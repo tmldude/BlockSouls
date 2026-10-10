@@ -1,0 +1,77 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}" apply false
+}
+
+// Every subproject is a Fabric mod with id `blocksouls_<name>`.
+// Feature mods depend on :common and nest it (jar-in-jar), so each feature jar is standalone.
+subprojects {
+	apply plugin: 'net.fabricmc.fabric-loom'
+
+	def modId = "blocksouls_${project.name}"
+	def isCommon = project.name == 'common'
+
+	version = rootProject.mod_version
+	group = rootProject.maven_group
+
+	base {
+		archivesName = "blocksouls-${project.name}"
+	}
+
+	loom {
+		splitEnvironmentSourceSets()
+
+		mods {
+			register(modId) {
+				sourceSet sourceSets.main
+				sourceSet sourceSets.client
+			}
+			if (!isCommon) {
+				register('blocksouls_common') {
+					sourceSet 'main', ':common'
+					sourceSet 'client', ':common'
+				}
+			}
+		}
+	}
+
+	dependencies {
+		minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+		implementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
+		implementation "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+
+		testImplementation "net.fabricmc:fabric-loader-junit:${rootProject.loader_version}"
+
+		if (!isCommon) {
+			implementation project(':common')
+			include project(':common')
+		}
+	}
+
+	processResources {
+		def props = [
+			version          : project.version,
+			minecraft_version: rootProject.minecraft_version,
+			loader_version   : rootProject.loader_version,
+		]
+		inputs.properties props
+
+		filesMatching('fabric.mod.json') {
+			expand props
+		}
+	}
+
+	tasks.withType(JavaCompile).configureEach {
+		it.options.release = 25
+		it.options.encoding = 'UTF-8'
+	}
+
+	java {
+		withSourcesJar()
+		sourceCompatibility = JavaVersion.VERSION_25
+		targetCompatibility = JavaVersion.VERSION_25
+	}
+
+	test {
+		useJUnitPlatform()
+	}
+}

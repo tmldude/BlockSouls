@@ -1,0 +1,20 @@
+{
+	"schemaVersion": 1,
+	"id": "blocksouls_common",
+	"version": "${version}",
+	"name": "BlockSouls Common",
+	"description": "Shared networking, config and keybind helpers for the BlockSouls mods.",
+	"authors": [
+		"tmldude"
+	],
+	"contact": {
+		"sources": "https://github.com/tmldude/blocksouls"
+	},
+	"environment": "*",
+	"depends": {
+		"fabricloader": ">=${loader_version}",
+		"minecraft": "~${minecraft_version}",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

@@ -1,0 +1,235 @@
+# BLOCKSOULS — Modded Minecraft Build Plan
+
+Minecraft (Java, Fabric) with Dark Souls boss fights / Destiny-style raids, Destiny-style guns, COD Zombies wave mode, Spider-Man web-swinging and wall-climbing, and Mario-style jump feel. Shipped as a Docker server image + a Modrinth modpack for friends.
+
+This file is written for Claude Code. Work top-down, one phase at a time. Each phase ends with a checkable "Done when". Do not start a later phase until the earlier one passes.
+
+> **Note:** some ground rules below (Java 21, Yarn mappings) predate Minecraft 26.x. `DECISIONS.md` records what changed and takes precedence.
+
+---
+
+## 0. Ground rules
+
+- **Loader:** Fabric. **MC version:** pin the latest Fabric-supported release at project start (check https://fabricmc.net/develop and the Fabric API Modrinth page). Record it in `gradle.properties` and never bump it mid-phase.
+- **Language:** Java 21. Kotlin is not used.
+- **Mappings:** Yarn (default for Fabric Loom).
+- **Assets:** All textures, models, sounds, names are **original**. No Bungie / FromSoftware / Activision / Marvel / Nintendo assets or trademarked names. Use inspired-by names (e.g. "Hand Cannon", "Pulse Rifle" are generic; "Gjallarhorn" is not).
+- **Repo layout:** one Gradle multi-project, one mod per feature so server-only mods can ship without a client update.
+- **Commit style:** conventional commits, small PRs per task. Run `./gradlew build` before every commit.
+- **Testing:** Fabric's `fabric-loader-junit` for unit tests of pure logic (wave math, damage calc, physics helpers). Gametest framework (`fabric-gametest-api`) for in-world checks where cheap.
+- **Ask the human** only when a decision is irreversible or taste-dependent (names, art direction, balance numbers). Otherwise choose a sensible default and note it in `DECISIONS.md`.
+
+## 1. Repo skeleton
+
+```
+blocksouls/
+  settings.gradle              # includes all subprojects
+  build.gradle                 # shared Loom config
+  gradle.properties            # minecraft_version, loader_version, fabric_version, mod_version
+  common/                      # shared utils, networking helpers, config
+  movement/                    # jump feel, dodge roll, web swing, wall climb  (client+server)
+  guns/                        # weapon framework, ammo, perks              (client+server)
+  zombies/                     # wave mode, round manager, barricades, points (server-heavy)
+  bosses/                      # boss entities, phases, boss bars, raid encounters (client+server)
+  docker/
+    Dockerfile
+    compose.yml
+    server.properties
+  modpack/
+    pack.toml / modrinth.index.json   # built by packwiz
+  .github/workflows/
+    build.yml                  # gradle build + test on PR
+    release.yml                # on tag: build jars, build+push image to GHCR, build .mrpack, attach to release
+  CLAUDE.md                    # pointer to this file + commands
+  DECISIONS.md                 # running log of defaults chosen
+  PLAN.md                      # this file
+```
+
+**Tasks**
+1. `gradle init` multi-project with Fabric Loom on every subproject. Use the Fabric example mod as the template for `fabric.mod.json`, mixins JSON, and entrypoints.
+2. `common` exports: a `Networking` helper (typed packets via Fabric's `PayloadTypeRegistry`), a `Config` loader (JSON in `config/blocksouls/`), and a `Keybinds` registry for the client.
+3. `CLAUDE.md` with: build/run commands, the version pin, the asset rule, the "one mod per feature" rule.
+4. CI `build.yml`: checkout, JDK 21, `./gradlew build test`, upload jars as artifacts.
+
+**Done when:** `./gradlew build` produces four mod jars; `./gradlew :movement:runClient` opens a client with the mod loaded; CI green on main.
+
+## 2. Docker server + modpack (do this BEFORE features — friends can join an empty server)
+
+### 2a. Docker
+- Base image `itzg/minecraft-server:java21`.
+- Multi-stage `Dockerfile`: stage 1 `gradle:8-jdk21` runs `./gradlew build`; stage 2 copies `*/build/libs/*.jar` (exclude `-sources`) into `/mods-baked/`. Entrypoint script copies `/mods-baked/*` into `/data/mods/` on start so updates to the image replace baked mods but leave third-party ones alone.
+- `compose.yml` env:
+  ```
+  EULA=TRUE
+  TYPE=FABRIC
+  VERSION=${MC_VERSION}
+  MEMORY=6G
+  ONLINE_MODE=TRUE
+  MODRINTH_PROJECTS=fabric-api,<third-party mods from 2b>
+  MODRINTH_DOWNLOAD_DEPENDENCIES=required
+  ENABLE_WHITELIST=TRUE
+  WHITELIST=<usernames>
+  VIEW_DISTANCE=10
+  ```
+  Volume `./data:/data`, port `25565:25565`. Add `restart: unless-stopped`.
+- Healthcheck via the image's built-in `mc-health`.
+- Backups: second service `itzg/mc-backup` with `BACKUP_INTERVAL=2h`, `PRUNE_BACKUPS_DAYS=7`.
+
+### 2b. Modpack
+- Use **packwiz** in `modpack/`. `packwiz init` with the pinned MC + Fabric versions.
+- Add Fabric API and the third-party mods via `packwiz modrinth add`. Initial third-party list (verify each exists for the pinned version; swap for equivalents if not):
+  - Fabric API
+  - Gun framework: Timeless and Classics Zero (TACZ) **or** Point Blank — pick the one with the better Fabric support for the pinned version; record in DECISIONS.md.
+  - Mod Menu, Cloth Config (config UI)
+  - GeckoLib (animated entities for bosses)
+  - Lithium (server perf)
+  - Sodium + Iris (client perf, client-only)
+- Our four mods are added as local files that `release.yml` uploads to the GitHub release and references by URL.
+- `packwiz modrinth export` → `.mrpack`.
+- Write `modpack/README.md`: "Install Modrinth App → Add pack from file → drag this .mrpack → join `<ip>`."
+
+### 2c. Hosting
+- Hetzner CPX31 (or equivalent, 8GB RAM) running Docker. `docker compose up -d`. Document in `docker/HOSTING.md`: provisioning, firewall (only 22 + 25565), updating (`docker compose pull && docker compose up -d`).
+
+**Done when:** `docker compose up` locally runs a joinable Fabric server with Fabric API + the empty feature mods; the `.mrpack` imports cleanly into Modrinth App; a friend can connect.
+
+## 3. Phase A — Movement (mod: `movement`)
+
+This is the feel layer. Build in the order below; each one is tunable from `config/blocksouls/movement.json`.
+
+### A1. Mario jump
+- Mixin into `LivingEntity#jump` / `getJumpVelocity` for players only.
+- Variable height: client tracks ticks jump key is held (cap ~8); each held tick adds `holdBoost` upward velocity. Server receives a tiny packet with the hold count for validation (clamp).
+- Faster fall: when `velocity.y < 0` and airborne, multiply gravity by `fallGravityMult` (default 1.6).
+- Short coyote time (3 ticks) and jump buffering (5 ticks).
+- Optional triple-jump chain: three jumps within 0.5s of landing each give +15%/+30% height. Config-gated, default on.
+
+### A2. Dodge roll (Souls)
+- Keybind (default: Left Alt). On press while grounded: apply horizontal impulse in input direction (or facing if no input), set `rolling` for 12 ticks, grant **i-frames for ticks 2–8** by cancelling `LivingEntity#damage` for the player during that window (server-authoritative; client sends roll packet, server starts the timer).
+- Stamina: lightweight stamina bar (client HUD), 100 max, roll costs 25, regen 15/s after 1s delay. Stored as a player attachment (Fabric Attachment API).
+- Animation: lower eye height and tilt camera during roll (client-only).
+
+### A3. Wall climb
+- Each tick while airborne and pushing into a solid block face (check `world.getBlockCollisions` for the player's horizontal AABB expanded 0.05 toward facing): set `velocity.y = climbSpeed` (0.25), drain stamina 5/s.
+- Ledge grab: if the block above the collided block is air and player's eye is within 0.6 of its top, snap up and over.
+- Server mirrors the check for anti-cheat; client predicts.
+
+### A4. Web swing
+- Keybind (default: right-click while holding the "Web Shooter" item, or a bare keybind — config). On press: raycast up to 40 blocks in look direction, prefer blocks above the horizon; on hit, store anchor point and rope length = distance.
+- Each tick while held: pendulum constraint. If `distance(player, anchor) > ropeLength`, project velocity onto the tangent plane and pull position back to the sphere. Add small forward boost along the swing arc (gravity does the rest). On release: keep velocity, add `releaseBoost` of +0.15 up.
+- Render: a thin line from hand to anchor (client, `WorldRenderEvents.AFTER_ENTITIES`).
+- Server authority: server runs the same constraint from the client-reported anchor and corrects if the client drifts > 2 blocks.
+- Fall damage: cancel while swinging or within 10 ticks of releasing.
+
+**Done when:** all four feel good in `runClient` (human playtests; tune defaults), no server kick for "moved too fast" (adjust `max-tick-time`/vanilla anti-cheat flag in config or override the check for our movement states), unit tests for the pendulum math and stamina regen.
+
+## 4. Phase B — Guns (mod: `guns`)
+
+Use the chosen framework for ballistics/recoil/reload; our mod supplies weapons, ammo, and the perk/rarity layer.
+
+### B1. Weapon set (v1: six weapons)
+| Archetype | Slot | Notes |
+|---|---|---|
+| Hand Cannon | Kinetic | 3-shot burst-capable, high precision dmg |
+| Auto Rifle | Kinetic | bread and butter |
+| Pulse Rifle | Energy | burst |
+| Shotgun | Special | close range |
+| Sniper | Special | 2× scope, precision ×3 |
+| Rocket Launcher | Heavy | splash, scarce ammo |
+
+Each weapon = one JSON definition in the framework's format + a GeckoLib or JSON model + original textures (16-32px, chunky to fit Minecraft).
+
+### B2. Ammo economy
+- Three ammo types (Primary / Special / Heavy) as items. Primary drops from any kill, Special 1-in-4, Heavy from bosses/zombie round ends. Max carry capacities in config.
+
+### B3. Rarity + perks
+- Item components: `rarity` (common/rare/legendary/exotic) and `perks` (list of ids). On craft/drop, roll 1–2 perks from the weapon's pool.
+- Perk pool v1 (8): Outlaw (faster reload after precision kill), Rampage (stacking dmg on kill), Kill Clip, Explosive Rounds, Dragonfly (AoE on precision kill), Vorpal (+boss dmg), Lightweight (+move speed), Snapshot (faster ADS).
+- Tooltip shows rarity color + perk names/descriptions.
+- Exotic (one per archetype, v2) = unique perk with its own behavior class.
+
+### B4. Precision hits
+- Headshot detection: compare hit vector y to `entity.getEyeY() - 0.3`. Multiply damage and emit yellow damage particle.
+
+**Done when:** six weapons craftable (recipes in data), all perks fire correctly in a gametest, ammo drops, headshots register.
+
+## 5. Phase C — Zombies wave mode (mod: `zombies`, server-heavy)
+
+### C1. Arena + round manager
+- A `ZombiesArena` is a world-saved data object: bounding box, spawn points (list), barricade positions, start trigger block, current round, players in, points per player.
+- Admin command `/zombies arena create <name>`, `/zombies arena addspawn`, `/zombies arena setbounds`, `/zombies start`, `/zombies stop`. Wand item to click corners.
+- Round N: zombie count = `min(24 + 6N, 60)` alive-cap 24; zombie health = `20 + 10N` (cap 400); speed tier increases every 5 rounds. 10s intermission between rounds, "Round N" title + sound.
+- Power-ups (10% drop on kill): Insta-Kill (30s), Double Points (30s), Max Ammo, Nuke. Floating item entity with glow + despawn 15s.
+
+### C2. Horde zombie
+- Custom entity `HordeZombie extends ZombieEntity`: no sunlight burn, no door-breaking (uses barricades), targets nearest player in arena, pathfinds to nearest barricade if no path. Rounds ≥10 spawn 1 in 8 as `Sprinter` variant.
+
+### C3. Barricades + buy system
+- Barricade block: 5 "planks" state; zombies break one plank/2s when adjacent; players rebuild with right-click (10 points each).
+- Wall-buy blocks: right-click with enough points → give weapon/ammo. Points: 10/hit, 60/kill, 100/headshot kill.
+- Door blocks (buyable, open an area), Mystery Box block (random weapon for 950 points, weighted by rarity).
+- Points displayed in a sidebar scoreboard.
+
+### C4. Perk machines (v2)
+- Juggernog (+hp), Speed Cola (reload), Stamin-Up (stamina regen). Lose on death. Max 4.
+
+**Done when:** `/zombies start` in a built arena runs rounds to at least 20 with 4 players without server TPS < 18; downed/revive loop works; unit tests for round scaling and point math.
+
+## 6. Phase D — Bosses & raids (mod: `bosses`)
+
+### D1. Boss framework
+- `BossEntity` base: phases list, each phase = health threshold + attack pattern list + optional arena change hook. `AttackPattern` = windup ticks (telegraph: particles + sound), active ticks (hitbox/damage), recovery ticks. Attacks are chosen by weighted RNG with cooldowns. Boss bar via `ServerBossBar`.
+- Lock-on: client keybind (default: middle mouse) locks camera to nearest boss; soft camera lerp.
+- Boss arena: fog wall block (passable only outward until boss dies), boss music via custom sound event.
+- Death: drops Heavy ammo, a guaranteed Legendary weapon, and a "Soul" currency item.
+
+### D2. Boss 1 — the Dragon ("Ashwyrm")
+- GeckoLib model, ~12 blocks long. Phases:
+  - P1 (100–60%): ground. Attacks: bite (short windup), tail sweep (360°, jump-dodge), fire breath (cone, 3s, roll through).
+  - P2 (60–25%): takes flight, strafes with fireballs that leave fire blocks; periodically lands → short vulnerability window with 2× damage.
+  - P3 (<25%): ground, enraged (faster), adds "firestorm" — meteors on random players, 1.5s telegraph circles.
+- Weak point: head hitbox child entity takes 2× dmg.
+
+### D3. Raid encounter 1 — "The Vault" (v2)
+- Multi-room gauntlet with mechanics requiring coordination: plate-standing to open doors (needs 2 players), "relic carrier" buff item (cleanses a debuff on others), DPS phase on a mini-boss gated by destroying 3 crystals in order shown by a symbol display. Ends in a boss (reuse framework, new model).
+- Checkpoint system: wipe → respawn at last checkpoint.
+
+**Done when:** Ashwyrm is beatable by 2–4 players in ~5 minutes with v1 guns and movement; no phase softlocks (gametest walks the phase machine with scripted health).
+
+## 7. Phase E — Polish & release
+
+- HUD: stamina bar, ammo counter, lock-on reticle, round counter — all in one `HudRenderer` with config toggles.
+- Sounds: original SFX (synth or freesound CC0 — record licenses in `ASSETS.md`).
+- Balance pass config file with every number used above; expose via Cloth Config.
+- `release.yml`: on `v*` tag → build, test, GHCR push `ghcr.io/<user>/blocksouls:<tag>` and `:latest`, packwiz export, GitHub release with `.mrpack` + jars.
+- Server update doc: tag → wait for CI → `docker compose pull && up -d` → tell friends to update pack in Modrinth App.
+
+## 8. Suggested session plan for Claude Code
+
+Each line is one focused session. Expect ~15–20 sessions to v1.
+
+1. Phase 1 skeleton + CI
+2. Docker + compose + local join test
+3. packwiz pack + third-party mod selection (verify versions!) → first friend-joinable release `v0.1.0`
+4. A1 jump + A2 roll (+ stamina)
+5. A3 wall climb
+6. A4 web swing (two sessions likely)
+7. B1 weapons ×3, framework integration
+8. B1 weapons ×3 + B2 ammo
+9. B3 perks + B4 precision → `v0.2.0`
+10. C1 arena data + commands + round manager
+11. C2 horde zombie + C3 barricades/buys
+12. C3 mystery box, power-ups, scoreboard → `v0.3.0`
+13. D1 framework + lock-on + fog wall
+14. D2 Ashwyrm model + P1
+15. D2 P2/P3 + loot → `v0.4.0`
+16. E polish, balance, HUD → `v1.0.0`
+
+Deferred to v2: exotics, perk machines, The Vault raid, more bosses.
+
+## 9. Known risks
+
+- Third-party gun framework may lag the pinned MC version → fall back to writing a minimal hitscan/projectile system in `guns` (reserve a session).
+- Vanilla "moved too quickly" checks fight custom movement → set `MAX_MOVE_SPEED` override or flag movement states so our server mixin skips the check for them.
+- GeckoLib learning curve for the dragon → prototype with a scaled vanilla Ender Dragon model first, swap later.
+- Swing physics is the only part with real tuning risk; budget playtest time.

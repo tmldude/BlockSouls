@@ -1,0 +1,36 @@
+{
+	"schemaVersion": 1,
+	"id": "blocksouls_bosses",
+	"version": "${version}",
+	"name": "BlockSouls Bosses",
+	"description": "Boss fights and raid encounters.",
+	"authors": [
+		"tmldude"
+	],
+	"contact": {
+		"sources": "https://github.com/tmldude/blocksouls"
+	},
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"io.github.tmldude.blocksouls.bosses.BlockSoulsBosses"
+		],
+		"client": [
+			"io.github.tmldude.blocksouls.bosses.client.BlockSoulsBossesClient"
+		]
+	},
+	"mixins": [
+		"blocksouls_bosses.mixins.json",
+		{
+			"config": "blocksouls_bosses.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=${loader_version}",
+		"minecraft": "~${minecraft_version}",
+		"java": ">=25",
+		"fabric-api": "*",
+		"blocksouls_common": "*"
+	}
+}
