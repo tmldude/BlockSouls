@@ -71,6 +71,12 @@ subprojects {
 		targetCompatibility = JavaVersion.VERSION_25
 	}
 
+	jar {
+		from(rootProject.file('LICENSE')) {
+			rename { "${it}_blocksouls" }
+		}
+	}
+
 	test {
 		useJUnitPlatform()
 	}

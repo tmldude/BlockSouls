@@ -159,7 +159,7 @@ Each weapon = one JSON definition in the framework's format + a GeckoLib or JSON
 
 ## 5. Phase C — Zombies wave mode (mod: `zombies`, server-heavy)
 
-**Nightly waves:** each in-game night starts a new zombie wave. Participation is optional (players opt in, e.g. via a command or a craftable "Horde Beacon"; opted-out players are left alone). Wave kills drop guns and ammo, scaled to the wave number. The arena mode below also stays available for built maps.
+**Nightly waves:** each in-game night is a server-wide zombie wave, and the wave number counts up night after night. A night only counts (and only spawns a wave) when at least one player is online. Admins can switch night waves off in config. Wave kills drop guns and ammo, scaled to the wave number. The arena mode below also stays available for built maps.
 
 ### C1. Arena + round manager
 - A `ZombiesArena` is a world-saved data object: bounding box, spawn points (list), barricade positions, start trigger block, current round, players in, points per player.
@@ -179,9 +179,9 @@ Each weapon = one JSON definition in the framework's format + a GeckoLib or JSON
 ### C4. Perk machines (v2)
 - Juggernog (+hp), Speed Cola (reload), Stamin-Up (stamina regen). Lose on death. Max 4.
 
-- **Nightly wave:** at dusk, opted-in players get a "Night N" title; Horde Zombies spawn around them in survival terrain using the same round scaling. Wave ends at dawn or when cleared. Kills roll gun/ammo drops (rarity weighted by wave number); clearing a wave gives a reward chest.
+- **Nightly wave:** at dusk, if anyone is online, the server-wide night counter increments and every online overworld player gets a "Night N" title; Horde Zombies spawn around each of them in survival terrain using the same round scaling. Wave ends at dawn or when cleared. Kills roll gun/ammo drops (rarity weighted by wave number); clearing a wave gives a reward chest.
 
-**Done when:** a night wave triggers for opted-in players only and drops guns/ammo; `/zombies start` in a built arena runs rounds to at least 20 with 4 players without server TPS < 18; downed/revive loop works; unit tests for round scaling and point math.
+**Done when:** a night wave triggers server-wide at dusk with players online, the night counter persists across restarts and skips empty nights, and wave kills drop guns/ammo; `/zombies start` in a built arena runs rounds to at least 20 with 4 players without server TPS < 18; downed/revive loop works; unit tests for round scaling and point math.
 
 ## 6. Phase D — Bosses & raids (mod: `bosses`)
 

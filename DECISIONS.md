@@ -18,19 +18,20 @@ Entries here override `PLAN.md`.
   installs on its own. `./gradlew build` still produces a standalone common jar; Docker/modpack ship only the four feature jars.
 - **Config loader:** Gson into plain classes with default field values. Missing keys keep defaults and the
   file is rewritten to add them; a malformed file is left untouched and defaults are used.
-- **License:** not chosen yet; `fabric.mod.json` has no `license` field. Needs a human decision before the
-  first public release.
+- **License: MIT** (owner asked for it to be public/permissive). `LICENSE` at the root; every
+  `fabric.mod.json` declares `"license": "MIT"`. Third-party assets keep their own licenses (`ASSETS.md`).
 
 ## Design additions from the owner (2026-10-10)
 
 Folded into `PLAN.md` (B5, Phase C intro + nightly wave, D1 drops + health bar, D2b):
 guns/ammo craftable with new ores/items; guns/ammo as rare loot in vanilla structure chests;
-boss drops themed to the boss; each night is an opt-in zombie wave that drops guns and ammo;
+boss drops themed to the boss; each night is a server-wide zombie wave that drops guns and ammo;
 Elden Ring-style random field bosses; a polished custom boss health bar.
 
-Interpretations to confirm when those phases start:
-- Opt-in for night waves is per player (command or craftable "Horde Beacon"), not server-wide.
-- The arena-based zombies mode stays alongside night waves.
+- **Night waves are server-wide** (owner's call), not per-player opt-in. The night counter counts up and
+  persists in world data; nights with nobody online don't spawn a wave or advance the counter. "Optional"
+  means an admin config toggle.
+- The arena-based zombies mode stays alongside night waves (assumption; confirm in Phase C).
 
 ## Open risks to resolve in Phase 2
 
