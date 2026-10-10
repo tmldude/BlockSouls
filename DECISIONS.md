@@ -21,6 +21,17 @@ Entries here override `PLAN.md`.
 - **License:** not chosen yet; `fabric.mod.json` has no `license` field. Needs a human decision before the
   first public release.
 
+## Design additions from the owner (2026-10-10)
+
+Folded into `PLAN.md` (B5, Phase C intro + nightly wave, D1 drops + health bar, D2b):
+guns/ammo craftable with new ores/items; guns/ammo as rare loot in vanilla structure chests;
+boss drops themed to the boss; each night is an opt-in zombie wave that drops guns and ammo;
+Elden Ring-style random field bosses; a polished custom boss health bar.
+
+Interpretations to confirm when those phases start:
+- Opt-in for night waves is per player (command or craftable "Horde Beacon"), not server-wide.
+- The arena-based zombies mode stays alongside night waves.
+
 ## Open risks to resolve in Phase 2
 
 - The plan's gun frameworks (TACZ, Point Blank) have historically been Forge/NeoForge-first. Verify Fabric

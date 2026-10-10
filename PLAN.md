@@ -151,9 +151,15 @@ Each weapon = one JSON definition in the framework's format + a GeckoLib or JSON
 ### B4. Precision hits
 - Headshot detection: compare hit vector y to `entity.getEyeY() - 0.3`. Multiply damage and emit yellow damage particle.
 
-**Done when:** six weapons craftable (recipes in data), all perks fire correctly in a gametest, ammo drops, headshots register.
+### B5. Crafting materials + world loot
+- Every gun and every ammo type is craftable in survival. Add whatever new ores/items the recipes need (e.g. a gunmetal ore that generates underground, smelts to ingots, plus parts like barrels/receivers/firing pins). Recipe tiers should map to rarity: commons from early-game materials, legendaries need boss/zombie drops.
+- Guns and ammo appear as **rare chest loot** across vanilla structures (villages, dungeons, mineshafts, strongholds, desert/jungle temples, outposts, ancient cities, etc.), injected via Fabric's `LootTableEvents.MODIFY`. Rarer structures roll higher rarity. Weights live in config.
+
+**Done when:** six weapons craftable (recipes in data), every gun and ammo type obtainable in survival via crafting, guns/ammo show up in vanilla structure chests, all perks fire correctly in a gametest, ammo drops, headshots register.
 
 ## 5. Phase C — Zombies wave mode (mod: `zombies`, server-heavy)
+
+**Nightly waves:** each in-game night starts a new zombie wave. Participation is optional (players opt in, e.g. via a command or a craftable "Horde Beacon"; opted-out players are left alone). Wave kills drop guns and ammo, scaled to the wave number. The arena mode below also stays available for built maps.
 
 ### C1. Arena + round manager
 - A `ZombiesArena` is a world-saved data object: bounding box, spawn points (list), barricade positions, start trigger block, current round, players in, points per player.
@@ -173,7 +179,9 @@ Each weapon = one JSON definition in the framework's format + a GeckoLib or JSON
 ### C4. Perk machines (v2)
 - Juggernog (+hp), Speed Cola (reload), Stamin-Up (stamina regen). Lose on death. Max 4.
 
-**Done when:** `/zombies start` in a built arena runs rounds to at least 20 with 4 players without server TPS < 18; downed/revive loop works; unit tests for round scaling and point math.
+- **Nightly wave:** at dusk, opted-in players get a "Night N" title; Horde Zombies spawn around them in survival terrain using the same round scaling. Wave ends at dawn or when cleared. Kills roll gun/ammo drops (rarity weighted by wave number); clearing a wave gives a reward chest.
+
+**Done when:** a night wave triggers for opted-in players only and drops guns/ammo; `/zombies start` in a built arena runs rounds to at least 20 with 4 players without server TPS < 18; downed/revive loop works; unit tests for round scaling and point math.
 
 ## 6. Phase D — Bosses & raids (mod: `bosses`)
 
@@ -181,7 +189,8 @@ Each weapon = one JSON definition in the framework's format + a GeckoLib or JSON
 - `BossEntity` base: phases list, each phase = health threshold + attack pattern list + optional arena change hook. `AttackPattern` = windup ticks (telegraph: particles + sound), active ticks (hitbox/damage), recovery ticks. Attacks are chosen by weighted RNG with cooldowns. Boss bar via `ServerBossBar`.
 - Lock-on: client keybind (default: middle mouse) locks camera to nearest boss; soft camera lerp.
 - Boss arena: fog wall block (passable only outward until boss dies), boss music via custom sound event.
-- Death: drops Heavy ammo, a guaranteed Legendary weapon, and a "Soul" currency item.
+- Death: drops Heavy ammo, a guaranteed Legendary weapon, and a "Soul" currency item. Drops should fit the boss (e.g. Ashwyrm drops fire-themed gun parts/materials used in high-tier recipes).
+- **Boss health bar:** custom-rendered (not the vanilla boss bar look): boss name, wide styled bar, a trailing "damage taken" chunk that drains after a delay, phase-threshold notches, and a subtle shake/flash on phase change. Vanilla `ServerBossBar` stays as the server-side source of truth; the client draws our own HUD from synced data.
 
 ### D2. Boss 1 — the Dragon ("Ashwyrm")
 - GeckoLib model, ~12 blocks long. Phases:
@@ -190,11 +199,15 @@ Each weapon = one JSON definition in the framework's format + a GeckoLib or JSON
   - P3 (<25%): ground, enraged (faster), adds "firestorm" — meteors on random players, 1.5s telegraph circles.
 - Weak point: head hitbox child entity takes 2× dmg.
 
+### D2b. Random boss events (field bosses)
+- Like Elden Ring's field bosses / invasions: bosses occasionally appear in the overworld near players (e.g. a dragon landing on a mountain, a giant knight at a ruin at night), announced with a sound + title + map marker. Spawn chance, cooldowns and biome rules in config; never inside claimed/arena areas or near spawn by default.
+- Uses the D1 framework so every boss can be a field boss. Fog wall goes up only when a player engages.
+
 ### D3. Raid encounter 1 — "The Vault" (v2)
 - Multi-room gauntlet with mechanics requiring coordination: plate-standing to open doors (needs 2 players), "relic carrier" buff item (cleanses a debuff on others), DPS phase on a mini-boss gated by destroying 3 crystals in order shown by a symbol display. Ends in a boss (reuse framework, new model).
 - Checkpoint system: wipe → respawn at last checkpoint.
 
-**Done when:** Ashwyrm is beatable by 2–4 players in ~5 minutes with v1 guns and movement; no phase softlocks (gametest walks the phase machine with scripted health).
+**Done when:** random boss events spawn per config and despawn cleanly if ignored; the custom boss health bar renders correctly for 1–4 players; Ashwyrm is beatable by 2–4 players in ~5 minutes with v1 guns and movement; no phase softlocks (gametest walks the phase machine with scripted health).
 
 ## 7. Phase E — Polish & release
 
