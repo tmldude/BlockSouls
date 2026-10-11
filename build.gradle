@@ -9,6 +9,7 @@ subprojects {
 
 	def modId = "blocksouls_${project.name}"
 	def isCommon = project.name == 'common'
+	def commonProject = rootProject.project(':common')
 
 	version = rootProject.mod_version
 	group = rootProject.maven_group
@@ -46,10 +47,9 @@ subprojects {
 			include project(':common')
 			// A project dependency only exposes common's main classes; client code also needs common's
 			// client source set (Keybinds, ClientNetworking). Same approach Fabric API uses between modules.
-			def common = project(':common')
 			clientImplementation files(
-					common.layout.buildDirectory.dir('classes/java/client'),
-					common.layout.buildDirectory.dir('resources/client')
+					commonProject.layout.buildDirectory.dir('classes/java/client'),
+					commonProject.layout.buildDirectory.dir('resources/client')
 			).builtBy(':common:clientClasses')
 		}
 	}
