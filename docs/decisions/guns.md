@@ -71,6 +71,10 @@ Defaults picked while building `guns/` where the brief or `PLAN.md` was silent. 
 - Shapes: barrel `GIG` (gunmetal, iron, gunmetal), receiver `SGR` (scrap, gunmetal, redstone), stock ` S / PP`
   (any planks). Hand Cannon `BR / ·I`, Auto Rifle `BRS / ·G·`, Shotgun `BRS / B··`, Sniper `·Y· / BRS / B··`
   (spyglass on top). Primary ×16 `CPC` (copper, gunpowder, copper); Special ×6 `PMP / ·I·`.
+- **Recipes that use world's items carry `fabric:load_conditions` → `fabric:all_mods_loaded: [blocksouls_world]`.**
+  In 26.3 recipes are a registry: one unknown item id fails the whole registry load (the server won't start), not
+  just a log line as the brief assumed. Without `world` those recipes are skipped; guns still come from loot and
+  `/bs gun give`. Other modules referencing each other's items in data need the same guard.
 
 ## Art
 - Item textures: per-gun silhouettes drawn with `gen.py`'s palettes (pistol scrap, rifles steel, shotgun rust), ammo
