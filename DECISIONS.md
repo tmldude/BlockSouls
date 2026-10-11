@@ -272,5 +272,24 @@ Orchestrator notes:
   souls, **curses** priced into greed objects (purgeable at the shopkeeper / a free altar cleanse), and
   **trinkets** — a 3-slot StS-relic-style collection that survives going down (field bosses offer a
   pick-1-of-3). The dawn drop keeps the name "relic"; the carried items are "trinkets".
-- **Coordination:** before v2 Wave 4 starts, confirm with the v1 detailing/sound session that its PRs
+- **Coordination:** before v2 spine work starts, confirm with the v1 detailing/sound session that its PRs
   are merged or don't overlap `game`/`movement`/`common` (message sent 2026-10-11; awaiting reply).
+
+## v2 Stage 5 kickoff + coordination outcome (2026-10-11, orchestrator)
+
+From the v1 orchestrator session (relayed, not owner-direct): v0.9.0 is released (tag = d37702b; the
+friends trial build); Stage 4 / v0.10.0 is in flight (claude/audio, boon-icons, kart-fuel-horn,
+arena-seal, world-structures). Agreed split:
+- **v2's batches are Stages 5–7** (renamed from PLAN2's "Waves 4–6" — v0.10's batch already uses
+  "Stage 4" per docs/sessions/README.md).
+- **Stage 5 (spine) starts now from current main**: nothing in Stage 4 touches `game/run`, the wave
+  scheduler, or existing `common` contracts. v2 sessions keep off `game/player/boon/**`, the game client
+  HUD, `bosses/`, `world/`, `vehicles/`, `mobs/` and `sounds.json` until v0.10.0 merges. **Stage 6 waits
+  for v0.10.0** (real collisions). `common` additions go in their own small PR first, as ever.
+- **PR ownership:** per the v1 orchestrator, the owner wants v2 PRs opened and merged by the v2 side,
+  v0.10's by the v1 side, neither merging the other's. Owner to confirm (relayed second-hand).
+- **Classic-by-default rule (orchestrator):** the Stage 5 spine merges with `runShape: "classic"` as the
+  default and must be behavior-neutral for the live pack; Expedition becomes the default at `v2.0.0`
+  (Stage 7). `integration/FullPackClientTest`'s dusk step is the regression gate.
+- Stage 5 brief: `docs/sessions/v2-spine.md` (branch `claude/v2-spine`, two PRs: common contracts, then
+  the game spine).

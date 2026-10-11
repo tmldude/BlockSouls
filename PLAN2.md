@@ -264,16 +264,26 @@ a learned Director trained on real run summaries. Not scheduled.
 | `movement` | gate each mechanic behind the origin capability set (Classic mode = all granted); Zephyr glide + updrafts; boon cross-training hooks |
 | `vehicles` | act-aware spawning (wrecks in all acts; the speeder's radioactive core moves to the Blightheart) |
 
-Contract changes land as their own small PRs in Wave 4 and are then frozen, per v1 rules.
+Contract changes land as their own small PRs in Stage 5 and are then frozen, per v1 rules.
 Everything that scales with players goes through `PartyScaling`, tested at 1 and 8. Every number in config.
 
-## 5. Session waves (continuing PLAN.md §8; v1 waves 0–3 finish first)
+## 5. Session stages (continuing docs/sessions/README.md's numbering; v1's Stage 4 / v0.10.0 is in flight)
 
-- **Wave 4 — contracts & spine (one session, sequential):** `common` v2 contracts; `SiegeClock`
-  (sun binding + synthetic vibe-switch cycle) + act state machine + threat scaling (`threat.json`);
-  player-triggered portal charge; Classic/Expedition flag; migration of the v1 scheduler under it;
-  gametest: a scripted 4-act run skeleton with empty acts, advanced by portal charges.
-- **Wave 5 — features (parallel, one worktree each):**
+Coordination with Stage 4 (agreed with the v1 orchestrator session, 2026-10-11): Stage 5 may start now
+from current `main` (v0.9.0); nothing in Stage 4 touches `game/run`, the wave scheduler, or existing
+`common` contracts. Until `claude/boon-icons` merges, v2 sessions don't touch `game/player/boon/**` or
+`game`'s client HUD. Stage 6 waits for v0.10.0 (collisions: world structures, bosses arena code,
+vehicles, HUD, sounds.json). v2 PRs are opened and merged by the v2 orchestrator; Stage 4's by the v1
+orchestrator — neither merges the other's.
+
+- **Stage 5 — contracts & spine (one session, sequential; brief: `docs/sessions/v2-spine.md`):**
+  `common` v2 contracts (own small PR first); `SiegeClock` (sun binding + synthetic vibe-switch cycle) +
+  act state machine + threat scaling (`threat.json`); player-triggered portal charge; Classic/Expedition
+  flag — **Classic stays the default until v2 ships**, so merging the spine is behavior-neutral for the
+  live pack; migration of the v1 scheduler under it; gametest: a scripted 4-act run skeleton with empty
+  acts, advanced by portal charges. `integration/FullPackClientTest`'s dusk step (advance_time +
+  `time set 12700` + 400 ticks to wave 1) must stay green or be updated in the same PR.
+- **Stage 6 — features (parallel, one worktree each; after v0.10.0):**
   | Session | Builds |
   |---|---|
   | Dimensions | Blightheart + Skyrift worldgen, portals, camps, act ores |
@@ -283,8 +293,9 @@ Everything that scales with players goes through `PartyScaling`, tested at 1 and
   | New bosses | Blightheart boss + Skyrift boss (design sub-sessions for models, per v1 practice) |
   | Mobs v2 | act rosters, influence map, elite affixes |
   | Players v2 | solo/co-op (§3g), run summary v2, HUD build line |
-- **Wave 6 — intersections (sequential):** acts wired to rosters/drops/recipes; Director tuned;
-  balance to ~2.5 h; perf with 8 players in act 3; full-run gametest across all four acts; `v2.0.0`.
+- **Stage 7 — intersections (sequential):** acts wired to rosters/drops/recipes; Director tuned;
+  balance to a ~2.5 h median; perf with 8 players in act 3; full-run gametest across all four acts;
+  Expedition becomes the default run shape; `v2.0.0`.
 
 ## 6. Risks
 
