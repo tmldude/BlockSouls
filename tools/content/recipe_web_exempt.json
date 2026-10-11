@@ -11,11 +11,10 @@
 		"blocksouls_bosses:dragonscale_leggings": "gear (boss armor, not craftable by design)",
 		"blocksouls_bosses:dragonscale_boots": "gear (boss armor, not craftable by design)",
 		"blocksouls_bosses:wraith_steed_whistle": "unique boss item",
-		"blocksouls_bosses:final_dragon_trophy": "trophy"
+		"blocksouls_bosses:final_dragon_trophy": "trophy",
+		"blocksouls_game:relic_common": "consumable (boon relic, dropped by game code, spent on a card pick)",
+		"blocksouls_game:relic_rare": "consumable (boon relic, dropped by game code, spent on a card pick)",
+		"blocksouls_game:relic_legendary": "consumable (boon relic, dropped by game code, spent on a card pick)"
 	},
-	"debt": {
-		"blocksouls_bosses:ashwyrm_scale": "Ashwyrm material in no recipe yet (crafting-web session)",
-		"blocksouls_bosses:ember_barrel": "Ashwyrm material in no recipe yet (crafting-web session)",
-		"blocksouls_world:gunmetal_nugget": "in 1 recipe, needs a second (crafting-web session)"
-	}
+	"debt": {}
 }

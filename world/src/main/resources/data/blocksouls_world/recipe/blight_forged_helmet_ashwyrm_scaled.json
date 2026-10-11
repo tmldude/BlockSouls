@@ -1,0 +1,49 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "blocksouls_bosses"
+      ]
+    }
+  ],
+  "type": "minecraft:smithing_transform",
+  "template": "blocksouls_bosses:ashwyrm_scale",
+  "base": "blocksouls_world:blight_forged_helmet",
+  "addition": "minecraft:magma_cream",
+  "result": {
+    "id": "blocksouls_world:blight_forged_helmet",
+    "components": {
+      "minecraft:attribute_modifiers": [
+        {
+          "type": "minecraft:armor",
+          "id": "minecraft:armor.helmet",
+          "amount": 3,
+          "operation": "add_value",
+          "slot": "head"
+        },
+        {
+          "type": "minecraft:armor_toughness",
+          "id": "minecraft:armor.helmet",
+          "amount": 2.5,
+          "operation": "add_value",
+          "slot": "head"
+        },
+        {
+          "type": "minecraft:knockback_resistance",
+          "id": "minecraft:armor.helmet",
+          "amount": 0.05,
+          "operation": "add_value",
+          "slot": "head"
+        },
+        {
+          "type": "minecraft:burning_time",
+          "id": "blocksouls_world:ashwyrm_scaled.helmet",
+          "amount": -0.2,
+          "operation": "add_multiplied_base",
+          "slot": "head"
+        }
+      ]
+    }
+  }
+}
