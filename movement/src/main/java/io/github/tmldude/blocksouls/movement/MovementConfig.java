@@ -4,6 +4,7 @@ package io.github.tmldude.blocksouls.movement;
 public class MovementConfig {
 	public Jump jump = new Jump();
 	public Roll roll = new Roll();
+	public Climb climb = new Climb();
 	public Stamina stamina = new Stamina();
 
 	public static class Jump {
@@ -39,6 +40,20 @@ public class MovementConfig {
 		public double speed = 0.6;
 		public int fullSpeedTicks = 7;
 		public double staminaCost = 25;
+	}
+
+	public static class Climb {
+		public boolean enabled = true;
+		/** Upward speed while climbing; never slows a faster rise (e.g. a jump). */
+		public double climbSpeed = 0.25;
+		public double staminaPerSecond = 5;
+		/** How far ahead (blocks) to look for a wall in the input direction. */
+		public double wallReach = 0.05;
+		/** Pull up over the top once the wall's top is at most this far above the player's feet. */
+		public double ledgeGrabHeight = 1.3;
+		/** Upward and forward velocity of the pull-up. */
+		public double ledgeBoostUp = 0.45;
+		public double ledgeBoostForward = 0.2;
 	}
 
 	public static class Stamina {

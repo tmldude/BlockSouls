@@ -1,5 +1,6 @@
 package io.github.tmldude.blocksouls.movement.roll;
 
+import io.github.tmldude.blocksouls.movement.MoveMath;
 import io.github.tmldude.blocksouls.movement.MovementConfig;
 
 /** Pure dodge-roll timing and direction math. Tick 0 is the tick the roll starts. */
@@ -27,23 +28,9 @@ public final class Roll {
 		return config.speed * (config.durationTicks - tick) / (easeTicks + 1);
 	}
 
-	/**
-	 * World-space unit direction {x, z} for a roll. Uses the movement input (strafe, forward) rotated by
-	 * the player's yaw like vanilla does, or the facing direction when there's no input.
-	 */
+	/** World-space unit direction {x, z} for a roll: the movement input, or the facing direction if none. */
 	public static double[] direction(double strafe, double forward, float yawDegrees) {
-		double length = Math.sqrt(strafe * strafe + forward * forward);
-		if (length < 1.0E-4) {
-			strafe = 0;
-			forward = 1;
-			length = 1;
-		}
-		strafe /= length;
-		forward /= length;
-
-		double yaw = Math.toRadians(yawDegrees);
-		double sin = Math.sin(yaw);
-		double cos = Math.cos(yaw);
-		return new double[] {strafe * cos - forward * sin, forward * cos + strafe * sin};
+		double[] direction = MoveMath.inputDirection(strafe, forward, yawDegrees);
+		return direction != null ? direction : MoveMath.inputDirection(0, 1, yawDegrees);
 	}
 }

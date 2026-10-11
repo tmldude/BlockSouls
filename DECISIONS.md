@@ -100,3 +100,15 @@ Elden Ring-style random field bosses; a polished custom boss health bar.
   creative/spectator. Turns red under 25%.
 - **Deferred to Phase E polish:** the roll's camera tilt and lowered eye height (cosmetic; needs camera
   mixins). Not done yet.
+
+### A3 wall climb
+- **Trigger:** airborne + WASD input pushing into a solid block within 0.05 blocks + stamina > 0. Any input
+  direction counts, not only forward. **Sneak lets go.** Climbing sets vertical speed to 0.25 but never
+  slows a faster rise, so jumping onto a block isn't dampened.
+- **Server mirrors the check** from the player's last sent input (`ServerPlayer.getLastClientInput()`) and drains
+  5 stamina/s; regen is paused while climbing. No anti-flight changes are needed: vanilla's "flying" kick only
+  counts ticks with nothing but air around the player, and a climber is always touching a wall.
+- **Ledge grab differs from the plan.** The plan said "snap up when the eye is within 0.6 of the top". A
+  teleport-style snap would fight vanilla's server-side "moved wrongly" collision re-check. Instead, once the
+  wall's top is ≤ 1.3 blocks above the feet and there's room to stand there, the player gets a pull-up boost
+  (0.45 up, 0.2 forward) and climbing pauses 8 ticks so the boost isn't repeated every tick.
