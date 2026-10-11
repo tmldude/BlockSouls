@@ -27,6 +27,11 @@ Last updated 2026-10-11. Read this after `CLAUDE.md` to know where the work stan
 - All 4 field bosses are in the MVP, with custom models (no vanilla bodies).
 - Orchestrator: this repo's lead session (Opus); workers per `docs/sessions/`.
 
+## Owner to-dos (needed by the first release, not before)
+- Create a Modrinth account + BlockSouls project; add repo secrets `MODRINTH_TOKEN` (a personal access token that
+  can create versions) and `MODRINTH_PROJECT_ID`.
+- Rent the Hetzner VPS when ready to play; run the install script from `docker/HOSTING.md`.
+
 ## Known gotchas
 - Client source sets of feature mods see `common`'s client classes through the `clientImplementation files(...)`
   wiring in the root `build.gradle` (a plain project dependency only exposes `main`).
