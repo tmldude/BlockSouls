@@ -34,11 +34,15 @@ import io.github.tmldude.blocksouls.common.event.BossEvents;
  * The final raid's phases 2 and 3 without the End (phase 1 is vanilla's fight): a scripted arena in the test area
  * (three crystal spots, two plate spots, a perch at the center) and scripted health.
  *
- * <p>All game tests share one world: the arena is tiny (flight scale 0.08) so the dragon stays over its own test area
- * (the only chunks guaranteed to tick) and neighbouring tests' mock players never count as being in this fight.
+ * <p>Determinism: the tests run in their own environment (their own batch), each force-loads the chunks around its
+ * arena (the runner only forces the test structure's own chunks, and the dragon's flight or the chunk grid can put it
+ * a few blocks over a border, where it would stop ticking; the runner un-forces everything after the batch), and the
+ * arena is tiny (flight scale 0.08, fight radius ~9) so neighbouring tests' mock players never count as being in
+ * this fight. Timings are in game ticks with wide margins; nothing depends on wall-clock time.
  */
 public class FinalRaidGameTests {
-	private static final String ENV = "blocksouls_bosses_test:normal";
+	/** Normal difficulty, in its own batch: the raid tests never share a batch with the other bosses' tests. */
+	private static final String ENV = "blocksouls_bosses_test:final_raid";
 	private static final BlockPos CENTER = new BlockPos(4, 1, 4);
 
 	private static final List<Kill> KILLS = new ArrayList<>();
@@ -63,6 +67,14 @@ public class FinalRaidGameTests {
 	private static FinalDragon dragon(GameTestHelper helper) {
 		floor(helper);
 		BlockPos center = helper.absolutePos(CENTER);
+		// Every chunk the dragon can reach (leash ~4.4 blocks, plus its body) ticks, wherever the chunk borders fall.
+		int cx = center.getX() >> 4;
+		int cz = center.getZ() >> 4;
+		for (int dx = -1; dx <= 1; dx++) {
+			for (int dz = -1; dz <= 1; dz++) {
+				helper.getLevel().setChunkForced(cx + dx, cz + dz, true);
+			}
+		}
 		Vec3 c = Vec3.atBottomCenterOf(center);
 		List<Vec3> crystals = List.of(c.add(-3, 2, -3), c.add(3, 2, -3), c.add(-3, 2, 3));
 		List<BlockPos> plates = List.of(center.offset(-2, -1, 0), center.offset(2, -1, 0));
