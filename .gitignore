@@ -44,3 +44,7 @@ replay_*.log
 docker/.env
 docker/data/
 docker/backups/
+
+# modpack (added by release.yml only)
+
+modpack/mods/blocksouls-*.jar

@@ -20,4 +20,5 @@ packwiz refresh                  # after editing files by hand
 packwiz modrinth export          # build BlockSouls-<version>.mrpack
 ```
 
-Our own four mods are added by the release workflow as URL references to the jars on the GitHub release.
+Our own four mods aren't committed here: `release.yml` copies the freshly built jars into `mods/` and they
+ship inside the `.mrpack` as overrides.

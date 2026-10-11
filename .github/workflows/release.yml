@@ -1,0 +1,84 @@
+name: release
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  IMAGE: ghcr.io/tmldude/blocksouls
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Check tag matches mod_version
+        run: |
+          version=$(sed -n 's/^mod_version=//p' gradle.properties)
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME doesn't match mod_version=$version in gradle.properties"
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v6
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+      - name: Build and test
+        run: ./gradlew build test
+      - name: Collect jars
+        run: |
+          mkdir dist
+          for m in movement guns zombies bosses; do
+            cp "$m"/build/libs/blocksouls-"$m"-*[0-9].jar dist/
+          done
+
+      # Our jars ride inside the .mrpack as overrides (unversioned names, so a pack update
+      # overwrites them). Third-party mods are Modrinth references from modpack/mods/*.pw.toml.
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: stable
+      - name: Build modpack
+        run: |
+          go install github.com/packwiz/packwiz@latest
+          cd modpack
+          mkdir -p mods
+          for m in movement guns zombies bosses; do
+            cp ../dist/blocksouls-"$m"-*.jar mods/blocksouls-"$m".jar
+          done
+          sed -i "s/^version = .*/version = \"$VERSION\"/" pack.toml
+          packwiz refresh
+          packwiz modrinth export -o "../dist/BlockSouls-$VERSION.mrpack"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --title "BlockSouls $VERSION" --generate-notes
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Build and push server image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ github.ref_name }}
+            ${{ env.IMAGE }}:latest

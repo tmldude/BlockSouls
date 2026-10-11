@@ -54,6 +54,16 @@ Elden Ring-style random field bosses; a polished custom boss health bar.
 - **Modpack written by hand** (`pack.toml` + `index.toml`, then `packwiz refresh`) because `packwiz init`
   needs Mojang's version manifest. `modpack/add-mods.sh` holds the third-party mod list.
 
+- **Our jars ship inside the `.mrpack` as overrides**, not as URL references to the GitHub release as the
+  plan said. `packwiz modrinth export` downloads URL files to hash them, so a URL reference needs the release
+  to exist first and the repo to be public; overrides need neither. Names are unversioned so a pack update
+  overwrites them.
+- **`release.yml`** refuses a tag that doesn't match `mod_version` in `gradle.properties`, then builds, creates
+  the GitHub release (jars + `.mrpack`) and pushes `ghcr.io/tmldude/blocksouls:<tag>` and `:latest`.
+- **Offline check** (`tools/offline-check/`): this sandbox can't reach Fabric's maven or Mojang, so code is
+  type-checked against decompiled 26.3 vanilla + Fabric API/Loader sources, and pure-logic unit tests run with
+  a stub `FabricLoader`. Not a substitute for `./gradlew build`; CI remains the real gate.
+
 ## Open risks to resolve in Phase 2
 
 - The plan's gun frameworks (TACZ, Point Blank) have historically been Forge/NeoForge-first. Verify Fabric
