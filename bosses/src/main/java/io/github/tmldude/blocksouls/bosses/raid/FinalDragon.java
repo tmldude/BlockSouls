@@ -286,8 +286,23 @@ public class FinalDragon extends BossEntity {
 
 	@Override
 	public void travel(Vec3 input) {
-		// Moves exactly by the velocity the flight code set: no gravity, no friction, through pillars.
-		move(MoverType.SELF, getDeltaMovement());
+		// Moves exactly by the velocity the flight code set: no gravity, no friction, through pillars...
+		Vec3 velocity = getDeltaMovement();
+		// ...but on a leash: never farther from the island center than half the fight radius (55 blocks in the End,
+		// beyond its circling path), so no attack path can carry it off the island or out of a small arena.
+		RaidArena a = arena();
+		Vec3 center = a.centerVec();
+		double leash = a.scaled(config().arenaRadius * 0.5);
+		Vec3 next = position().add(velocity);
+		double dx = next.x - center.x;
+		double dz = next.z - center.z;
+		double distance = Math.sqrt(dx * dx + dz * dz);
+		if (distance > leash) {
+			double k = leash / distance;
+			velocity = new Vec3(center.x + dx * k - getX(), velocity.y, center.z + dz * k - getZ());
+			setDeltaMovement(velocity);
+		}
+		move(MoverType.SELF, velocity);
 	}
 
 	// ---------------------------------------------------------------------------------------------------------

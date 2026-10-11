@@ -36,7 +36,8 @@ Code: `bosses/src/main/java/.../bosses/raid/`, client in `.../bosses/client/raid
 - **Flight scale:** every flight distance (circling radius and height, approach paths, lane and dive lengths) is
   multiplied by the arena's scale: 1 on the End island, 0.5 for those small summoned arenas, 0.08 in game tests (the
   dragon must stay over the test area, the only chunks guaranteed to tick). Attack recoveries steer back onto the
-  circle, so the dragon never coasts off the island.
+  circle, so the dragon never coasts off the island; on top of that its movement is leashed to half the fight radius
+  from the island center (55 blocks in the End, outside its 46-block circle). The fight radius scales the same way.
 
 ## The fight
 - **Phases at 70% / 30%** as briefed. Health 1000 base (framework scaling: +50% per extra player, × difficulty).
