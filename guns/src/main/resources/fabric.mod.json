@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "blocksouls_guns",
+	"version": "${version}",
+	"name": "BlockSouls Guns",
+	"description": "Weapons, ammo, rarity and perks.",
+	"authors": [
+		"tmldude"
+	],
+	"license": "MIT",
+	"contact": {
+		"sources": "https://github.com/tmldude/blocksouls"
+	},
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"io.github.tmldude.blocksouls.guns.BlockSoulsGuns"
+		],
+		"client": [
+			"io.github.tmldude.blocksouls.guns.client.BlockSoulsGunsClient"
+		]
+	},
+	"mixins": [
+		"blocksouls_guns.mixins.json",
+		{
+			"config": "blocksouls_guns.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=${loader_version}",
+		"minecraft": "~${minecraft_version}",
+		"java": ">=25",
+		"fabric-api": "*",
+		"blocksouls_common": "*"
+	}
+}

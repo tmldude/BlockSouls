@@ -1,0 +1,49 @@
+# Run from this directory: docker compose up -d
+# Copy .env.example to .env first and fill it in.
+services:
+  mc:
+    image: ghcr.io/tmldude/blocksouls:${BLOCKSOULS_TAG:-latest}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "25565:25565"
+    environment:
+      EULA: "TRUE"
+      MEMORY: 6G
+      ONLINE_MODE: "TRUE"
+      MOTD: "BlockSouls"
+      VIEW_DISTANCE: 10
+      ENABLE_WHITELIST: "TRUE"
+      WHITELIST: ${WHITELIST:?set WHITELIST in .env}
+      OPS: ${OPS:-}
+      RCON_PASSWORD: ${RCON_PASSWORD:?set RCON_PASSWORD in .env}
+      # Third-party server mods. Our own mods are baked into the image.
+      MODRINTH_PROJECTS: |
+        fabric-api
+      MODRINTH_DOWNLOAD_DEPENDENCIES: required
+    volumes:
+      - ./data:/data
+    healthcheck:
+      test: mc-health
+      # Modded servers take a while on first start (downloads + world gen).
+      start_period: 5m
+      interval: 30s
+      retries: 3
+
+  backups:
+    image: itzg/mc-backup
+    restart: unless-stopped
+    depends_on:
+      mc:
+        condition: service_healthy
+    environment:
+      BACKUP_INTERVAL: 2h
+      PRUNE_BACKUPS_DAYS: 7
+      RCON_HOST: mc
+      RCON_PASSWORD: ${RCON_PASSWORD:?set RCON_PASSWORD in .env}
+      INITIAL_DELAY: 0
+    volumes:
+      - ./data:/data:ro
+      - ./backups:/backups

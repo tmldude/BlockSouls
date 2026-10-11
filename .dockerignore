@@ -1,0 +1,8 @@
+.git
+.gradle
+**/build
+run
+docker/data
+docker/backups
+docker/.env
+modpack

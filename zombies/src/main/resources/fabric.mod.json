@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "blocksouls_zombies",
+	"version": "${version}",
+	"name": "BlockSouls Zombies",
+	"description": "Wave-based zombies mode with arenas, barricades and points.",
+	"authors": [
+		"tmldude"
+	],
+	"license": "MIT",
+	"contact": {
+		"sources": "https://github.com/tmldude/blocksouls"
+	},
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"io.github.tmldude.blocksouls.zombies.BlockSoulsZombies"
+		],
+		"client": [
+			"io.github.tmldude.blocksouls.zombies.client.BlockSoulsZombiesClient"
+		]
+	},
+	"mixins": [
+		"blocksouls_zombies.mixins.json",
+		{
+			"config": "blocksouls_zombies.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=${loader_version}",
+		"minecraft": "~${minecraft_version}",
+		"java": ">=25",
+		"fabric-api": "*",
+		"blocksouls_common": "*"
+	}
+}
