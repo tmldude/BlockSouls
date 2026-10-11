@@ -240,13 +240,23 @@ Ideation pass for the next version, planned in `PLAN2.md`. v1 ships first.
   each act ~3 sieges with prep time, portal-gated, strongholds/Ender-Eye hunt removed, shopkeepers at a
   camp per act.
 
-**Orchestrator recommendation, for the owner to confirm** (owner flagged the worry himself):
-- Acts are **open dimensions, not closed maps** (Risk of Rain-style: explicit stage gate, player chooses
-  when to leave). Rules in PLAN2.md §2: the portal ignites but never pulls; two-way portals with the
-  siege front following the party; camps as landmarks not walls; portal-charge defense as act finale;
-  **Classic mode config flag** keeps the v1 open-world run shape for A/B playtesting.
+**Confirmed by the owner (same day):** acts are **open dimensions, not closed maps** (Risk of Rain-style:
+explicit stage gate, the party chooses when to leave). Rules in PLAN2.md §2: the portal never pulls;
+two-way portals with the siege front following the party; camps as landmarks not walls; portal-charge
+defense to leave an act; **Classic mode config flag** keeps the v1 run shape for A/B playtesting.
+
+Owner refinements over the first draft:
+- **No fixed siege count per act** ("3 waves is worthless"). An act lasts as long as the party stays;
+  the portal charge can be started at any time. Greed vs. safety is the core rule: the threat counter
+  (the v1 wave counter, promoted) climbs every night forever, and **every boss ahead — final raid
+  included — scales with it at engage time** (`threat.json`, multiplied with `PartyScaling`). Staying =
+  stronger build vs. harder bosses; rushing = the reverse; both legitimate.
+- **Day/night rhythm in every dimension**, not horn-timer sieges: dimensions without a sun get a
+  synthetic cycle — a "vibe switch" (ambient light/fog lerp, soundscape, aggression) on the same
+  ~17-minute clock, so v1's dusk-siege/dawn-pause rules apply unchanged everywhere. `SiegeClock` has a
+  sun-bound and a synthetic implementation.
+
+Orchestrator notes:
 - 26.3's "new biome" is the Dappled Forest (an overworld forest biome, not a dimension), and vanilla has
   no aether — so acts 3–4 are **our own custom dimensions** with original names (placeholders:
-  "the Blightheart", "the Skyrift"; no "Aether" per the asset-name rule).
-- Sieges in dimensions without a sun are horn-signaled events on a prep timer (`SiegeClock`), since only
-  the overworld has day/night.
+  "the Blightheart", "the Skyrift"; no "Aether" per the asset-name rule). Names still the owner's call.

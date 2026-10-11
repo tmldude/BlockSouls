@@ -3,9 +3,10 @@
 v1 (PLAN.md) ships first; this plan is the next version. It folds in the owner's 2026-10-11 ideation
 pass. Everything in PLAN.md still applies unless this file says otherwise; DECISIONS.md still wins over both.
 
-**Status of the big call:** the owner approved the systems below. The world model (§1–§2, open-dimension
-acts rather than closed maps) is the orchestrator's recommendation, pending the owner's confirmation —
-see DECISIONS.md "v2 direction". Classic mode (§2e) exists so playtests can compare both shapes.
+**Status of the big call:** the owner confirmed the open-dimension act model (2026-10-11): acts are
+open dimensions, not closed maps; **no fixed siege count per act** — pacing is entirely the party's;
+day/night rhythm exists in every dimension (synthetic where there's no sun). Classic mode (§2e) stays
+so playtests can compare run shapes.
 
 ---
 
@@ -13,48 +14,69 @@ see DECISIONS.md "v2 direction". Classic mode (§2e) exists so playtests can com
 
 v1 is "Minecraft + night waves." v2 is its own game: a 1–8 player roguelike **expedition through four
 acts** — Overworld → infected Nether → the Blightheart → the Skyrift — ending in the End raid. Each act
-is a whole open dimension: mine its ores, build, roam, fight its field bosses. Three **sieges** per act;
-clearing them ignites the portal to the next act. You choose when to step through — lingering to loot is
-allowed and the difficulty ratchet keeps turning. Builds emerge from tag synergies across boons, guns and
-enchantments; an AI Director runs the sieges; every run ends in a shareable run summary.
+is a whole open dimension: mine its ores, build, roam, fight its field bosses. Nights bring sieges,
+everywhere, forever — **the waves do not care how long you stay**. The party leaves an act whenever it
+chooses by charging the portal; the global threat counter never stops climbing, and every boss ahead
+(final raid included) scales with it. Stay and you're stronger against harder bosses; rush and you're
+weaker against easier ones. That trade is the game.
+Builds emerge from tag synergies across boons, guns and enchantments; an AI Director runs the sieges;
+every run ends in a shareable run summary.
 
-Run length target: **~2.5 hours** (≈35 min/act + finale). All pacing numbers in config.
+Run length: **player-paced**; tune curves to a ~2.5-hour median. All pacing numbers in config.
 
 ## 1. The act structure
 
-| Act | Dimension | Entry | Sieges | Resource tier | Field bosses | Camp |
-|---|---|---|---|---|---|---|
-| 1 | Overworld | run start | 3 night-sieges (dusk-triggered, dawn pause as in v1) | scrap, gunmetal | Pale Rider, Ashwyrm | spawns near run start |
-| 2 | Infected Nether (exists) | nether portal, ignited by the Act 1 portal siege | 3 horn-sieges | blight ore / blight cores | Furnace Knight | near arrival portal |
-| 3 | **The Blightheart** (new dimension; the source of the infection) | portal built deep in the Nether, ignited by the Act 2 portal siege | 3 horn-sieges | blightheart ore (name TBD) | 1 new boss (blight-themed; e.g. a wall-crawling blight knight that uses the players' own climb mechanic) | near arrival portal |
-| 4 | **The Skyrift** (new sky dimension; floating islands, storms) | glowstone-framed portal, ignited by the Act 3 portal siege | 3 horn-sieges | skysteel (name TBD) | Stormplate Knight (relocated home), 1 new boss | near arrival portal |
-| Finale | The End (existing raid) | final portal appears at the Act 4 camp after siege 3 | — | — | reworked Ender Dragon (exists) | — |
+| Act | Dimension | Entry | Resource tier | Field bosses | Camp |
+|---|---|---|---|---|---|
+| 1 | Overworld | run start | scrap, gunmetal | Pale Rider, Ashwyrm | spawns near run start |
+| 2 | Infected Nether (exists) | nether portal, ignited by the Act 1 portal charge | blight ore / blight cores | Furnace Knight | near arrival portal |
+| 3 | **The Blightheart** (new dimension; the source of the infection) | portal built deep in the Nether, ignited by the Act 2 portal charge | blightheart ore (name TBD) | 1 new boss (blight-themed; e.g. a wall-crawling blight knight that uses the players' own climb mechanic) | near arrival portal |
+| 4 | **The Skyrift** (new sky dimension; floating islands, storms) | glowstone-framed portal, ignited by the Act 3 portal charge | skysteel (name TBD) | Stormplate Knight (relocated home), 1 new boss | near arrival portal |
+| Finale | The End (existing raid) | final portal at the Act 4 camp, ignited by the Act 4 portal charge | — | reworked Ender Dragon (exists) | — |
 
+- **No fixed siege count per act** (owner). An act lasts exactly as long as the party chooses to stay.
 - **Dimension names are placeholders** — owner's taste call. Original names only (no "Aether").
 - Strongholds / Ender Eye hunting are **removed from the run** (Classic mode keeps them).
 - Endless mode after the finale: endless sieges in the act of the party's choice.
 
-### Sieges, not sun
+### One rhythm: day and night everywhere
 
-Only the overworld has a day/night cycle. A **siege** is the v2 unit of assault:
-- Act 1 sieges are the v1 night-waves (dusk start, several waves chained, dawn pause). Unchanged.
-- Acts 2–4 sieges are horn-signaled events: prep timer (config, default ~8 min) → horn + title → 2–4
-  chained waves → "dawn" event (siege end; ordinary wave mobs die, elites persist, relic drops).
-- The wave counter stays global and only counts up, across acts. Siege waves draw from the act's roster.
-- `game` grows a `SiegeClock` abstraction over the v1 scheduler: overworld binds it to the sun,
-  other dimensions to timers. One code path for wave chaining, rewards, dawn rules.
+Every act runs the ~17-minute day/night cycle, so the v1 siege rules apply unchanged in every dimension:
+sieges start at dusk wherever the party is, chain through the night, pause at dawn; days are prep.
+- The overworld binds to the real sun. Dimensions without one get a **synthetic cycle — the "vibe
+  switch"** (owner): no fake sun, just the world turning hostile on the same clock. Ambient light and
+  fog color lerp down at dusk (Nether: ash-glow dims to ember-dark), the soundscape shifts (distant
+  horns, growl layers), hostile aggression and spawn pressure rise, and dawn visibly releases it.
+  Client renders from a synced cycle phase; the server drives sieges off the same clock.
+- `game` grows a `SiegeClock` abstraction over the v1 scheduler: one implementation reads the sun,
+  the other drives the synthetic cycle. Wave chaining, dawn rules, relic drops: one code path.
+- The **threat counter** (the v1 wave counter, promoted) ticks up every night of the run, in every act,
+  and never pauses. Mob *rosters* come from the current act; wave size/toughness come from the counter.
 
-### Portal siege (act finale)
+### Greed vs. safety: the ratchet (core rule)
 
-Clearing siege 3 starts the **portal charge**: the next act's portal frame (pre-generated near the camp,
-or the party's own nether portal in Act 1) begins charging over ~3 minutes while the Director throws a
-siege at it. Charge completes → portal ignites permanently. Players never craft a weird item or hunt a
-structure; the climax is a defense fight. Wiping the charge attempt just means re-triggering it.
+- **The waves do not care how long you stay.** Sieges keep coming every night at ever-higher threat.
+  There is no "clearing" an act.
+- **Every boss ahead scales with the threat counter at engage time** — field bosses, portal-charge
+  sieges, and the final raid — via a config curve (`threat.json`), separate from and multiplied with
+  `PartyScaling`. Staying longer = stronger build vs. harder bosses; rushing = weaker build vs. easier
+  bosses. Both are legitimate runs; the curve is the balance lever.
+- The HUD shows the threat counter prominently (and the shopkeeper comments on it), so greed is always
+  an informed choice, never a hidden tax.
+
+### Portal charge (leaving an act, whenever you dare)
+
+The next act's portal frame generates near the camp (Act 1 uses the party's own nether portal). **Any
+player can start the charge at any time**: ~3 minutes of defense while the Director throws a siege at
+the portal, at current threat, day or night. Charge completes → the portal ignites permanently. No
+crafted key items, no structure hunt, no minimum sieges survived; the climax is a fight you pick the
+moment for. Wiping the attempt just means re-triggering it later.
 
 ## 2. Open-world stance (the rules that keep acts from feeling like rails)
 
-a. **The portal never pulls.** It ignites and waits. Staying to mine/loot/over-prepare is always legal;
-   sieges keep coming on the clock and the wave counter keeps climbing. Advancing is a party decision.
+a. **The portal never pulls.** It waits for a player to start the charge, and once lit it waits again.
+   Staying to mine/loot/over-prepare is always legal; sieges keep coming on the clock and the threat
+   counter keeps climbing (§1). Advancing is a party decision.
 b. **Two-way portals.** Backtracking to earlier acts and the home base is allowed. The siege front
    follows the party: once act N is unlocked, sieges target whatever dimension the party is in.
    (Split parties: the siege targets the dimension with the most non-downed players; stragglers get a
@@ -210,9 +232,10 @@ Everything that scales with players goes through `PartyScaling`, tested at 1 and
 
 ## 5. Session waves (continuing PLAN.md §8; v1 waves 0–3 finish first)
 
-- **Wave 4 — contracts & spine (one session, sequential):** `common` v2 contracts; `SiegeClock` +
-  act state machine with the overworld binding; Classic/Expedition flag; migration of the v1 scheduler
-  under it; gametest: a scripted 4-act run skeleton with empty acts.
+- **Wave 4 — contracts & spine (one session, sequential):** `common` v2 contracts; `SiegeClock`
+  (sun binding + synthetic vibe-switch cycle) + act state machine + threat scaling (`threat.json`);
+  player-triggered portal charge; Classic/Expedition flag; migration of the v1 scheduler under it;
+  gametest: a scripted 4-act run skeleton with empty acts, advanced by portal charges.
 - **Wave 5 — features (parallel, one worktree each):**
   | Session | Builds |
   |---|---|
@@ -234,7 +257,9 @@ Everything that scales with players goes through `PartyScaling`, tested at 1 and
 - **The Director can make nights feel unfair** if stress inputs are wrong; its decision log and hard
   config bounds exist for exactly that. Ship conservative defaults.
 - **Synergy balance explosion**: tags multiply; cap stacking (one keystone per trigger tag) from day one.
-- **Pacing**: 4 acts can drag; sieges per act (3) and prep timers are config so playtests can cut to
-  2-siege acts without code.
+- **Pacing is player-owned, so it can bloat or trivialize.** The threat curve on bosses (§1) is the
+  balancing lever: lingering must get genuinely dangerous and rushing genuinely under-geared. Playtest
+  the curve; keep the counter visible so the choice is informed. A config soft-cap (threat growth
+  accelerates after N nights in one act) is the fallback if parties turtle.
 - **Classic mode drift**: it shares the scheduler; CI keeps one classic-mode gametest alive so v1 shape
   never silently breaks.
