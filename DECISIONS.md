@@ -140,3 +140,14 @@ My defaults, to confirm:
   Dark Souls references stay inspiration only (no "Torrent", no "Dragonslayer").
 - **Run variety:** night modifiers, shuffled roster, 1–3 field bosses per run; MVP ships one boss + the final raid.
 - **MVP scope** defined in PLAN.md §0c.
+
+## Game design pass 3 (2026-10-11, from the owner)
+
+- **Downed/revive:** 0 health → downed (crawl, ~30 s bleed-out), teammates revive. **Everyone down/dead at once =
+  run over.** Bleeding out is a real vanilla death (gear and boons lost).
+- **Late joiners** get the Starter Pistol only.
+- **Wacky enchantments and armor sets** join boons as "axes of fun".
+- **MVP field bosses: 2 of 4.** I picked Furnace Knight (mid-run Nether milestone) + Pale Rider (overworld; the
+  Wraith Steed is a big fun payoff). The owner would prefer 4/4; Ashwyrm and Stormplate Knight follow right after the MVP.
+- **New run** = fresh world via an admin command + server script (keeps the difficulty setting).
+- **HUD** (wave, between-wave timer, boons, downed/revive bars) is MVP.

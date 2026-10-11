@@ -42,10 +42,26 @@ pushes difficulty up, and a Souls-style raid as the finale.
 crafting slot into the existing tiers instead of replacing them. To fit 2 hours, Ender Eyes also come from
 bosses, and teleporting mobs drop Ender Pearls more readily.
 
-**Start:** each player's first join gives a **stone pickaxe** and a **Starter Pistol** with infinite ammo. The
-pistol **breaks at the end of wave 3** (with a suitably silly sound and message).
+**Start:** players present when the run starts get a **stone pickaxe** and a **Starter Pistol** with infinite ammo.
+The pistol **breaks at the end of wave 3** (with a suitably silly sound and message). **Late joiners get only the
+Starter Pistol**; friends can hand them gear.
 
-**Death:** vanilla rules: you drop everything, Starter Pistol included, and it isn't re-issued.
+**Death: downed, not dead.** At 0 health you go **down** instead of dying: you crawl, can't fight, and bleed out
+over ~30 s. A teammate holding use on you for a few seconds **revives** you. If you bleed out you die for real:
+vanilla rules, you drop everything, boons are lost, and the Starter Pistol isn't re-issued. You respawn at your
+bed/spawn after the current wave ends (immediately if no wave is running).
+- **Run over = everyone down or dead at the same time.** That ends the run with a run summary (waves survived,
+  bosses killed, best boon, time) and the admin starts a new run.
+- Solo play: going down with nobody to revive you means bleeding out.
+- This rewards sticking together and playing carefully.
+
+**Axes of fun:** boons, **wacky enchantments**, cool armor sets, new ores, new crafting, movement, cars, web
+swinging and field bosses. Each new item should land on at least one axis.
+- **Wacky enchantments:** found on loot and boss drops and applied at a normal enchanting table. Examples:
+  Bouncy (arrows and bullets ricochet), Magnetized (pull nearby drops), Combustion (kills explode),
+  Grapple (hits pull you toward the target), Moonwalk (armor: low gravity), Vampiric (heal on kill).
+- **Armor sets with set bonuses:** a scrap-plate set (early), a blight-forged set from the Nether, a dragonscale set
+  from the Stormplate Knight, and a hazmat set against radiation (growth).
 
 **Finale:** the **Ender Dragon is reworked into the final Souls-style raid boss** in The End (phases, telegraphed
 attacks, mechanics for 2–4 players). Killing it switches the world to **endless mode**: waves keep coming
@@ -95,15 +111,16 @@ The first goal is one complete, fun run end to end, not every idea. Everything e
 
 | Area | MVP | Growth (later) |
 |---|---|---|
-| Game loop | Short day/night, multi-wave nights + dawn pause, dusk cues, sleep + dimension rules, starter kit + breaking pistol, difficulty presets, endless mode | More night modifiers |
+| Game loop | Downed/revive, team-wipe = run over + run summary, run start/new-run admin command, wave/boon HUD, short day/night, multi-wave nights + dawn pause, dusk cues, sleep + dimension rules, starter kit + breaking pistol, difficulty presets, endless mode | More night modifiers |
 | Run variety | Blood Moon + 2 night modifiers, shuffled roster | Modifier pool, run seeds |
 | Boons | ~20 boons over 3 tiers incl. Wildcard, lost on death, 2 combos | Big data-driven pool |
+| Enchantments & armor | 6 wacky enchantments, scrap-plate + blight-forged armor sets | More enchantments, dragonscale + hazmat sets |
 | Movement | Jump, roll, climb (done), basic web swing | Boon-driven upgrades |
 | Guns | Own framework, Starter Pistol + 4 guns, ammo, rarity, 4 perks, headshots | Full 6 + exotics |
 | Mobs | 5 wave types + Mutant Brute elite + 2 Nether mobs; block breaking | Full roster, Stalker, Spreader |
 | World | Scrap, 1 new ore, 2 wreck/ruin structures, loot injection, Ender Eye sources, infected Nether look | Radiation zones, more structures |
 | Vehicles | 4-seat kart from a repaired wreck | Gun truck, hover speeder |
-| Bosses | Framework, boss bar, lock-on, **Furnace Knight**, **final dragon raid** | Ashwyrm, Stormplate Knight, Pale Rider, side raid |
+| Bosses | Framework, boss bar, lock-on, **Furnace Knight** + **Pale Rider** (2 of 4 field bosses), **final dragon raid** | Ashwyrm, Stormplate Knight, side raid |
 | Art | Procedural, in-theme placeholders for everything | Real models, sounds |
 
 ## 1. Repo skeleton
