@@ -22,9 +22,10 @@ public class FullPackClientTest implements FabricClientGameTest {
 			context.waitTicks(20);
 			context.takeScreenshot("01-joined");
 
-			// Dusk: the run's first wave starts, the sky tint and wave HUD come up.
-			server.runCommand("time set 12900");
-			context.waitTicks(100);
+			// The test world freezes time; the run needs it running. Dusk: wave 1 starts, the sky tint and wave HUD come up.
+			server.runCommand("gamerule advance_time true");
+			server.runCommand("time set 12700");
+			context.waitTicks(400);
 			context.takeScreenshot("02-dusk-wave");
 
 			// A line-up of the roster in front of the player.
@@ -42,10 +43,17 @@ public class FullPackClientTest implements FabricClientGameTest {
 			context.waitTicks(20);
 			context.takeScreenshot("04-gun-and-wreck");
 
-			// Night in the Nether: blight and ash fog.
-			server.runCommand("execute in minecraft:the_nether run tp @a 0 70 0");
+			// A wave in progress (mobs come from 24-40 blocks out).
+			server.runCommand("kill @e[type=blocksouls_mobs:shambler,nbt={NoAI:1b}]");
+			context.waitTicks(200);
+			context.takeScreenshot("05-wave-incoming");
+
+			// The Nether: blight and ash fog, from a safe platform high above the lava sea.
+			server.runCommand("execute in minecraft:the_nether run fill -3 100 -3 3 100 3 minecraft:obsidian");
+			server.runCommand("execute in minecraft:the_nether run fill -3 101 -3 3 104 3 minecraft:air");
+			server.runCommand("execute in minecraft:the_nether run tp @a 0 101 0");
 			context.waitTicks(100);
-			context.takeScreenshot("05-nether");
+			context.takeScreenshot("06-nether");
 		}
 	}
 }
