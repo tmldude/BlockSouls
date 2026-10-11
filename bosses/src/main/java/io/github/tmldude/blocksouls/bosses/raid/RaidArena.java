@@ -74,15 +74,9 @@ public record RaidArena(BlockPos center, int floorY, List<Vec3> crystals, List<B
 		// Plate spots on the island between the podium and the pillars: enough for the biggest party (party.json's
 		// raidPlatesMax, plus a spare), evenly around the podium.
 		List<BlockPos> plates = new ArrayList<>();
-		int spots = RaidMath.plateSpots(PartyScaling.config().maxParty);
-		// Each spot skips about half the ring from the last one (a step coprime with the count, so every spot is
-		// used once): the first few plates, the ones small parties get, are always far apart.
-		int step = Math.max(1, spots / 2);
-		while (gcd(step, spots) != 1) {
-			step--;
-		}
+		int spots = plateSpotCount();
 		for (int i = 0; i < spots; i++) {
-			double angle = Math.PI / 4 + (i * step % spots) * 2 * Math.PI / spots;
+			double angle = plateAngle(i, spots);
 			double r = config.plateDistance;
 			int x = podium.getX() + (int) Math.round(Math.cos(angle) * r);
 			int z = podium.getZ() + (int) Math.round(Math.sin(angle) * r);
@@ -90,6 +84,24 @@ public record RaidArena(BlockPos center, int floorY, List<Vec3> crystals, List<B
 			plates.add(new BlockPos(x, y - 1, z));
 		}
 		return new RaidArena(center, floorY, crystals, caged, obelisk, perch, plates, 1.0, radii, true);
+	}
+
+	/** Plate spots an arena offers: enough for the biggest party (party.json) plus a spare. */
+	static int plateSpotCount() {
+		return RaidMath.plateSpots(PartyScaling.config().maxParty);
+	}
+
+	/**
+	 * Angle of plate spot {@code i} of {@code spots} around the center. Each spot skips about half the ring from the
+	 * last one (a step coprime with the count, so every spot is used once): the first few plates, the ones small
+	 * parties get, are always far apart.
+	 */
+	static double plateAngle(int i, int spots) {
+		int step = Math.max(1, spots / 2);
+		while (gcd(step, spots) != 1) {
+			step--;
+		}
+		return Math.PI / 4 + (i * step % spots) * 2 * Math.PI / spots;
 	}
 
 	private static int gcd(int a, int b) {
