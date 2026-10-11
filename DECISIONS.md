@@ -223,3 +223,30 @@ My defaults, to confirm:
 - **Final raid** (after #21): plates to hold `ceil(players / 2)` (1–4; was min(players, 2)), one spare placed (the End
   arena now has 5 spots); crystals 3 × a `raidCrystals` curve (0.3, 0.9): 3 / 4 / 5 / 8 at 1 / 2 / 4 / 8 (was +1 per
   player); wave 7 × the wave curve (29 at 8; was 4 + 3 per player). `maxScaledPlayers` is gone: party.json's `maxParty`.
+
+## v2 direction — "Expedition" (2026-10-11, from the owner)
+
+Ideation pass for the next version, planned in `PLAN2.md`. v1 ships first.
+
+**Owner decisions:**
+- v2 adds: a tag-based synergy engine with keystone boons; an AI Director for sieges; risk-reward world
+  objects (altars, cursed chests, pylons, wagers); the day phase as a shop/prep phase with camp
+  shopkeepers; optional objectives inside sieges; Origins (run-start classes — scope generous);
+  solo Last Stand + co-op cross-player boons and downed gameplay; a major boss expansion (posture/stagger,
+  part breaks, new attack/movement archetypes, elite affixes); Tier 1–2 AI (utility attack picking,
+  Director, influence maps, habit reads). Learned-model AI (ONNX policies, JEPA-style) is explicitly
+  deferred past v2.
+- **The run becomes act-structured**: Overworld → Nether → a new dimension → a sky dimension → final raid,
+  each act ~3 sieges with prep time, portal-gated, strongholds/Ender-Eye hunt removed, shopkeepers at a
+  camp per act.
+
+**Orchestrator recommendation, for the owner to confirm** (owner flagged the worry himself):
+- Acts are **open dimensions, not closed maps** (Risk of Rain-style: explicit stage gate, player chooses
+  when to leave). Rules in PLAN2.md §2: the portal ignites but never pulls; two-way portals with the
+  siege front following the party; camps as landmarks not walls; portal-charge defense as act finale;
+  **Classic mode config flag** keeps the v1 open-world run shape for A/B playtesting.
+- 26.3's "new biome" is the Dappled Forest (an overworld forest biome, not a dimension), and vanilla has
+  no aether — so acts 3–4 are **our own custom dimensions** with original names (placeholders:
+  "the Blightheart", "the Skyrift"; no "Aether" per the asset-name rule).
+- Sieges in dimensions without a sun are horn-signaled events on a prep timer (`SiegeClock`), since only
+  the overworld has day/night.

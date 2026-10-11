@@ -5,6 +5,8 @@ web-swinging/wall-climbing, Mario-style jumps. Shipped as a Docker server image 
 
 - **The plan:** `PLAN.md`. §0b is the game design every feature serves. §8 splits the work into waves of
   parallel sessions, each owning one module; don't start a wave until the previous one is merged with CI green.
+- **The next version:** `PLAN2.md` ("Expedition": act-structured run, synergy builds, AI Director, origins,
+  bosses v2). v1 ships first; v2 work starts at its Wave 4.
 - **Decisions:** `DECISIONS.md` logs every default chosen. Where it conflicts with `PLAN.md`, `DECISIONS.md` wins.
   Add an entry whenever you pick a default the plan doesn't specify.
 
