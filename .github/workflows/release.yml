@@ -59,13 +59,46 @@ jobs:
             cp "$jar" "mods/$m.jar"
           done
           sed -i "s/^version = .*/version = \"$VERSION\"/" pack.toml
+          ./add-mods.sh
           packwiz refresh
           packwiz modrinth export -o "../dist/BlockSouls-$VERSION.mrpack"
+
+      # For hosts without Docker: our server jars + a README. Fabric API comes from Modrinth.
+      - name: Build server pack
+        run: |
+          mkdir -p server-pack/mods
+          for jar in dist/blocksouls-*.jar; do
+            m=$(basename "$jar"); m=${m%%-[0-9]*}
+            cp "$jar" "server-pack/mods/$m.jar"
+          done
+          cp docker/SERVER-PACK.md server-pack/README.md
+          (cd server-pack && zip -qr "../dist/BlockSouls-$VERSION-server.zip" .)
 
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create "$GITHUB_REF_NAME" dist/* --title "BlockSouls $VERSION" --generate-notes
+
+      # Skipped until the owner adds the MODRINTH_TOKEN and MODRINTH_PROJECT_ID repo secrets (docs/STATUS.md).
+      - name: Publish to Modrinth
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          MODRINTH_PROJECT_ID: ${{ secrets.MODRINTH_PROJECT_ID }}
+        if: env.MODRINTH_TOKEN != '' && env.MODRINTH_PROJECT_ID != ''
+        run: |
+          mc=$(sed -n 's/^minecraft_version=//p' gradle.properties)
+          case "$VERSION" in 0.*) type=beta ;; *) type=release ;; esac
+          data=$(jq -n --arg v "$VERSION" --arg mc "$mc" --arg t "$type" --arg p "$MODRINTH_PROJECT_ID" \
+            --arg log "https://github.com/${{ github.repository }}/releases/tag/$GITHUB_REF_NAME" '{
+              name: "BlockSouls \($v)", version_number: $v, changelog: $log, dependencies: [],
+              game_versions: [$mc], version_type: $t, loaders: ["fabric"], featured: true,
+              project_id: $p, file_parts: ["pack"], primary_file: "pack"
+            }')
+          curl -fsS https://api.modrinth.com/v2/version \
+            -H "Authorization: $MODRINTH_TOKEN" \
+            -H "User-Agent: tmldude/BlockSouls release workflow" \
+            -F "data=$data" \
+            -F "pack=@dist/BlockSouls-$VERSION.mrpack;type=application/x-modrinth-modpack+zip"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4

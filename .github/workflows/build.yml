@@ -27,3 +27,23 @@ jobs:
           path: |
             */build/libs/*.jar
             !*/build/libs/*-sources.jar
+
+  # Resolves the third-party mods against Modrinth and exports a test .mrpack (without our jars), so a missing
+  # 26.3 build shows up on every push instead of at release time.
+  modpack:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: stable
+      - name: Resolve and export
+        run: |
+          go install github.com/packwiz/packwiz@latest
+          cd modpack
+          ./add-mods.sh
+          packwiz refresh
+          packwiz modrinth export -o test.mrpack
+          ls mods
