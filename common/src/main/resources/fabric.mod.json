@@ -15,6 +15,9 @@
 	"entrypoints": {
 		"main": [
 			"io.github.tmldude.blocksouls.common.BlockSoulsCommon"
+		],
+		"client": [
+			"io.github.tmldude.blocksouls.common.client.BlockSoulsCommonClient"
 		]
 	},
 	"depends": {

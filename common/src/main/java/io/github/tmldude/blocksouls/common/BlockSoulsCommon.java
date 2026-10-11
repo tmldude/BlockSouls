@@ -12,5 +12,6 @@ public class BlockSoulsCommon implements ModInitializer {
 		PlayerTraits.init();
 		PlayerStatus.init();
 		DebugCommands.init();
+		VersionCheck.init();
 	}
 }

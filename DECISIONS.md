@@ -192,3 +192,18 @@ My defaults, to confirm:
 - **No GeckoLib:** custom models use vanilla's Java model + keyframe animation system (no third-party dependency to
   keep in sync with 26.3).
 - **Field bosses die once per run** (no farming); the spawner picks from the bosses not yet killed.
+
+## Distribution (2026-10-11, orchestrator)
+
+- **Daily 05:00 update via cron, not Watchtower.** `install.sh` installs `/etc/cron.d/blocksouls` running
+  `docker/update.sh`: pull, and only if the image changed, warn players over RCON and restart 60 s later. Same
+  behavior as the planned Watchtower window without a third-party container holding the Docker socket.
+- **One-command install** (`docker/install.sh`): Docker, clone to `/opt/blocksouls`, `.env` with a generated RCON
+  password, `ufw` (22 + 25565), cron, start. Re-runnable.
+- **Third-party mods:** Fabric API is required; Mod Menu, Sodium and Lithium are optional and skipped with a warning
+  if they lack a 26.3 build. GeckoLib, Cloth Config and Iris are dropped (unused). A `modpack` CI job resolves them on
+  every push.
+- **Releases** also attach a server-pack zip (our jars + a README) and, once the owner adds `MODRINTH_TOKEN` and
+  `MODRINTH_PROJECT_ID`, publish the `.mrpack` as a new Modrinth version (beta while 0.x).
+- **Version check on join** (common): the server sends its BlockSouls version; a client on a different version gets a
+  chat line telling them to update the pack.

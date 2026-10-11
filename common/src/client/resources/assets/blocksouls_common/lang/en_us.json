@@ -1,3 +1,4 @@
 {
-	"key.category.blocksouls.controls": "BlockSouls"
+	"key.category.blocksouls.controls": "BlockSouls",
+	"message.blocksouls_common.version_mismatch": "Your BlockSouls pack (%s) doesn't match this server (%s). Update the pack in the Modrinth App, then rejoin."
 }

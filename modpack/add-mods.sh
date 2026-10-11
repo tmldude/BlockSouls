@@ -1,13 +1,14 @@
 #!/bin/sh
 # Adds the third-party mods to the pack. Needs packwiz and network access to api.modrinth.com.
-# packwiz refuses a mod with no build for the pack's Minecraft version + loader, so a failure here
-# means that mod has no 26.3 Fabric build: pick an equivalent and record it in DECISIONS.md.
-# Client/server sides come from each project's Modrinth metadata.
+# Fabric API is required. The rest are nice-to-haves (performance, mod list): one without a 26.3 Fabric build
+# is skipped with a warning instead of failing the release. Client/server sides come from Modrinth metadata.
 set -e
 cd "$(dirname "$0")"
 
-for slug in fabric-api modmenu cloth-config geckolib lithium sodium iris; do
-	packwiz modrinth add -y "$slug"
-done
+packwiz modrinth add -y fabric-api
 
-# Gun framework (TACZ or Point Blank) is chosen in Phase 2b; add it here once picked.
+for slug in modmenu sodium lithium; do
+	if ! packwiz modrinth add -y "$slug"; then
+		echo "warning: $slug has no Minecraft 26.3 Fabric build yet; leaving it out of the pack" >&2
+	fi
+done
