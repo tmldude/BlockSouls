@@ -267,6 +267,21 @@ a learned Director trained on real run summaries. Not scheduled.
 Contract changes land as their own small PRs in Stage 5 and are then frozen, per v1 rules.
 Everything that scales with players goes through `PartyScaling`, tested at 1 and 8. Every number in config.
 
+**Content standards:** all v2 content follows `docs/CONTENT.md` (owner's call, 2026-10-11; lands with
+tmldude/BlockSouls#35 and is CI-enforced). The v2-specific consequences:
+- **Recipe web (R1/R2):** every act material, forge ingredient and boss drop must be an ingredient in
+  2+ recipes; crafted items must connect. **Souls** drop from bosses, so beyond being the shop currency
+  they get 2+ recipes of their own (soul-infused crafting is on-theme — e.g. a recipe path into trinket
+  or keystone crafting). Gear and **trinkets** are end items: exempt with a one-line reason each.
+- CONTENT.md's boss **readability rule** (>30% health ⇒ ≥15 ticks windup, config-locked) is the same
+  invariant as §3h's "telegraphs never lie" — bosses v2 attack archetypes must satisfy it.
+- New boons/curses/trinkets each add a row to the boon icon generator; mobs/bosses/dimensions use the
+  generated-asset pipelines and test rosters CONTENT.md names.
+- CONTENT.md's "progression stays vanilla-shaped (… stronghold → End)" line describes the **Classic**
+  shape; in Expedition the act portals replace the stronghold (DECISIONS.md logs the resolution).
+- **Releases:** coordinate with the v1 orchestrator before cutting any v2 version from main (they cut
+  v0.10.x; we announce before cutting v2 tags).
+
 ## 5. Session stages (continuing docs/sessions/README.md's numbering; v1's Stage 4 / v0.10.0 is in flight)
 
 Coordination with Stage 4 (agreed with the v1 orchestrator session, 2026-10-11): Stage 5 may start now

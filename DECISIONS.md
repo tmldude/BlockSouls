@@ -293,3 +293,20 @@ arena-seal, world-structures). Agreed split:
   (Stage 7). `integration/FullPackClientTest`'s dusk step is the regression gate.
 - Stage 5 brief: `docs/sessions/v2-spine.md` (branch `claude/v2-spine`, two PRs: common contracts, then
   the game spine).
+
+## Content standards adopted for v2 (2026-10-11, orchestrator)
+
+The owner (via the v1 orchestrator; verified against branch `claude/content-standards`, PR #35) set
+content standards for both tracks: `docs/CONTENT.md` + a CI-enforced crafting web
+(`tools/content/check_recipe_web.py`: R1 every drop feeds 2+ recipes, R2 every crafted item connects,
+end items exempt with a reason). Binding once #35 merges. v2 resolutions, logged here as the tie-breaker:
+- **Expedition vs. "vanilla-shaped progression":** CONTENT.md's crafting-web goal line says
+  "overworld → Nether → stronghold → End". That describes the Classic run shape; in Expedition the act
+  portal chain replaces the stronghold step. The crafting rules themselves (R1/R2) apply unchanged to
+  all v2 content. Nit reported to the v1 orchestrator for a wording tweak in #35.
+- **Ender Eyes:** field bosses keep dropping them (Classic needs them); in Expedition they're crafting
+  material only (must keep satisfying R1 — they already feed boss-tier recipes).
+- **Souls** (boss currency) will satisfy R1 with 2+ soul-infused recipes rather than an exemption.
+- **Trinkets** are end items → `recipe_web_exempt.json` with reasons, like gear.
+- **Release coordination** accepted: v1 orchestrator cuts v0.10.x; v2 versions are cut by us only after
+  telling them, never both from main at once.
