@@ -2,117 +2,105 @@
   "gun.starter_pistol.fire": {
     "subtitle": "subtitles.blocksouls_guns.gun.fire",
     "sounds": [
-      {
-        "name": "minecraft:entity.firework_rocket.blast",
-        "type": "event",
-        "volume": 0.9,
-        "pitch": 1.6
-      }
+      "blocksouls_guns:gun/starter_pistol/fire1",
+      "blocksouls_guns:gun/starter_pistol/fire2",
+      "blocksouls_guns:gun/starter_pistol/fire3"
     ]
   },
   "gun.hand_cannon.fire": {
     "subtitle": "subtitles.blocksouls_guns.gun.fire",
     "sounds": [
-      {
-        "name": "minecraft:entity.generic.explode",
-        "type": "event",
-        "volume": 0.45,
-        "pitch": 1.7
-      }
+      "blocksouls_guns:gun/hand_cannon/fire1",
+      "blocksouls_guns:gun/hand_cannon/fire2",
+      "blocksouls_guns:gun/hand_cannon/fire3"
     ]
   },
   "gun.auto_rifle.fire": {
     "subtitle": "subtitles.blocksouls_guns.gun.fire",
     "sounds": [
-      {
-        "name": "minecraft:entity.firework_rocket.large_blast",
-        "type": "event",
-        "volume": 0.6,
-        "pitch": 1.9
-      }
+      "blocksouls_guns:gun/auto_rifle/fire1",
+      "blocksouls_guns:gun/auto_rifle/fire2",
+      "blocksouls_guns:gun/auto_rifle/fire3"
     ]
   },
   "gun.shotgun.fire": {
     "subtitle": "subtitles.blocksouls_guns.gun.fire",
     "sounds": [
-      {
-        "name": "minecraft:entity.generic.explode",
-        "type": "event",
-        "volume": 0.6,
-        "pitch": 1.25
-      }
+      "blocksouls_guns:gun/shotgun/fire1",
+      "blocksouls_guns:gun/shotgun/fire2"
     ]
   },
   "gun.sniper_rifle.fire": {
     "subtitle": "subtitles.blocksouls_guns.gun.fire",
     "sounds": [
-      {
-        "name": "minecraft:entity.generic.explode",
-        "type": "event",
-        "volume": 0.7,
-        "pitch": 1.45
-      },
-      {
-        "name": "minecraft:entity.firework_rocket.large_blast",
-        "type": "event",
-        "volume": 0.8,
-        "pitch": 0.8
-      }
+      "blocksouls_guns:gun/sniper_rifle/fire1",
+      "blocksouls_guns:gun/sniper_rifle/fire2"
     ]
   },
   "gun.empty": {
     "subtitle": "subtitles.blocksouls_guns.gun.empty",
     "sounds": [
-      {
-        "name": "minecraft:block.dispenser.fail",
-        "type": "event",
-        "volume": 0.6,
-        "pitch": 1.8
-      }
+      "blocksouls_guns:gun/empty1",
+      "blocksouls_guns:gun/empty2"
     ]
   },
   "gun.reload_start": {
     "subtitle": "subtitles.blocksouls_guns.gun.reload",
     "sounds": [
-      {
-        "name": "minecraft:item.crossbow.loading_start",
-        "type": "event",
-        "volume": 0.8,
-        "pitch": 1.4
-      }
+      "blocksouls_guns:gun/reload_start1",
+      "blocksouls_guns:gun/reload_start2"
     ]
   },
   "gun.reload_end": {
     "subtitle": "subtitles.blocksouls_guns.gun.reload",
     "sounds": [
-      {
-        "name": "minecraft:item.crossbow.loading_end",
-        "type": "event",
-        "volume": 0.8,
-        "pitch": 1.5
-      }
+      "blocksouls_guns:gun/reload_end1",
+      "blocksouls_guns:gun/reload_end2"
     ]
   },
   "gun.ricochet": {
     "subtitle": "subtitles.blocksouls_guns.gun.ricochet",
     "sounds": [
-      {
-        "name": "minecraft:block.anvil.land",
-        "type": "event",
-        "volume": 0.25,
-        "pitch": 2.0
-      }
+      "blocksouls_guns:gun/ricochet1",
+      "blocksouls_guns:gun/ricochet2",
+      "blocksouls_guns:gun/ricochet3"
     ]
   },
   "gun.explosive_round": {
     "subtitle": "subtitles.blocksouls_guns.gun.explosive_round",
     "sounds": [
-      {
-        "name": "minecraft:entity.generic.explode",
-        "type": "event",
-        "volume": 0.4,
-        "pitch": 1.6
-      }
+      "blocksouls_guns:gun/explosive_round1",
+      "blocksouls_guns:gun/explosive_round2"
+    ]
+  },
+  "gun.ammo_pickup": {
+    "subtitle": "subtitles.blocksouls_guns.gun.ammo_pickup",
+    "sounds": [
+      "blocksouls_guns:gun/ammo_pickup1",
+      "blocksouls_guns:gun/ammo_pickup2"
+    ]
+  },
+  "gun.headshot": {
+    "sounds": [
+      "blocksouls_guns:gun/headshot1"
+    ]
+  },
+  "gun.perk.outlaw": {
+    "subtitle": "subtitles.blocksouls_guns.gun.perk.outlaw",
+    "sounds": [
+      "blocksouls_guns:gun/perk/outlaw1"
+    ]
+  },
+  "gun.perk.rampage": {
+    "subtitle": "subtitles.blocksouls_guns.gun.perk.rampage",
+    "sounds": [
+      "blocksouls_guns:gun/perk/rampage1"
+    ]
+  },
+  "gun.perk.vorpal": {
+    "subtitle": "subtitles.blocksouls_guns.gun.perk.vorpal",
+    "sounds": [
+      "blocksouls_guns:gun/perk/vorpal1"
     ]
   }
 }
