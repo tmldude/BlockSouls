@@ -1,0 +1,18 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"category": "misc",
+	"pattern": [
+		" S ",
+		"KIK",
+		" S "
+	],
+	"key": {
+		"S": "blocksouls_world:scrap",
+		"K": "minecraft:dried_kelp_block",
+		"I": "minecraft:iron_ingot"
+	},
+	"result": {
+		"id": "blocksouls_vehicles:wheel",
+		"count": 1
+	}
+}
