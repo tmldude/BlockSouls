@@ -140,5 +140,158 @@
         "volume": 1.0
       }
     ]
+  },
+  "music.stormplate_knight": {
+    "sounds": [
+      {
+        "name": "minecraft:music_disc.precipice",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 0.6
+      }
+    ]
+  },
+  "entity.stormplate_knight.ambient": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.iron_golem.step",
+        "type": "event",
+        "pitch": 0.5,
+        "volume": 0.6
+      }
+    ]
+  },
+  "entity.stormplate_knight.hurt": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.iron_golem.hurt",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.stormplate_knight.death": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.wither.death",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 0.9
+      }
+    ]
+  },
+  "entity.stormplate_knight.step": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.step",
+    "sounds": [
+      {
+        "name": "minecraft:entity.iron_golem.step",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.stormplate_knight.roar": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.roar",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ravager.roar",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.stormplate_knight.windup": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.windup",
+    "sounds": [
+      {
+        "name": "minecraft:item.trident.return",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.stormplate_knight.thrust": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.thrust",
+    "sounds": [
+      {
+        "name": "minecraft:item.trident.throw",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.stormplate_knight.swing": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.swing",
+    "sounds": [
+      {
+        "name": "minecraft:entity.player.attack.sweep",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.stormplate_knight.charge": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.charge",
+    "sounds": [
+      {
+        "name": "minecraft:item.trident.thunder",
+        "type": "event",
+        "pitch": 1.2,
+        "volume": 0.8
+      }
+    ]
+  },
+  "entity.stormplate_knight.thunder": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.thunder",
+    "sounds": [
+      {
+        "name": "minecraft:entity.lightning_bolt.thunder",
+        "type": "event",
+        "pitch": 1.1,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.stormplate_knight.throw": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.throw",
+    "sounds": [
+      {
+        "name": "minecraft:item.trident.riptide_3",
+        "type": "event",
+        "pitch": 0.9,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.stormplate_knight.slam": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.slam",
+    "sounds": [
+      {
+        "name": "minecraft:entity.generic.explode",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.stormplate_knight.puddle": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.puddle",
+    "sounds": [
+      {
+        "name": "minecraft:entity.lightning_bolt.impact",
+        "type": "event",
+        "pitch": 1.6,
+        "volume": 0.6
+      }
+    ]
   }
 }

@@ -16,6 +16,7 @@ import io.github.tmldude.blocksouls.bosses.field.FieldBosses;
 import io.github.tmldude.blocksouls.bosses.furnace.FurnaceKnights;
 import io.github.tmldude.blocksouls.bosses.registry.BossBlocks;
 import io.github.tmldude.blocksouls.bosses.registry.BossSounds;
+import io.github.tmldude.blocksouls.bosses.stormplate.StormplateKnights;
 import io.github.tmldude.blocksouls.common.Config;
 
 public class BlockSoulsBosses implements ModInitializer {
@@ -48,5 +49,6 @@ public class BlockSoulsBosses implements ModInitializer {
 
 		// Bosses: one line each. Stage 2b sessions add theirs below.
 		FurnaceKnights.register();
+		StormplateKnights.register();
 	}
 }
