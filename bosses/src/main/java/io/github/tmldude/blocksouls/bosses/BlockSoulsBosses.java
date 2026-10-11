@@ -18,6 +18,7 @@ import io.github.tmldude.blocksouls.bosses.raid.FinalRaids;
 import io.github.tmldude.blocksouls.bosses.palerider.PaleRiders;
 import io.github.tmldude.blocksouls.bosses.registry.BossBlocks;
 import io.github.tmldude.blocksouls.bosses.registry.BossSounds;
+import io.github.tmldude.blocksouls.bosses.stormplate.StormplateKnights;
 import io.github.tmldude.blocksouls.common.Config;
 
 public class BlockSoulsBosses implements ModInitializer {
@@ -53,5 +54,6 @@ public class BlockSoulsBosses implements ModInitializer {
 		FinalRaids.register();
 		PaleRiders.register();
 		io.github.tmldude.blocksouls.bosses.ashwyrm.Ashwyrms.register();
+		StormplateKnights.register();
 	}
 }

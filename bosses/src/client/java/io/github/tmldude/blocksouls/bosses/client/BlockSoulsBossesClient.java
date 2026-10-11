@@ -11,6 +11,7 @@ import io.github.tmldude.blocksouls.bosses.api.BossParts;
 import io.github.tmldude.blocksouls.bosses.client.bar.BossBarHud;
 import io.github.tmldude.blocksouls.bosses.client.bar.ClientBossBars;
 import io.github.tmldude.blocksouls.bosses.client.furnace.FurnaceKnightClient;
+import io.github.tmldude.blocksouls.bosses.client.stormplate.StormplateKnightClient;
 import io.github.tmldude.blocksouls.bosses.client.lockon.LockOn;
 import io.github.tmldude.blocksouls.bosses.client.raid.FinalDragonClient;
 import io.github.tmldude.blocksouls.bosses.client.palerider.PaleRiderClient;
@@ -42,5 +43,6 @@ public class BlockSoulsBossesClient implements ClientModInitializer {
 		FinalDragonClient.register();
 		PaleRiderClient.register();
 		io.github.tmldude.blocksouls.bosses.client.ashwyrm.AshwyrmClient.register();
+		StormplateKnightClient.register();
 	}
 }
