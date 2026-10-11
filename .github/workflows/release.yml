@@ -1,7 +1,10 @@
 name: release
+# Two ways to release: push a v<mod_version> tag, or run this workflow on main from the Actions tab (or the API),
+# which creates the tag itself (for environments that can't push tags).
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -19,11 +22,23 @@ jobs:
       - name: Check tag matches mod_version
         run: |
           version=$(sed -n 's/^mod_version=//p' gradle.properties)
-          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+          tag="v$version"
+          if [ "$GITHUB_EVENT_NAME" = push ] && [ "$GITHUB_REF_NAME" != "$tag" ]; then
             echo "::error::Tag $GITHUB_REF_NAME doesn't match mod_version=$version in gradle.properties"
             exit 1
           fi
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            if [ "$GITHUB_REF_NAME" != main ]; then
+              echo "::error::Run the release from main, not $GITHUB_REF_NAME"
+              exit 1
+            fi
+            if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+              echo "::error::$tag already exists: bump mod_version in gradle.properties first"
+              exit 1
+            fi
+          fi
           echo "VERSION=$version" >> "$GITHUB_ENV"
+          echo "TAG=$tag" >> "$GITHUB_ENV"
       - name: Validate Gradle wrapper
         uses: gradle/actions/wrapper-validation@v6
       - name: Set up JDK 25
@@ -77,9 +92,10 @@ jobs:
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" dist/* --title "BlockSouls $VERSION" --generate-notes
+        # Creates the tag at this commit when the run was started by hand.
+        run: gh release create "$TAG" dist/* --target "$GITHUB_SHA" --title "BlockSouls $VERSION" --generate-notes
 
-      # Skipped until the owner adds the MODRINTH_TOKEN and MODRINTH_PROJECT_ID repo secrets (docs/STATUS.md).
+      # Skipped unless the MODRINTH_TOKEN and MODRINTH_PROJECT_ID repo secrets are set.
       - name: Publish to Modrinth
         env:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
@@ -89,7 +105,7 @@ jobs:
           mc=$(sed -n 's/^minecraft_version=//p' gradle.properties)
           case "$VERSION" in 0.*) type=beta ;; *) type=release ;; esac
           data=$(jq -n --arg v "$VERSION" --arg mc "$mc" --arg t "$type" --arg p "$MODRINTH_PROJECT_ID" \
-            --arg log "https://github.com/${{ github.repository }}/releases/tag/$GITHUB_REF_NAME" '{
+            --arg log "https://github.com/${{ github.repository }}/releases/tag/$TAG" '{
               name: "BlockSouls \($v)", version_number: $v, changelog: $log, dependencies: [],
               game_versions: [$mc], version_type: $t, loaders: ["fabric"], featured: true,
               project_id: $p, file_parts: ["pack"], primary_file: "pack"
@@ -115,5 +131,5 @@ jobs:
           file: docker/Dockerfile
           push: true
           tags: |
-            ${{ env.IMAGE }}:${{ github.ref_name }}
+            ${{ env.IMAGE }}:${{ env.TAG }}
             ${{ env.IMAGE }}:latest
