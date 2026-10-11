@@ -51,3 +51,8 @@ Kart wreck + repaired 4-seat kart. Numbers live in `config/blocksouls/vehicles.j
 - Sounds are our own ids in `sounds.json` that point at vanilla sound events (`"type": "event"`): engine = bee loop
   re-pitched by speed (0.5–1.6), hop = slime jump, boost = firework launch, ram = zombie hitting an iron door,
   break = explosion, part fitted = smithing table, repaired = anvil.
+
+## Data
+- **Recipes are gated on `blocksouls_world` being loaded** (`fabric:load_conditions` / `all_mods_loaded`). In 26.3
+  recipes are a registry and an unknown item id is a fatal load error, not a warning, so without the gate the
+  vehicles-only gametest server (and any world without the world mod) fails to start.
