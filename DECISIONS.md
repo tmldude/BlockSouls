@@ -151,3 +151,10 @@ My defaults, to confirm:
   Wraith Steed is a big fun payoff). The owner would prefer 4/4; Ashwyrm and Stormplate Knight follow right after the MVP.
 - **New run** = fresh world via an admin command + server script (keeps the difficulty setting).
 - **HUD** (wave, between-wave timer, boons, downed/revive bars) is MVP.
+
+## Bosses + execution (2026-10-11, from the owner)
+
+- **MVP field bosses stay at 2** (Furnace Knight + Pale Rider), built with **custom models from dedicated design
+  sub-sessions**, not re-skinned vanilla bodies.
+- **Execution:** full autonomy for PRs, merges and codebase management; questions only when truly blocking.
+  This session orchestrates; workers run as parallel sessions per PLAN.md §8.
