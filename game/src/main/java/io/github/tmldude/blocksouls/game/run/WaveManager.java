@@ -45,6 +45,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.storage.loot.LootTable;
 
+import net.fabricmc.fabric.api.event.lifecycle.v1.EntityLoadData;
+
 import io.github.tmldude.blocksouls.common.CommonIds;
 import io.github.tmldude.blocksouls.common.CommonTags;
 import io.github.tmldude.blocksouls.common.event.RunEvents;
@@ -227,13 +229,15 @@ public final class WaveManager {
 		mob.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, random.nextFloat() * 360, 0);
 		boolean elite = (spec != null && spec.elite()) || isElite(mob);
 		setUpWaveMob(mob, data, elite);
+		// Track before adding: ENTITY_LOAD fires on add and discards untracked wave mobs.
+		data.waveMobs.add(mob.getUUID());
 		if (!level.addFreshEntity(mob)) {
+			data.waveMobs.remove(mob.getUUID());
 			return true;
 		}
 		if (elite) {
 			data.waveElites++;
 		}
-		data.waveMobs.add(mob.getUUID());
 		retarget(level, mob, players);
 		RunSync.markDirty();
 		return true;
@@ -531,7 +535,7 @@ public final class WaveManager {
 
 	/** Wave mobs (or leftovers from an earlier wave) that load in when they shouldn't exist are removed. */
 	static void onEntityLoad(Entity entity, ServerLevel level, RunData data) {
-		if (!(entity instanceof Mob) || !entity.entityTags().contains(RunIds.WAVE_MOB_TAG)) {
+		if (!(entity instanceof Mob) || !((EntityLoadData) entity).isLoadedFromDisk() || !entity.entityTags().contains(RunIds.WAVE_MOB_TAG)) {
 			return;
 		}
 		UUID id = entity.getUUID();
