@@ -37,3 +37,39 @@ Same style as `DECISIONS.md`: where this conflicts with a plan file, this logs w
 - **SynergyTags registry is init-time single-threaded** (mod initializers), reads thread-safe afterwards.
   The "tags of a thing" contract is `SynergyTags.Source` feeding `tag → stack count` per player: counts (not
   booleans) because relic weighting and the HUD build line need "top two tags by stacks" (PLAN2 §3a).
+
+## The game spine (PR 2)
+
+- **One synthetic cycle per run, not per dimension.** PLAN2's "one rhythm" taken literally: every sun-less
+  dimension reads the same persisted `SyntheticCycle`, started at run start aligned to the overworld's
+  time of day and advanced at the same clock rate, so hopping dimensions keeps roughly one continuous
+  rhythm instead of juggling phases. It pauses with the sun's clock when the server is empty.
+- **The scheduler runs off the active dimension's clock, one code path.** `RunSystem.activeClock` is the
+  overworld `SunClock` in classic (byte-for-byte the v1 reads) or whenever the party's act is the
+  overworld; the `SyntheticClock` elsewhere. Dusk/dawn edge detection, wave chaining, dawn rules and
+  relic drops are the existing v1 code reading through the interface. Switching dimensions mid-night can
+  re-enter or skip a dusk edge; the shared rhythm keeps that rare, and it's accepted skeleton behavior.
+- **The siege follows the party through the existing stray mechanic.** Waves spawn in the active
+  dimension; mobs left in an abandoned dimension read as strays (entity unreachable), get dropped from
+  tracking after `straySeconds` and respawn near the party — no per-wave dimension bookkeeping. Leftovers
+  on the ground are discarded when their chunks next load (the v1 `ENTITY_LOAD` rule, now in any
+  dimension); discard/burn sweeps search all levels.
+- **The portal charge reuses `startWave` verbatim** ("a wave at current threat via the existing wave spawn
+  path"): the counter increments per defense wave exactly like a night wave, and a cleared defense wave
+  starts the next one so the pressure holds for the whole charge. Dawn mid-charge ends the wave like any
+  other; the charge loop restarts one within a second. Completion ends the running wave by dawn rules
+  (ordinaries burn, elites hunt). Default `portalChargeSeconds` 180.
+- **Leaving the act aborts the charge** (party-follow switches the current act → `cancelCharge`), matching
+  "wiping the attempt just means re-triggering it later". A charge on the last act fires
+  `PORTAL_CHARGE_COMPLETED` with nothing to open — Stage 6/7 wires the finale portal to it.
+- **Aliased act dimensions** (two acts sharing a dimension — only in test skeletons until Stage 6): the
+  dimension belongs to the current act if it matches, else to the highest open act with it; the
+  "ties → earlier act" rule stays for player counts across distinct dimensions (`ActMath`).
+- **Threat command is the wave counter**: `/bs threat get|set` reads/writes `RunData.wave` — one value,
+  two readings, per the PR 1 decision.
+- **Expedition visuals outside the overworld**: the dusk sky/fog tint plus a modest block-light dim
+  (×0.65 at full night) driven by the synced synthetic phase; the overworld keeps its sun-driven v1 look.
+  The End gets the same vibe switch during a run — acceptable until the Graphics stage restyles the raid.
+- **Classic neutrality**: every new sync field is constant in classic (`-1`/`0`/act 1), the act machine
+  and synthetic cycle never tick, and `/bs act charge` fails with a pointer at `runShape`. The classic
+  gametests are untouched; `act_classic` asserts the contracts read classic values.

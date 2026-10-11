@@ -70,4 +70,54 @@ public final class RunDebug {
 	public static Set<UUID> gotKit(MinecraftServer server) {
 		return Set.copyOf(RunData.get(server).gotKit);
 	}
+
+	// ---------------------------------------------------------------- v2 expedition spine
+
+	/** Reparses the act list after a test swapped {@code RunSystem.config()} fields. */
+	public static void reloadActs(MinecraftServer server) {
+		ActMachine.load(RunSystem.config());
+	}
+
+	/** {@code /bs act charge}: starts the portal charge. Returns null on success, else why not. */
+	public static String startCharge(MinecraftServer server) {
+		return ActMachine.startCharge(server, RunData.get(server));
+	}
+
+	/** {@code /bs act advance}: opens the next act and makes it current. Returns null on success, else why not. */
+	public static String advanceAct(MinecraftServer server) {
+		return ActMachine.advance(server, RunData.get(server));
+	}
+
+	/** The party's current act ordinal (1-based). */
+	public static int currentAct(MinecraftServer server) {
+		return RunData.get(server).actOrdinal;
+	}
+
+	public static int highestOpenAct(MinecraftServer server) {
+		return RunData.get(server).highestOpenAct;
+	}
+
+	public static boolean charging(MinecraftServer server) {
+		return RunData.get(server).chargingAct > 0;
+	}
+
+	/** {@code /bs threat set}: sets the threat (wave) counter. */
+	public static void setThreat(MinecraftServer server, int threat) {
+		RunData data = RunData.get(server);
+		data.wave = Math.max(0, threat);
+		data.setDirty();
+		RunSync.markDirty();
+	}
+
+	/** Moves the run's synthetic cycle forward to {@code timeOfDay} (expedition dimensions without a sun). */
+	public static void skipSyntheticTo(MinecraftServer server, int timeOfDay) {
+		RunData data = RunData.get(server);
+		data.synthetic.skipTo(timeOfDay);
+		data.setDirty();
+	}
+
+	/** Forces an act-machine tick now (it normally runs once a second). */
+	public static void tickActs(MinecraftServer server) {
+		ActMachine.tick(server, RunData.get(server));
+	}
 }
