@@ -62,8 +62,6 @@ public final class ConfigPlacement {
 
 	public static int rarity(WorldConfig.Gen gen, String key) {
 		return switch (key) {
-			case "wreck" -> gen.wreckRarityChunks;
-			case "checkpoint" -> gen.checkpointRarityChunks;
 			case "scrap_pile" -> gen.scrapPileRarityChunks;
 			default -> throw new IllegalArgumentException("Unknown config rarity " + key);
 		};

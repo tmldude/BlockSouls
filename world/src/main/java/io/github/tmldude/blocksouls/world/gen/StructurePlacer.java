@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.storage.loot.LootTable;
 
 import io.github.tmldude.blocksouls.common.CommonIds;
@@ -39,7 +40,7 @@ public final class StructurePlacer {
 	private StructurePlacer() {
 	}
 
-	/** What got placed, for tests and the locate log. */
+	/** What got placed, for tests and the debug command. */
 	public record Placed(BlockPos origin, List<BlockPos> chests, List<BlockPos> scrapPiles, Entity kart) {
 	}
 
@@ -58,6 +59,14 @@ public final class StructurePlacer {
 	}
 
 	public static Placed place(ServerLevelAccessor level, RandomSource random, BlockPos origin, Layout layout, ResourceKey<LootTable> loot) {
+		return place(level, random, origin, layout, loot, BoundingBox.infinite());
+	}
+
+	/**
+	 * Places only what falls inside {@code clip} (a structure piece builds one chunk at a time). Scrap piles and the
+	 * kart wreck count as inside when their column is.
+	 */
+	public static Placed place(ServerLevelAccessor level, RandomSource random, BlockPos origin, Layout layout, ResourceKey<LootTable> loot, BoundingBox clip) {
 		BlockState ground = level.getBlockState(origin.below());
 		BlockState foundation = ground.isAir() || ground.is(BlockTags.LEAVES) ? Blocks.COBBLESTONE.defaultBlockState() : ground;
 		Direction facing = Direction.Plane.HORIZONTAL.getRandomDirection(random);
@@ -66,6 +75,9 @@ public final class StructurePlacer {
 		int minY = layout.cells().stream().mapToInt(Cell::y).min().orElse(0);
 		for (Cell cell : layout.cells()) {
 			BlockPos pos = origin.offset(cell.x(), cell.y(), cell.z());
+			if (!inColumn(clip, pos.getX(), pos.getZ())) {
+				continue;
+			}
 			if (cell.part() == Part.CHEST) {
 				level.setBlock(pos, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, facing), 2);
 				RandomizableContainer.setBlockEntityLootTable(level, random, pos, loot);
@@ -80,6 +92,9 @@ public final class StructurePlacer {
 
 		List<BlockPos> piles = new ArrayList<>();
 		for (int[] pile : layout.scrapPiles()) {
+			if (!inColumn(clip, origin.getX() + pile[0], origin.getZ() + pile[1])) {
+				continue;
+			}
 			BlockPos pos = groundAt(level, origin.getX() + pile[0], origin.getZ() + pile[1]);
 			if (pos != null && Math.abs(pos.getY() - origin.getY()) <= 3 && level.getBlockState(pos.below()).isSolid()) {
 				level.setBlock(pos, WorldBlocks.SCRAP_PILE.defaultBlockState(), 2);
@@ -88,10 +103,14 @@ public final class StructurePlacer {
 		}
 
 		Entity kart = null;
-		if (layout.kartSpot() != null) {
+		if (layout.kartSpot() != null && inColumn(clip, origin.getX() + layout.kartSpot()[0], origin.getZ() + layout.kartSpot()[1])) {
 			kart = spawnKartWreck(level, origin.offset(layout.kartSpot()[0], 0, layout.kartSpot()[1]), random);
 		}
 		return new Placed(origin, chests, piles, kart);
+	}
+
+	private static boolean inColumn(BoundingBox clip, int x, int z) {
+		return x >= clip.minX() && x <= clip.maxX() && z >= clip.minZ() && z <= clip.maxZ();
 	}
 
 	private static void fillBelow(ServerLevelAccessor level, BlockPos start, BlockState foundation) {

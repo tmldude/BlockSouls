@@ -1,51 +1,54 @@
 package io.github.tmldude.blocksouls.world.command;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.brigadier.context.CommandContext;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.levelgen.structure.Structure;
 
 import io.github.tmldude.blocksouls.common.debug.DebugCommands;
 import io.github.tmldude.blocksouls.world.BlockSoulsWorld;
 import io.github.tmldude.blocksouls.world.gen.Blight;
-import io.github.tmldude.blocksouls.world.gen.StructureLog;
+import io.github.tmldude.blocksouls.world.gen.RuinStructure;
 import io.github.tmldude.blocksouls.world.gen.StructurePlacer;
-import io.github.tmldude.blocksouls.world.gen.layout.CheckpointLayout;
-import io.github.tmldude.blocksouls.world.gen.layout.WreckLayout;
+import io.github.tmldude.blocksouls.world.gen.WorldGen;
 
 /** {@code /bs world place wreck|checkpoint}, {@code /bs world blight <radius>}, {@code /bs world locate wreck|checkpoint}. */
 public final class WorldCommands {
+	private static final int LOCATE_RADIUS_CHUNKS = 100;
+
 	private WorldCommands() {
 	}
 
 	public static void init() {
 		DebugCommands.register((root, context) -> root.then(Commands.literal("world")
 				.then(Commands.literal("place")
-						.then(Commands.literal("wreck").executes(c -> place(c, StructureLog.Kind.WRECK)))
-						.then(Commands.literal("checkpoint").executes(c -> place(c, StructureLog.Kind.CHECKPOINT))))
+						.then(Commands.literal("wreck").executes(c -> place(c, RuinStructure.Kind.WRECK)))
+						.then(Commands.literal("checkpoint").executes(c -> place(c, RuinStructure.Kind.CHECKPOINT))))
 				.then(Commands.literal("blight")
 						.then(Commands.argument("radius", IntegerArgumentType.integer(1, 16)).executes(WorldCommands::blight)))
 				.then(Commands.literal("locate")
-						.then(Commands.literal("wreck").executes(c -> locate(c, StructureLog.Kind.WRECK)))
-						.then(Commands.literal("checkpoint").executes(c -> locate(c, StructureLog.Kind.CHECKPOINT))))));
+						.then(Commands.literal("wreck").executes(c -> locate(c, WorldGen.WRECK)))
+						.then(Commands.literal("checkpoint").executes(c -> locate(c, WorldGen.CHECKPOINT))))));
 	}
 
 	private static BlockPos feet(CommandSourceStack source) {
 		return BlockPos.containing(source.getPosition());
 	}
 
-	private static int place(CommandContext<CommandSourceStack> c, StructureLog.Kind kind) {
+	private static int place(CommandContext<CommandSourceStack> c, RuinStructure.Kind kind) {
 		ServerLevel level = c.getSource().getLevel();
 		BlockPos at = feet(c.getSource());
-		long seed = level.getRandom().nextLong();
-		StructurePlacer.Placed placed = kind == StructureLog.Kind.WRECK
-				? StructurePlacer.place(level, level.getRandom(), at, WreckLayout.generate(seed), StructurePlacer.WRECK_LOOT)
-				: StructurePlacer.place(level, level.getRandom(), at, CheckpointLayout.generate(seed), StructurePlacer.CHECKPOINT_LOOT);
-		StructureLog.record(level, kind, at);
+		StructurePlacer.Placed placed = StructurePlacer.place(level, level.getRandom(), at, kind.layout(level.getRandom().nextLong()), kind.loot);
 		c.getSource().sendSuccess(() -> Component.literal("Placed " + kind.getSerializedName() + " at " + at.toShortString()
 				+ " (" + placed.chests().size() + " chest(s), " + placed.scrapPiles().size() + " scrap pile(s), kart wreck: "
 				+ (placed.kart() != null ? "yes" : "no") + ")"), true);
@@ -61,17 +64,22 @@ public final class WorldCommands {
 		return result.converted();
 	}
 
-	private static int locate(CommandContext<CommandSourceStack> c, StructureLog.Kind kind) {
+	/** Same search as vanilla {@code /locate structure}: nearest, explored or not, up to 100 chunks out. */
+	private static int locate(CommandContext<CommandSourceStack> c, ResourceKey<Structure> key) {
 		ServerLevel level = c.getSource().getLevel();
 		BlockPos from = feet(c.getSource());
-		return StructureLog.get(level).nearest(kind, from).map(entry -> {
-			int dist = (int) Math.sqrt(entry.pos().distSqr(from));
-			c.getSource().sendSuccess(() -> Component.literal("Nearest " + kind.getSerializedName() + ": "
-					+ entry.pos().toShortString() + " (" + dist + " blocks)"), false);
-			return 1;
-		}).orElseGet(() -> {
-			c.getSource().sendFailure(Component.literal("No " + kind.getSerializedName() + " generated yet (only explored chunks are known)"));
+		Holder<Structure> structure = level.registryAccess().lookupOrThrow(Registries.STRUCTURE).getOrThrow(key);
+		Pair<BlockPos, Holder<Structure>> found = level.getChunkSource().getGenerator()
+				.findNearestMapStructure(level, HolderSet.direct(structure), from, LOCATE_RADIUS_CHUNKS, false);
+		String name = key.identifier().getPath();
+		if (found == null) {
+			c.getSource().sendFailure(Component.literal("No " + name + " within " + LOCATE_RADIUS_CHUNKS + " chunks"));
 			return 0;
-		});
+		}
+		BlockPos pos = found.getFirst();
+		int dist = (int) Math.sqrt(from.distToLowCornerSqr(pos.getX(), from.getY(), pos.getZ()));
+		c.getSource().sendSuccess(() -> Component.literal("Nearest " + name + ": " + pos.getX() + " ~ " + pos.getZ()
+				+ " (" + dist + " blocks)"), false);
+		return dist;
 	}
 }
