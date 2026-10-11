@@ -17,11 +17,16 @@ Each file here is a brief for one parallel session (PLAN.md §8). A session is s
    - `common` is frozen. You may *add* to it (a new constant in `CommonIds`, a new event) when you truly need to;
      never change or remove existing signatures. List any additions under "Contract additions" in your PR.
 4. **Verify like CI does.** This sandbox can't reach Fabric's maven, so:
+   - If `java -version` isn't 25: `sudo apt-get install -y openjdk-25-jdk-headless` (or without sudo as root), and
+     use `/usr/lib/jvm/java-25-openjdk-amd64`.
    - `tools/offline-check/setup.sh` once, then `typecheck.sh <your module> common` and `runtests.sh <your module>`
      before every push. For mixins, grep the vanilla source in `~/.cache/blocksouls-offline-check/mc/client`
      for the exact target method and signature.
-   - Push, then read the CI run (GitHub MCP `actions_list` / `get_job_logs`). CI runs the real Gradle build,
-     unit tests and your game tests (`runGameTest`, a headless server). **CI green is the bar.**
+   - Push, open the PR, then read the CI run (GitHub MCP `actions_list` / `get_job_logs`; or subscribe to your PR's
+     activity). CI runs the real Gradle build, unit tests and your game tests (`runGameTest`, a headless server).
+     **CI green is the bar**: keep fixing and pushing until it is, then say so in the PR and stop.
+   - Push early (a first compiling slice within your first hour) so CI catches build-script or API surprises
+     before you've built everything on top of them.
 5. **Testing:** unit-test pure logic (no Minecraft classes) in `src/test/java`; test in-world behavior with
    `@GameTest` methods in `src/gametest/java` (copy the setup from `movement/src/gametest`). Use
    `helper.makeMockServerPlayerInLevel()` for players.
@@ -34,11 +39,15 @@ Each file here is a brief for one parallel session (PLAN.md §8). A session is s
    everything with a name.
 9. **Show, don't tell.** No lore text. Tooltips state mechanics only. Names are original (no Bungie /
    FromSoftware / Activision / Marvel / Nintendo names).
-10. **Decide, don't ask.** Pick sensible defaults and log them in `DECISIONS.md` under `## <name> session`.
+10. **Decide, don't ask.** Pick sensible defaults and log them in `docs/decisions/<name>.md` (one file per
+    session so PRs don't conflict; same style as `DECISIONS.md`).
     Ask the user only if something is irreversible and truly ambiguous.
 11. **Minecraft 26.3** uses Mojang names (`ServerPlayer`, `Identifier`, `GuiGraphicsExtractor`, `Hud`), Java 25,
     SDL key codes. When unsure of an API, read the source (vanilla in the offline-check cache, Fabric API in
     `~/.cache/blocksouls-offline-check/fabric-src`) instead of guessing.
+
+12. **Numbers in briefs are starting points.** Keep them unless they play badly; if you change one, log it.
+13. **Commits:** conventional commits, small and frequent; never commit secrets; never push to `main`.
 
 ## Stages
 

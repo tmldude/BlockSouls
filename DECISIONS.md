@@ -1,7 +1,7 @@
 # Decisions
 
 Running log of defaults chosen where `PLAN.md` was silent or out of date. Newest at the bottom.
-Entries here override `PLAN.md`.
+Entries here override `PLAN.md`. Worker sessions log theirs in `docs/decisions/<session>.md`.
 
 ## Phase 1 — skeleton (2026-10-10)
 
@@ -178,3 +178,17 @@ My defaults, to confirm:
     server is whitelist-only.
   - **Watchtower applies updates automatically in a 05:00 server-time window** only, so nobody is kicked mid-run.
   - **No domain** (owner): friends connect by the server's IP; a domain can be added later.
+
+## Wave 0 close-out (2026-10-11)
+
+- **Session briefs** in `docs/sessions/<name>.md`; workers log decisions in `docs/decisions/<name>.md`.
+- **`game` is shared by two parallel sessions.** game-loop owns `game/run/**` + `game/client/run/**`; game-players
+  owns `game/player/**` + `game/client/hud/**`. Seams: `RunSystem.endRun(server)` (team wipe → run over) and
+  `ClientRun` (client copy of the run state for the HUD). Separate config files `game-run.json` / `game-players.json`.
+- **Contract additions:** `CommonIds.SCRAP`, `GUNMETAL_INGOT`, `BLIGHT_CORE` (world materials), `ROLL_PERKS` (guns'
+  loot function, usable in any module's loot tables), `CommonTags.WAVE_BREAKABLE` (block tag, filled by mobs).
+- **Gun controls:** attack fires, use aims down sights, R reloads. Bullets are attributed to the player + gun so
+  on-kill enchantments and boss credit work across modules.
+- **No GeckoLib:** custom models use vanilla's Java model + keyframe animation system (no third-party dependency to
+  keep in sync with 26.3).
+- **Field bosses die once per run** (no farming); the spawner picks from the bosses not yet killed.

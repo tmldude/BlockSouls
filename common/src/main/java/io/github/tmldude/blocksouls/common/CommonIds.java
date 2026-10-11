@@ -45,6 +45,18 @@ public final class CommonIds {
 	public static final Identifier MAGNETIZED = id(WORLD, "magnetized");
 	public static final Identifier MOONWALK = id(WORLD, "moonwalk");
 
+	/** Crafting materials (world). Other modules' recipes and loot tables use them. */
+	public static final Identifier SCRAP = id(WORLD, "scrap");
+	public static final Identifier GUNMETAL_INGOT = id(WORLD, "gunmetal_ingot");
+	/** Nether material: mined from blight hearts, dropped by the Furnace Knight; blight-forged armor needs it. */
+	public static final Identifier BLIGHT_CORE = id(WORLD, "blight_core");
+
+	/**
+	 * Loot function (guns) that rolls a gun's rarity and perks, e.g.
+	 * {@code {"function": "blocksouls_guns:roll_perks", "tier": "legendary"}}. Any module's loot table may use it.
+	 */
+	public static final Identifier ROLL_PERKS = id(GUNS, "roll_perks");
+
 	/** Entity type (vehicles) placed by world structures as a repairable wreck. */
 	public static final Identifier KART_WRECK = id(VEHICLES, "kart_wreck");
 
