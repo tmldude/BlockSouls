@@ -189,8 +189,9 @@ public class AshwyrmGameTests {
 				helper.setBlock(x, 0, z, (x + z) % 2 == 0 ? Blocks.OAK_PLANKS : Blocks.GRASS_BLOCK);
 			}
 		}
-		helper.setBlock(1, 1, 6, Blocks.BOOKSHELF);
-		helper.setBlock(6, 1, 1, Blocks.HAY_BLOCK);
+		// On plank tiles: grass under a solid block turns to dirt on a random tick, which isn't the fireball's doing.
+		helper.setBlock(2, 1, 6, Blocks.BOOKSHELF);
+		helper.setBlock(6, 1, 2, Blocks.HAY_BLOCK);
 		Pig pig = dummy(helper, 6, 4);
 		// Engage first: the fog wall it raises is the framework's, not a fireball's doing.
 		wyrm.engage(outsider(helper));
