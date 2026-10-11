@@ -6,6 +6,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write   # publishes client screenshots to the ci/screenshots branch
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -47,6 +49,24 @@ jobs:
             integration/build/run/clientGameTest/screenshots/
             integration/build/run/clientGameTest/logs/
           if-no-files-found: ignore
+      # The latest screenshots + client log as a git branch, so they can be read with plain git (artifact storage
+      # isn't reachable from every dev sandbox).
+      - name: Publish screenshots to ci/screenshots
+        if: always() && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          run=integration/build/run/clientGameTest
+          [ -d "$run/screenshots" ] || exit 0
+          out=$(mktemp -d)
+          cp -r "$run/screenshots/." "$out/"
+          cp "$run/logs/latest.log" "$out/client.log" 2>/dev/null || true
+          cd "$out"
+          git init -q -b ci/screenshots
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "screenshots: $GITHUB_REF_NAME $GITHUB_SHA" --allow-empty
+          git add -A
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "screenshots: $GITHUB_REF_NAME $GITHUB_SHA"
+          git push -qf "https://x-access-token:$GH_TOKEN@github.com/$GITHUB_REPOSITORY.git" ci/screenshots
       - name: Upload mod jars
         uses: actions/upload-artifact@v7
         with:
