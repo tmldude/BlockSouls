@@ -1,6 +1,87 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/block",
   "textures": {
-    "all": "blocksouls_world:block/blight_heart"
-  }
+    "particle": "blocksouls_world:block/blight_heart",
+    "base": "blocksouls_world:block/blight_heart",
+    "glow": "blocksouls_world:block/blight_heart_glow"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#base",
+          "cullface": "down"
+        },
+        "up": {
+          "texture": "#base",
+          "cullface": "up"
+        },
+        "north": {
+          "texture": "#base",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#base",
+          "cullface": "south"
+        },
+        "west": {
+          "texture": "#base",
+          "cullface": "west"
+        },
+        "east": {
+          "texture": "#base",
+          "cullface": "east"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "light_emission": 15,
+      "faces": {
+        "down": {
+          "texture": "#glow",
+          "cullface": "down"
+        },
+        "up": {
+          "texture": "#glow",
+          "cullface": "up"
+        },
+        "north": {
+          "texture": "#glow",
+          "cullface": "north"
+        },
+        "south": {
+          "texture": "#glow",
+          "cullface": "south"
+        },
+        "west": {
+          "texture": "#glow",
+          "cullface": "west"
+        },
+        "east": {
+          "texture": "#glow",
+          "cullface": "east"
+        }
+      }
+    }
+  ]
 }

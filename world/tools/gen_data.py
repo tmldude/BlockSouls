@@ -349,8 +349,22 @@ CUBES = ["gunmetal_ore", "deepslate_gunmetal_ore", "raw_gunmetal_block", "gunmet
          "blight_heart"]
 for b in CUBES:
     write(f"{ASSETS}/blockstates/{b}.json", {"variants": {"": {"model": f"{NS}:block/{b}"}}})
-    model(f"block/{b}", {"parent": "minecraft:block/cube_all", "textures": {"all": f"{NS}:block/{b}"}})
+    if b != "blight_heart":
+        model(f"block/{b}", {"parent": "minecraft:block/cube_all", "textures": {"all": f"{NS}:block/{b}"}})
     item_def(b, f"block/{b}")
+
+
+def heart_faces(texture):
+    return {d: {"texture": texture, "cullface": d} for d in ("down", "up", "north", "south", "west", "east")}
+
+
+# Flesh shell plus a full-bright beating core overlay (tools/assets/art.py paints both textures).
+model("block/blight_heart", {
+    "parent": "minecraft:block/block",
+    "textures": {"particle": f"{NS}:block/blight_heart", "base": f"{NS}:block/blight_heart",
+                 "glow": f"{NS}:block/blight_heart_glow"},
+    "elements": [{"from": [0, 0, 0], "to": [16, 16, 16], "faces": heart_faces("#base")},
+                 {"from": [0, 0, 0], "to": [16, 16, 16], "light_emission": 15, "faces": heart_faces("#glow")}]})
 
 write(f"{ASSETS}/blockstates/scrap_pile.json", {"variants": {"": [
     {"model": f"{NS}:block/scrap_pile"}, {"model": f"{NS}:block/scrap_pile", "y": 90},
