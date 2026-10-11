@@ -44,6 +44,13 @@ subprojects {
 		if (!isCommon) {
 			implementation project(':common')
 			include project(':common')
+			// A project dependency only exposes common's main classes; client code also needs common's
+			// client source set (Keybinds, ClientNetworking). Same approach Fabric API uses between modules.
+			def common = project(':common')
+			clientImplementation files(
+					common.layout.buildDirectory.dir('classes/java/client'),
+					common.layout.buildDirectory.dir('resources/client')
+			).builtBy(':common:clientClasses')
 		}
 	}
 
