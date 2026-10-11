@@ -45,4 +45,13 @@ class StaminaStateTest {
 		assertEquals(config.max, state.value(), 1e-6);
 		assertSame(state, state.tick(config), "no new state (and no sync) once full");
 	}
+
+	@Test
+	void regenMultiplierScalesTheRate() {
+		StaminaState state = new StaminaState(10, 0);
+		for (int t = 0; t < 20; t++) {
+			state = state.tick(config, 1.4);
+		}
+		assertEquals(10 + config.regenPerSecond * 1.4, state.value(), 1e-3);
+	}
 }

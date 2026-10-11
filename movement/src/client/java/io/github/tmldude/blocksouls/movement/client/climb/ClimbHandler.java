@@ -11,7 +11,9 @@ import io.github.tmldude.blocksouls.movement.MoveMath;
 import io.github.tmldude.blocksouls.movement.MovementConfig;
 import io.github.tmldude.blocksouls.movement.climb.Climb;
 import io.github.tmldude.blocksouls.movement.climb.ClimbWorld;
+import io.github.tmldude.blocksouls.movement.client.web.WebHandler;
 import io.github.tmldude.blocksouls.movement.stamina.StaminaAttachment;
+import io.github.tmldude.blocksouls.movement.trait.MovementTraits;
 
 /** Wall climbing for the local player: push into a wall while airborne to climb; sneak to let go. */
 public final class ClimbHandler {
@@ -31,7 +33,7 @@ public final class ClimbHandler {
 
 	private static void tick(Minecraft client) {
 		LocalPlayer player = client.player;
-		if (player == null) {
+		if (player == null || WebHandler.isSwinging()) {
 			return;
 		}
 		if (ledgeCooldown > 0) {
@@ -57,7 +59,7 @@ public final class ClimbHandler {
 					direction[1] * config.ledgeBoostForward);
 			ledgeCooldown = LEDGE_COOLDOWN_TICKS;
 		} else {
-			player.setDeltaMovement(velocity.x, Climb.climbVelocity(velocity.y, config), velocity.z);
+			player.setDeltaMovement(velocity.x, Climb.climbVelocity(velocity.y, config, MovementTraits.climbSpeedMultiplier(player)), velocity.z);
 		}
 	}
 }

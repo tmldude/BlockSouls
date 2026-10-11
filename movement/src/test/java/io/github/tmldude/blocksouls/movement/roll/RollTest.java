@@ -64,4 +64,21 @@ class RollTest {
 		assertEquals(x, actual[0], 1e-9, "x");
 		assertEquals(z, actual[1], 1e-9, "z");
 	}
+
+	@Test
+	void traitExtendedIframesOutlastTheRollMovement() {
+		int end = 12;
+		assertTrue(Roll.isInvulnerable(12, config, end));
+		assertFalse(Roll.isInvulnerable(13, config, end));
+		assertEquals(13, Roll.trackedTicks(config, end));
+		assertEquals(config.durationTicks, Roll.trackedTicks(config, config.iframeEnd));
+	}
+
+	@Test
+	void easeRisesAndFalls() {
+		assertEquals(0, Roll.ease(0, config));
+		assertEquals(1, Roll.ease(config.durationTicks / 2.0, config), 1e-9);
+		assertEquals(0, Roll.ease(config.durationTicks, config));
+		assertTrue(Roll.ease(2, config) < Roll.ease(5, config));
+	}
 }
