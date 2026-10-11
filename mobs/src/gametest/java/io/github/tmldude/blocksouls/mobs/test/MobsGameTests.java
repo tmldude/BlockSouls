@@ -201,8 +201,9 @@ public class MobsGameTests {
 		floor(helper);
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		Shambler shambler = spawnWave(helper, MobEntities.SHAMBLER, 2, 2, 1, false);
-		// Mock players are in creative, which vanilla already refuses as a target, so this checks canAttack,
-		// which is what the targeting goals and Mob#setTarget consult.
+		// Mock players are in creative (invulnerable, never a target). Drop the invulnerability so canAttack, which the
+		// targeting goals and Mob#setTarget consult, reflects only the downed state.
+		player.getAbilities().invulnerable = false;
 		helper.assertTrue(shambler.canAttack(player), "can't attack a player who is up");
 		PlayerStatus.setDowned(player, true);
 		helper.assertTrue(!shambler.canAttack(player), "can attack a downed player");
