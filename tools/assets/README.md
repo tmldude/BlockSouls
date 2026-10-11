@@ -1,4 +1,13 @@
-# Placeholder assets
+# Assets
+
+**Real art:** `art.py` paints the items, blocks, armor, ammo, gun parts, vehicle and relic textures, and `guns.py`
+builds the 3D gun models; the rules and palettes are in [`STYLE.md`](STYLE.md). Re-run after editing either:
+
+```sh
+python3 tools/assets/art.py --sheet docs/art/items-sheet.png
+```
+
+## Placeholder assets
 
 `gen.py` makes deterministic, in-theme pixel art so no session waits on real art:
 

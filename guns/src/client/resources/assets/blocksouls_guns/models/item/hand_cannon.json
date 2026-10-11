@@ -1,36 +1,868 @@
 {
-  "parent": "minecraft:item/generated",
+  "gui_light": "front",
   "textures": {
-    "layer0": "blocksouls_guns:item/hand_cannon"
+    "gun": "blocksouls_guns:item/hand_cannon",
+    "particle": "blocksouls_guns:item/hand_cannon"
   },
+  "elements": [
+    {
+      "name": "barrel",
+      "from": [
+        7,
+        9,
+        0
+      ],
+      "to": [
+        9,
+        11,
+        7.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            4,
+            0,
+            8,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            4,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            4,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            4,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            4,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            4,
+            4
+          ],
+          "texture": "#gun"
+        }
+      }
+    },
+    {
+      "name": "rib",
+      "from": [
+        7.4,
+        11,
+        0
+      ],
+      "to": [
+        8.6,
+        11.6,
+        7.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            4,
+            4,
+            8,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "south": {
+          "uv": [
+            4,
+            4,
+            8,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "east": {
+          "uv": [
+            4,
+            4,
+            8,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "west": {
+          "uv": [
+            4,
+            4,
+            8,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "up": {
+          "uv": [
+            4,
+            4,
+            8,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "down": {
+          "uv": [
+            4,
+            4,
+            8,
+            8
+          ],
+          "texture": "#gun"
+        }
+      }
+    },
+    {
+      "name": "ejector",
+      "from": [
+        7.4,
+        8.2,
+        1.5
+      ],
+      "to": [
+        8.6,
+        9,
+        7.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "south": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "east": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "west": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "up": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "down": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#gun"
+        }
+      }
+    },
+    {
+      "name": "cylinder",
+      "from": [
+        6.5,
+        7.8,
+        7.5
+      ],
+      "to": [
+        9.5,
+        11.4,
+        11
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "south": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "east": {
+          "uv": [
+            8,
+            0,
+            12,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "west": {
+          "uv": [
+            8,
+            0,
+            12,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "up": {
+          "uv": [
+            8,
+            0,
+            12,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "down": {
+          "uv": [
+            8,
+            0,
+            12,
+            4
+          ],
+          "texture": "#gun"
+        }
+      }
+    },
+    {
+      "name": "frame",
+      "from": [
+        7,
+        7.5,
+        11
+      ],
+      "to": [
+        9,
+        11.6,
+        12.8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "south": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "east": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "west": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "up": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "down": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#gun"
+        }
+      }
+    },
+    {
+      "name": "topstrap",
+      "from": [
+        7.2,
+        11.2,
+        7.3
+      ],
+      "to": [
+        8.8,
+        11.8,
+        11.3
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "south": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "east": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "west": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "up": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#gun"
+        },
+        "down": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#gun"
+        }
+      }
+    },
+    {
+      "name": "hammer",
+      "from": [
+        7.5,
+        11.4,
+        12.4
+      ],
+      "to": [
+        8.5,
+        12.6,
+        13.4
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "south": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "east": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "west": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "up": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "down": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        }
+      },
+      "rotation": {
+        "axis": "x",
+        "angle": 20,
+        "origin": [
+          8,
+          11.5,
+          12.8
+        ]
+      }
+    },
+    {
+      "name": "grip",
+      "from": [
+        7.1,
+        2.6,
+        11.4
+      ],
+      "to": [
+        8.9,
+        8.6,
+        14.2
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            4,
+            4,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "south": {
+          "uv": [
+            0,
+            4,
+            4,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "east": {
+          "uv": [
+            0,
+            4,
+            4,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "west": {
+          "uv": [
+            0,
+            4,
+            4,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "up": {
+          "uv": [
+            0,
+            4,
+            4,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "down": {
+          "uv": [
+            0,
+            4,
+            4,
+            8
+          ],
+          "texture": "#gun"
+        }
+      },
+      "rotation": {
+        "axis": "x",
+        "angle": -25,
+        "origin": [
+          8,
+          8,
+          12.5
+        ]
+      }
+    },
+    {
+      "name": "guard",
+      "from": [
+        7.6,
+        6.2,
+        8.5
+      ],
+      "to": [
+        8.4,
+        6.6,
+        11.6
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "south": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "east": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "west": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "up": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "down": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        }
+      }
+    },
+    {
+      "name": "guard_front",
+      "from": [
+        7.6,
+        6.6,
+        8.5
+      ],
+      "to": [
+        8.4,
+        7.8,
+        8.9
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "south": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "east": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "west": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "up": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "down": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        }
+      }
+    },
+    {
+      "name": "trigger",
+      "from": [
+        7.75,
+        6.6,
+        10.2
+      ],
+      "to": [
+        8.25,
+        7.8,
+        10.7
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "south": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "east": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "west": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "up": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "down": {
+          "uv": [
+            12,
+            4,
+            16,
+            8
+          ],
+          "texture": "#gun"
+        }
+      }
+    },
+    {
+      "name": "front_sight",
+      "from": [
+        7.75,
+        11.6,
+        0.4
+      ],
+      "to": [
+        8.25,
+        12.6,
+        1.6
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            8,
+            4,
+            12,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "south": {
+          "uv": [
+            8,
+            4,
+            12,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "east": {
+          "uv": [
+            8,
+            4,
+            12,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "west": {
+          "uv": [
+            8,
+            4,
+            12,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "up": {
+          "uv": [
+            8,
+            4,
+            12,
+            8
+          ],
+          "texture": "#gun"
+        },
+        "down": {
+          "uv": [
+            8,
+            4,
+            12,
+            8
+          ],
+          "texture": "#gun"
+        }
+      }
+    }
+  ],
   "display": {
     "thirdperson_righthand": {
       "rotation": [
-        0,
-        -90,
-        10
+        90.0,
+        0.0,
+        0.0
       ],
       "translation": [
-        0,
-        3.5,
-        0.5
-      ],
-      "scale": [
-        0.85,
-        0.85,
-        0.85
-      ]
-    },
-    "thirdperson_lefthand": {
-      "rotation": [
-        0,
-        90,
-        -10
-      ],
-      "translation": [
-        0,
-        3.5,
-        0.5
+        0.0,
+        1.739,
+        3.773
       ],
       "scale": [
         0.85,
@@ -40,36 +872,121 @@
     },
     "firstperson_righthand": {
       "rotation": [
-        0,
-        -90,
-        5
+        0.0,
+        4.0,
+        0.0
       ],
       "translation": [
-        1.13,
-        3.6,
-        1.13
+        -0.166,
+        0.855,
+        -4.919
       ],
       "scale": [
-        0.8,
-        0.8,
-        0.8
+        0.85,
+        0.85,
+        0.85
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        90.0,
+        0.0,
+        0.0
+      ],
+      "translation": [
+        0.0,
+        1.739,
+        3.773
+      ],
+      "scale": [
+        0.85,
+        0.85,
+        0.85
       ]
     },
     "firstperson_lefthand": {
       "rotation": [
-        0,
-        90,
-        -5
+        0.0,
+        4.0,
+        0.0
       ],
       "translation": [
-        1.13,
-        3.6,
-        1.13
+        -0.166,
+        0.855,
+        -4.919
       ],
       "scale": [
-        0.8,
-        0.8,
-        0.8
+        0.85,
+        0.85,
+        0.85
+      ]
+    },
+    "gui": {
+      "rotation": [
+        150.466,
+        -78.834,
+        135.787
+      ],
+      "translation": [
+        0.098,
+        0.302,
+        0.096
+      ],
+      "scale": [
+        0.872,
+        0.872,
+        0.872
+      ]
+    },
+    "ground": {
+      "rotation": [
+        0.0,
+        -90.0,
+        0.0
+      ],
+      "translation": [
+        0.079,
+        0.169,
+        -0.0
+      ],
+      "scale": [
+        0.49,
+        0.49,
+        0.49
+      ]
+    },
+    "fixed": {
+      "rotation": [
+        29.534,
+        78.834,
+        -44.213
+      ],
+      "translation": [
+        -0.088,
+        0.273,
+        -0.087
+      ],
+      "scale": [
+        0.787,
+        0.787,
+        0.787
+      ]
+    },
+    "head": {
+      "rotation": [
+        0.0,
+        -90.0,
+        0.0
+      ],
+      "translation": [
+        0.099,
+        10.211,
+        0.0
+      ],
+      "scale": [
+        0.613,
+        0.613,
+        0.613
       ]
     }
   }
