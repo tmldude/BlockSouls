@@ -16,6 +16,9 @@ Each file here is a brief for one parallel session (PLAN.md §8). A session is s
      every module. But in 26.3 **one unknown item id in a recipe fails the whole recipe registry** (the server won't
      start), so recipes using another module's items need `"fabric:load_conditions": [{"condition":
      "fabric:all_mods_loaded", "values": ["blocksouls_<module>"]}]`. Tag entries use `"required": false`.
+   - **26.3 loot table JSON:** pools, entries and tables take one `"modifier"` (a function object keyed by `"type"`,
+     or a list of them) and one `"condition"` (use `minecraft:all_of` for several). The old `"functions"` /
+     `"conditions"` / `"function"` keys are silently ignored.
    - `common` is frozen. You may *add* to it (a new constant in `CommonIds`, a new event) when you truly need to;
      never change or remove existing signatures. List any additions under "Contract additions" in your PR.
 4. **Verify like CI does.** This sandbox can't reach Fabric's maven, so:

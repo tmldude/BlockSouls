@@ -53,7 +53,8 @@ public final class CommonIds {
 
 	/**
 	 * Loot function (guns) that rolls a gun's rarity and perks, e.g.
-	 * {@code {"function": "blocksouls_guns:roll_perks", "tier": "legendary"}}. Any module's loot table may use it.
+	 * {@code {"type": "blocksouls_guns:roll_perks", "tier": "legendary"}} (26.3 loot JSON keys functions by
+	 * {@code "type"} and takes them as an entry's {@code "modifier"}). Any module's loot table may use it.
 	 */
 	public static final Identifier ROLL_PERKS = id(GUNS, "roll_perks");
 
