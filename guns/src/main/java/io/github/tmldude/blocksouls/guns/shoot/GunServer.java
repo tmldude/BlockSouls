@@ -11,7 +11,9 @@ import org.jspecify.annotations.Nullable;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -84,6 +86,7 @@ public final class GunServer {
 		@Nullable ItemStack reloadStack;
 		RampageStacks rampage = RampageStacks.NONE;
 		long outlawUntil;
+		long vorpalSoundTick = -1;
 
 		public boolean reloading() {
 			return reloadStack != null;
@@ -217,6 +220,10 @@ public final class GunServer {
 		}
 		if (GunRolls.hasPerk(stack, Perk.VORPAL) && isBossOrElite(target)) {
 			perkMult *= perks.vorpalMult;
+			if (shooter.vorpalSoundTick != now) {
+				shooter.vorpalSoundTick = now;
+				playToShooter(player, GunSounds.PERK_VORPAL, 0.6F, 1.0F);
+			}
 		}
 		double damage = ShotMath.damage(stats.damage(), GunRolls.damageMult(GunRolls.rarity(stack)), precision, stats.precisionMult(),
 				perkMult, ShotMath.falloff(trace.distance(), stats.falloffStart(), stats.range(), stats.falloffMinMult()),
@@ -240,9 +247,11 @@ public final class GunServer {
 		if (killed) {
 			if (precision && GunRolls.hasPerk(stack, Perk.OUTLAW)) {
 				shooter.outlawUntil = now + perks.outlawDurationTicks;
+				playToShooter(player, GunSounds.PERK_OUTLAW, 0.8F, 1.0F);
 			}
 			if (GunRolls.hasPerk(stack, Perk.RAMPAGE)) {
 				shooter.rampage = shooter.rampage.onKill(now, perks.rampageDurationTicks, perks.rampageMaxStacks);
+				playToShooter(player, GunSounds.PERK_RAMPAGE, 0.7F, 0.9F + 0.15F * shooter.rampage.active(now));
 			}
 		}
 		return killed ? HitMarkerPayload.KILL : precision ? HitMarkerPayload.PRECISION : HitMarkerPayload.BODY;
@@ -380,6 +389,12 @@ public final class GunServer {
 		}
 		inventory.setChanged();
 		return taken;
+	}
+
+	/** A perk's proc: feedback for the shooter alone, not everyone nearby. */
+	private static void playToShooter(ServerPlayer player, SoundEvent sound, float volume, float pitch) {
+		player.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound), SoundSource.PLAYERS,
+				player.getX(), player.getY(), player.getZ(), volume, pitch, player.getRandom().nextLong()));
 	}
 
 	private static void playSound(ServerPlayer player, SoundEvent sound, float volume, float pitch) {

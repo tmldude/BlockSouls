@@ -668,7 +668,7 @@ public class FinalDragon extends BossEntity {
 			level.sendParticles(CAST, true, true, getX(), getY() + 2, getZ(), 6, 1.5, 1.5, 1.5, 0);
 		}
 		if (castLeft % 40 == 0) {
-			level.playSound(null, center.x, center.y, center.z, FinalRaidSounds.ORB, SoundSource.HOSTILE, 8f, 0.5f + progress);
+			level.playSound(null, center.x, center.y, center.z, FinalRaidSounds.CAST, SoundSource.HOSTILE, 8f, 0.5f + progress);
 		}
 		if (castLeft <= 0) {
 			sovereignsEnd(level);
