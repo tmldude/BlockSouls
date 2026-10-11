@@ -10,6 +10,159 @@
       }
     ]
   },
+  "entity.ashwyrm.ambient": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ender_dragon.growl",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 0.6
+      }
+    ]
+  },
+  "entity.ashwyrm.hurt": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ender_dragon.hurt",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.ashwyrm.death": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ender_dragon.death",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.ashwyrm.step": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.step",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ravager.step",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.ashwyrm.roar": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.roar",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ender_dragon.growl",
+        "type": "event",
+        "pitch": 0.75,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.ashwyrm.bite": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.bite",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ravager.attack",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.ashwyrm.tail": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.tail",
+    "sounds": [
+      {
+        "name": "minecraft:entity.player.attack.sweep",
+        "type": "event",
+        "pitch": 0.4,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.ashwyrm.breath": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.breath",
+    "sounds": [
+      {
+        "name": "minecraft:entity.blaze.shoot",
+        "type": "event",
+        "pitch": 0.5,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.ashwyrm.flap": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.flap",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ender_dragon.flap",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.ashwyrm.fireball": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.fireball",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ghast.shoot",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.ashwyrm.impact": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.impact",
+    "sounds": [
+      {
+        "name": "minecraft:entity.generic.explode",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.ashwyrm.land": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.land",
+    "sounds": [
+      {
+        "name": "minecraft:entity.generic.explode",
+        "type": "event",
+        "pitch": 0.5,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.ashwyrm.meteor": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.meteor",
+    "sounds": [
+      {
+        "name": "minecraft:item.firecharge.use",
+        "type": "event",
+        "pitch": 0.4,
+        "volume": 1.0
+      }
+    ]
+  },
+  "music.ashwyrm": {
+    "sounds": [
+      {
+        "name": "minecraft:music.dragon",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 1.0
+      }
+    ]
+  },
   "entity.furnace_knight.ambient": {
     "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.ambient",
     "sounds": [

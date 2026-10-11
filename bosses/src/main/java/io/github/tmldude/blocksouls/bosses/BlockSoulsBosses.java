@@ -48,5 +48,6 @@ public class BlockSoulsBosses implements ModInitializer {
 
 		// Bosses: one line each. Stage 2b sessions add theirs below.
 		FurnaceKnights.register();
+		io.github.tmldude.blocksouls.bosses.ashwyrm.Ashwyrms.register();
 	}
 }

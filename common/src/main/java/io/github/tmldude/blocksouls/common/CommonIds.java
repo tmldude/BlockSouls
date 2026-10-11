@@ -50,6 +50,10 @@ public final class CommonIds {
 	public static final Identifier GUNMETAL_INGOT = id(WORLD, "gunmetal_ingot");
 	/** Nether material: mined from blight hearts, dropped by the Furnace Knight; blight-forged armor needs it. */
 	public static final Identifier BLIGHT_CORE = id(WORLD, "blight_core");
+	/** Material (bosses), dropped by the Ashwyrm. High-tier recipes may use it. */
+	public static final Identifier ASHWYRM_SCALE = id(BOSSES, "ashwyrm_scale");
+	/** Gun part (bosses), dropped by the Ashwyrm. Guns' fire-themed recipes may use it. */
+	public static final Identifier EMBER_BARREL = id(BOSSES, "ember_barrel");
 
 	/**
 	 * Loot function (guns) that rolls a gun's rarity and perks, e.g.

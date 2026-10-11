@@ -6,7 +6,8 @@
 	"environment": "*",
 	"entrypoints": {
 		"fabric-gametest": [
-			"io.github.tmldude.blocksouls.bosses.test.BossesGameTests"
+			"io.github.tmldude.blocksouls.bosses.test.BossesGameTests",
+			"io.github.tmldude.blocksouls.bosses.test.AshwyrmGameTests"
 		]
 	},
 	"depends": {

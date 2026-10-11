@@ -37,5 +37,6 @@ public class BlockSoulsBossesClient implements ClientModInitializer {
 
 		// Bosses: one line each. Stage 2b sessions add theirs below.
 		FurnaceKnightClient.register();
+		io.github.tmldude.blocksouls.bosses.client.ashwyrm.AshwyrmClient.register();
 	}
 }
