@@ -29,3 +29,12 @@ Defaults picked while giving every boon its own icon (`docs/sessions/boon-icons.
   malformed boon. An unknown *item* icon stays a warning (an isolated module run may lack the item).
 - `BoonParser.parse(id, json)` without a sprite checker still accepts any sprite id; the catalog and the shipped-boon
   unit test always pass one.
+
+## HUD row layout (review fix)
+
+- The boon row used a fixed 6 per row and ran off the left edge on narrow GUIs (854×480 at GUI scale 2 started at
+  x = −29). `BoonRowLayout` now fits as many 20 px columns (max 6) as there are between the offhand slot and a 2 px
+  left margin, and wraps upward. If the rows would climb above y = 40 (below the run info), it adds columns with a
+  tighter, overlapping step instead, so every icon stays on screen at any GUI scale. Unit-tested from 320×240 to
+  1920×1080 with 0–24 boons.
+- No other boon row exists: the `game` HUD's only top element is the centered run info.
