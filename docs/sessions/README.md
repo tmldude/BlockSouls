@@ -64,3 +64,4 @@ Each file here is a brief for one parallel session (PLAN.md §8). A session is s
 | 2a | `bosses` (framework + Furnace Knight) |
 | 2b | `boss-pale-rider`, `boss-ashwyrm`, `boss-stormplate`, `final-raid`, `art-mobs`, `art-items` |
 | 3 | orchestrator: integration, balance, distribution, `v0.9` |
+| 4 (v0.10) | `audio`, `boon-icons`, `kart-fuel-horn`, `arena-seal`, `world-structures` |
