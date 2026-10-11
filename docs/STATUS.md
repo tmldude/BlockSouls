@@ -1,6 +1,6 @@
 # Status (handoff)
 
-Last updated 2026-10-11 (v0.9.0 released; Stage 4 planned). Read this after `CLAUDE.md` to know where the work stands.
+Last updated 2026-10-11 (v0.10.0). Read this after `CLAUDE.md` to know where the work stands.
 
 ## Done (on `main`, CI green)
 - Build: Gradle multi-project, Minecraft 26.3 / Fabric API 0.162.0+26.3 / Java 25, CI (`build.yml`), release
@@ -35,10 +35,14 @@ End handoff checked by the client test (#27). A client crash when a boss with hi
 ## v0.9.0: released (first trial run)
 Release workflow can be started by hand on `main` (#28; this sandbox can't push tags). Modrinth publish is on.
 
-## Now: Stage 4 (v0.10.0)
-Five parallel sessions, briefs in `docs/sessions/`: `audio` (original SFX and music for guns, bosses, kart),
-`boon-icons`, `kart-fuel-horn`, `arena-seal` (fog-wall arenas hold in 3D), `world-structures` (wrecks and
-checkpoints as `/locate`-able structures). Trial-run feedback feeds a balance pass after them.
+## Stage 4 (v0.10.0): done
+Original sounds and music for guns, bosses and the kart (#36), custom boon icons (#31), kart fuel and horn (#33),
+fog-wall arenas that hold in 3D (#34), wrecks/checkpoints as `/locate`-able structures (#32), content standards +
+CI crafting check (#35) and every drop in 2+ recipes (#38). Releases set the Modrinth environment (#30).
+
+## Next
+- v1 track (this orchestrator): trial-run feedback → balance pass → v1.0.0.
+- v2 "Expedition" (`PLAN2.md`, its own orchestrator and PRs): Stage 5 spine in progress; Stage 6 starts after v0.10.0.
 
 ## Decisions that changed late (see DECISIONS.md for all)
 - Downed players stay down until revived (no bleed-out); everyone down at once ends the run; going down costs
