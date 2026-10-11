@@ -1,0 +1,12 @@
+{
+  "tier": "rare",
+  "icon": "minecraft:string",
+  "stackable": 2,
+  "effects": [
+    {
+      "type": "trait",
+      "trait": "blocksouls:web_reach",
+      "level": 1
+    }
+  ]
+}

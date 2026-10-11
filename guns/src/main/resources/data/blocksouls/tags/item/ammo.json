@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "blocksouls_guns:primary_ammo",
+    "blocksouls_guns:special_ammo"
+  ]
+}

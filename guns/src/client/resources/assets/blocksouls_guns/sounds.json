@@ -1,0 +1,118 @@
+{
+  "gun.starter_pistol.fire": {
+    "subtitle": "subtitles.blocksouls_guns.gun.fire",
+    "sounds": [
+      {
+        "name": "minecraft:entity.firework_rocket.blast",
+        "type": "event",
+        "volume": 0.9,
+        "pitch": 1.6
+      }
+    ]
+  },
+  "gun.hand_cannon.fire": {
+    "subtitle": "subtitles.blocksouls_guns.gun.fire",
+    "sounds": [
+      {
+        "name": "minecraft:entity.generic.explode",
+        "type": "event",
+        "volume": 0.45,
+        "pitch": 1.7
+      }
+    ]
+  },
+  "gun.auto_rifle.fire": {
+    "subtitle": "subtitles.blocksouls_guns.gun.fire",
+    "sounds": [
+      {
+        "name": "minecraft:entity.firework_rocket.large_blast",
+        "type": "event",
+        "volume": 0.6,
+        "pitch": 1.9
+      }
+    ]
+  },
+  "gun.shotgun.fire": {
+    "subtitle": "subtitles.blocksouls_guns.gun.fire",
+    "sounds": [
+      {
+        "name": "minecraft:entity.generic.explode",
+        "type": "event",
+        "volume": 0.6,
+        "pitch": 1.25
+      }
+    ]
+  },
+  "gun.sniper_rifle.fire": {
+    "subtitle": "subtitles.blocksouls_guns.gun.fire",
+    "sounds": [
+      {
+        "name": "minecraft:entity.generic.explode",
+        "type": "event",
+        "volume": 0.7,
+        "pitch": 1.45
+      },
+      {
+        "name": "minecraft:entity.firework_rocket.large_blast",
+        "type": "event",
+        "volume": 0.8,
+        "pitch": 0.8
+      }
+    ]
+  },
+  "gun.empty": {
+    "subtitle": "subtitles.blocksouls_guns.gun.empty",
+    "sounds": [
+      {
+        "name": "minecraft:block.dispenser.fail",
+        "type": "event",
+        "volume": 0.6,
+        "pitch": 1.8
+      }
+    ]
+  },
+  "gun.reload_start": {
+    "subtitle": "subtitles.blocksouls_guns.gun.reload",
+    "sounds": [
+      {
+        "name": "minecraft:item.crossbow.loading_start",
+        "type": "event",
+        "volume": 0.8,
+        "pitch": 1.4
+      }
+    ]
+  },
+  "gun.reload_end": {
+    "subtitle": "subtitles.blocksouls_guns.gun.reload",
+    "sounds": [
+      {
+        "name": "minecraft:item.crossbow.loading_end",
+        "type": "event",
+        "volume": 0.8,
+        "pitch": 1.5
+      }
+    ]
+  },
+  "gun.ricochet": {
+    "subtitle": "subtitles.blocksouls_guns.gun.ricochet",
+    "sounds": [
+      {
+        "name": "minecraft:block.anvil.land",
+        "type": "event",
+        "volume": 0.25,
+        "pitch": 2.0
+      }
+    ]
+  },
+  "gun.explosive_round": {
+    "subtitle": "subtitles.blocksouls_guns.gun.explosive_round",
+    "sounds": [
+      {
+        "name": "minecraft:entity.generic.explode",
+        "type": "event",
+        "volume": 0.4,
+        "pitch": 1.6
+      }
+    ]
+  }
+}

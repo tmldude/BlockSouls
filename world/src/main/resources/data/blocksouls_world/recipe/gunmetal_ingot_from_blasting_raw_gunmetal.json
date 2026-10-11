@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "cookingtime": 100,
+  "experience": 0.7,
+  "group": "gunmetal_ingot",
+  "ingredient": "blocksouls_world:raw_gunmetal",
+  "result": {
+    "id": "blocksouls_world:gunmetal_ingot"
+  }
+}

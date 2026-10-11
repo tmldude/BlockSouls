@@ -1,0 +1,11 @@
+{
+  "tier": "rare",
+  "icon": "minecraft:wind_charge",
+  "effects": [
+    {
+      "type": "trait",
+      "trait": "blocksouls:free_roll_on_kill",
+      "level": 1
+    }
+  ]
+}

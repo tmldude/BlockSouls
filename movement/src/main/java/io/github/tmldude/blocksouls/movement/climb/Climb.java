@@ -21,7 +21,12 @@ public final class Climb {
 
 	/** Vertical velocity while climbing: climb speed, unless already rising faster. */
 	public static double climbVelocity(double velocityY, MovementConfig.Climb config) {
-		return Math.max(velocityY, config.climbSpeed);
+		return climbVelocity(velocityY, config, 1.0);
+	}
+
+	/** @param speedMultiplier scales the climb speed (the {@code CLIMB_SPEED} trait) */
+	public static double climbVelocity(double velocityY, MovementConfig.Climb config, double speedMultiplier) {
+		return Math.max(velocityY, config.climbSpeed * speedMultiplier);
 	}
 
 	/**

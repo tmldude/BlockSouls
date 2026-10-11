@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "blocksouls_mobs:item/screamer_spawn_egg"
+  }
+}

@@ -1,11 +1,67 @@
 package io.github.tmldude.blocksouls.movement;
 
-/** {@code config/blocksouls/movement.json}. Velocities are blocks/tick, times are ticks. */
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
+
+/**
+ * {@code config/blocksouls/movement.json}. Velocities are blocks/tick, times are ticks.
+ *
+ * <p>One instance lives for the whole game ({@link BlockSoulsMovement#CONFIG}); features keep references to its
+ * sections, so new values (server sync, reload) are copied into it with {@link #copyFrom} rather than replacing it.
+ */
 public class MovementConfig {
+	private static final Gson GSON = new Gson();
+
 	public Jump jump = new Jump();
 	public Roll roll = new Roll();
 	public Climb climb = new Climb();
 	public Stamina stamina = new Stamina();
+	public Web web = new Web();
+	public Traits traits = new Traits();
+
+	public String toJson() {
+		return GSON.toJson(this);
+	}
+
+	/** Parses a config sent by a server; missing keys keep their defaults. Null if it doesn't parse. */
+	public static MovementConfig fromJson(String json) {
+		try {
+			MovementConfig config = GSON.fromJson(json, MovementConfig.class);
+			return config != null ? config : new MovementConfig();
+		} catch (JsonParseException e) {
+			return null;
+		}
+	}
+
+	/** Copies every value from {@code other} into this instance and its existing sections. */
+	public void copyFrom(MovementConfig other) {
+		copyFields(other, this);
+	}
+
+	private static void copyFields(Object from, Object to) {
+		for (Field field : to.getClass().getFields()) {
+			if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {
+				continue;
+			}
+			try {
+				Object value = field.get(from);
+				Object current = field.get(to);
+				boolean section = field.getType().getDeclaringClass() == MovementConfig.class;
+				if (!section) {
+					field.set(to, value);
+				} else if (value != null && current != null) {
+					copyFields(value, current);
+				} else if (value != null) {
+					field.set(to, value);
+				}
+			} catch (IllegalAccessException e) {
+				throw new IllegalStateException("Can't copy config field " + field, e);
+			}
+		}
+	}
 
 	public static class Jump {
 		public boolean enabled = true;
@@ -40,6 +96,9 @@ public class MovementConfig {
 		public double speed = 0.6;
 		public int fullSpeedTicks = 7;
 		public double staminaCost = 25;
+		/** Client-only look: how far the camera rolls toward a sideways dodge, and whether the view drops to crouch height. */
+		public double cameraTiltDegrees = 10;
+		public boolean lowerEyeHeight = true;
 	}
 
 	public static class Climb {
@@ -61,5 +120,51 @@ public class MovementConfig {
 		public double regenPerSecond = 15;
 		/** Ticks after spending stamina before it starts regenerating. */
 		public int regenDelayTicks = 20;
+	}
+
+	public static class Web {
+		public boolean enabled = true;
+		/** Anchor raycast reach in blocks (before {@code WEB_REACH}). */
+		public double range = 32;
+		public double staminaCost = 10;
+		/** Shortest rope, in blocks: attach length and the reel-in limit. */
+		public double minLength = 3;
+		/** Rope length removed per tick while holding sneak. */
+		public double reelSpeed = 0.3;
+		/** Speed added along the swing direction each tick while moving downward on the arc. */
+		public double swingBoost = 0.04;
+		/** Velocity multiplier per tick while swinging (replaces vanilla's air drag). */
+		public double drag = 0.99;
+		/** Upward velocity added on release. */
+		public double releaseBoost = 0.15;
+		/** Swing speed cap in blocks/tick (vanilla only kicks above ~10). */
+		public double maxSpeed = 2.5;
+		/** No fall damage for this many ticks after letting go. */
+		public int noFallTicksAfterRelease = 10;
+		/** Server drops the swing when the player is further than rope length + this from the anchor. */
+		public double serverSlack = 4;
+		/** Server accepts anchors up to range × this from its own view of the player. */
+		public double serverRangeTolerance = 1.1;
+		/** Extra rays tried above the look direction when it misses, in degrees each. */
+		public double fallbackRayStepDegrees = 6;
+		public int fallbackRays = 3;
+	}
+
+	/** How {@code PlayerTraits} levels scale movement. Every level stacks. */
+	public static class Traits {
+		/** Extra mid-air jumps per {@code DOUBLE_JUMP} level. */
+		public int airJumpsPerLevel = 1;
+		/** Ticks added to the end of the roll's i-frame window per {@code ROLL_IFRAMES} level. */
+		public int rollIframeTicksPerLevel = 2;
+		/** Rolls are free for this long after a mob kill ({@code FREE_ROLL_ON_KILL}). Not scaled by level. */
+		public int freeRollTicks = 60;
+		public double webReachPerLevel = 0.25;
+		public double climbSpeedPerLevel = 0.25;
+		public double staminaRegenPerLevel = 0.20;
+		/** {@code FLIGHT}: flying speed as a fraction of creative's (0.05). */
+		public double flightSpeedFraction = 0.6;
+		public double flightStaminaPerSecond = 12;
+		/** Ticks between the two jump presses that start flight. */
+		public int flightDoubleTapTicks = 7;
 	}
 }

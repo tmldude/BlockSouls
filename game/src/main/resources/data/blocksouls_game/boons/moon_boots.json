@@ -1,0 +1,21 @@
+{
+  "tier": "legendary",
+  "icon": "minecraft:chainmail_boots",
+  "requires": [
+    "blocksouls_game:spring_legs",
+    "blocksouls_game:featherfall"
+  ],
+  "effects": [
+    {
+      "type": "effect",
+      "effect": "minecraft:jump_boost",
+      "amplifier": 1
+    },
+    {
+      "type": "attribute",
+      "attribute": "minecraft:safe_fall_distance",
+      "amount": 256,
+      "operation": "add_value"
+    }
+  ]
+}

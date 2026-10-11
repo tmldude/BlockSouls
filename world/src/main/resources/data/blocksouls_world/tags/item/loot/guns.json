@@ -1,0 +1,20 @@
+{
+  "values": [
+    {
+      "id": "blocksouls_guns:hand_cannon",
+      "required": false
+    },
+    {
+      "id": "blocksouls_guns:auto_rifle",
+      "required": false
+    },
+    {
+      "id": "blocksouls_guns:shotgun",
+      "required": false
+    },
+    {
+      "id": "blocksouls_guns:sniper_rifle",
+      "required": false
+    }
+  ]
+}

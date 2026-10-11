@@ -50,3 +50,6 @@ docker/backups/
 # modpack (added by release.yml only)
 
 modpack/mods/blocksouls-*.jar
+
+__pycache__/
+*.pyc

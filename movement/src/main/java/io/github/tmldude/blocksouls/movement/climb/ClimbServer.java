@@ -10,6 +10,7 @@ import io.github.tmldude.blocksouls.movement.MoveMath;
 import io.github.tmldude.blocksouls.movement.MovementConfig;
 import io.github.tmldude.blocksouls.movement.stamina.StaminaAttachment;
 import io.github.tmldude.blocksouls.movement.stamina.StaminaState;
+import io.github.tmldude.blocksouls.movement.web.WebServer;
 
 /**
  * Mirrors the client's climb check from the player's last sent input and drains stamina while
@@ -30,7 +31,7 @@ public final class ClimbServer {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			Input input = player.getLastClientInput();
 			double[] direction = MoveMath.inputDirection(input.forward(), input.backward(), input.left(), input.right(), player.getYRot());
-			if (direction == null) {
+			if (direction == null || WebServer.isSwinging(player)) {
 				continue;
 			}
 

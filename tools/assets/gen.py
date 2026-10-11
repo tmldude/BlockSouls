@@ -4,7 +4,8 @@
     python3 tools/assets/gen.py <kind> <palette> <out.png> [--seed NAME]
 
 kinds:    block ore ingot item gun helmet chestplate leggings boots skin
-palettes: see PALETTES below (one per theme: scrap, rust, blight, rad, ember, pale, storm, ash, bone, steel, wood)
+palettes: see PALETTES below (one per theme: scrap, rust, blight, rad, ember, pale, storm, ash, bone, steel, wood,
+          rot, flesh)
 
 The same arguments always produce the same image. The seed defaults to the output file name, so two items in
 the same palette still look different. Real art replaces these later; keep file paths stable.
@@ -30,6 +31,8 @@ PALETTES = {
     "bone": ["#3a342a", "#6b6252", "#a39880", "#d1c7ad", "#f2ecdc"],
     "steel": ["#1d2329", "#38444f", "#5a6b7a", "#8a9cad", "#c5d3df"],
     "wood": ["#2e1c0e", "#4f3219", "#73502b", "#987040", "#bf9660"],
+    "rot": ["#1b2414", "#33402a", "#55623f", "#7b8458", "#a9ad80"],
+    "flesh": ["#2e1a16", "#5a342b", "#8a5545", "#b67c66", "#dcae98"],
 }
 
 # 16x16 silhouettes. '#' = body, '+' = highlight, '-' = shadow, '.' = transparent.

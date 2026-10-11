@@ -1,0 +1,26 @@
+{
+	"fabric:load_conditions": [
+		{
+			"condition": "fabric:all_mods_loaded",
+			"values": [
+				"blocksouls_world"
+			]
+		}
+	],
+	"type": "minecraft:crafting_shaped",
+	"category": "misc",
+	"pattern": [
+		"GPG",
+		"SRS"
+	],
+	"key": {
+		"G": "blocksouls_world:gunmetal_ingot",
+		"P": "minecraft:piston",
+		"R": "minecraft:redstone",
+		"S": "blocksouls_world:scrap"
+	},
+	"result": {
+		"id": "blocksouls_vehicles:engine",
+		"count": 1
+	}
+}

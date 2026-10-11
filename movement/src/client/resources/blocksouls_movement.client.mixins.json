@@ -3,6 +3,8 @@
 	"package": "io.github.tmldude.blocksouls.movement.client.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
+		"CameraMixin",
+		"GameRendererMixin",
 		"LivingEntityMixin"
 	],
 	"injectors": {

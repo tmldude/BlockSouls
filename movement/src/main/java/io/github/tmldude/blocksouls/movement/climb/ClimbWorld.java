@@ -5,6 +5,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import io.github.tmldude.blocksouls.common.player.PlayerStatus;
+
 /** World queries for wall climbing, shared by the client (prediction) and server (stamina). */
 public final class ClimbWorld {
 	/** How far past the wall face the player has to fit to stand on top of it. */
@@ -42,6 +44,7 @@ public final class ClimbWorld {
 				&& !player.isInLiquid()
 				&& !player.onClimbable()
 				&& !player.isPassenger()
-				&& !player.isSpectator();
+				&& !player.isSpectator()
+				&& !PlayerStatus.isDowned(player);
 	}
 }

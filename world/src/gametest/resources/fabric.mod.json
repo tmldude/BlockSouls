@@ -1,0 +1,15 @@
+{
+	"schemaVersion": 1,
+	"id": "blocksouls_world_test",
+	"version": "${version}",
+	"name": "BlockSouls World game tests",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-gametest": [
+			"io.github.tmldude.blocksouls.world.test.WorldGameTests"
+		]
+	},
+	"depends": {
+		"blocksouls_world": "*"
+	}
+}

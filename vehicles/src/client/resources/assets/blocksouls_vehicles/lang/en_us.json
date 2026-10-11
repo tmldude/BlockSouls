@@ -1,0 +1,16 @@
+{
+	"entity.blocksouls_vehicles.kart": "Kart",
+	"entity.blocksouls_vehicles.kart_wreck": "Kart Wreck",
+	"item.blocksouls_vehicles.wheel": "Wheel",
+	"item.blocksouls_vehicles.engine": "Engine",
+	"message.blocksouls_vehicles.wreck_progress": "Wheels %s/%s · Engine %s/%s · Scrap %s/%s",
+	"message.blocksouls_vehicles.kart_health": "Kart %s/%s HP",
+	"subtitles.blocksouls_vehicles.kart.engine": "Kart engine runs",
+	"subtitles.blocksouls_vehicles.kart.hop": "Kart hops",
+	"subtitles.blocksouls_vehicles.kart.boost": "Kart boosts",
+	"subtitles.blocksouls_vehicles.kart.ram": "Kart rams",
+	"subtitles.blocksouls_vehicles.kart.break": "Kart breaks down",
+	"subtitles.blocksouls_vehicles.kart.repair": "Kart patched up",
+	"subtitles.blocksouls_vehicles.wreck.fit_part": "Part fitted",
+	"subtitles.blocksouls_vehicles.wreck.repaired": "Wreck repaired"
+}

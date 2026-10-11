@@ -18,13 +18,18 @@ public record StaminaState(float value, int regenDelay) {
 	}
 
 	public StaminaState tick(MovementConfig.Stamina config) {
+		return tick(config, 1.0);
+	}
+
+	/** @param regenMultiplier scales the regen rate (the {@code STAMINA_REGEN} trait) */
+	public StaminaState tick(MovementConfig.Stamina config, double regenMultiplier) {
 		if (regenDelay > 0) {
 			return new StaminaState(value, regenDelay - 1);
 		}
 		if (value >= config.max) {
 			return value == config.max ? this : new StaminaState((float) config.max, 0);
 		}
-		return new StaminaState((float) Math.min(config.max, value + config.regenPerSecond / 20.0), 0);
+		return new StaminaState((float) Math.min(config.max, value + config.regenPerSecond * regenMultiplier / 20.0), 0);
 	}
 
 	public float fraction(MovementConfig.Stamina config) {

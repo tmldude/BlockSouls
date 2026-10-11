@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "blocksouls_mobs:shambler",
+    "blocksouls_mobs:crawler",
+    "blocksouls_mobs:screamer",
+    "blocksouls_mobs:bloater",
+    "blocksouls_mobs:brute"
+  ]
+}

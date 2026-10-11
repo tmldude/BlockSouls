@@ -1,0 +1,13 @@
+{
+  "tier": "common",
+  "icon": "minecraft:emerald",
+  "stackable": 3,
+  "effects": [
+    {
+      "type": "attribute",
+      "attribute": "minecraft:luck",
+      "amount": 1,
+      "operation": "add_value"
+    }
+  ]
+}

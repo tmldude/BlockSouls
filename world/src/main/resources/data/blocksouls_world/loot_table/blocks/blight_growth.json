@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_world:blight_growth",
+          "condition": "minecraft:tool/can_shear"
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "blocksouls_world:blocks/blight_growth"
+}

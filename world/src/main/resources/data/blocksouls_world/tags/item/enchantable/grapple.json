@@ -1,0 +1,10 @@
+{
+  "values": [
+    "minecraft:bow",
+    "minecraft:crossbow",
+    {
+      "id": "#blocksouls:guns",
+      "required": false
+    }
+  ]
+}

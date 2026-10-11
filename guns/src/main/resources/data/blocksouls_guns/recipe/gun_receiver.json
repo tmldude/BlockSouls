@@ -1,0 +1,23 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "blocksouls_world"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SGR"
+  ],
+  "key": {
+    "G": "blocksouls_world:gunmetal_ingot",
+    "S": "blocksouls_world:scrap",
+    "R": "minecraft:redstone"
+  },
+  "result": {
+    "id": "blocksouls_guns:gun_receiver"
+  }
+}

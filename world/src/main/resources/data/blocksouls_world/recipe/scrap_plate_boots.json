@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "A": "blocksouls_world:scrap",
+    "B": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "A A",
+    "B B"
+  ],
+  "result": {
+    "id": "blocksouls_world:scrap_plate_boots"
+  }
+}

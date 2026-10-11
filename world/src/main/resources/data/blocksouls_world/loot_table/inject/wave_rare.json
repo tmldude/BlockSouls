@@ -1,0 +1,41 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_world:scrap",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 4
+            }
+          },
+          "weight": 8
+        },
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_world:gunmetal_ingot",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_world:raw_gunmetal",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 2
+            }
+          },
+          "weight": 4
+        }
+      ],
+      "rolls": 1
+    }
+  ]
+}

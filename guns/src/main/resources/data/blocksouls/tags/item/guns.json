@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "blocksouls_guns:starter_pistol",
+    "blocksouls_guns:hand_cannon",
+    "blocksouls_guns:auto_rifle",
+    "blocksouls_guns:shotgun",
+    "blocksouls_guns:sniper_rifle"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "A": "blocksouls_world:gunmetal_ingot",
+    "B": "blocksouls_world:blight_core"
+  },
+  "pattern": [
+    "A A",
+    "ABA",
+    "AAA"
+  ],
+  "result": {
+    "id": "blocksouls_world:blight_forged_chestplate"
+  }
+}

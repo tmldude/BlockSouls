@@ -1,0 +1,12 @@
+{
+  "tier": "common",
+  "icon": "minecraft:glass_bottle",
+  "stackable": 2,
+  "effects": [
+    {
+      "type": "trait",
+      "trait": "blocksouls:stamina_regen",
+      "level": 1
+    }
+  ]
+}

@@ -2,7 +2,10 @@
 	"required": true,
 	"package": "io.github.tmldude.blocksouls.guns.client.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"client": [],
+	"client": [
+		"AbstractClientPlayerMixin",
+		"MinecraftMixin"
+	],
 	"injectors": {
 		"defaultRequire": 1
 	},
