@@ -229,8 +229,8 @@ def walk(name, t):
         for i, limb in enumerate(("right_front", "left_front", "right_mid", "left_mid", "right_hind", "left_hind")):
             ph = s if i in (0, 3, 4) else -s
             flip = -1 if limb.startswith("left") else 1
-            pose[limb] = {"rot": (0, ph * 0.35, 0)}
-            pose[limb + "_upper"] = {"rot": (0, 0, -max(0, ph) * 0.35 * flip)}
+            pose[limb] = {"rot": (0, flip * ph * 0.4, 0)}
+            pose[limb + "_upper"] = {"rot": (0, 0, -flip * max(0, ph) * 0.45)}
         return pose
     return {}
 
@@ -238,12 +238,16 @@ def walk(name, t):
 def telegraph(name):
     """The attack windup at full extension."""
     if name == "shambler":
-        return {"right_arm": {"rot": (-2.2, 0, 0.3)}, "left_arm": {"rot": (-0.6, 0, 0)}, "jaw": {"rot": (0.4, 0, 0)}}
+        return {"right_arm": {"rot": (-2.3, 0, 0)}, "right_forearm": {"rot": (-0.5, 0, 0)}, "left_arm": {"rot": (-0.7, 0, 0)},
+                "body": {"rot": (-0.2, 0, 0)}, "jaw": {"rot": (0.4, 0, 0)}}
     if name == "crawler":
-        pose = {"head": {"rot": (-0.5, 0, 0)}, "jaw": {"rot": (0.6, 0, 0)}, "body": {"pos": (0, 2, 0), "rot": (-0.2, 0, 0)}}
-        for limb in ("right_front", "left_front"):
-            flip = -1 if limb.startswith("left") else 1
-            pose[limb + "_upper"] = {"rot": (-0.9, 0, 0.25 * flip)}
+        # As CrawlerModel when airborne: front limbs thrown forward and up, hind limbs trailing, mouth wide.
+        pose = {"head": {"rot": (-0.35, 0, 0)}, "jaw": {"rot": (0.6, 0, 0)}}
+        for side, sx in (("right", -1), ("left", 1)):
+            pose[f"{side}_front"] = {"rot": (0, -sx * 0.4, 0)}
+            pose[f"{side}_front_upper"] = {"rot": (0, 0, sx * 0.45)}
+            pose[f"{side}_front_lower"] = {"rot": (0, 0, -sx * 0.5)}
+            pose[f"{side}_hind"] = {"rot": (0, sx * 0.35, 0)}
         return pose
     if name == "screamer":
         return {"jaw": {"rot": (1.3, 0, 0)}, "head": {"rot": (-0.35, 0, 0)}, "body": {"rot": (-0.25, 0, 0)},
@@ -256,13 +260,15 @@ def telegraph(name):
             pose[sac] = {"scale": (1.35, 1.35, 1.35)}
         return pose
     if name in ("brute", "mutant_brute"):
-        return {"right_arm": {"rot": (-2.6, 0, -0.45)}, "left_arm": {"rot": (-2.6, 0, 0.45)},
-                "right_forearm": {"rot": (-0.3, 0, 0)}, "left_forearm": {"rot": (-0.3, 0, 0)},
-                "body": {"rot": (-0.5, 0, 0)}, "head": {"rot": (0.3, 0, 0)}}
+        # BruteModel at full windup: fists overhead, body reared back, legs planted wide.
+        return {"right_arm": {"rot": (-2.58, 0, -0.47)}, "left_arm": {"rot": (-2.58, 0, 0.47)},
+                "right_forearm": {"rot": (-0.37, 0, 0)}, "left_forearm": {"rot": (-0.37, 0, 0)},
+                "body": {"rot": (-0.5, 0, 0)}, "head": {"rot": (0.35, 0, 0)},
+                "right_leg": {"rot": (0, 0, 0.15)}, "left_leg": {"rot": (0, 0, -0.15)}}
     if name == "infected_piglin":
         return {"right_arm": {"rot": (-2.6, 0, 0)}, "left_arm": {"rot": (-1.2, 0, 0)}}
     if name == "ash_hound":
-        return {"body": {"rot": (-0.25, 0, 0)}, "jaw": {"rot": (0.7, 0, 0)}, "head": {"rot": (-0.25, 0, 0)},
+        return {"body": {"rot": (-0.2, 0, 0)}, "jaw": {"rot": (0.6, 0, 0)}, "head": {"rot": (-0.2, 0, 0)},
                 "right_front_leg": {"rot": (-1.1, 0, 0)}, "left_front_leg": {"rot": (-1.0, 0, 0)},
                 "right_hind_leg": {"rot": (0.6, 0, 0)}, "left_hind_leg": {"rot": (0.7, 0, 0)}, "tail": {"rot": (-0.4, 0, 0)}}
     return {}
