@@ -219,6 +219,9 @@ plants become wall, and it remembers exactly which blocks it placed. Arena chang
 ### 7. Loot
 
 `loot_table/entities/<boss>.json` is rolled by vanilla on death; keep it to vanilla items (and your own).
+**26.3 loot format:** entries and pools take one `"modifier"` (a single function object; chain several with
+`minecraft:sequence`) and one `"condition"`. The old `"functions"` / `"conditions"` lists are silently ignored, so a
+`set_count` written that way just drops 1 item.
 **Items from other modules go in separate tables** with a load condition, listed via `.extraLoot(...)`:
 
 ```json
