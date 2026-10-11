@@ -24,6 +24,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.InterpolationHandler;
+import net.minecraft.world.entity.LinearInterpolationHandler;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MoverType;
@@ -120,6 +122,12 @@ public class KartEntity extends Entity {
 	/** Horizontal speed the server measured last tick (blocks/tick). */
 	public double getMeasuredSpeed() {
 		return measuredSpeed;
+	}
+
+	@Override
+	protected InterpolationHandler createInterpolationHandler() {
+		// Smooths the kart for everyone but the driver (same as boats).
+		return LinearInterpolationHandler.create(this, 3);
 	}
 
 	@Override
