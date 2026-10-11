@@ -55,6 +55,9 @@ Each file here is a brief for one parallel session (PLAN.md §8). A session is s
     its tests cover 1 and 8 players (8 mock players via `helper.makeMockServerPlayerInLevel()`).
 13. **Numbers in briefs are starting points.** Keep them unless they play badly; if you change one, log it.
 14. **Commits:** conventional commits, small and frequent; never commit secrets; never push to `main`.
+15. **Content standards:** anything you add (items, recipes, loot, mobs, bosses, structures, dimensions, sounds,
+    icons) follows `docs/CONTENT.md`. Every drop goes into 2+ recipes and every crafted item connects to other
+    BlockSouls items; `python3 tools/content/check_recipe_web.py` must pass (CI runs it).
 
 ## Stages
 
@@ -64,4 +67,5 @@ Each file here is a brief for one parallel session (PLAN.md §8). A session is s
 | 2a | `bosses` (framework + Furnace Knight) |
 | 2b | `boss-pale-rider`, `boss-ashwyrm`, `boss-stormplate`, `final-raid`, `art-mobs`, `art-items` |
 | 3 | orchestrator: integration, balance, distribution, `v0.9` |
-| 4 (v0.10) | `audio`, `boon-icons`, `kart-fuel-horn`, `arena-seal`, `world-structures` |
+| 4 (v0.10) | `audio`, `boon-icons`, `kart-fuel-horn`, `arena-seal`, `world-structures`, `crafting-web` |
+| 5–7 (v2) | see `PLAN2.md` (owned by the v2 orchestrator) |

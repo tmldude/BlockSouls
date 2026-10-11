@@ -15,6 +15,8 @@ jobs:
         run: |
           python3 -m pip install --quiet pillow
           python3 tools/assets/check_mob_assets.py
+      - name: Check the crafting web
+        run: python3 tools/content/check_recipe_web.py
       - name: Validate Gradle wrapper
         uses: gradle/actions/wrapper-validation@v6
       - name: Set up JDK 25
