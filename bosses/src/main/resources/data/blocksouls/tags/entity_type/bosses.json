@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "blocksouls_bosses:furnace_knight"
+    "blocksouls_bosses:furnace_knight",
+    "blocksouls_bosses:pale_rider"
   ]
 }

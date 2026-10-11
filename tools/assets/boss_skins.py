@@ -143,3 +143,5 @@ def write_all(save):
     save(furnace_knight(), "entity", "furnace_knight.png")
     save(furnace_knight_glow(), "entity", "furnace_knight_glow.png")
     save(furnace_knight_blade_glow(), "entity", "furnace_knight_blade_glow.png")
+    import pale_rider_skins
+    pale_rider_skins.write_all(save)
