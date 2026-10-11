@@ -71,7 +71,9 @@ public class FinalRaidGameTests {
 	private static ServerPlayer player(GameTestHelper helper) {
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		Vec3 at = Vec3.atBottomCenterOf(helper.absolutePos(CENTER));
-		player.snapTo(at.x, at.y, at.z);
+		// teleportTo, not snapTo: the mock connection never confirms its login teleport, and vanilla re-sends a pending
+		// teleport every second, snapping a plain snapTo back.
+		player.teleportTo(at.x, at.y, at.z);
 		return player;
 	}
 
@@ -168,6 +170,8 @@ public class FinalRaidGameTests {
 		FinalDragon dragon = dragon(helper);
 		ServerPlayer player = player(helper);
 		dragon.engage(player);
+		// Something to fight, so the fight never resets while we wait.
+		dragon.forceTarget(dummy(helper));
 		dragon.skipCrystals();
 		dragon.forcePhase(1);
 		helper.assertTrue(dragon.plateCenters().size() == 2, "solo gets two plates, got " + dragon.plateCenters().size());
@@ -177,7 +181,7 @@ public class FinalRaidGameTests {
 		helper.runAfterDelay(160, () -> {
 			helper.assertTrue(dragon.mode() == FinalDragon.Mode.FLYING, "came down with nobody on a plate: " + dragon.mode());
 			Vec3 on = Vec3.atBottomCenterOf(plate.above());
-			player.snapTo(on.x, on.y, on.z);
+			player.teleportTo(on.x, on.y, on.z);
 		});
 		helper.succeedWhen(() -> {
 			helper.assertTrue(dragon.mode() == FinalDragon.Mode.PERCHED, "not perched yet: " + dragon.mode());
