@@ -145,9 +145,10 @@ public class FullPackGameTests {
 		ItemAttributeModifiers before = base.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
 		ItemAttributeModifiers after = result.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
 		helper.assertTrue(result.getItem() == base.getItem(), "same armor piece");
+		// Armor materials hold floats (0.05F), recipe JSON holds doubles: compare loosely.
 		for (ItemAttributeModifiers.Entry entry : before.modifiers()) {
 			helper.assertTrue(after.modifiers().stream().anyMatch(e -> e.attribute().equals(entry.attribute())
-					&& e.modifier().amount() == entry.modifier().amount() && e.slot() == entry.slot()), "keeps " + entry.attribute().getRegisteredName());
+					&& Math.abs(e.modifier().amount() - entry.modifier().amount()) < 1.0E-4 && e.slot() == entry.slot()), "keeps " + entry.attribute().getRegisteredName());
 		}
 		helper.assertTrue(after.modifiers().stream().anyMatch(e -> e.attribute().equals(Attributes.BURNING_TIME) && e.modifier().amount() < 0),
 				"adds shorter burning");
