@@ -1,0 +1,13 @@
+{
+  "tier": "common",
+  "icon": "minecraft:iron_chestplate",
+  "stackable": 2,
+  "effects": [
+    {
+      "type": "attribute",
+      "attribute": "minecraft:max_health",
+      "amount": 4,
+      "operation": "add_value"
+    }
+  ]
+}

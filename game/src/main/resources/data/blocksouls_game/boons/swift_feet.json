@@ -1,0 +1,11 @@
+{
+  "tier": "common",
+  "icon": "minecraft:sugar",
+  "effects": [
+    {
+      "type": "effect",
+      "effect": "minecraft:speed",
+      "amplifier": 0
+    }
+  ]
+}

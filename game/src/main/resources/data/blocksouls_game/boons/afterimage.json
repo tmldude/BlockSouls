@@ -1,0 +1,20 @@
+{
+  "tier": "legendary",
+  "icon": "minecraft:echo_shard",
+  "requires": [
+    "blocksouls_game:swift_feet",
+    "blocksouls_game:second_wind"
+  ],
+  "effects": [
+    {
+      "type": "effect",
+      "effect": "minecraft:speed",
+      "amplifier": 1
+    },
+    {
+      "type": "trait",
+      "trait": "blocksouls:roll_iframes",
+      "level": 2
+    }
+  ]
+}

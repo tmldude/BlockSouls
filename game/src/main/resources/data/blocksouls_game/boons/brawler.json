@@ -1,0 +1,11 @@
+{
+  "tier": "rare",
+  "icon": "minecraft:blaze_powder",
+  "effects": [
+    {
+      "type": "effect",
+      "effect": "minecraft:strength",
+      "amplifier": 0
+    }
+  ]
+}

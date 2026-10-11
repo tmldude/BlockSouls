@@ -1,0 +1,16 @@
+{
+	"schemaVersion": 1,
+	"id": "blocksouls_game_test",
+	"version": "${version}",
+	"name": "BlockSouls Game game tests",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-gametest": [
+			"io.github.tmldude.blocksouls.game.test.DownedGameTests",
+			"io.github.tmldude.blocksouls.game.test.BoonGameTests"
+		]
+	},
+	"depends": {
+		"blocksouls_game": "*"
+	}
+}

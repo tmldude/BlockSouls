@@ -1,0 +1,11 @@
+{
+  "tier": "rare",
+  "icon": "minecraft:golden_pickaxe",
+  "effects": [
+    {
+      "type": "effect",
+      "effect": "minecraft:haste",
+      "amplifier": 1
+    }
+  ]
+}

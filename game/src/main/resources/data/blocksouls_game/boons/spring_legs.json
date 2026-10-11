@@ -1,0 +1,12 @@
+{
+  "tier": "common",
+  "icon": "minecraft:rabbit_foot",
+  "effects": [
+    {
+      "type": "attribute",
+      "attribute": "minecraft:jump_strength",
+      "amount": 0.5,
+      "operation": "add_multiplied_base"
+    }
+  ]
+}

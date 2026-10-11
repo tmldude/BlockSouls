@@ -1,0 +1,12 @@
+{
+  "tier": "common",
+  "icon": "minecraft:gunpowder",
+  "stackable": 2,
+  "effects": [
+    {
+      "type": "trait",
+      "trait": "blocksouls:reload_speed",
+      "level": 1
+    }
+  ]
+}
