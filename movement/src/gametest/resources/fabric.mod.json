@@ -1,0 +1,15 @@
+{
+	"schemaVersion": 1,
+	"id": "blocksouls_movement_test",
+	"version": "${version}",
+	"name": "BlockSouls Movement game tests",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-gametest": [
+			"io.github.tmldude.blocksouls.movement.test.MovementGameTests"
+		]
+	},
+	"depends": {
+		"blocksouls_movement": "*"
+	}
+}

@@ -19,7 +19,8 @@ import io.github.tmldude.blocksouls.common.CommonIds;
 /**
  * Gameplay traits on a player, as {@code id → level}. The game module grants them (boons); other modules read
  * them to change behavior (e.g. movement checks {@link #DOUBLE_JUMP}). Saved with the player and synced to that
- * player's client. Not copied on death, so a real death clears them, as boons should.
+ * player's client. The game clears them when the player goes down; a vanilla death also clears them (not
+ * copied on death).
  */
 public final class PlayerTraits {
 	public static final Identifier DOUBLE_JUMP = trait("double_jump");

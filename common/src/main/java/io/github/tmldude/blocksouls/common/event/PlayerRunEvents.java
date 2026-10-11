@@ -10,9 +10,8 @@ import net.fabricmc.fabric.api.event.EventFactory;
 
 /** Per-player run events, fired by the game module on the server thread. */
 public final class PlayerRunEvents {
+	/** The player went down (stays down until revived). */
 	public static final Event<Player> DOWNED = player();
-	/** The player bled out (a real death follows). */
-	public static final Event<Player> BLED_OUT = player();
 
 	public static final Event<Revived> REVIVED = EventFactory.createArrayBacked(Revived.class, callbacks -> (player, reviver) -> {
 		for (Revived callback : callbacks) {

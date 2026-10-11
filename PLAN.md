@@ -46,13 +46,12 @@ bosses, and teleporting mobs drop Ender Pearls more readily.
 The pistol **breaks at the end of wave 3** (with a suitably silly sound and message). **Late joiners get only the
 Starter Pistol**; friends can hand them gear.
 
-**Death: downed, not dead.** At 0 health you go **down** instead of dying: you crawl, can't fight, and bleed out
-over ~30 s. A teammate holding use on you for a few seconds **revives** you. If you bleed out you die for real:
-vanilla rules, you drop everything, boons are lost, and the Starter Pistol isn't re-issued. You respawn at your
-bed/spawn after the current wave ends (immediately if no wave is running).
-- **Run over = everyone down or dead at the same time.** That ends the run with a run summary (waves survived,
-  bosses killed, best boon, time) and the admin starts a new run.
-- Solo play: going down with nobody to revive you means bleeding out.
+**Death: downed, not dead.** At 0 health you go **down** where you stand: you can't fight, and you stay down
+until a teammate holds use on you for a few seconds to **revive** you. There's no bleed-out timer. You keep your gear,
+but **going down costs your boons** (like perks in zombies).
+- **Run over = everyone down at the same time.** That ends the run with a run summary (waves survived, bosses
+  killed, best boon, time) and the admin starts a new run. Solo play: going down ends the run.
+- Deaths that can't leave a body (void, `/kill`) are vanilla deaths: you respawn and lose your gear.
 - This rewards sticking together and playing carefully.
 
 **Axes of fun:** boons, **wacky enchantments**, cool armor sets, new ores, new crafting, movement, cars, web
@@ -111,7 +110,7 @@ The first goal is one complete, fun run end to end, not every idea. Everything e
 
 | Area | MVP | Growth (later) |
 |---|---|---|
-| Game loop | Downed/revive, team-wipe = run over + run summary, run start/new-run admin command, wave/boon HUD, short day/night, multi-wave nights + dawn pause, dusk cues, sleep + dimension rules, starter kit + breaking pistol, difficulty presets, endless mode | More night modifiers |
+| Game loop | Downed until revived (no bleed-out), team-wipe = run over + run summary, run start/new-run admin command, wave/boon HUD, short day/night, multi-wave nights + dawn pause, dusk cues, sleep + dimension rules, starter kit + breaking pistol, difficulty presets, endless mode | More night modifiers |
 | Run variety | Blood Moon + 2 night modifiers, shuffled roster | Modifier pool, run seeds |
 | Boons | ~20 boons over 3 tiers incl. Wildcard, lost on death, 2 combos | Big data-driven pool |
 | Enchantments & armor | 6 wacky enchantments, scrap-plate + blight-forged armor sets | More enchantments, dragonscale + hazmat sets |

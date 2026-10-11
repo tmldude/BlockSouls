@@ -163,3 +163,7 @@ My defaults, to confirm:
   Knight) with custom models.
 - **Distribution (PLAN.md §2d):** Modrinth project auto-published by CI, a "host from your own game" tunnel mod, a
   one-command VPS install script with Watchtower auto-updates, a server-pack zip, and a version check on join.
+
+- **Update (downed):** no bleed-out. Downed players stay down where they fell until revived; everyone down at once
+  ends the run. My reading of "boons removed on death like zombies": **going down costs your boons**, gear is kept.
+  Void and `/kill` remain vanilla deaths.

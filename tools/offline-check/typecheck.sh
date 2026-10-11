@@ -14,7 +14,7 @@ CP=$(ls "$H"/libs/*.jar | grep -v console-standalone | tr '\n' ':')
 
 FILES=()
 for m in $MODS; do
-	while IFS= read -r f; do FILES+=("$f"); done < <(find "$REPO/$m/src/main/java" "$REPO/$m/src/client/java" -name '*.java' 2>/dev/null)
+	while IFS= read -r f; do FILES+=("$f"); done < <(find "$REPO/$m/src/main/java" "$REPO/$m/src/client/java" "$REPO/$m/src/gametest/java" -name '*.java' 2>/dev/null)
 done
 rm -rf "$OUT"; mkdir -p "$OUT"
 # -implicit:none: vanilla/Fabric sources are only used to resolve names, never compiled.
