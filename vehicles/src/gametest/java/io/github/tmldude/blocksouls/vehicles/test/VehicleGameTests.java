@@ -14,6 +14,7 @@ import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
@@ -256,6 +257,8 @@ public class VehicleGameTests {
 		floor(helper);
 		KartEntity kart = helper.spawn(VehicleRegistry.KART, new BlockPos(4, 1, 4));
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		// Mock players are creative, where items aren't used up.
+		player.setGameMode(GameType.SURVIVAL);
 		var cfg = BlockSoulsVehicles.CONFIG.fuel;
 		kart.setFuel(100);
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.COAL, 2));
