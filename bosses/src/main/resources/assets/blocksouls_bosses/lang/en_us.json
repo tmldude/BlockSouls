@@ -61,5 +61,22 @@
 	"subtitles.blocksouls_bosses.entity.pale_rider.throw": "Spears fly",
 	"subtitles.blocksouls_bosses.entity.pale_rider.blink": "Pale Rider shimmers",
 	"subtitles.blocksouls_bosses.item.wraith_steed_whistle.use": "Whistle blows",
-	"subtitles.blocksouls_bosses.entity.wraith_steed.fade": "Wraith Steed fades"
+	"subtitles.blocksouls_bosses.entity.wraith_steed.fade": "Wraith Steed fades",
+	"entity.blocksouls_bosses.ashwyrm": "Ashwyrm",
+	"item.blocksouls_bosses.ashwyrm_spawn_egg": "Ashwyrm Spawn Egg",
+	"item.blocksouls_bosses.ashwyrm_scale": "Ashwyrm Scale",
+	"item.blocksouls_bosses.ember_barrel": "Ember Barrel",
+	"subtitles.blocksouls_bosses.entity.ashwyrm.ambient": "Ashwyrm rumbles",
+	"subtitles.blocksouls_bosses.entity.ashwyrm.hurt": "Ashwyrm hurts",
+	"subtitles.blocksouls_bosses.entity.ashwyrm.death": "Ashwyrm falls",
+	"subtitles.blocksouls_bosses.entity.ashwyrm.step": "Heavy claws",
+	"subtitles.blocksouls_bosses.entity.ashwyrm.roar": "Ashwyrm roars",
+	"subtitles.blocksouls_bosses.entity.ashwyrm.bite": "Jaws snap",
+	"subtitles.blocksouls_bosses.entity.ashwyrm.tail": "Tail sweeps",
+	"subtitles.blocksouls_bosses.entity.ashwyrm.breath": "Fire pours",
+	"subtitles.blocksouls_bosses.entity.ashwyrm.flap": "Wings beat",
+	"subtitles.blocksouls_bosses.entity.ashwyrm.fireball": "Fireball launches",
+	"subtitles.blocksouls_bosses.entity.ashwyrm.impact": "Fire explodes",
+	"subtitles.blocksouls_bosses.entity.ashwyrm.land": "Ashwyrm crashes down",
+	"subtitles.blocksouls_bosses.entity.ashwyrm.meteor": "Meteors fall"
 }

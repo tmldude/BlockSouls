@@ -41,5 +41,6 @@ public class BlockSoulsBossesClient implements ClientModInitializer {
 		FurnaceKnightClient.register();
 		FinalDragonClient.register();
 		PaleRiderClient.register();
+		io.github.tmldude.blocksouls.bosses.client.ashwyrm.AshwyrmClient.register();
 	}
 }

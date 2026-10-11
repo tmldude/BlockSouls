@@ -52,5 +52,6 @@ public class BlockSoulsBosses implements ModInitializer {
 		FurnaceKnights.register();
 		FinalRaids.register();
 		PaleRiders.register();
+		io.github.tmldude.blocksouls.bosses.ashwyrm.Ashwyrms.register();
 	}
 }
