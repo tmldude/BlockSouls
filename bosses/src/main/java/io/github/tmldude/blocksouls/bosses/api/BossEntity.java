@@ -701,6 +701,10 @@ public abstract class BossEntity extends Monster {
 
 	@Override
 	public boolean canAttack(LivingEntity target) {
+		if (target == forcedTarget) {
+			// Debug/test target: kept even if vanilla wouldn't (e.g. an invulnerable dummy).
+			return target.isAlive();
+		}
 		return !(target instanceof Player player && PlayerStatus.isDowned(player)) && super.canAttack(target);
 	}
 

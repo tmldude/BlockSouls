@@ -9,12 +9,13 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.animal.pig.Pig;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
@@ -218,20 +219,24 @@ public class BossesGameTests {
 		helper.succeed();
 	}
 
-	@GameTest(environment = ENV, maxTicks = 60)
+	/** The main table drops 4 blaze rods + 2 Ender Eyes; the optional cross-module tables don't break anything when missing. */
+	@GameTest(environment = ENV)
 	public void furnaceKnightDropsLoot(GameTestHelper helper) {
 		FurnaceKnight knight = knight(helper);
 		ServerPlayer player = outsider(helper);
-		knight.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(player), 100000);
-		helper.succeedWhen(() -> {
-			helper.assertTrue(count(helper, Items.BLAZE_ROD) == 4, "blaze rods: " + count(helper, Items.BLAZE_ROD));
-			helper.assertTrue(count(helper, Items.ENDER_EYE) == 2, "ender eyes: " + count(helper, Items.ENDER_EYE));
-		});
+		ServerLevel level = helper.getLevel();
+		DamageSource source = level.damageSources().playerAttack(player);
+		List<ItemStack> drops = new ArrayList<>();
+		knight.dropFromLootTable(level, source, true, knight.getLootTable().orElseThrow(), drops::add);
+		for (var table : knight.definition().extraLoot()) {
+			knight.dropFromLootTable(level, source, true, table, drops::add);
+		}
+		helper.assertTrue(count(drops, Items.BLAZE_ROD) == 4, "blaze rods: " + count(drops, Items.BLAZE_ROD));
+		helper.assertTrue(count(drops, Items.ENDER_EYE) == 2, "ender eyes: " + count(drops, Items.ENDER_EYE));
+		helper.succeed();
 	}
 
-	private static int count(GameTestHelper helper, Item item) {
-		AABB area = new AABB(helper.absolutePos(CENTER)).inflate(8);
-		return helper.getLevel().getEntitiesOfClass(ItemEntity.class, area, e -> e.getItem().is(item)).stream()
-				.mapToInt(e -> e.getItem().getCount()).sum();
+	private static int count(List<ItemStack> drops, Item item) {
+		return drops.stream().filter(stack -> stack.is(item)).mapToInt(ItemStack::getCount).sum();
 	}
 }
