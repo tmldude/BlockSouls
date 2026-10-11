@@ -1,0 +1,15 @@
+{
+	"schemaVersion": 1,
+	"id": "blocksouls_vehicles_test",
+	"version": "${version}",
+	"name": "BlockSouls Vehicles game tests",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-gametest": [
+			"io.github.tmldude.blocksouls.vehicles.test.VehicleGameTests"
+		]
+	},
+	"depends": {
+		"blocksouls_vehicles": "*"
+	}
+}
