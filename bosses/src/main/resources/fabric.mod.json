@@ -23,6 +23,7 @@
 	"mixins": [
 		"blocksouls_bosses.mixins.json",
 		"blocksouls_bosses_raid.mixins.json",
+		"blocksouls_bosses_arena.mixins.json",
 		{
 			"config": "blocksouls_bosses.client.mixins.json",
 			"environment": "client"

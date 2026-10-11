@@ -1,5 +1,7 @@
 package io.github.tmldude.blocksouls.game.test;
 
+import java.util.List;
+
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
@@ -14,6 +16,8 @@ import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import io.github.tmldude.blocksouls.common.player.PlayerTraits;
 import io.github.tmldude.blocksouls.game.player.boon.Boon;
 import io.github.tmldude.blocksouls.game.player.boon.BoonCatalog;
+import io.github.tmldude.blocksouls.game.player.boon.BoonEffect;
+import io.github.tmldude.blocksouls.game.player.boon.BoonIcons;
 import io.github.tmldude.blocksouls.game.player.boon.BoonTier;
 import io.github.tmldude.blocksouls.game.player.boon.CardRoller;
 import io.github.tmldude.blocksouls.game.player.boon.PlayerBoons;
@@ -89,6 +93,21 @@ public class BoonGameTests {
 		helper.assertTrue(RelicOffers.pending(player).isEmpty(), "offer used up");
 		helper.assertTrue(BuiltInRegistries.ITEM.containsKey(Identifier.fromNamespaceAndPath("blocksouls_game", "relic_legendary")),
 				"all relic tiers are registered");
+		helper.succeed();
+	}
+
+	@GameTest
+	public void everyBoonIconResolves(GameTestHelper helper) {
+		helper.assertTrue(BoonCatalog.all().size() >= 20, "boons are loaded, found " + BoonCatalog.all().size());
+		for (Boon boon : BoonCatalog.all()) {
+			helper.assertTrue(BoonCatalog.iconResolves(boon), boon.id() + "'s icon " + boon.icon() + " resolves");
+			if (boon.id().startsWith("blocksouls_game:")) {
+				helper.assertTrue(BoonIcons.isSprite(boon.icon()), boon.id() + " uses its own sprite, not " + boon.icon());
+			}
+		}
+		helper.assertTrue(BoonCatalog.spriteExists(BoonIcons.WILDCARD), "the Wildcard card back ships");
+		helper.assertTrue(BoonCatalog.iconResolves(new Boon("test:item_icon", BoonTier.COMMON, "minecraft:feather", 1, List.of(),
+				List.of(new BoonEffect.Effect("minecraft:speed", 0)))), "item icons still resolve");
 		helper.succeed();
 	}
 }

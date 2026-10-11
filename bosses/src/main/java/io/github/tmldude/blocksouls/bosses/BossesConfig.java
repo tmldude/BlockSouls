@@ -35,6 +35,15 @@ public class BossesConfig {
 	/** Fog wall band: blocks below and above the boss's home. */
 	public int fogWallBelow = 4;
 	public int fogWallAbove = 10;
+	/**
+	 * The seal over the fog wall (server side, any height): participants inside can't leave, nobody else can enter.
+	 * Blocks above and below the boss's home it reaches; 0 or less = unlimited.
+	 */
+	public int sealHeight = 0;
+	/** Speed of the push (blocks/tick) someone gets when the seal puts them back; no damage. */
+	public double pushStrength = 0.6;
+	/** A move longer than this in one tick is a server teleport (commands, run transitions) and isn't undone. */
+	public double sealMaxCatchDistance = 64;
 	/** While resetting, teleport home if the walk takes longer than this. */
 	public int returnHomeTimeoutTicks = 200;
 

@@ -147,6 +147,36 @@ def sounds():
         clank = metal(g, d, 600, 0.15)
         return mix((rev, 1.0), (clank, 0.35))
     make("repaired", 1, repaired)
+
+    # Refuel: fuel glugging from a can into the tank, the pitch rising as it fills, a cap clink at the end.
+    def refuel(g, i):
+        d = 0.85
+        n = int(d * SR)
+        glugs = np.zeros(n)
+        t0, k = 0.02, 0
+        while t0 < 0.62:
+            m = int(0.07 * SR)
+            tt = np.arange(m) / SR
+            f = (180 + 70 * k + 30 * i) * (1 + tt * 6)
+            glugs += at(np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-tt * 40) * g.rng.uniform(0.6, 1), t0, d)
+            t0 += 0.075 + 0.02 * g.rng.random()
+            k += 1
+        pour = band(g.noise(n), 400, 3000) * env(n, shape=[(0, 0), (0.05, 1), (0.7, 0.8), (0.75, 0), (1, 0)])
+        cap = at(metal(g, 0.15, 2400 + 200 * i, 0.02), 0.72, d)
+        return mix((glugs, 1.0), (pour, 0.3), (cap, 0.5))
+    make("refuel", 2, refuel)
+
+    # Sputter: the engine misfiring on an empty tank, a few uneven coughs and a dying pop.
+    def sputter(g, i):
+        d = 0.65
+        out = np.zeros(int(d * SR))
+        times = [(0.0, 1.0), (0.13 + 0.02 * i, 0.6), (0.21 + 0.03 * i, 0.8), (0.42, 0.5)]
+        for t0, a in times[:3 + (i % 2)]:
+            cough = mix((thump(0.18, 140, 55, 0.035), 1.0), (noise_hit(g, 0.18, 120, 2500, 0.03), 0.9))
+            out += at(cough * a, t0, d)
+        hiss = band(g.noise(len(out)), 1500, 6000) * env(len(out), shape=[(0, 0), (0.6, 0), (0.8, 1), (1, 0)])
+        return drive(mix((out, 1.0), (hiss, 0.12)), 1.8)
+    make("sputter", 3, sputter)
     return S
 
 
@@ -159,11 +189,13 @@ EVENTS = {
     "kart.ram": ("ram", SUB + "kart.ram"),
     "kart.break": ("break", SUB + "kart.break"),
     "kart.repair": ("repair", SUB + "kart.repair"),
+    "kart.refuel": ("refuel", SUB + "kart.refuel"),
+    "kart.sputter": ("sputter", SUB + "kart.sputter"),
     "wreck.fit_part": ("fit_part", SUB + "wreck.fit_part"),
     "wreck.repaired": ("repaired", SUB + "wreck.repaired"),
 }
 PEAKS = {"engine": 0.6, "hop": 0.6, "boost": 0.75, "skid": 0.55, "ram": 0.85, "break": 0.9, "repair": 0.75, "fit_part": 0.7,
-         "repaired": 0.75}
+         "repaired": 0.75, "refuel": 0.65, "sputter": 0.7}
 
 
 def main():

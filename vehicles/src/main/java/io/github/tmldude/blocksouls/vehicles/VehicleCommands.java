@@ -3,6 +3,7 @@ package io.github.tmldude.blocksouls.vehicles;
 import java.util.Locale;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import org.jspecify.annotations.Nullable;
@@ -22,10 +23,14 @@ import net.minecraft.world.phys.Vec3;
 
 import io.github.tmldude.blocksouls.common.debug.DebugCommands;
 import io.github.tmldude.blocksouls.vehicles.kart.KartEntity;
+import io.github.tmldude.blocksouls.vehicles.kart.KartFuel;
 import io.github.tmldude.blocksouls.vehicles.kart.KartWreckEntity;
 import io.github.tmldude.blocksouls.vehicles.kart.RepairProgress;
 
-/** {@code /bs vehicle spawn kart|wreck}, {@code /bs vehicle repair}, {@code /bs vehicle stats}. */
+/**
+ * {@code /bs vehicle spawn kart|wreck}, {@code /bs vehicle repair}, {@code /bs vehicle stats},
+ * {@code /bs kart fuel <amount>} (the kart you ride or look at).
+ */
 public final class VehicleCommands {
 	private static final double LOOK_REACH = 16;
 
@@ -39,6 +44,23 @@ public final class VehicleCommands {
 						.then(Commands.literal("wreck").executes(c -> spawn(c, VehicleRegistry.KART_WRECK))))
 				.then(Commands.literal("repair").executes(VehicleCommands::repair))
 				.then(Commands.literal("stats").executes(VehicleCommands::stats))));
+		DebugCommands.register((root, context) -> root.then(Commands.literal("kart")
+				.then(Commands.literal("fuel")
+						.then(Commands.argument("amount", IntegerArgumentType.integer(0)).executes(VehicleCommands::fuel)))));
+	}
+
+	private static int fuel(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+		ServerPlayer player = context.getSource().getPlayerOrException();
+		Entity target = player.getVehicle() instanceof KartEntity riding ? riding : lookedAt(player);
+		if (!(target instanceof KartEntity kart)) {
+			context.getSource().sendFailure(Component.literal("Ride or look at a kart"));
+			return 0;
+		}
+		kart.setFuel(IntegerArgumentType.getInteger(context, "amount"));
+		VehiclesConfig.Fuel cfg = BlockSoulsVehicles.CONFIG.fuel;
+		context.getSource().sendSuccess(() -> Component.literal(String.format(Locale.ROOT, "Kart fuel %d/%d (%.0f%%)",
+				kart.getFuel(), cfg.fuelCapacity, KartFuel.share(kart.getFuel(), cfg) * 100)), false);
+		return Command.SINGLE_SUCCESS;
 	}
 
 	private static int spawn(CommandContext<CommandSourceStack> context, EntityType<?> type) throws CommandSyntaxException {
@@ -81,13 +103,14 @@ public final class VehicleCommands {
 		VehiclesConfig cfg = BlockSoulsVehicles.CONFIG;
 		String text;
 		if (target instanceof KartEntity kart) {
-			text = String.format(Locale.ROOT, "Kart: health %.1f/%.0f, speed %.2f b/t (max %.2f), riders %d/%d, driver %s",
-					kart.getHealth(), cfg.kart.maxHealth, kart.getMeasuredSpeed(), cfg.kart.maxSpeed, kart.getPassengers().size(),
+			text = String.format(Locale.ROOT, "Kart: health %.1f/%.0f, fuel %d/%d, speed %.2f b/t (max %.2f), riders %d/%d, driver %s",
+					kart.getHealth(), cfg.kart.maxHealth, kart.getFuel(), cfg.fuel.fuelCapacity, kart.getMeasuredSpeed(), cfg.kart.maxSpeed, kart.getPassengers().size(),
 					KartEntity.MAX_PASSENGERS, kart.getControllingPassenger() == null ? "none" : kart.getControllingPassenger().getPlainTextName());
 		} else if (target instanceof KartWreckEntity wreck) {
 			RepairProgress progress = wreck.getProgress();
-			text = String.format(Locale.ROOT, "Wreck: wheels %d/%d, engine %d/%d, scrap %d/%d",
-					progress.wheels(), cfg.wreck.wheels, progress.engines(), cfg.wreck.engines, progress.scrap(), cfg.wreck.scrap);
+			text = String.format(Locale.ROOT, "Wreck: wheels %d/%d, engine %d/%d, scrap %d/%d, fuel kept %s",
+					progress.wheels(), cfg.wreck.wheels, progress.engines(), cfg.wreck.engines, progress.scrap(), cfg.wreck.scrap,
+					wreck.getStoredFuel() == KartFuel.UNKNOWN ? "none" : String.valueOf(wreck.getStoredFuel()));
 		} else {
 			text = String.format(Locale.ROOT, "Kart config: health %.0f, max speed %.2f, accel %.3f, ram above %.2f (x%.0f damage), drift boost after %d ticks",
 					cfg.kart.maxHealth, cfg.kart.maxSpeed, cfg.kart.acceleration, cfg.kart.ramMinSpeed, cfg.kart.ramDamagePerSpeed,

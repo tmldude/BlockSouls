@@ -1,6 +1,6 @@
 {
   "tier": "rare",
-  "icon": "minecraft:feather",
+  "icon": "blocksouls_game:boon/featherfall",
   "effects": [
     {
       "type": "effect",

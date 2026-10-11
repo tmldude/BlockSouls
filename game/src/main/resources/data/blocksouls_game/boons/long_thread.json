@@ -1,6 +1,6 @@
 {
   "tier": "rare",
-  "icon": "minecraft:string",
+  "icon": "blocksouls_game:boon/long_thread",
   "stackable": 2,
   "effects": [
     {

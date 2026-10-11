@@ -48,6 +48,21 @@
       "blocksouls_vehicles:kart/repair2"
     ]
   },
+  "kart.refuel": {
+    "subtitle": "subtitles.blocksouls_vehicles.kart.refuel",
+    "sounds": [
+      "blocksouls_vehicles:kart/refuel1",
+      "blocksouls_vehicles:kart/refuel2"
+    ]
+  },
+  "kart.sputter": {
+    "subtitle": "subtitles.blocksouls_vehicles.kart.sputter",
+    "sounds": [
+      "blocksouls_vehicles:kart/sputter1",
+      "blocksouls_vehicles:kart/sputter2",
+      "blocksouls_vehicles:kart/sputter3"
+    ]
+  },
   "wreck.fit_part": {
     "subtitle": "subtitles.blocksouls_vehicles.wreck.fit_part",
     "sounds": [
@@ -59,6 +74,12 @@
     "subtitle": "subtitles.blocksouls_vehicles.wreck.repaired",
     "sounds": [
       "blocksouls_vehicles:kart/repaired1"
+    ]
+  },
+  "kart.horn": {
+    "subtitle": "subtitles.blocksouls_vehicles.kart.horn",
+    "sounds": [
+      "blocksouls_vehicles:kart/horn"
     ]
   }
 }

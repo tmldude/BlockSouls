@@ -1,0 +1,33 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "blocksouls_bosses",
+        "blocksouls_world"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "ER",
+    "SG"
+  ],
+  "key": {
+    "E": "blocksouls_bosses:ember_barrel",
+    "R": "blocksouls_guns:gun_receiver",
+    "S": "blocksouls_bosses:ashwyrm_scale",
+    "G": "blocksouls_world:gunmetal_ingot"
+  },
+  "result": {
+    "id": "blocksouls_guns:hand_cannon",
+    "components": {
+      "blocksouls_guns:rarity": "rare",
+      "blocksouls_guns:perks": [
+        "blocksouls_guns:explosive_rounds"
+      ],
+      "minecraft:rarity": "rare"
+    }
+  }
+}

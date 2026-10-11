@@ -1,0 +1,7 @@
+{
+  "type": "blocksouls_world:ruin",
+  "kind": "wreck",
+  "biomes": "#blocksouls_world:has_structure/wreck",
+  "spawn_overrides": {},
+  "step": "surface_structures"
+}

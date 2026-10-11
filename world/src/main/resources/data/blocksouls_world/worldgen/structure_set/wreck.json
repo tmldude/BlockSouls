@@ -1,0 +1,13 @@
+{
+  "structures": [
+    {
+      "structure": "blocksouls_world:wreck",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "blocksouls_world:config_spread",
+    "key": "wreck",
+    "salt": 1730429161
+  }
+}

@@ -12,7 +12,7 @@ Defaults picked by the `audio` session. Same rules as `DECISIONS.md` (the root f
 - **Loudness:** every sound is normalized to a per-kind peak (handling sounds 0.45–0.65, shots and impacts 0.8–0.92)
   and turned down if its loudest 100 ms RMS is over 0.4 (`synth.MAX_RMS`), so nothing approaches vanilla thunder's
   sustained full scale. Mono `.ogg` (quality 4) for every positional sound; stereo quality 3 for music.
-- **Size:** 186 new files, 7.9 MB (guns 0.4, bosses SFX 2.9, music 4.3, kart 0.25). Under the 15 MB budget.
+- **Size:** 191 new files, 7.9 MB (guns 0.4, bosses SFX 2.9, music 4.3, kart 0.3). Under the 15 MB budget.
 - **`check_sounds.py`** covers mobs, guns, bosses and vehicles: registered events vs. `sounds.json` both ways,
   every named file exists, no entry points at a vanilla sound or event, every subtitle has a lang line. Added to
   CI's "Check art assets" step.
@@ -44,12 +44,14 @@ Defaults picked by the `audio` session. Same rules as `DECISIONS.md` (the root f
   96 bpm, huge drums, low brass stabs, fire bed, rising horn. Stormplate: E minor 112 bpm, eighth-note bass, steel
   backbeat, thunder rolls, arpeggiated lead. Final raid: B minor 60 bpm, void drone, organ, crystal-bell arpeggios,
   slow enormous drum, choir in the last third.
-- **Kart** (`vehicles/.../sounds/kart/`, `vehicle_sounds.py`, 17 files): engine loop = a two-stroke pulse train
+- **Kart** (`vehicles/.../sounds/kart/`, `vehicle_sounds.py`, 22 files): engine loop = a two-stroke pulse train
   through exhaust resonances + intake hiss, whole cycles at 52 Hz for pitch 1.0 (so `KartEngineSound`'s 0.5–1.6
   covers idle 26 Hz to ~83 Hz), tail cross-faded into the head (no fade at the ends). Skid squeal (2), crash/ram
   panel crunch + clank + rattle (3), breakdown bang + dying cough + clatter (2), repair = three hammer blows on
   sheet metal (2), part fitted = ratchet + clunk (2), repaired = engine catching (1), hop boing + thunk (2),
-  boost exhaust pop + turbo whoosh (2). The horn is the kart-fuel-horn session's; `vehicle_sounds.py` keeps any
+  boost exhaust pop + turbo whoosh (2), refuel = glugs rising in pitch as the tank fills + cap clink (2), sputter
+  = uneven misfire coughs (3; `kart.refuel` and `kart.sputter` came from kart-fuel-horn with vanilla placeholders and
+  were replaced after merging main). The horn is the kart-fuel-horn session's; `vehicle_sounds.py` keeps any
   entry it doesn't own.
 
 ## New events (registration classes) and their one-line hooks

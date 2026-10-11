@@ -1,5 +1,7 @@
 package io.github.tmldude.blocksouls.game.client.hud;
 
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -7,6 +9,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
+import io.github.tmldude.blocksouls.game.player.boon.BoonIcons;
 import io.github.tmldude.blocksouls.game.player.boon.BoonPayloads.BoonView;
 import io.github.tmldude.blocksouls.game.player.boon.BoonTier;
 
@@ -39,8 +42,23 @@ public final class BoonStyle {
 		return Component.translatable("boon." + boon.getNamespace() + "." + boon.getPath() + ".desc");
 	}
 
-	public static ItemStack icon(BoonView boon) {
-		Item item = BuiltInRegistries.ITEM.getValue(boon.icon());
+	public static final Identifier WILDCARD_ICON = Identifier.parse(BoonIcons.WILDCARD);
+
+	/** Draws a boon icon (a GUI sprite or an item, see {@link BoonIcons}) as a {@code size}x{@code size} square. */
+	public static void drawIcon(GuiGraphicsExtractor graphics, Identifier icon, int x, int y, int size) {
+		if (BoonIcons.isSprite(icon.toString())) {
+			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon, x, y, size, size);
+			return;
+		}
+		graphics.pose().pushMatrix();
+		graphics.pose().translate(x, y);
+		graphics.pose().scale(size / 16.0F, size / 16.0F);
+		graphics.fakeItem(itemIcon(icon), 0, 0);
+		graphics.pose().popMatrix();
+	}
+
+	private static ItemStack itemIcon(Identifier icon) {
+		Item item = BuiltInRegistries.ITEM.getValue(icon);
 		return new ItemStack(item == null || item == Items.AIR ? Items.BARRIER : item);
 	}
 }

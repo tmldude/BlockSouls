@@ -1,6 +1,6 @@
 {
   "tier": "common",
-  "icon": "minecraft:rabbit_foot",
+  "icon": "blocksouls_game:boon/spring_legs",
   "effects": [
     {
       "type": "attribute",

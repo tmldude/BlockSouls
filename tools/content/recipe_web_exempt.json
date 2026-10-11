@@ -1,0 +1,20 @@
+{
+	"exempt": {
+		"blocksouls_guns:auto_rifle": "gear (gun)",
+		"blocksouls_guns:hand_cannon": "gear (gun)",
+		"blocksouls_guns:shotgun": "gear (gun)",
+		"blocksouls_guns:sniper_rifle": "gear (gun)",
+		"blocksouls_guns:primary_ammo": "consumable (ammo), crafted cheaply from vanilla on purpose",
+		"blocksouls_guns:special_ammo": "consumable (ammo)",
+		"blocksouls_bosses:dragonscale_helmet": "gear (boss armor, not craftable by design)",
+		"blocksouls_bosses:dragonscale_chestplate": "gear (boss armor, not craftable by design)",
+		"blocksouls_bosses:dragonscale_leggings": "gear (boss armor, not craftable by design)",
+		"blocksouls_bosses:dragonscale_boots": "gear (boss armor, not craftable by design)",
+		"blocksouls_bosses:wraith_steed_whistle": "unique boss item",
+		"blocksouls_bosses:final_dragon_trophy": "trophy",
+		"blocksouls_game:relic_common": "consumable (boon relic, dropped by game code, spent on a card pick)",
+		"blocksouls_game:relic_rare": "consumable (boon relic, dropped by game code, spent on a card pick)",
+		"blocksouls_game:relic_legendary": "consumable (boon relic, dropped by game code, spent on a card pick)"
+	},
+	"debt": {}
+}

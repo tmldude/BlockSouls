@@ -151,6 +151,17 @@ public class FinalRaidGameTests {
 		});
 	}
 
+	/** The final raid has no fog wall, so no seal either: the whole island stays open. */
+	@GameTest(environment = ENV)
+	public void finalDragonHasNoSeal(GameTestHelper helper) {
+		FinalDragon dragon = dragon(helper);
+		dragon.engage(player(helper));
+		helper.assertTrue(dragon.isEngaged(), "not engaged");
+		helper.assertTrue(!dragon.fogWall().isUp(), "the final raid raised a fog wall");
+		helper.assertTrue(!dragon.seal().isActive(), "the final raid closed an arena seal");
+		helper.succeed();
+	}
+
 	/** Damage can't skip the interludes: a huge hit at full health stops at the wave's threshold. */
 	@GameTest(environment = ENV)
 	public void interludesCantBeSkipped(GameTestHelper helper) {

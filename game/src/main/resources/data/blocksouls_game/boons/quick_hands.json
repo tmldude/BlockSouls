@@ -1,6 +1,6 @@
 {
   "tier": "common",
-  "icon": "minecraft:gunpowder",
+  "icon": "blocksouls_game:boon/quick_hands",
   "stackable": 2,
   "effects": [
     {

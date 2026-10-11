@@ -1,6 +1,6 @@
 {
   "tier": "legendary",
-  "icon": "minecraft:phantom_membrane",
+  "icon": "blocksouls_game:boon/wings",
   "effects": [
     {
       "type": "trait",

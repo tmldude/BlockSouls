@@ -1,6 +1,6 @@
 {
   "tier": "rare",
-  "icon": "minecraft:slime_ball",
+  "icon": "blocksouls_game:boon/slippery",
   "stackable": 2,
   "effects": [
     {
