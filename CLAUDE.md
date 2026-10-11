@@ -3,8 +3,8 @@
 Modded Minecraft (Fabric): Souls-style bosses, Destiny-style guns, COD-style zombies waves,
 web-swinging/wall-climbing, Mario-style jumps. Shipped as a Docker server image + a Modrinth modpack.
 
-- **The plan:** `PLAN.md`. Work top-down, one phase at a time; don't start a phase until the previous
-  one's "Done when" passes.
+- **The plan:** `PLAN.md`. §0b is the game design every feature serves. §8 splits the work into waves of
+  parallel sessions, each owning one module; don't start a wave until the previous one is merged with CI green.
 - **Decisions:** `DECISIONS.md` logs every default chosen. Where it conflicts with `PLAN.md`, `DECISIONS.md` wins.
   Add an entry whenever you pick a default the plan doesn't specify.
 

@@ -53,6 +53,26 @@ every night and keep scaling, COD-style, with no reset.
 
 **Difficulty:** admins pick a difficulty preset when starting a world (multiplies wave size, mob health and damage).
 
+**Wave pressure rules:**
+- **Block breaking:** ~1 in 10 wave zombies can slowly break player-placed blocks (never terrain); the share
+  and speed creep up with the wave number. Brutes and Mutants always can.
+- **No sleeping during an active wave.** Beds still set spawn, and sleeping works once the night's waves are over.
+- **Other dimensions don't get waves, but they're no escape:** the wave counter still advances on nights nobody
+  is in the overworld (you just miss that night's loot). The Nether has its own pressure; see "Nether" below.
+
+**Run rewards (roguelike boons):** at dawn after surviving a night, each player picks 1 of 3 boons. Boons improve
+physical attributes and playstyle (health, speed, stamina, jump, reload, loot luck, radiation resistance, ...),
+with rarities and a few synergies.
+
+**Vehicles: repairable wrecks, made fun.** Broken-down vehicles in the world get fixed with parts:
+- a 4-seat kart-style buggy (bouncy, drifty);
+- a gun-truck variant with a passenger-manned turret on the back;
+- a late-game hover speeder (needs a radioactive core).
+
+**Framing: show, don't tell.** No lore dumps or quest text. The world explains itself: wrecks, ruins, rad
+craters, an infected Nether, sky and sound cues before dusk, item names that hint. Tooltips state mechanics,
+never story.
+
 ## 1. Repo skeleton
 
 ```
@@ -258,28 +278,63 @@ Each weapon = one JSON definition in the framework's format + a GeckoLib or JSON
 - `release.yml`: on `v*` tag → build, test, GHCR push `ghcr.io/<user>/blocksouls:<tag>` and `:latest`, packwiz export, GitHub release with `.mrpack` + jars.
 - Server update doc: tag → wait for CI → `docker compose pull && up -d` → tell friends to update pack in Modrinth App.
 
-## 8. Suggested session plan for Claude Code
+## 8. Session plan (parallel workstreams)
 
-Each line is one focused session. Expect ~15–20 sessions to v1.
+Goal: get to a playable v1 by running sessions **in parallel**, each in its own worktree and branch, each owning
+one module so they rarely touch the same files. Sections 3–7 still describe the features; this section says
+who builds what, in what order. Phase letters (A–E) no longer gate each other; the waves below do.
 
-1. Phase 1 skeleton + CI
-2. Docker + compose + local join test
-3. packwiz pack + third-party mod selection (verify versions!) → first friend-joinable release `v0.1.0`
-4. A1 jump + A2 roll (+ stamina)
-5. A3 wall climb
-6. A4 web swing (two sessions likely)
-7. B1 weapons ×3, framework integration
-8. B1 weapons ×3 + B2 ammo
-9. B3 perks + B4 precision → `v0.2.0`
-10. C1 arena data + commands + round manager
-11. C2 horde zombie + C3 barricades/buys
-12. C3 mystery box, power-ups, scoreboard → `v0.3.0`
-13. D1 framework + lock-on + fog wall
-14. D2 Ashwyrm model + P1
-15. D2 P2/P3 + loot → `v0.4.0`
-16. E polish, balance, HUD → `v1.0.0`
+### Module layout (set up in Wave 0)
 
-Deferred to v2: exotics, perk machines, The Vault raid, more bosses.
+| Module | Owns |
+|---|---|
+| `common` | **Contracts every module codes against**: the run's game state (wave number, phase, endless flag, difficulty), game events (wave start/end, dawn, boon picked, boss killed), mob-spawn-by-id API, shared tags and damage types, config + networking helpers, debug-command registry |
+| `movement` | Jump, roll, climb, web swing, stamina (A1–A4) |
+| `guns` | Weapon framework, all guns incl. Starter Pistol, ammo, perks, precision hits |
+| `game` (was `zombies`) | Day/night length, wave scheduler, multi-wave nights, dawn pause, sleep rule, dimension rule, starting kit, boons, difficulty presets, endless mode, wave HUD, arena side mode |
+| `mobs` | Wave roster, mutants, Nether mobs, block-breaking AI; spawned by id through `common` |
+| `world` | Scrap, ores, worldgen, wrecks/ruins/structures, radiation zones, loot tables, Ender Eye sources |
+| `vehicles` | Kart, gun truck, speeder; wreck repair |
+| `bosses` | Boss framework, boss bar, lock-on, field bosses, final dragon raid |
+
+Rules for parallel work:
+- `common`'s contracts are written in Wave 0 and **frozen**. Changing one is its own small PR, merged before
+  anyone depends on the change.
+- Modules talk only through `common`: events, and spawning or looking things up by id. No module imports another feature module.
+- Every session ships **placeholder assets** from the shared generator (`tools/assets/`), so nobody waits on art.
+  The Graphics session replaces them later.
+- Every feature gets debug commands (`/bs wave start 7`, `/bs spawn mobs:brute`, `/bs time dusk`, ...) and at least
+  one server gametest, so CI can check it without a human.
+
+### Wave 0: foundation (one session, sequential; everything depends on it)
+1. **Working build:** network access or CI green; real `./gradlew build` + runClient/runServer.
+2. Module layout above; `common` contracts with stub implementations; debug-command registry; gametest
+   harness in CI (server gametests headless, client gametests under xvfb for smoke screenshots).
+3. Placeholder asset generator; verify GeckoLib (and any third-party mod we still want) has a 26.3 build.
+
+### Wave 1: features (parallel, one worktree each)
+| Session | Builds |
+|---|---|
+| **Game loop & waves** (dedicated) | Everything in `game` |
+| Mobs | Wave roster (8 types), mutants, Nether mobs, block breaking |
+| Guns | Own hitscan/projectile framework, 6 weapons + Starter Pistol, ammo, perks, precision |
+| World & items | Scrap, ores, wrecks/ruins, radiation, loot, Ender Eye sources, Nether changes |
+| Vehicles | Kart, gun truck, speeder, repair |
+| Movement | A4 web swing + roll visuals |
+
+### Wave 2: bosses & look (parallel)
+| Session | Builds |
+|---|---|
+| Boss framework + field bosses | D1, D2, D2b, custom boss bar |
+| **Final raid** (dedicated) | Reworked Ender Dragon, endless-mode trigger |
+| Graphics & audio | Textures, models, sounds, particles, blood-moon / dusk sky cues, HUD styling |
+
+### Wave 3: intersections (sequential)
+Wire it all together: mob roster into waves, drops into recipes into progression gates, boons tuned,
+balance to a ~2-hour run, performance with 4 players at wave 10, full-run gametest with scripted waves →
+`v1.0.0`.
+
+Each wave ends with its branches merged to `main` and CI green, before the next wave starts.
 
 ## 9. Known risks
 
@@ -287,3 +342,9 @@ Deferred to v2: exotics, perk machines, The Vault raid, more bosses.
 - Vanilla "moved too quickly" checks fight custom movement → set `MAX_MOVE_SPEED` override or flag movement states so our server mixin skips the check for them.
 - GeckoLib learning curve for the dragon → prototype with a scaled vanilla Ender Dragon model first, swap later.
 - Swing physics is the only part with real tuning risk; budget playtest time.
+- **Art is the biggest gap for "show, don't tell".** Code sessions can generate decent procedural pixel textures and
+  simple block/item models, but animated mob and boss models and good sound design need either a human with
+  Blockbench or CC0 asset packs (licenses in `ASSETS.md`). Plan the Graphics session around that.
+- **"One-shot to playable" needs automated verification.** Parallel sessions only converge if each can build and run
+  gametests itself, hence Wave 0's working build and gametest harness. Fun still needs human playtests.
+- **Balance of a 2-hour run** can only be tuned by playing it; everything tunable stays in config.
