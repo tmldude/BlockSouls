@@ -17,6 +17,7 @@ REPO = os.path.join(HERE, "..", "..")
 GEN = os.path.join(REPO, "tools", "assets", "gen.py")
 TEX = os.path.join(HERE, "..", "src", "client", "resources", "assets", "blocksouls_world", "textures")
 
+sys.dont_write_bytecode = True  # keep tools/assets free of __pycache__
 sys.path.insert(0, os.path.dirname(GEN))
 import gen  # noqa: E402  (tools/assets/gen.py)
 
