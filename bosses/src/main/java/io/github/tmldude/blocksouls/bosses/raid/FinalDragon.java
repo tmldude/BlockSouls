@@ -267,9 +267,10 @@ public class FinalDragon extends BossEntity {
 		RaidArena a = arena();
 		double dx = entity.getX() - (a.center().getX() + 0.5);
 		double dz = entity.getZ() - (a.center().getZ() + 0.5);
-		double r = config().arenaRadius;
+		// Scaled like the flight, so small arenas (tests, summons outside the End) don't pull in players far away.
+		double r = a.scaled(config().arenaRadius);
 		double dy = entity.getY() - a.floorY();
-		return dx * dx + dz * dz <= r * r && dy >= -config().arenaBelow && dy <= config().arenaAbove;
+		return dx * dx + dz * dz <= r * r && dy >= -a.scaled(config().arenaBelow) && dy <= a.scaled(config().arenaAbove);
 	}
 
 	@Override

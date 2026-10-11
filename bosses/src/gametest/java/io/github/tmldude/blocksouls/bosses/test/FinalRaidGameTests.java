@@ -247,19 +247,19 @@ public class FinalRaidGameTests {
 		helper.runAfterDelay(10, () -> dragon.setHealth(dragon.getMaxHealth() * 0.6f));
 		helper.runAfterDelay(400, () -> {
 			helper.assertTrue(dragon.phase() == 1, "not in phase 2 at 60%: " + dragon.debugInfo());
-			helper.assertTrue(dragon.attacksFinished() >= 2, "only " + dragon.attacksFinished() + " attacks in phase 2 (flying)");
+			helper.assertTrue(dragon.attacksFinished() >= 2, "only " + dragon.attacksFinished() + " attacks in phase 2 (flying): " + dragon.debugInfo());
 			mark[1] = dragon.attacksFinished();
 			dragon.forcePerch();
 		});
 		helper.runAfterDelay(700, () -> {
-			helper.assertTrue(dragon.attacksFinished() > mark[1], "no attack finished while perched");
+			helper.assertTrue(dragon.attacksFinished() > mark[1], "no attack finished while perched: " + dragon.debugInfo());
 			dragon.setHealth(dragon.getMaxHealth() * 0.2f);
 		});
 		helper.runAfterDelay(1000, () -> mark[2] = dragon.attacksFinished());
 		helper.succeedWhen(() -> {
 			helper.assertTrue(mark[2] >= 0, "not done yet");
 			helper.assertTrue(dragon.phase() == 2, "not in phase 3 at 20%");
-			helper.assertTrue(dragon.attacksFinished() >= mark[2] + 2, "attacks stalled in phase 3");
+			helper.assertTrue(dragon.attacksFinished() >= mark[2] + 2, "attacks stalled in phase 3: " + dragon.debugInfo());
 			helper.assertTrue(dragon.isEngaged(), "fight reset unexpectedly");
 		});
 	}
