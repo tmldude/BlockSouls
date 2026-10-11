@@ -41,6 +41,7 @@ import net.minecraft.world.phys.Vec3;
 
 import io.github.tmldude.blocksouls.bosses.BlockSoulsBosses;
 import io.github.tmldude.blocksouls.bosses.BossesConfig;
+import io.github.tmldude.blocksouls.bosses.arena.ArenaSeal;
 import io.github.tmldude.blocksouls.bosses.arena.FogWall;
 import io.github.tmldude.blocksouls.bosses.bar.BossBars;
 import io.github.tmldude.blocksouls.bosses.field.FieldBosses;
@@ -89,6 +90,7 @@ public abstract class BossEntity extends Monster {
 	private @Nullable BlockPos home;
 	private int arenaRadiusOverride = -1;
 	private final FogWall wall = new FogWall();
+	private final ArenaSeal seal = new ArenaSeal(this);
 	private boolean wallNeedsClearing;
 	private int outOfFightTicks;
 	private boolean returning;
@@ -270,6 +272,11 @@ public abstract class BossEntity extends Monster {
 
 	public FogWall fogWall() {
 		return wall;
+	}
+
+	/** The server-side seal that holds the fog wall at any height while engaged (fog-wall bosses only). */
+	public ArenaSeal seal() {
+		return seal;
 	}
 
 	public double damageMultiplier() {
@@ -461,10 +468,13 @@ public abstract class BossEntity extends Monster {
 	}
 
 	private void engagedTick(ServerLevel level) {
-		// Late joiners: anyone who walks in joins the fight.
+		// Before anything else: whoever crossed the seal since last tick goes back to their side.
+		seal.tick(level);
+
+		// Late joiners: anyone who walks in joins the fight (behind a seal, only someone already inside it).
 		if (tickCount % 10 == 0) {
 			for (ServerPlayer player : level.players()) {
-				if (!participants.contains(player.getUUID()) && !player.isSpectator() && player.isAlive() && inArena(player)) {
+				if (!participants.contains(player.getUUID()) && !player.isSpectator() && player.isAlive() && canJoinFrom(player)) {
 					join(player);
 				}
 			}
@@ -756,11 +766,17 @@ public abstract class BossEntity extends Monster {
 		refreshScaling(level);
 		if (raisesFogWall()) {
 			wall.raise(level, home(), arenaRadius(), framework().fogWallBelow, framework().fogWallAbove);
+			seal.activate(level);
 		}
 		level.playSound(null, home(), io.github.tmldude.blocksouls.bosses.registry.BossSounds.FOG_WALL_CLOSE, SoundSource.HOSTILE, 2.0f, 0.8f);
 		onEngage();
 		BossEvents.ENGAGED.invoker().onBoss(level, definition().id(), this, participants());
 		FieldBosses.onEngaged(level, this);
+	}
+
+	/** Whether {@code player} joins the running fight from where they stand: in the arena, and inside an active seal. */
+	private boolean canJoinFrom(ServerPlayer player) {
+		return inArena(player) && (!seal.isActive() || seal.isInside(player.position()));
 	}
 
 	/** Adds a player to the running fight (late joiner). */
@@ -777,6 +793,7 @@ public abstract class BossEntity extends Monster {
 		}
 		cancelAttack();
 		wall.lower(level);
+		seal.release();
 		entityData.set(DATA_ENGAGED, false);
 		participants.clear();
 		aggro.clear();
@@ -833,7 +850,8 @@ public abstract class BossEntity extends Monster {
 		if (player != null) {
 			if (!isEngaged()) {
 				engage(player);
-			} else {
+			} else if (!seal.isActive() || seal.isInside(player.position())) {
+				// Behind a seal, hits from outside don't make you a participant (who could then walk in).
 				join(player);
 			}
 			if (!inArena(player)) {
@@ -860,6 +878,7 @@ public abstract class BossEntity extends Monster {
 		if (wasAlive && level() instanceof ServerLevel level) {
 			cancelAttack();
 			wall.lower(level);
+			seal.release();
 			List<ServerPlayer> players = participants();
 			Collection<ServerPlayer> credited = List.copyOf(players);
 			BossEvents.KILLED.invoker().onBoss(level, definition().id(), this, credited);
@@ -886,6 +905,8 @@ public abstract class BossEntity extends Monster {
 
 	@Override
 	public void remove(RemovalReason reason) {
+		// Unloaded too: a seal must never outlive its boss's ticking.
+		seal.release();
 		if (reason.shouldDestroy() && level() instanceof ServerLevel level) {
 			cancelAttack();
 			wall.lower(level);

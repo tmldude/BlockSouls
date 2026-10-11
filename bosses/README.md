@@ -213,8 +213,11 @@ Client-side effects (embers, mist) go in your entity's `tick()` under `level().i
 
 Set `arenaRadius` in the definition (or per spawn: `FieldBossRule.Spot(..., arenaRadius)`, `boss.setArenaRadius`).
 On engage the framework raises a one-way fog wall ring of that radius around `boss.home()`: only air and replaceable
-plants become wall, and it remembers exactly which blocks it placed. Arena changes for a phase go in the phase's
-`onEnter` hook; undo them in `onReset()`.
+plants become wall, and it remembers exactly which blocks it placed. On top of the visible wall, the server-side
+**arena seal** (`arena/ArenaSeal`) holds the ring at any height while engaged: participants inside can't leave, nobody
+else can enter, pearls/chorus across it fail and web ropes across it snap (creative and spectators ignore it). Bosses
+with `raisesFogWall() == false` get neither. Arena changes for a phase go in the phase's `onEnter` hook; undo them in
+`onReset()`.
 
 ### 7. Loot
 
