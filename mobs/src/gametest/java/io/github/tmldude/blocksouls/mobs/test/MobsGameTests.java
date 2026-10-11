@@ -37,6 +37,9 @@ import io.github.tmldude.blocksouls.mobs.registry.MobEntities;
 import io.github.tmldude.blocksouls.mobs.registry.MobWaves;
 
 public class MobsGameTests {
+	/** Normal difficulty: the default test environment is peaceful, where monsters can't attack players. */
+	private static final String ENV = "blocksouls_mobs_test:normal";
+
 	private static WaveContext context(int wave, boolean breaker) {
 		return new WaveContext(wave, Difficulty.NORMAL, Set.of(), breaker);
 	}
@@ -70,13 +73,15 @@ public class MobsGameTests {
 		ServerLevel level = helper.getLevel();
 		T mob = MobWaves.create(type, level, helper.absolutePos(new BlockPos(x, 1, z)), context(wave, breaker));
 		helper.assertTrue(mob != null, "factory returned null for " + type);
+		// The game makes wave mobs persistent; without it they'd despawn, being far from the mock players.
+		mob.setPersistenceRequired();
 		// Keep the sun out of the result either way.
 		mob.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 20 * 60, 0));
 		level.addFreshEntity(mob);
 		return mob;
 	}
 
-	@GameTest
+	@GameTest(environment = ENV)
 	public void everyFactoryMakesItsOwnMob(GameTestHelper helper) {
 		floor(helper);
 		int ours = 0;
@@ -98,7 +103,7 @@ public class MobsGameTests {
 		helper.succeed();
 	}
 
-	@GameTest(maxTicks = 400)
+	@GameTest(environment = ENV, maxTicks = 400)
 	public void breakerShamblerBreaksPlanks(GameTestHelper helper) {
 		floor(helper);
 		// The shambler is boxed into the x=2 lane: stone behind it, planks between it and the target.
@@ -120,7 +125,7 @@ public class MobsGameTests {
 		});
 	}
 
-	@GameTest(maxTicks = 260)
+	@GameTest(environment = ENV, maxTicks = 260)
 	public void shamblerLeavesStone(GameTestHelper helper) {
 		floor(helper);
 		wall(helper, 1, Blocks.STONE);
@@ -137,7 +142,7 @@ public class MobsGameTests {
 		});
 	}
 
-	@GameTest(maxTicks = 260)
+	@GameTest(environment = ENV, maxTicks = 260)
 	public void nonBreakerLeavesPlanks(GameTestHelper helper) {
 		floor(helper);
 		wall(helper, 1, Blocks.STONE);
@@ -151,7 +156,7 @@ public class MobsGameTests {
 		});
 	}
 
-	@GameTest(maxTicks = 40)
+	@GameTest(environment = ENV, maxTicks = 40)
 	public void bloaterBurstHurtsButSparesBlocks(GameTestHelper helper) {
 		floor(helper);
 		helper.setBlock(4, 1, 3, Blocks.GLASS);
@@ -173,7 +178,7 @@ public class MobsGameTests {
 		});
 	}
 
-	@GameTest(maxTicks = 40)
+	@GameTest(environment = ENV, maxTicks = 40)
 	public void screamerBuffsNearbyShambler(GameTestHelper helper) {
 		floor(helper);
 		// Mock players are in creative, which mobs refuse to target, so the scream is aimed at a pig.
@@ -191,7 +196,7 @@ public class MobsGameTests {
 		});
 	}
 
-	@GameTest
+	@GameTest(environment = ENV)
 	public void downedPlayersAreNeverTargets(GameTestHelper helper) {
 		floor(helper);
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
@@ -209,7 +214,7 @@ public class MobsGameTests {
 	}
 
 	/** Vanilla burns exactly the mobs in {@code minecraft:burn_in_daylight} (Mob#aiStep). */
-	@GameTest
+	@GameTest(environment = ENV)
 	public void elitesDontBurnInDaylight(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		for (EntityType<?> type : new EntityType<?>[] {MobEntities.SHAMBLER, MobEntities.CRAWLER, MobEntities.SCREAMER, MobEntities.BLOATER,
@@ -223,7 +228,7 @@ public class MobsGameTests {
 		helper.succeed();
 	}
 
-	@GameTest
+	@GameTest(environment = ENV)
 	public void dreadDecaysOutsideTheNether(GameTestHelper helper) {
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		Dread.set(player, 100);
