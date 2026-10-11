@@ -65,4 +65,4 @@ Config: `config/blocksouls/boss-ashwyrm.json` (`AshwyrmConfig`); every number be
 ## Tests
 `AshwyrmGameTests`: registration/tag/stats/items; a scripted phase walk P1 → P2 (takes off, lands at least once
 with a vulnerability window, attacks keep finishing) → P3 (grounded, still attacking); head part ×2; stunned ×2; a
-full fireball run over planks/grass/leaves/hay changes no block; `BossEvents.KILLED` with `CommonIds.ASHWYRM`; loot.
+full fireball run over planks/grass/bookshelf/hay changes no block; `BossEvents.KILLED` with `CommonIds.ASHWYRM`; loot.

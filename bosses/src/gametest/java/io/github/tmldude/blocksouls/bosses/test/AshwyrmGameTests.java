@@ -189,7 +189,7 @@ public class AshwyrmGameTests {
 				helper.setBlock(x, 0, z, (x + z) % 2 == 0 ? Blocks.OAK_PLANKS : Blocks.GRASS_BLOCK);
 			}
 		}
-		helper.setBlock(1, 1, 6, Blocks.OAK_LEAVES);
+		helper.setBlock(1, 1, 6, Blocks.BOOKSHELF);
 		helper.setBlock(6, 1, 1, Blocks.HAY_BLOCK);
 		Pig pig = dummy(helper, 6, 4);
 		// Engage first: the fog wall it raises is the framework's, not a fireball's doing.
