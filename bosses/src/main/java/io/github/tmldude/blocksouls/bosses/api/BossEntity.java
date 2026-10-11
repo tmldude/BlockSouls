@@ -164,8 +164,12 @@ public abstract class BossEntity extends Monster {
 		BossPart part = new BossPart(this, name, width, height, damageMultiplier, offset);
 		parts = Arrays.copyOf(parts, parts.length + 1);
 		parts[parts.length - 1] = part;
-		// Parts take the ids right after the boss's (the client mirrors this in recreateFromPacket).
-		part.setId(getId() + parts.length);
+		// Parts take the ids right after the boss's (the client mirrors this in recreateFromPacket). A client-side boss
+		// has no id yet while it's being constructed (getId() would throw and drop the connection); setId and
+		// recreateFromPacket number the parts once the spawn packet assigns it, as vanilla's dragon does.
+		if (!level().isClientSide()) {
+			part.setId(getId() + parts.length);
+		}
 		return part;
 	}
 
