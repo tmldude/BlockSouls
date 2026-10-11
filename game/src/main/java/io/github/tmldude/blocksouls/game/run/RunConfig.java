@@ -33,13 +33,10 @@ public class RunConfig {
 	/** A new wave only starts if at least this much (real) night is left. */
 	public int minNightLeftSeconds = 60;
 
-	/** count = round((baseCount + countPerWave·wave) · playerFactor · difficulty.waveSize · modifierFactor). */
+	/** count = round((baseCount + countPerWave·wave) · party size factor · difficulty.waveSize · modifierFactor). Party scaling
+	 * (wave size, mobs alive at once, elites) lives in common's party.json. */
 	public double baseCount = 6;
 	public double countPerWave = 3;
-	/** playerFactor = playerFactorBase + playerFactorPerPlayer · players in the overworld. */
-	public double playerFactorBase = 0.6;
-	public double playerFactorPerPlayer = 0.4;
-	public int maxAlive = 30;
 	public double spawnMinDistance = 24;
 	public double spawnMaxDistance = 40;
 	public double minPlayerDistance = 12;

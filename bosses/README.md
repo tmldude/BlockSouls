@@ -256,7 +256,9 @@ within 96 blocks). The final raid boss isn't a field boss: don't register a rule
 
 - `BossEvents.ENGAGED` when a fight starts and `BossEvents.KILLED` with every participant on death, with your boss
   id.
-- Health = base × (1 + 0.5 per extra player in the fight) × `difficulty.mobHealth`; damage × `difficulty.mobDamage`.
+- Health = base × `PartyScaling.bossHealth(players in the fight)` (common's party curve, tuned for 1–8 players) ×
+  `difficulty.mobHealth`; damage × `difficulty.mobDamage`. Mechanics that need several players (plates, adds) scale
+  through `PartyScaling` too.
   The player count is the most players seen in the fight so far (leaving doesn't weaken the boss).
 - Downed players are never targets, can't be hit by `Hitboxes`, and don't keep a fight alive. Everyone dead / downed /
   out of the arena for 10 s → reset: wall down, full heal, walk home.

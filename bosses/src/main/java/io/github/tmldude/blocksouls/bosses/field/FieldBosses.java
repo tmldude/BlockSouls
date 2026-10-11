@@ -30,6 +30,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import io.github.tmldude.blocksouls.bosses.BlockSoulsBosses;
 import io.github.tmldude.blocksouls.bosses.BossesConfig;
 import io.github.tmldude.blocksouls.bosses.api.BossEntity;
+import io.github.tmldude.blocksouls.common.party.PartyScaling;
 import io.github.tmldude.blocksouls.common.event.RunEvents;
 import io.github.tmldude.blocksouls.common.run.Runs;
 
@@ -116,9 +117,11 @@ public final class FieldBosses {
 		}
 		data.lastDay = day;
 		data.pendingToday.clear();
+		// Bigger parties meet field bosses a bit more often (common's party.json).
+		double partyChance = PartyScaling.fieldBossChance(server.getPlayerList().getPlayerCount());
 		for (Map.Entry<Identifier, FieldBossRule> entry : RULES.entrySet()) {
 			FieldBossRule rule = entry.getValue();
-			if (rule.schedule() == FieldBossRule.Schedule.DAILY && RANDOM.nextDouble() < rule.settings().chancePerDay) {
+			if (rule.schedule() == FieldBossRule.Schedule.DAILY && RANDOM.nextDouble() < Math.min(1.0, rule.settings().chancePerDay * partyChance)) {
 				data.pendingToday.add(entry.getKey());
 			}
 		}

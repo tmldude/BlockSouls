@@ -47,6 +47,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.EntityLoadData;
 
+import io.github.tmldude.blocksouls.common.party.PartyScaling;
 import io.github.tmldude.blocksouls.common.CommonIds;
 import io.github.tmldude.blocksouls.common.CommonTags;
 import io.github.tmldude.blocksouls.common.event.RunEvents;
@@ -187,7 +188,7 @@ public final class WaveManager {
 		if (players.isEmpty()) {
 			return;
 		}
-		for (int i = 0; i < SPAWNS_PER_TICK && data.waveSpawned < data.waveTotal && data.waveMobs.size() < config().maxAlive; i++) {
+		for (int i = 0; i < SPAWNS_PER_TICK && data.waveSpawned < data.waveTotal && data.waveMobs.size() < PartyScaling.aliveCap(players.size()); i++) {
 			// A failed spawn still counts, so a wave can't stall on bad terrain; it retries next tick otherwise.
 			if (!spawnOne(server, data, players)) {
 				return;
@@ -207,7 +208,7 @@ public final class WaveManager {
 
 		boolean breaks = random.nextDouble() < WaveMath.breakerShare(data.wave, config());
 		WaveContext context = new WaveContext(data.wave, data.difficulty, modifierIds(data), breaks);
-		boolean allowElite = data.waveElites < WaveMath.maxElites(data.wave, config());
+		boolean allowElite = data.waveElites < WaveMath.maxElites(data.wave, players.size(), config());
 		WaveMobSpec spec = pickSpec(data, random, allowElite);
 		Mob mob = null;
 		if (spec != null) {
