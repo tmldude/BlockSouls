@@ -113,5 +113,13 @@ How to build on the framework: `bosses/README.md`.
 - **Fight length:** not play-tested in this sandbox (no client). Numbers are the brief's; tune `boss-furnace_knight.json`
   in Stage 3 if the fight runs outside 3–5 minutes.
 
+## Found along the way (outside this lane)
+- **26.3 loot table format:** entries/pools take one `"modifier"` (a function object keyed by `"type"`) and one
+  `"condition"`; the old `"functions"`/`"conditions"` lists are silently ignored. The mobs module's loot tables still use
+  `"functions"`, so their `set_count`/looting functions don't apply (each drop is 1 item). `CommonIds.ROLL_PERKS`'s doc
+  example uses `"function"` as the key; in JSON it has to be `"type"`.
+- **A loot table that references a table which didn't load fails the whole loot registry** (unbound value), hence
+  `extraLoot` for cross-module drops.
+
 ## Contract additions
 None: `CommonIds`, `CommonTags.BOSSES` and `BossEvents` already had what this needed.
