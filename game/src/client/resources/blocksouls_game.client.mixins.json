@@ -2,7 +2,10 @@
 	"required": true,
 	"package": "io.github.tmldude.blocksouls.game.client.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"client": [],
+	"client": [
+		"run.RunAttributeProbeMixin",
+		"run.RunMoonMixin"
+	],
 	"injectors": {
 		"defaultRequire": 1
 	},
