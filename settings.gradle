@@ -12,3 +12,6 @@ pluginManagement {
 rootProject.name = 'blocksouls'
 
 include 'common', 'movement', 'guns', 'game', 'mobs', 'world', 'vehicles', 'bosses'
+
+// Test-only: boots every mod together (server game tests + a client game test). Never shipped.
+include 'integration'
