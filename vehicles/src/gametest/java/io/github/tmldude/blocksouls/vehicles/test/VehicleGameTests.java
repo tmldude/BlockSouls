@@ -9,6 +9,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -23,10 +24,17 @@ import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import io.github.tmldude.blocksouls.vehicles.BlockSoulsVehicles;
 import io.github.tmldude.blocksouls.vehicles.VehicleRegistry;
 import io.github.tmldude.blocksouls.vehicles.kart.KartEntity;
+import io.github.tmldude.blocksouls.vehicles.kart.KartFuel;
+import io.github.tmldude.blocksouls.vehicles.kart.KartHorn;
 import io.github.tmldude.blocksouls.vehicles.kart.KartWreckEntity;
 
-/** The test mod adds iron nuggets to {@code blocksouls_vehicles:repair_scrap}, since world's scrap isn't loaded here. */
+/**
+ * The test mod adds iron nuggets to {@code blocksouls_vehicles:repair_scrap}, since world's scrap isn't loaded here,
+ * and zombies to {@code #blocksouls:wave_mobs}, since mobs isn't either.
+ */
 public class VehicleGameTests {
+	private static final Input FORWARD = new Input(true, false, false, false, false, false, false);
+
 	private static void floor(GameTestHelper helper) {
 		for (int x = 0; x < 8; x++) {
 			for (int z = 0; z < 8; z++) {
@@ -195,5 +203,124 @@ public class VehicleGameTests {
 		helper.assertTrue(kart.getHealth() == Math.min(cfg.maxHealth, damaged + cfg.scrapRepairHealth), "scrap restores health");
 		helper.assertFalse(player.isPassenger(), "repairing doesn't board");
 		helper.succeed();
+	}
+
+	@GameTest(maxTicks = 40)
+	public void throttleDrainsFuelButIdlingDoesnt(GameTestHelper helper) {
+		floor(helper);
+		KartEntity driving = helper.spawn(VehicleRegistry.KART, new BlockPos(2, 1, 2));
+		KartEntity idling = helper.spawn(VehicleRegistry.KART, new BlockPos(6, 1, 6));
+		ServerPlayer driver = helper.makeMockServerPlayerInLevel();
+		ServerPlayer idler = helper.makeMockServerPlayerInLevel();
+		driver.startRiding(driving);
+		idler.startRiding(idling);
+		// What vanilla's input packet would set for a player holding W.
+		driver.setLastClientInput(FORWARD);
+		int full = BlockSoulsVehicles.CONFIG.fuel.fuelCapacity;
+
+		helper.runAfterDelay(10, () -> {
+			int burned = full - driving.getFuel();
+			helper.assertTrue(burned >= 8 && burned <= 12, "about 10 ticks of throttle burned, got " + burned);
+			helper.assertTrue(idling.getFuel() == full, "idling burns nothing, fuel " + idling.getFuel());
+			helper.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 40)
+	public void emptyKartDoesntAccelerate(GameTestHelper helper) {
+		floor(helper);
+		KartEntity fueled = helper.spawn(VehicleRegistry.KART, new Vec3(1.5, 1, 1.5));
+		KartEntity empty = helper.spawn(VehicleRegistry.KART, new Vec3(5.5, 1, 1.5));
+		fueled.setYRot(0);
+		empty.setYRot(0);
+		empty.setFuel(0);
+
+		helper.runAfterDelay(5, () -> {
+			Vec3 fueledStart = fueled.position();
+			Vec3 emptyStart = empty.position();
+			for (int i = 0; i < 10; i++) {
+				fueled.simulate(FORWARD);
+				empty.simulate(FORWARD);
+			}
+			double fueledMoved = fueled.position().subtract(fueledStart).horizontalDistance();
+			double emptyMoved = empty.position().subtract(emptyStart).horizontalDistance();
+			helper.assertTrue(fueledMoved > 1, "a fueled kart pulls away, moved " + fueledMoved);
+			helper.assertTrue(emptyMoved < 0.01, "an empty kart doesn't, moved " + emptyMoved);
+			helper.assertTrue(empty.getDeltaMovement().horizontalDistance() < 0.01, "and has no speed");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 20)
+	public void coalRefuelsByTheConfiguredAmount(GameTestHelper helper) {
+		floor(helper);
+		KartEntity kart = helper.spawn(VehicleRegistry.KART, new BlockPos(4, 1, 4));
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		var cfg = BlockSoulsVehicles.CONFIG.fuel;
+		kart.setFuel(100);
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.COAL, 2));
+		kart.interact(player, InteractionHand.MAIN_HAND, kart.position());
+		int coal = cfg.items.get("minecraft:coal");
+		helper.assertTrue(kart.getFuel() == 100 + coal, "coal adds " + coal + ", fuel " + kart.getFuel());
+		helper.assertTrue(player.getMainHandItem().getCount() == 1, "one coal used");
+		helper.assertFalse(player.isPassenger(), "refuelling doesn't board");
+
+		kart.setFuel(cfg.fuelCapacity);
+		kart.interact(player, InteractionHand.MAIN_HAND, kart.position());
+		helper.assertTrue(player.getMainHandItem().getCount() == 1, "a full tank takes no coal");
+		helper.succeed();
+	}
+
+	@GameTest(maxTicks = 40)
+	public void fuelSurvivesBreakingDownAndRepair(GameTestHelper helper) {
+		floor(helper);
+		KartEntity kart = helper.spawn(VehicleRegistry.KART, new BlockPos(4, 1, 4));
+		kart.setFuel(1234);
+		kart.hurtServer(helper.getLevel(), helper.getLevel().damageSources().generic(), BlockSoulsVehicles.CONFIG.kart.maxHealth * 2);
+		KartWreckEntity fresh = helper.spawn(VehicleRegistry.KART_WRECK, new BlockPos(1, 1, 1));
+
+		helper.runAfterDelay(2, () -> {
+			List<KartWreckEntity> wrecks = find(helper, VehicleRegistry.KART_WRECK).stream().filter(w -> w != fresh).toList();
+			helper.assertTrue(wrecks.size() == 1, "the kart broke down into a wreck");
+			KartWreckEntity wreck = wrecks.get(0);
+			helper.assertTrue(wreck.getStoredFuel() == 1234, "the wreck keeps the fuel, " + wreck.getStoredFuel());
+			KartEntity repaired = wreck.repair(helper.getLevel());
+			helper.assertTrue(repaired != null && repaired.getFuel() == 1234, "the repaired kart has it back");
+
+			KartEntity fromFresh = fresh.repair(helper.getLevel());
+			int quarter = KartFuel.repairedStart(BlockSoulsVehicles.CONFIG.fuel);
+			helper.assertTrue(fromFresh != null && fromFresh.getFuel() == quarter, "a wreck that never ran starts at 25%");
+			helper.succeed();
+		});
+	}
+
+	@GameTest(maxTicks = 60)
+	public void hornIsRateLimitedAndPushesANearbyWaveMob(GameTestHelper helper) {
+		floor(helper);
+		KartEntity kart = helper.spawn(VehicleRegistry.KART, new Vec3(2.5, 1, 4.5));
+		ServerPlayer driver = helper.makeMockServerPlayerInLevel();
+		ServerPlayer passenger = helper.makeMockServerPlayerInLevel();
+		driver.startRiding(kart);
+		passenger.startRiding(kart);
+		Zombie near = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new Vec3(5.5, 1, 4.5));
+		Zombie far = helper.spawnWithNoFreeWill(EntityTypes.ZOMBIE, new Vec3(2.5, 1, 4.5 + BlockSoulsVehicles.CONFIG.horn.flinchRadius + 3));
+		var cfg = BlockSoulsVehicles.CONFIG.horn;
+
+		helper.runAfterDelay(2, () -> {
+			near.setDeltaMovement(Vec3.ZERO);
+			far.setDeltaMovement(Vec3.ZERO);
+			helper.assertFalse(KartHorn.honk(passenger), "only the driver honks");
+			helper.assertTrue(KartHorn.honk(driver), "the driver honks");
+			helper.assertFalse(KartHorn.honk(driver), "not again right away");
+			Vec3 push = near.getDeltaMovement();
+			helper.assertTrue(push.x > 0.1, "the nearby wave mob flinches away from the kart, " + push);
+			helper.assertTrue(far.getDeltaMovement().horizontalDistance() < 1e-6, "a mob out of range doesn't");
+		});
+		helper.runAfterDelay(3 + cfg.cooldownTicks, () -> {
+			near.setDeltaMovement(Vec3.ZERO);
+			helper.assertTrue(KartHorn.honk(driver), "honks again after the cooldown");
+			helper.assertTrue(near.getDeltaMovement().horizontalDistance() < 1e-6, "but the flinch has a longer cooldown");
+			helper.succeed();
+		});
 	}
 }

@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import net.fabricmc.api.ModInitializer;
 
 import io.github.tmldude.blocksouls.common.Config;
+import io.github.tmldude.blocksouls.vehicles.kart.KartHorn;
 
 public class BlockSoulsVehicles implements ModInitializer {
 	public static final String MOD_ID = "blocksouls_vehicles";
@@ -18,5 +19,6 @@ public class BlockSoulsVehicles implements ModInitializer {
 		CONFIG = Config.load("vehicles", VehiclesConfig.class, VehiclesConfig::new);
 		VehicleRegistry.init();
 		VehicleCommands.register();
+		KartHorn.register();
 	}
 }

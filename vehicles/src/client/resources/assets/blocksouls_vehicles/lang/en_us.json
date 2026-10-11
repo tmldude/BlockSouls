@@ -12,5 +12,11 @@
 	"subtitles.blocksouls_vehicles.kart.break": "Kart breaks down",
 	"subtitles.blocksouls_vehicles.kart.repair": "Kart patched up",
 	"subtitles.blocksouls_vehicles.wreck.fit_part": "Part fitted",
-	"subtitles.blocksouls_vehicles.wreck.repaired": "Wreck repaired"
+	"subtitles.blocksouls_vehicles.wreck.repaired": "Wreck repaired",
+	"item.blocksouls_vehicles.fuel_can": "Fuel Can",
+	"message.blocksouls_vehicles.kart_fuel": "Fuel %s%%",
+	"key.blocksouls.kart_horn": "Kart Horn",
+	"subtitles.blocksouls_vehicles.kart.refuel": "Kart refuelled",
+	"subtitles.blocksouls_vehicles.kart.sputter": "Kart engine sputters",
+	"subtitles.blocksouls_vehicles.kart.horn": "Kart honks"
 }
