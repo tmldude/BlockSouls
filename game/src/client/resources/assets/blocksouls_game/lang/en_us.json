@@ -1,0 +1,10 @@
+{
+	"message.blocksouls_game.pistol_broke": "Your Starter Pistol fell apart. It had a good run.",
+	"title.blocksouls_game.run_over": "Run Over",
+	"title.blocksouls_game.endless": "Endless",
+	"summary.blocksouls_game.waves": "Waves survived: %s",
+	"summary.blocksouls_game.nights": "Nights: %s",
+	"summary.blocksouls_game.bosses": "Bosses felled: %s",
+	"summary.blocksouls_game.time": "Run time: %s",
+	"summary.blocksouls_game.difficulty": "Difficulty: %s"
+}
