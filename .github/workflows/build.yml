@@ -15,6 +15,7 @@ jobs:
         run: |
           python3 -m pip install --quiet pillow
           python3 tools/assets/check_mob_assets.py
+          python3 tools/assets/check_sounds.py
       - name: Validate Gradle wrapper
         uses: gradle/actions/wrapper-validation@v6
       - name: Set up JDK 25
