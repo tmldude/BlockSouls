@@ -48,10 +48,14 @@ public class FullPackClientTest implements FabricClientGameTest {
 			context.waitTicks(200);
 			context.takeScreenshot("05-wave-incoming");
 
-			// The Nether: blight and ash fog, from a safe platform high above the lava sea.
-			server.runCommand("execute in minecraft:the_nether run fill -3 100 -3 3 100 3 minecraft:obsidian");
-			server.runCommand("execute in minecraft:the_nether run fill -3 101 -3 3 104 3 minecraft:air");
-			server.runCommand("execute in minecraft:the_nether run tp @a 0 101 0");
+			// The Nether: blight and ash fog. Teleport first so the chunks load, then clear a pocket around the player
+			// (a fill in unloaded chunks does nothing) and stand them on a platform out of the lava.
+			server.runCommand("effect give @a minecraft:fire_resistance infinite 0 true");
+			server.runCommand("execute in minecraft:the_nether run tp @a 0 100 0");
+			context.waitTicks(60);
+			server.runCommand("execute as @a at @s run fill ~-4 ~-1 ~-4 ~4 ~-1 ~4 minecraft:obsidian");
+			server.runCommand("execute as @a at @s run fill ~-4 ~ ~-4 ~4 ~4 ~4 minecraft:air");
+			server.runCommand("execute as @a at @s run tp @s ~ ~ ~ 0 10");
 			context.waitTicks(100);
 			context.takeScreenshot("06-nether");
 		}
