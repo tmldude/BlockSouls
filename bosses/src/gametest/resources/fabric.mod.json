@@ -1,0 +1,15 @@
+{
+	"schemaVersion": 1,
+	"id": "blocksouls_bosses_test",
+	"version": "${version}",
+	"name": "BlockSouls Bosses game tests",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-gametest": [
+			"io.github.tmldude.blocksouls.bosses.test.BossesGameTests"
+		]
+	},
+	"depends": {
+		"blocksouls_bosses": "*"
+	}
+}

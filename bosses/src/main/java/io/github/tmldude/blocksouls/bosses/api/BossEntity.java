@@ -98,6 +98,7 @@ public abstract class BossEntity extends Monster {
 	private int unattendedTicks;
 	private double damageMultiplier = 1;
 	private boolean scalingApplied;
+	private int attacksFinished;
 
 	protected BossEntity(EntityType<? extends BossEntity> type, Level level) {
 		super(type, level);
@@ -361,14 +362,15 @@ public abstract class BossEntity extends Monster {
 			cooldowns = new int[definition().attacks().size()];
 		}
 		if (!scalingApplied) {
+			// Keeps the health fraction (full for a fresh spawn).
 			scalingApplied = true;
 			refreshScaling(level);
-			setHealth(getMaxHealth());
 		}
 		if (wallNeedsClearing) {
 			// Saved mid-fight: a restart resets the fight.
 			wallNeedsClearing = false;
 			wall.lower(level);
+			setHealth(getMaxHealth());
 		}
 
 		for (int i = 0; i < cooldowns.length; i++) {
@@ -575,6 +577,7 @@ public abstract class BossEntity extends Monster {
 		cooldowns[index] = (int) Math.round(attack.stats().cooldownTicks * current.cooldownMult());
 		lastAttack = index;
 		gap = framework().attackGapTicks;
+		attacksFinished++;
 		run = null;
 		attack.end(finished);
 		syncStage(Stage.NONE, null);
@@ -592,6 +595,11 @@ public abstract class BossEntity extends Monster {
 
 	public @Nullable AttackRun attackRun() {
 		return run;
+	}
+
+	/** Attacks that ran to the end of their recovery since this boss was created (tests use it to spot softlocks). */
+	public int attacksFinished() {
+		return attacksFinished;
 	}
 
 	/** Turns body and head to a horizontal direction. */
