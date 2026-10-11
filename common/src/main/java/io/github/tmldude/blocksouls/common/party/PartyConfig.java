@@ -29,6 +29,8 @@ public class PartyConfig {
 	/** Final raid: pressure plates that must be held, {@code ceil(players / playersPerRaidPlate)}, 1 to raidPlatesMax. */
 	public int playersPerRaidPlate = 2;
 	public int raidPlatesMax = 4;
+	/** Final raid: crystals in each Crystal Order (× its solo count). 2 players ×1.3, 4 ×1.8, 8 ×2.7. */
+	public Curve raidCrystals = new Curve(0.3, 0.9);
 
 	public static class Curve {
 		public double perExtraPlayer;

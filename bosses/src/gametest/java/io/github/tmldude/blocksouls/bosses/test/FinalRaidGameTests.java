@@ -65,6 +65,15 @@ public class FinalRaidGameTests {
 
 	/** A final dragon on foot in a scripted arena: crystals at three corners, plates two blocks east and west. */
 	private static FinalDragon dragon(GameTestHelper helper) {
+		BlockPos center = helper.absolutePos(CENTER);
+		Vec3 c = Vec3.atBottomCenterOf(center);
+		List<Vec3> crystals = List.of(c.add(-3, 2, -3), c.add(3, 2, -3), c.add(-3, 2, 3));
+		List<BlockPos> plates = List.of(center.offset(-2, -1, 0), center.offset(2, -1, 0));
+		return dragon(helper, crystals, plates);
+	}
+
+	/** A final dragon on foot in a scripted arena with the given crystal and plate spots. */
+	private static FinalDragon dragon(GameTestHelper helper, List<Vec3> crystals, List<BlockPos> plates) {
 		floor(helper);
 		BlockPos center = helper.absolutePos(CENTER);
 		// Every chunk the dragon can reach (leash ~4.4 blocks, plus its body) ticks, wherever the chunk borders fall.
@@ -76,8 +85,6 @@ public class FinalRaidGameTests {
 			}
 		}
 		Vec3 c = Vec3.atBottomCenterOf(center);
-		List<Vec3> crystals = List.of(c.add(-3, 2, -3), c.add(3, 2, -3), c.add(-3, 2, 3));
-		List<BlockPos> plates = List.of(center.offset(-2, -1, 0), center.offset(2, -1, 0));
 		FinalDragon dragon = helper.spawn(FinalRaids.TYPE, CENTER);
 		dragon.setArena(RaidArena.of(center, crystals, c.add(0, 3, 0), c, plates, 0.08), false);
 		return dragon;
@@ -245,6 +252,58 @@ public class FinalRaidGameTests {
 		});
 		helper.succeedWhen(() -> {
 			helper.assertTrue(dragon.mode() == FinalDragon.Mode.STUNNED, "not stunned: " + dragon.debugInfo());
+		});
+	}
+
+	/**
+	 * A full party of 8 in the final stand (party.json's curves): 8 crystals, 5 plates placed, and the crystals stay sealed
+	 * until 4 of them are held at once.
+	 */
+	@GameTest(environment = ENV, maxTicks = 300)
+	public void aFullPartyOfEightScalesTheFinalStand(GameTestHelper helper) {
+		BlockPos center = helper.absolutePos(CENTER);
+		Vec3 c = Vec3.atBottomCenterOf(center);
+		List<Vec3> crystals = new ArrayList<>();
+		for (int dx = -3; dx <= 3; dx += 3) {
+			for (int dz = -3; dz <= 3; dz += 3) {
+				if (dx != 0 || dz != 0) {
+					crystals.add(c.add(dx, 2, dz));
+				}
+			}
+		}
+		// Five non-overlapping 3x3 plates, none at the center where the party starts.
+		List<BlockPos> plates = List.of(center.offset(-3, -1, 0), center.offset(3, -1, 0), center.offset(0, -1, -3),
+				center.offset(0, -1, 3), center.offset(-3, -1, -3));
+		FinalDragon dragon = dragon(helper, crystals, plates);
+		List<ServerPlayer> party = new ArrayList<>();
+		for (int i = 0; i < 8; i++) {
+			party.add(player(helper));
+		}
+		dragon.engage(party.getFirst());
+		dragon.forceTarget(dummy(helper));
+		dragon.setHealth(dragon.getMaxHealth() * (float) (FinalRaids.CONFIG.finalStandThreshold - 0.05));
+		helper.runAfterDelay(60, () -> {
+			helper.assertTrue(dragon.phase() == 1, "not in the final stand: " + dragon.debugInfo());
+			CrystalOrder order = dragon.crystalOrder();
+			helper.assertTrue(order != null && order.remaining().size() == 8, "expected 8 crystals: " + dragon.debugInfo());
+			helper.assertTrue(dragon.plateCenters().size() == 5, "8 players get 5 plates: " + dragon.debugInfo());
+			for (int i = 0; i < 3; i++) {
+				Vec3 on = Vec3.atBottomCenterOf(dragon.plateCenters().get(i).above());
+				party.get(i).teleportTo(on.x, on.y, on.z);
+			}
+		});
+		helper.runAfterDelay(80, () -> {
+			CrystalOrder order = dragon.crystalOrder();
+			hitCrystal(helper, dragon, order.next(), party.getLast());
+			helper.assertTrue(order.destroyed() == 0, "3 of 4 plates held, yet a crystal broke: " + dragon.debugInfo());
+			Vec3 on = Vec3.atBottomCenterOf(dragon.plateCenters().get(3).above());
+			party.get(3).teleportTo(on.x, on.y, on.z);
+		});
+		helper.runAfterDelay(100, () -> {
+			CrystalOrder order = dragon.crystalOrder();
+			hitCrystal(helper, dragon, order.next(), party.getLast());
+			helper.assertTrue(order.destroyed() == 1, "4 plates held, but the crystal stayed sealed: " + dragon.debugInfo());
+			helper.succeed();
 		});
 	}
 

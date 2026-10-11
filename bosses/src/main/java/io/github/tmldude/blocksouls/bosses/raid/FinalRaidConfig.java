@@ -18,8 +18,7 @@ public class FinalRaidConfig {
 
 	public double health = 1000;
 	public double armor = 12;
-	/** Mechanics (crystals, plates, wave size, cast time) scale with players up to this many. */
-	public int maxScaledPlayers = 8;
+	// Mechanics (crystals, plates, wave size) scale with players through common's party.json (PartyScaling), 1–8.
 	/** The fight covers the whole main island: this far (horizontally) from its center counts as "in the arena". */
 	public int arenaRadius = 110;
 	/** ...and this far below / above the island surface (the arrival platform is ~15 below). */
@@ -40,10 +39,9 @@ public class FinalRaidConfig {
 	/** The zombie wave starts at this share of health; the herald at this one. */
 	public double waveThreshold = 0.85;
 	public double heraldThreshold = 0.6;
-	/** Zombie wave: base + per player, capped. Spawned around the island this far from the center. */
-	public int waveBase = 4;
-	public int wavePerPlayer = 3;
-	public int waveMax = 30;
+	/** Zombie wave: this many solo, × party.json's wave curve (29 for 8 players), capped. Spawned this far out. */
+	public int waveSolo = 7;
+	public int waveMax = 40;
 	public double waveRadius = 24;
 	/** Wave number the mobs are rolled for (which mob kinds are eligible). */
 	public int waveMobTier = 15;
@@ -84,9 +82,8 @@ public class FinalRaidConfig {
 	public int castMinTicks = 20 * 30;
 	/** A wrong crystal also pushes the cast forward by this share of its length. */
 	public double wrongCrystalCastPenalty = 0.1;
-	/** Crystals in each Crystal Order: this many solo, plus per extra player, at most {@link #crystalsMax}. */
+	/** Crystals in each Crystal Order: this many solo, × party.json's raid-crystal curve, at most {@link #crystalsMax}. */
 	public int crystalsSolo = 3;
-	public int crystalsPerExtraPlayer = 1;
 	public int crystalsMax = 8;
 	/** A wrong crystal heals the dragon by this share of its max health. */
 	public double wrongCrystalHeal = 0.05;

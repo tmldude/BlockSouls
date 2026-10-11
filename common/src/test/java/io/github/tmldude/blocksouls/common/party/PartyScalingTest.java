@@ -61,4 +61,12 @@ class PartyScalingTest {
 		assertEquals(3, PartyScaling.raidPlates(6));
 		assertEquals(4, PartyScaling.raidPlates(8));
 	}
+
+	@Test
+	void raidCrystalsFollowTheirCurve() {
+		assertEquals(1.0, PartyScaling.raidCrystals(1), 1e-9);
+		assertEquals(1.3, PartyScaling.raidCrystals(2), 1e-9);
+		assertEquals(PartyScaling.raidCrystals(8), PartyScaling.raidCrystals(20), 1e-9, "caps at 8");
+		assertTrue(PartyScaling.raidCrystals(8) > 2.6 && PartyScaling.raidCrystals(8) < 2.8);
+	}
 }

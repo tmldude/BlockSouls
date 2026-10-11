@@ -1,34 +1,38 @@
 package io.github.tmldude.blocksouls.bosses.raid.logic;
 
-/** The final raid's numbers that depend on the group size, the clock and the phase. Pure logic, no Minecraft. */
+import io.github.tmldude.blocksouls.common.party.PartyScaling;
+
+/**
+ * The final raid's numbers that depend on the group size, the clock and the phase. Pure logic, no Minecraft. Everything
+ * that grows with players goes through common's {@link PartyScaling} (party.json), tuned for parties of 1–8.
+ */
 public final class RaidMath {
 	private RaidMath() {
 	}
 
-	/** Players the mechanics scale for: at least 1, at most {@code max} (8 by default). */
-	public static int scaledPlayers(int players, int max) {
-		return Math.clamp(players, 1, Math.max(1, max));
+	/** Players the mechanics scale for: at least 1, at most the party cap (8 by default). */
+	public static int scaledPlayers(int players) {
+		return PartyScaling.partySize(players);
 	}
 
-	/** Crystals in a Crystal Order for {@code players} (at least 1 counted): {@code solo} plus some per extra player. */
-	public static int crystalCount(int players, int solo, int perExtraPlayer, int max) {
-		int extra = Math.max(0, players - 1);
-		return Math.clamp(solo + (long) perExtraPlayer * extra, 1, Math.max(1, max));
+	/** Crystals in a Crystal Order: {@code solo} × the party's crystal curve, at least 1, at most {@code max}. */
+	public static int crystalCount(int players, int solo, int max) {
+		return Math.clamp(Math.round(solo * PartyScaling.raidCrystals(players)), 1, Math.max(1, max));
 	}
 
-	/** Plates that must be held at the same time: one per player, at most two (so a solo player can do it). */
+	/** Plates that must be held at the same time: one per two players (1 solo, 4 for a party of 8). */
 	public static int requiredPlates(int players) {
-		return Math.clamp(players, 1, 2);
+		return PartyScaling.raidPlates(players);
 	}
 
-	/** Plates placed: one more than the players (choice of where to stand), between 2 and 4. */
+	/** Plates placed: one more than required (a choice of where to stand), at least 2. */
 	public static int plateSpots(int players) {
-		return Math.clamp(players + 1, 2, 4);
+		return Math.max(2, requiredPlates(players) + 1);
 	}
 
-	/** Mobs in the zombie wave: {@code base} plus {@code perPlayer} each, at most {@code max}. */
-	public static int waveSize(int players, int base, int perPlayer, int max) {
-		return Math.clamp(base + (long) perPlayer * Math.max(1, players), 1, Math.max(1, max));
+	/** Mobs in the zombie wave: {@code solo} × the party's wave curve, at least 1, at most {@code max}. */
+	public static int waveSize(int players, int solo, int max) {
+		return Math.clamp(Math.round(solo * PartyScaling.waveSize(players)), 1, Math.max(1, max));
 	}
 
 	/**

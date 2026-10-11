@@ -58,6 +58,10 @@ public final class PartyScaling {
 		return curve(players, config.fieldBossChance);
 	}
 
+	public static double raidCrystals(int players) {
+		return curve(players, config.raidCrystals);
+	}
+
 	public static int raidPlates(int players) {
 		int perPlate = Math.max(1, config.playersPerRaidPlate);
 		int plates = (partySize(players) + perPlate - 1) / perPlate;

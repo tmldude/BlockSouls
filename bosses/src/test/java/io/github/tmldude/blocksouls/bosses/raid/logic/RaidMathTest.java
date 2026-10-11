@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import io.github.tmldude.blocksouls.bosses.logic.PhaseMath;
+import io.github.tmldude.blocksouls.common.party.PartyScaling;
 
 class RaidMathTest {
 	/** Our dragon's phases: Grounded (raid phase 2), Final Stand (raid phase 3) below 35%. */
@@ -14,40 +15,46 @@ class RaidMathTest {
 
 	@Test
 	void playersScaleUpToEight() {
-		assertEquals(1, RaidMath.scaledPlayers(0, 8));
-		assertEquals(5, RaidMath.scaledPlayers(5, 8));
-		assertEquals(8, RaidMath.scaledPlayers(12, 8));
+		assertEquals(1, RaidMath.scaledPlayers(0));
+		assertEquals(5, RaidMath.scaledPlayers(5));
+		assertEquals(8, RaidMath.scaledPlayers(12));
 	}
 
 	@Test
-	void crystalCountGrowsWithPlayersUpToTheCap() {
-		assertEquals(3, RaidMath.crystalCount(1, 3, 1, 8));
-		assertEquals(4, RaidMath.crystalCount(2, 3, 1, 8));
-		assertEquals(8, RaidMath.crystalCount(8, 3, 1, 8));
-		assertEquals(3, RaidMath.crystalCount(0, 3, 1, 8), "nobody counted yet plays as solo");
+	void crystalCountFollowsThePartyCurve() {
+		assertEquals(3, RaidMath.crystalCount(1, 3, 8), "solo");
+		assertEquals(4, RaidMath.crystalCount(2, 3, 8));
+		assertEquals(5, RaidMath.crystalCount(4, 3, 8));
+		assertEquals(8, RaidMath.crystalCount(8, 3, 8), "a full party of 8");
+		assertEquals(8, RaidMath.crystalCount(20, 3, 8), "bigger parties count as 8");
+		assertEquals(3, RaidMath.crystalCount(0, 3, 8), "nobody counted yet plays as solo");
 	}
 
 	@Test
-	void requiredPlatesIsPlayersCappedAtTwo() {
+	void requiredPlatesIsOnePerTwoPlayers() {
 		assertEquals(1, RaidMath.requiredPlates(1), "solo must be possible");
-		assertEquals(2, RaidMath.requiredPlates(2));
-		assertEquals(2, RaidMath.requiredPlates(8));
+		assertEquals(1, RaidMath.requiredPlates(2));
+		assertEquals(2, RaidMath.requiredPlates(4));
+		assertEquals(4, RaidMath.requiredPlates(8), "a full party holds 4");
+		assertEquals(PartyScaling.raidPlates(8), RaidMath.requiredPlates(8));
 	}
 
 	@Test
-	void plateSpotsAreTwoToFourWithASpare() {
+	void plateSpotsAlwaysHaveASpare() {
 		for (int players = 1; players <= 8; players++) {
 			int spots = RaidMath.plateSpots(players);
-			assertTrue(spots >= 2 && spots <= 4);
+			assertTrue(spots >= 2 && spots <= 5);
 			assertTrue(spots > RaidMath.requiredPlates(players), "always a spare plate");
+			assertTrue(RaidMath.requiredPlates(players) < players || players == 1, "someone is free to break crystals");
 		}
 	}
 
 	@Test
-	void waveGrowsWithPlayersUpToTheCap() {
-		assertEquals(7, RaidMath.waveSize(1, 4, 3, 30));
-		assertEquals(28, RaidMath.waveSize(8, 4, 3, 30));
-		assertEquals(30, RaidMath.waveSize(20, 4, 3, 30));
+	void waveFollowsThePartyCurve() {
+		assertEquals(7, RaidMath.waveSize(1, 7, 40), "solo");
+		assertEquals(29, RaidMath.waveSize(8, 7, 40), "a full party of 8");
+		assertEquals(29, RaidMath.waveSize(20, 7, 40), "bigger parties count as 8");
+		assertEquals(20, RaidMath.waveSize(8, 7, 20), "capped");
 	}
 
 	@Test
