@@ -1,0 +1,18 @@
+{
+  "entity.blocksouls_bosses.furnace_knight": "Furnace Knight",
+  "item.blocksouls_bosses.furnace_knight_spawn_egg": "Furnace Knight Spawn Egg",
+  "block.blocksouls_bosses.fog_wall": "Fog Wall",
+  "key.blocksouls.lock_on": "Lock On",
+  "subtitles.blocksouls_bosses.block.fog_wall.close": "Fog wall closes",
+  "subtitles.blocksouls_bosses.entity.furnace_knight.ambient": "Furnace Knight breathes",
+  "subtitles.blocksouls_bosses.entity.furnace_knight.hurt": "Furnace Knight hurts",
+  "subtitles.blocksouls_bosses.entity.furnace_knight.death": "Furnace Knight falls",
+  "subtitles.blocksouls_bosses.entity.furnace_knight.step": "Heavy footsteps",
+  "subtitles.blocksouls_bosses.entity.furnace_knight.roar": "Furnace Knight roars",
+  "subtitles.blocksouls_bosses.entity.furnace_knight.windup": "Furnace Knight winds up",
+  "subtitles.blocksouls_bosses.entity.furnace_knight.slam": "Cleaver slams",
+  "subtitles.blocksouls_bosses.entity.furnace_knight.swing": "Cleaver sweeps",
+  "subtitles.blocksouls_bosses.entity.furnace_knight.breath": "Furnace roars",
+  "subtitles.blocksouls_bosses.entity.furnace_knight.charge": "Furnace Knight charges",
+  "subtitles.blocksouls_bosses.entity.furnace_knight.pillar": "Fire erupts"
+}

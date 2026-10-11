@@ -1,0 +1,144 @@
+{
+  "block.fog_wall.close": {
+    "subtitle": "subtitles.blocksouls_bosses.block.fog_wall.close",
+    "sounds": [
+      {
+        "name": "minecraft:block.respawn_anchor.deplete",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.furnace_knight.ambient": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.blaze.ambient",
+        "type": "event",
+        "pitch": 0.5,
+        "volume": 0.8
+      }
+    ]
+  },
+  "entity.furnace_knight.hurt": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.iron_golem.hurt",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.furnace_knight.death": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.iron_golem.death",
+        "type": "event",
+        "pitch": 0.5,
+        "volume": 1.5
+      }
+    ]
+  },
+  "entity.furnace_knight.step": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.step",
+    "sounds": [
+      {
+        "name": "minecraft:entity.iron_golem.step",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 0.8
+      }
+    ]
+  },
+  "entity.furnace_knight.roar": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.roar",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ravager.roar",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.furnace_knight.windup": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.windup",
+    "sounds": [
+      {
+        "name": "minecraft:block.furnace.fire_crackle",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.furnace_knight.slam": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.slam",
+    "sounds": [
+      {
+        "name": "minecraft:entity.generic.explode",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.furnace_knight.swing": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.swing",
+    "sounds": [
+      {
+        "name": "minecraft:entity.player.attack.sweep",
+        "type": "event",
+        "pitch": 0.5,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.furnace_knight.breath": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.breath",
+    "sounds": [
+      {
+        "name": "minecraft:entity.blaze.shoot",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.furnace_knight.charge": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.charge",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ravager.step",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.furnace_knight.pillar": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.pillar",
+    "sounds": [
+      {
+        "name": "minecraft:item.firecharge.use",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "music.furnace_knight": {
+    "sounds": [
+      {
+        "name": "minecraft:music_disc.pigstep",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 1.0
+      }
+    ]
+  }
+}
