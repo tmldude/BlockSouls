@@ -40,6 +40,9 @@ public class KartWreckEntity extends Entity {
 	private static final EntityDataAccessor<Integer> DATA_ENGINES = SynchedEntityData.defineId(KartWreckEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_SCRAP = SynchedEntityData.defineId(KartWreckEntity.class, EntityDataSerializers.INT);
 
+	/** The fuel the kart had when it broke down; {@link KartFuel#UNKNOWN} for a wreck that never ran. Server only. */
+	private int storedFuel = KartFuel.UNKNOWN;
+
 	public KartWreckEntity(EntityType<? extends KartWreckEntity> type, Level level) {
 		super(type, level);
 		this.blocksBuilding = true;
@@ -64,6 +67,14 @@ public class KartWreckEntity extends Entity {
 		entityData.set(DATA_WHEELS, progress.wheels());
 		entityData.set(DATA_ENGINES, progress.engines());
 		entityData.set(DATA_SCRAP, progress.scrap());
+	}
+
+	public int getStoredFuel() {
+		return storedFuel;
+	}
+
+	public void setStoredFuel(int fuel) {
+		storedFuel = fuel < 0 ? KartFuel.UNKNOWN : fuel;
 	}
 
 	public static RepairProgress.@Nullable Part partFor(ItemStack stack) {
@@ -148,6 +159,7 @@ public class KartWreckEntity extends Entity {
 		}
 		kart.snapTo(getX(), getY(), getZ(), getYRot(), 0);
 		kart.setHealth(BlockSoulsVehicles.CONFIG.kart.maxHealth);
+		kart.setFuel(KartFuel.afterRepair(storedFuel, BlockSoulsVehicles.CONFIG.fuel));
 		level.addFreshEntity(kart);
 		level.sendParticles(ParticleTypes.POOF, getX(), getY() + 0.5, getZ(), 25, 0.7, 0.3, 0.7, 0.05);
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 0.5, getZ(), 10, 0.5, 0.2, 0.5, 0.02);
@@ -201,6 +213,7 @@ public class KartWreckEntity extends Entity {
 	@Override
 	protected void readAdditionalSaveData(ValueInput input) {
 		setProgress(new RepairProgress(input.getIntOr("wheels", 0), input.getIntOr("engines", 0), input.getIntOr("scrap", 0)));
+		setStoredFuel(input.getIntOr("fuel", KartFuel.UNKNOWN));
 	}
 
 	@Override
@@ -209,5 +222,8 @@ public class KartWreckEntity extends Entity {
 		output.putInt("wheels", progress.wheels());
 		output.putInt("engines", progress.engines());
 		output.putInt("scrap", progress.scrap());
+		if (storedFuel != KartFuel.UNKNOWN) {
+			output.putInt("fuel", storedFuel);
+		}
 	}
 }

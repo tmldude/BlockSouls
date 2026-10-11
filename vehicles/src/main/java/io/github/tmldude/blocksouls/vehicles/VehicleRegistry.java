@@ -30,6 +30,8 @@ public final class VehicleRegistry {
 	/** Repair parts; world's loot tables reference these ids. */
 	public static final Item WHEEL = item("wheel", 16);
 	public static final Item ENGINE = item("engine", 4);
+	/** Refuels a kart (amount in config {@code fuel.items}). */
+	public static final Item FUEL_CAN = item("fuel_can", 16);
 
 	/** Items that count as scrap for repairs (world's scrap; test mods may add more). */
 	public static final TagKey<Item> REPAIR_SCRAP = TagKey.create(Registries.ITEM, id("repair_scrap"));
@@ -40,6 +42,9 @@ public final class VehicleRegistry {
 	public static final SoundEvent KART_RAM = sound("kart.ram");
 	public static final SoundEvent KART_BREAK = sound("kart.break");
 	public static final SoundEvent KART_REPAIR = sound("kart.repair");
+	public static final SoundEvent KART_REFUEL = sound("kart.refuel");
+	public static final SoundEvent KART_SPUTTER = sound("kart.sputter");
+	public static final SoundEvent KART_HORN = sound("kart.horn");
 	public static final SoundEvent WRECK_FIT_PART = sound("wreck.fit_part");
 	public static final SoundEvent WRECK_REPAIRED = sound("wreck.repaired");
 
@@ -53,7 +58,7 @@ public final class VehicleRegistry {
 	/** Forces class loading so everything registers during init. */
 	public static void init() {
 		CreativeModeTabEvents.modifyOutputEvent(ResourceKey.create(Registries.CREATIVE_MODE_TAB, Identifier.withDefaultNamespace("ingredients")))
-				.register(output -> output.insertAfter(Items.IRON_INGOT, WHEEL, ENGINE));
+				.register(output -> output.insertAfter(Items.IRON_INGOT, WHEEL, ENGINE, FUEL_CAN));
 	}
 
 	private static <T extends Entity> EntityType<T> entity(String path, EntityType.Builder<T> builder) {

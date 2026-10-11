@@ -7,12 +7,14 @@ import java.util.Map;
 import org.jspecify.annotations.Nullable;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
@@ -38,6 +40,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import io.github.tmldude.blocksouls.common.CommonTags;
 import io.github.tmldude.blocksouls.common.player.PlayerStatus;
 import io.github.tmldude.blocksouls.vehicles.BlockSoulsVehicles;
 import io.github.tmldude.blocksouls.vehicles.VehicleRegistry;
@@ -46,7 +49,8 @@ import io.github.tmldude.blocksouls.vehicles.VehiclesConfig;
 /**
  * The repaired 4-seat kart. Driven like a boat: the driver's client simulates the movement and the server
  * accepts it (vanilla's vehicle move packets); with nobody driving, the server simulates it (coasting,
- * falling). Ramming and health are server-side.
+ * falling). Ramming, health and fuel are server-side; the driver's client reads the synced fuel to know whether
+ * the engine pulls.
  */
 public class KartEntity extends Entity {
 	public static final int MAX_PASSENGERS = 4;
@@ -58,6 +62,7 @@ public class KartEntity extends Entity {
 
 	private static final EntityDataAccessor<Float> DATA_HEALTH = SynchedEntityData.defineId(KartEntity.class, EntityDataSerializers.FLOAT);
 	private static final EntityDataAccessor<Integer> DATA_HURT_TIME = SynchedEntityData.defineId(KartEntity.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Integer> DATA_FUEL = SynchedEntityData.defineId(KartEntity.class, EntityDataSerializers.INT);
 
 	// Driving state, only meaningful on the side simulating the movement.
 	private Input input = Input.EMPTY;
@@ -71,6 +76,8 @@ public class KartEntity extends Entity {
 	private @Nullable Vec3 lastServerPos;
 	private double measuredSpeed;
 	private final Map<Integer, Integer> lastRammed = new HashMap<>();
+	private final Cooldown horn = new Cooldown();
+	private final Cooldown flinch = new Cooldown();
 
 	// Client visuals, derived from movement so every client sees them, not just the driver.
 	public float wheelSpin;
@@ -88,10 +95,24 @@ public class KartEntity extends Entity {
 		return BlockSoulsVehicles.CONFIG.kart;
 	}
 
+	private static VehiclesConfig.Fuel fuelCfg() {
+		return BlockSoulsVehicles.CONFIG.fuel;
+	}
+
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		builder.define(DATA_HEALTH, cfg().maxHealth);
 		builder.define(DATA_HURT_TIME, 0);
+		builder.define(DATA_FUEL, fuelCfg().fuelCapacity);
+	}
+
+	/** Fuel left, in ticks of throttle. */
+	public int getFuel() {
+		return entityData.get(DATA_FUEL);
+	}
+
+	public void setFuel(int fuel) {
+		entityData.set(DATA_FUEL, KartFuel.clamp(fuel, fuelCfg()));
 	}
 
 	public float getHealth() {
@@ -153,14 +174,7 @@ public class KartEntity extends Entity {
 		}
 
 		if (isLocalInstanceAuthoritative()) {
-			Input driverInput = getControllingPassenger() != null ? input : Input.EMPTY;
-			boolean wasOnGround = onGround();
-			drive(driverInput);
-			double fallSpeed = getDeltaMovement().y;
-			move(MoverType.SELF, getDeltaMovement());
-			if (!wasOnGround && onGround()) {
-				land(fallSpeed);
-			}
+			simulate(getControllingPassenger() != null ? input : Input.EMPTY);
 		} else {
 			deltaRotation = 0;
 			drifting = false;
@@ -173,6 +187,20 @@ public class KartEntity extends Entity {
 			serverTick(serverLevel);
 		} else {
 			clientTick();
+		}
+	}
+
+	/**
+	 * One tick of driving physics with these keys. {@link #tick} runs it on whichever side simulates the kart;
+	 * game tests call it directly, since a mock driver's client doesn't exist to do it.
+	 */
+	public void simulate(Input in) {
+		boolean wasOnGround = onGround();
+		drive(in);
+		double fallSpeed = getDeltaMovement().y;
+		move(MoverType.SELF, getDeltaMovement());
+		if (!wasOnGround && onGround()) {
+			land(fallSpeed);
 		}
 	}
 
@@ -209,7 +237,9 @@ public class KartEntity extends Entity {
 		drifting = nowDrifting;
 
 		if (onGround || inWater) {
-			forward = KartPhysics.forwardSpeed(forward, throttle, inWater ? cfg.waterMaxSpeed : cfg.maxSpeed, cfg);
+			// An empty tank still brakes but won't pull: the kart coasts to a stop.
+			int engine = KartFuel.effectiveThrottle(throttle, forward, getFuel());
+			forward = KartPhysics.forwardSpeed(forward, engine, inWater ? cfg.waterMaxSpeed : cfg.maxSpeed, cfg);
 		} else {
 			forward *= cfg.airDrag;
 		}
@@ -271,6 +301,64 @@ public class KartEntity extends Entity {
 			setDeltaMovement(moved);
 		}
 		ram(level, moved);
+		burnFuel(level);
+	}
+
+	/**
+	 * Burns fuel for the driver's throttle. The server doesn't run the driver's physics, but it knows their keys:
+	 * vanilla sends every client's movement input ({@link ServerPlayer#getLastClientInput}).
+	 */
+	private void burnFuel(ServerLevel level) {
+		if (!(getControllingPassenger() instanceof ServerPlayer driver)) {
+			return;
+		}
+		Input keys = driver.getLastClientInput();
+		int throttle = (keys.forward() ? 1 : 0) - (keys.backward() ? 1 : 0);
+		if (throttle == 0) {
+			return;
+		}
+		VehiclesConfig.Fuel cfg = fuelCfg();
+		int fuel = getFuel();
+		setFuel(KartFuel.burn(fuel, throttle, cfg));
+		if (KartFuel.low(fuel, cfg) && cfg.sputterIntervalTicks > 0 && tickCount % cfg.sputterIntervalTicks == 0) {
+			// Coughs while running low, and when you floor it on an empty tank.
+			Vec3 exhaust = local(-0.35, -1.05);
+			level.sendParticles(ParticleTypes.LARGE_SMOKE, exhaust.x, getY() + 0.55, exhaust.z, 4, 0.1, 0.05, 0.1, 0.02);
+			level.playSound(null, getX(), getY(), getZ(), VehicleRegistry.KART_SPUTTER, SoundSource.NEUTRAL, 0.8f,
+					0.8f + random.nextFloat() * 0.3f);
+		}
+	}
+
+	/**
+	 * Server: sounds the horn if its cooldown allows. Wave mobs close by flinch away from the kart, at most once
+	 * per flinch cooldown: a panic button, not a weapon. Returns whether it honked.
+	 */
+	public boolean honk(ServerLevel level) {
+		VehiclesConfig.Horn cfg = BlockSoulsVehicles.CONFIG.horn;
+		long now = level.getGameTime();
+		if (!horn.tryUse(now, cfg.cooldownTicks)) {
+			return false;
+		}
+		// Variable-range sounds carry 16 blocks per unit of volume.
+		level.playSound(null, getX(), getY(), getZ(), VehicleRegistry.KART_HORN, SoundSource.NEUTRAL,
+				Math.max(1.0f, cfg.hearingRange / 16.0f), 1.0f);
+
+		if (flinch.ready(now, cfg.flinchCooldownTicks)) {
+			double radius = cfg.flinchRadius;
+			List<Mob> mobs = level.getEntitiesOfClass(Mob.class, getBoundingBox().inflate(radius), mob -> mob.isAlive()
+					&& mob.is(CommonTags.WAVE_MOBS) && mob.distanceToSqr(this) <= radius * radius);
+			if (!mobs.isEmpty()) {
+				flinch.tryUse(now, cfg.flinchCooldownTicks);
+				DamageSource source = level.damageSources().generic();
+				for (Mob mob : mobs) {
+					mob.getNavigation().stop();
+					// knockback() pushes away from the given direction, so point it at the kart.
+					mob.knockback(cfg.flinchStrength, getX() - mob.getX(), getZ() - mob.getZ(), source, 0);
+					level.sendParticles(ParticleTypes.SMOKE, mob.getX(), mob.getY(1.0) + 0.2, mob.getZ(), 3, 0.2, 0.1, 0.2, 0.01);
+				}
+			}
+		}
+		return true;
 	}
 
 	private void ram(ServerLevel level, Vec3 moved) {
@@ -394,6 +482,7 @@ public class KartEntity extends Entity {
 		if (wreck != null) {
 			wreck.snapTo(getX(), getY(), getZ(), getYRot(), 0);
 			wreck.setProgress(RepairProgress.brokenKart(cfg(), BlockSoulsVehicles.CONFIG.wreck));
+			wreck.setStoredFuel(getFuel());
 			level.addFreshEntity(wreck);
 		}
 		level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 0.5, getZ(), 30, 0.6, 0.3, 0.6, 0.05);
@@ -409,6 +498,18 @@ public class KartEntity extends Entity {
 			return result;
 		}
 		ItemStack stack = player.getItemInHand(hand);
+		int fuelValue = fuelValue(stack);
+		if (KartFuel.canRefuel(getFuel(), fuelValue, fuelCfg())) {
+			if (level() instanceof ServerLevel level) {
+				setFuel(KartFuel.refuel(getFuel(), fuelValue, fuelCfg()));
+				stack.consume(1, player);
+				level.sendParticles(ParticleTypes.SMOKE, getX(), getY() + 0.6, getZ(), 6, 0.4, 0.2, 0.4, 0.02);
+				level.playSound(null, getX(), getY(), getZ(), VehicleRegistry.KART_REFUEL, SoundSource.NEUTRAL, 1.0f, 1.0f);
+				player.sendOverlayMessage(Component.translatable("message.blocksouls_vehicles.kart_fuel",
+						(int) Math.round(KartFuel.share(getFuel(), fuelCfg()) * 100)));
+			}
+			return InteractionResult.SUCCESS;
+		}
 		if (stack.is(VehicleRegistry.REPAIR_SCRAP) && getHealth() < cfg().maxHealth) {
 			if (level() instanceof ServerLevel level) {
 				setHealth(getHealth() + cfg().scrapRepairHealth);
@@ -427,6 +528,15 @@ public class KartEntity extends Entity {
 			return InteractionResult.PASS;
 		}
 		return InteractionResult.SUCCESS;
+	}
+
+	/** Fuel one of this item adds (config {@code fuel.items}), 0 if it isn't fuel. */
+	public static int fuelValue(ItemStack stack) {
+		if (stack.isEmpty()) {
+			return 0;
+		}
+		Integer value = BlockSoulsVehicles.CONFIG.fuel.items.get(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString());
+		return value == null ? 0 : value;
 	}
 
 	@Override
@@ -498,10 +608,13 @@ public class KartEntity extends Entity {
 	@Override
 	protected void readAdditionalSaveData(ValueInput input) {
 		setHealth(input.getFloatOr("health", cfg().maxHealth));
+		// Karts saved before fuel existed get a full tank.
+		setFuel(input.getIntOr("fuel", fuelCfg().fuelCapacity));
 	}
 
 	@Override
 	protected void addAdditionalSaveData(ValueOutput output) {
 		output.putFloat("health", getHealth());
+		output.putInt("fuel", getFuel());
 	}
 }
