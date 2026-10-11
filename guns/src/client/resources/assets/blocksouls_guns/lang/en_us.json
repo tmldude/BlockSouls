@@ -35,5 +35,9 @@
   "subtitles.blocksouls_guns.gun.empty": "Gun clicks empty",
   "subtitles.blocksouls_guns.gun.reload": "Gun reloads",
   "subtitles.blocksouls_guns.gun.ricochet": "Bullet ricochets",
-  "subtitles.blocksouls_guns.gun.explosive_round": "Round explodes"
+  "subtitles.blocksouls_guns.gun.explosive_round": "Round explodes",
+  "subtitles.blocksouls_guns.gun.ammo_pickup": "Ammo clinks",
+  "subtitles.blocksouls_guns.gun.perk.outlaw": "Cylinder spins",
+  "subtitles.blocksouls_guns.gun.perk.rampage": "Rampage builds",
+  "subtitles.blocksouls_guns.gun.perk.vorpal": "Vorpal strikes"
 }

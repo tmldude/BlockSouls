@@ -39,6 +39,7 @@ public final class VehicleRegistry {
 	public static final SoundEvent KART_ENGINE = sound("kart.engine");
 	public static final SoundEvent KART_HOP = sound("kart.hop");
 	public static final SoundEvent KART_BOOST = sound("kart.boost");
+	public static final SoundEvent KART_SKID = sound("kart.skid");
 	public static final SoundEvent KART_RAM = sound("kart.ram");
 	public static final SoundEvent KART_BREAK = sound("kart.break");
 	public static final SoundEvent KART_REPAIR = sound("kart.repair");

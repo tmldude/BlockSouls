@@ -1,98 +1,85 @@
 {
-	"kart.engine": {
-		"subtitle": "subtitles.blocksouls_vehicles.kart.engine",
-		"sounds": [
-			{
-				"name": "minecraft:entity.bee.loop",
-				"type": "event"
-			}
-		]
-	},
-	"kart.hop": {
-		"subtitle": "subtitles.blocksouls_vehicles.kart.hop",
-		"sounds": [
-			{
-				"name": "minecraft:entity.slime.jump",
-				"type": "event"
-			}
-		]
-	},
-	"kart.boost": {
-		"subtitle": "subtitles.blocksouls_vehicles.kart.boost",
-		"sounds": [
-			{
-				"name": "minecraft:entity.firework_rocket.launch",
-				"type": "event"
-			}
-		]
-	},
-	"kart.ram": {
-		"subtitle": "subtitles.blocksouls_vehicles.kart.ram",
-		"sounds": [
-			{
-				"name": "minecraft:entity.zombie.attack_iron_door",
-				"type": "event"
-			}
-		]
-	},
-	"kart.break": {
-		"subtitle": "subtitles.blocksouls_vehicles.kart.break",
-		"sounds": [
-			{
-				"name": "minecraft:entity.generic.explode",
-				"type": "event"
-			}
-		]
-	},
-	"kart.repair": {
-		"subtitle": "subtitles.blocksouls_vehicles.kart.repair",
-		"sounds": [
-			{
-				"name": "minecraft:entity.iron_golem.repair",
-				"type": "event"
-			}
-		]
-	},
-	"wreck.fit_part": {
-		"subtitle": "subtitles.blocksouls_vehicles.wreck.fit_part",
-		"sounds": [
-			{
-				"name": "minecraft:block.smithing_table.use",
-				"type": "event"
-			}
-		]
-	},
-	"wreck.repaired": {
-		"subtitle": "subtitles.blocksouls_vehicles.wreck.repaired",
-		"sounds": [
-			{
-				"name": "minecraft:block.anvil.use",
-				"type": "event"
-			}
-		]
-	},
-	"kart.refuel": {
-		"subtitle": "subtitles.blocksouls_vehicles.kart.refuel",
-		"sounds": [
-			{
-				"name": "minecraft:item.bucket.fill",
-				"type": "event"
-			}
-		]
-	},
-	"kart.sputter": {
-		"subtitle": "subtitles.blocksouls_vehicles.kart.sputter",
-		"sounds": [
-			{
-				"name": "minecraft:block.fire.extinguish",
-				"type": "event"
-			}
-		]
-	},
-	"kart.horn": {
-		"subtitle": "subtitles.blocksouls_vehicles.kart.horn",
-		"sounds": [
-			"blocksouls_vehicles:kart/horn"
-		]
-	}
+  "kart.engine": {
+    "subtitle": "subtitles.blocksouls_vehicles.kart.engine",
+    "sounds": [
+      "blocksouls_vehicles:kart/engine1"
+    ]
+  },
+  "kart.hop": {
+    "subtitle": "subtitles.blocksouls_vehicles.kart.hop",
+    "sounds": [
+      "blocksouls_vehicles:kart/hop1",
+      "blocksouls_vehicles:kart/hop2"
+    ]
+  },
+  "kart.boost": {
+    "subtitle": "subtitles.blocksouls_vehicles.kart.boost",
+    "sounds": [
+      "blocksouls_vehicles:kart/boost1",
+      "blocksouls_vehicles:kart/boost2"
+    ]
+  },
+  "kart.skid": {
+    "subtitle": "subtitles.blocksouls_vehicles.kart.skid",
+    "sounds": [
+      "blocksouls_vehicles:kart/skid1",
+      "blocksouls_vehicles:kart/skid2"
+    ]
+  },
+  "kart.ram": {
+    "subtitle": "subtitles.blocksouls_vehicles.kart.ram",
+    "sounds": [
+      "blocksouls_vehicles:kart/ram1",
+      "blocksouls_vehicles:kart/ram2",
+      "blocksouls_vehicles:kart/ram3"
+    ]
+  },
+  "kart.break": {
+    "subtitle": "subtitles.blocksouls_vehicles.kart.break",
+    "sounds": [
+      "blocksouls_vehicles:kart/break1",
+      "blocksouls_vehicles:kart/break2"
+    ]
+  },
+  "kart.repair": {
+    "subtitle": "subtitles.blocksouls_vehicles.kart.repair",
+    "sounds": [
+      "blocksouls_vehicles:kart/repair1",
+      "blocksouls_vehicles:kart/repair2"
+    ]
+  },
+  "kart.refuel": {
+    "subtitle": "subtitles.blocksouls_vehicles.kart.refuel",
+    "sounds": [
+      "blocksouls_vehicles:kart/refuel1",
+      "blocksouls_vehicles:kart/refuel2"
+    ]
+  },
+  "kart.sputter": {
+    "subtitle": "subtitles.blocksouls_vehicles.kart.sputter",
+    "sounds": [
+      "blocksouls_vehicles:kart/sputter1",
+      "blocksouls_vehicles:kart/sputter2",
+      "blocksouls_vehicles:kart/sputter3"
+    ]
+  },
+  "wreck.fit_part": {
+    "subtitle": "subtitles.blocksouls_vehicles.wreck.fit_part",
+    "sounds": [
+      "blocksouls_vehicles:kart/fit_part1",
+      "blocksouls_vehicles:kart/fit_part2"
+    ]
+  },
+  "wreck.repaired": {
+    "subtitle": "subtitles.blocksouls_vehicles.wreck.repaired",
+    "sounds": [
+      "blocksouls_vehicles:kart/repaired1"
+    ]
+  },
+  "kart.horn": {
+    "subtitle": "subtitles.blocksouls_vehicles.kart.horn",
+    "sounds": [
+      "blocksouls_vehicles:kart/horn"
+    ]
+  }
 }

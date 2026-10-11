@@ -233,6 +233,9 @@ public class KartEntity extends Entity {
 				playLocalSound(VehicleRegistry.KART_BOOST, 0.8f, 1.0f + 0.2f * KartPhysics.driftTier(driftTicks, cfg));
 			}
 		}
+		if (nowDrifting && !drifting) {
+			playLocalSound(VehicleRegistry.KART_SKID, 0.5f, 0.9f + random.nextFloat() * 0.2f);
+		}
 		driftTicks = nowDrifting ? driftTicks + 1 : 0;
 		drifting = nowDrifting;
 

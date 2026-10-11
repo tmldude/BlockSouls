@@ -7,7 +7,7 @@ import net.minecraft.sounds.SoundEvent;
 
 import io.github.tmldude.blocksouls.guns.BlockSoulsGuns;
 
-/** Our sound events. {@code sounds.json} maps them to re-pitched vanilla sounds until real audio exists. */
+/** Our sound events. {@code sounds.json} maps them to original synthesized sounds ({@code tools/assets/gun_sounds.py}). */
 public final class GunSounds {
 	public static final SoundEvent PISTOL_FIRE = register("gun.starter_pistol.fire");
 	public static final SoundEvent HAND_CANNON_FIRE = register("gun.hand_cannon.fire");
@@ -19,6 +19,12 @@ public final class GunSounds {
 	public static final SoundEvent RELOAD_END = register("gun.reload_end");
 	public static final SoundEvent RICOCHET = register("gun.ricochet");
 	public static final SoundEvent EXPLOSIVE_ROUND = register("gun.explosive_round");
+	public static final SoundEvent AMMO_PICKUP = register("gun.ammo_pickup");
+	/** The shooter's own tick on a precision hit. */
+	public static final SoundEvent HEADSHOT = register("gun.headshot");
+	public static final SoundEvent PERK_OUTLAW = register("gun.perk.outlaw");
+	public static final SoundEvent PERK_RAMPAGE = register("gun.perk.rampage");
+	public static final SoundEvent PERK_VORPAL = register("gun.perk.vorpal");
 
 	private GunSounds() {
 	}

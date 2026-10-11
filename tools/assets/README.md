@@ -50,3 +50,21 @@ python3 tools/assets/check_mob_assets.py  # fails if MobGeometry.java is stale o
   attack telegraph, and the telegraph shrunk to how it reads ~20 blocks away.
 - **`mob_sounds.py`** builds voices from a glottal pulse train shaped by moving vowel formants, plus filtered noise,
   clicks, bubbles and impacts. Seeded, so re-running gives byte-identical files.
+
+## Sound effects and music (`guns`, `bosses`, `vehicles`)
+
+All original and synthesized, no samples. The helpers (voices, formants, noise, impacts, metal, bells, fire,
+thunder, wings, reverb, the Vorbis encoder) live in `synth.py`; every generator imports them.
+
+```sh
+python3 tools/assets/gun_sounds.py      # guns: shots, reload, empty, ricochet, ammo, headshot, perk procs
+python3 tools/assets/boss_sounds.py     # bosses: every boss event + the fog wall and lock-on; writes sounds.json
+python3 tools/assets/music.py           # bosses: one looping stereo track per boss -> sounds/music/<track>.ogg
+python3 tools/assets/vehicle_sounds.py  # vehicles: kart engine loop, skid, crash, repair, part fitted
+python3 tools/assets/check_sounds.py    # fails if a registered event has no entry, a file is missing, an entry
+                                        # points at a vanilla sound, or a subtitle has no lang line (runs in CI)
+```
+
+Each script rewrites its module's `sounds.json`, so add a new event to the script, not to the JSON. Same script,
+same files (seeded per sound, `-bitexact` encoding). Levels: `synth.level()` normalizes each sound to its peak and
+caps its loudest 100 ms (`MAX_RMS`), so nothing is louder than vanilla thunder.

@@ -1,877 +1,570 @@
 {
-	"block.fog_wall.close": {
-		"subtitle": "subtitles.blocksouls_bosses.block.fog_wall.close",
-		"sounds": [
-			{
-				"name": "minecraft:block.respawn_anchor.deplete",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.furnace_knight.ambient": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.ambient",
-		"sounds": [
-			{
-				"name": "minecraft:entity.blaze.ambient",
-				"type": "event",
-				"pitch": 0.5,
-				"volume": 0.8
-			}
-		]
-	},
-	"entity.furnace_knight.hurt": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.hurt",
-		"sounds": [
-			{
-				"name": "minecraft:entity.iron_golem.hurt",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.furnace_knight.death": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.death",
-		"sounds": [
-			{
-				"name": "minecraft:entity.iron_golem.death",
-				"type": "event",
-				"pitch": 0.5,
-				"volume": 1.5
-			}
-		]
-	},
-	"entity.furnace_knight.step": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.step",
-		"sounds": [
-			{
-				"name": "minecraft:entity.iron_golem.step",
-				"type": "event",
-				"pitch": 0.7,
-				"volume": 0.8
-			}
-		]
-	},
-	"entity.furnace_knight.roar": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.roar",
-		"sounds": [
-			{
-				"name": "minecraft:entity.ravager.roar",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.furnace_knight.windup": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.windup",
-		"sounds": [
-			{
-				"name": "minecraft:block.furnace.fire_crackle",
-				"type": "event",
-				"pitch": 0.7,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.furnace_knight.slam": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.slam",
-		"sounds": [
-			{
-				"name": "minecraft:entity.generic.explode",
-				"type": "event",
-				"pitch": 0.7,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.furnace_knight.swing": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.swing",
-		"sounds": [
-			{
-				"name": "minecraft:entity.player.attack.sweep",
-				"type": "event",
-				"pitch": 0.5,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.furnace_knight.breath": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.breath",
-		"sounds": [
-			{
-				"name": "minecraft:entity.blaze.shoot",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.furnace_knight.charge": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.charge",
-		"sounds": [
-			{
-				"name": "minecraft:entity.ravager.step",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.furnace_knight.pillar": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.pillar",
-		"sounds": [
-			{
-				"name": "minecraft:item.firecharge.use",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"music.furnace_knight": {
-		"sounds": [
-			{
-				"name": "minecraft:music_disc.pigstep",
-				"type": "event",
-				"pitch": 0.8,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.final_dragon.ambient": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.ambient",
-		"sounds": [
-			{
-				"name": "minecraft:entity.ender_dragon.ambient",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.final_dragon.hurt": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.hurt",
-		"sounds": [
-			{
-				"name": "minecraft:entity.ender_dragon.hurt",
-				"type": "event",
-				"pitch": 0.7,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.final_dragon.death": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.death",
-		"sounds": [
-			{
-				"name": "minecraft:entity.ender_dragon.death",
-				"type": "event",
-				"pitch": 0.8,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.final_dragon.flap": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.flap",
-		"sounds": [
-			{
-				"name": "minecraft:entity.ender_dragon.flap",
-				"type": "event",
-				"pitch": 0.7,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.final_dragon.roar": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.roar",
-		"sounds": [
-			{
-				"name": "minecraft:entity.ender_dragon.growl",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.final_dragon.screech": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.screech",
-		"sounds": [
-			{
-				"name": "minecraft:entity.phantom.swoop",
-				"type": "event",
-				"pitch": 0.5,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.final_dragon.breath": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.breath",
-		"sounds": [
-			{
-				"name": "minecraft:entity.ender_dragon.shoot",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.final_dragon.gust": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.gust",
-		"sounds": [
-			{
-				"name": "minecraft:entity.breeze.wind_burst",
-				"type": "event",
-				"pitch": 0.5,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.final_dragon.tail": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.tail",
-		"sounds": [
-			{
-				"name": "minecraft:entity.player.attack.sweep",
-				"type": "event",
-				"pitch": 0.4,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.final_dragon.orb": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.orb",
-		"sounds": [
-			{
-				"name": "minecraft:block.beacon.ambient",
-				"type": "event",
-				"pitch": 1.4,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.final_dragon.orb_pop": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.orb_pop",
-		"sounds": [
-			{
-				"name": "minecraft:entity.shulker_bullet.hit",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.final_dragon.meteor": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.meteor",
-		"sounds": [
-			{
-				"name": "minecraft:entity.generic.explode",
-				"type": "event",
-				"pitch": 0.7,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.final_dragon.land": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.land",
-		"sounds": [
-			{
-				"name": "minecraft:entity.ravager.stunned",
-				"type": "event",
-				"pitch": 0.5,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.final_dragon.deflect": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.deflect",
-		"sounds": [
-			{
-				"name": "minecraft:item.shield.block",
-				"type": "event",
-				"pitch": 1.0,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.final_dragon.enrage": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.enrage",
-		"sounds": [
-			{
-				"name": "minecraft:entity.wither.spawn",
-				"type": "event",
-				"pitch": 0.7,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.final_dragon.shield_break": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.shield_break",
-		"sounds": [
-			{
-				"name": "minecraft:block.beacon.deactivate",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.raid_crystal.chime": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.raid_crystal.chime",
-		"sounds": [
-			{
-				"name": "minecraft:block.note_block.bell",
-				"type": "event",
-				"pitch": 1.0,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.raid_crystal.shatter": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.raid_crystal.shatter",
-		"sounds": [
-			{
-				"name": "minecraft:block.glass.break",
-				"type": "event",
-				"pitch": 1.0,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.raid_crystal.wrong": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.raid_crystal.wrong",
-		"sounds": [
-			{
-				"name": "minecraft:block.respawn_anchor.deplete",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.raid_crystal.reform": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.raid_crystal.reform",
-		"sounds": [
-			{
-				"name": "minecraft:block.amethyst_block.chime",
-				"type": "event",
-				"pitch": 0.8,
-				"volume": 1.0
-			}
-		]
-	},
-	"block.raid_plate.hum": {
-		"subtitle": "subtitles.blocksouls_bosses.block.raid_plate.hum",
-		"sounds": [
-			{
-				"name": "minecraft:block.beacon.activate",
-				"type": "event",
-				"pitch": 1.2,
-				"volume": 1.0
-			}
-		]
-	},
-	"block.raid_plate.held": {
-		"subtitle": "subtitles.blocksouls_bosses.block.raid_plate.held",
-		"sounds": [
-			{
-				"name": "minecraft:block.beacon.power_select",
-				"type": "event",
-				"pitch": 1.0,
-				"volume": 1.0
-			}
-		]
-	},
-	"block.raid_plate.chains": {
-		"subtitle": "subtitles.blocksouls_bosses.block.raid_plate.chains",
-		"sounds": [
-			{
-				"name": "minecraft:block.chain.place",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"music.final_dragon": {
-		"sounds": [
-			{
-				"name": "minecraft:music.dragon",
-				"type": "event",
-				"pitch": 0.85,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.pale_rider.ambient": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.ambient",
-		"sounds": [
-			{
-				"name": "minecraft:entity.vex.ambient",
-				"type": "event",
-				"pitch": 0.5,
-				"volume": 0.8
-			}
-		]
-	},
-	"entity.pale_rider.hurt": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.hurt",
-		"sounds": [
-			{
-				"name": "minecraft:entity.skeleton_horse.hurt",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.pale_rider.death": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.death",
-		"sounds": [
-			{
-				"name": "minecraft:entity.skeleton_horse.death",
-				"type": "event",
-				"pitch": 0.5,
-				"volume": 1.5
-			}
-		]
-	},
-	"entity.pale_rider.hooves": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.hooves",
-		"sounds": [
-			{
-				"name": "minecraft:entity.horse.gallop",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.pale_rider.scream": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.scream",
-		"sounds": [
-			{
-				"name": "minecraft:entity.skeleton_horse.ambient",
-				"type": "event",
-				"pitch": 0.5,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.pale_rider.windup": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.windup",
-		"sounds": [
-			{
-				"name": "minecraft:entity.evoker.prepare_attack",
-				"type": "event",
-				"pitch": 0.7,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.pale_rider.charge": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.charge",
-		"sounds": [
-			{
-				"name": "minecraft:entity.horse.angry",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.pale_rider.swing": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.swing",
-		"sounds": [
-			{
-				"name": "minecraft:entity.player.attack.sweep",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.pale_rider.stomp": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.stomp",
-		"sounds": [
-			{
-				"name": "minecraft:entity.ravager.stunned",
-				"type": "event",
-				"pitch": 0.7,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.pale_rider.call": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.call",
-		"sounds": [
-			{
-				"name": "minecraft:entity.evoker.prepare_summon",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.pale_rider.throw": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.throw",
-		"sounds": [
-			{
-				"name": "minecraft:item.trident.throw",
-				"type": "event",
-				"pitch": 0.7,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.pale_rider.blink": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.blink",
-		"sounds": [
-			{
-				"name": "minecraft:entity.illusioner.mirror_move",
-				"type": "event",
-				"pitch": 0.8,
-				"volume": 1.0
-			}
-		]
-	},
-	"item.wraith_steed_whistle.use": {
-		"subtitle": "subtitles.blocksouls_bosses.item.wraith_steed_whistle.use",
-		"sounds": [
-			{
-				"name": "minecraft:entity.skeleton_horse.ambient",
-				"type": "event",
-				"pitch": 1.3,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.wraith_steed.fade": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.wraith_steed.fade",
-		"sounds": [
-			{
-				"name": "minecraft:entity.illusioner.mirror_move",
-				"type": "event",
-				"pitch": 1.2,
-				"volume": 1.0
-			}
-		]
-	},
-	"music.pale_rider": {
-		"sounds": [
-			{
-				"name": "minecraft:music_disc.11",
-				"type": "event",
-				"pitch": 0.8,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.ashwyrm.ambient": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.ambient",
-		"sounds": [
-			{
-				"name": "minecraft:entity.ender_dragon.growl",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 0.6
-			}
-		]
-	},
-	"entity.ashwyrm.hurt": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.hurt",
-		"sounds": [
-			{
-				"name": "minecraft:entity.ender_dragon.hurt",
-				"type": "event",
-				"pitch": 0.7,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.ashwyrm.death": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.death",
-		"sounds": [
-			{
-				"name": "minecraft:entity.ender_dragon.death",
-				"type": "event",
-				"pitch": 0.8,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.ashwyrm.step": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.step",
-		"sounds": [
-			{
-				"name": "minecraft:entity.ravager.step",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.ashwyrm.roar": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.roar",
-		"sounds": [
-			{
-				"name": "minecraft:entity.ender_dragon.growl",
-				"type": "event",
-				"pitch": 0.75,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.ashwyrm.bite": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.bite",
-		"sounds": [
-			{
-				"name": "minecraft:entity.ravager.attack",
-				"type": "event",
-				"pitch": 0.7,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.ashwyrm.tail": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.tail",
-		"sounds": [
-			{
-				"name": "minecraft:entity.player.attack.sweep",
-				"type": "event",
-				"pitch": 0.4,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.ashwyrm.breath": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.breath",
-		"sounds": [
-			{
-				"name": "minecraft:entity.blaze.shoot",
-				"type": "event",
-				"pitch": 0.5,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.ashwyrm.flap": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.flap",
-		"sounds": [
-			{
-				"name": "minecraft:entity.ender_dragon.flap",
-				"type": "event",
-				"pitch": 0.7,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.ashwyrm.fireball": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.fireball",
-		"sounds": [
-			{
-				"name": "minecraft:entity.ghast.shoot",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.ashwyrm.impact": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.impact",
-		"sounds": [
-			{
-				"name": "minecraft:entity.generic.explode",
-				"type": "event",
-				"pitch": 0.8,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.ashwyrm.land": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.land",
-		"sounds": [
-			{
-				"name": "minecraft:entity.generic.explode",
-				"type": "event",
-				"pitch": 0.5,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.ashwyrm.meteor": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.meteor",
-		"sounds": [
-			{
-				"name": "minecraft:item.firecharge.use",
-				"type": "event",
-				"pitch": 0.4,
-				"volume": 1.0
-			}
-		]
-	},
-	"music.ashwyrm": {
-		"sounds": [
-			{
-				"name": "minecraft:music.dragon",
-				"type": "event",
-				"pitch": 1.0,
-				"volume": 1.0
-			}
-		]
-	},
-	"music.stormplate_knight": {
-		"sounds": [
-			{
-				"name": "minecraft:music_disc.precipice",
-				"type": "event",
-				"pitch": 0.8,
-				"volume": 0.6
-			}
-		]
-	},
-	"entity.stormplate_knight.ambient": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.ambient",
-		"sounds": [
-			{
-				"name": "minecraft:entity.iron_golem.step",
-				"type": "event",
-				"pitch": 0.5,
-				"volume": 0.6
-			}
-		]
-	},
-	"entity.stormplate_knight.hurt": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.hurt",
-		"sounds": [
-			{
-				"name": "minecraft:entity.iron_golem.hurt",
-				"type": "event",
-				"pitch": 0.7,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.stormplate_knight.death": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.death",
-		"sounds": [
-			{
-				"name": "minecraft:entity.wither.death",
-				"type": "event",
-				"pitch": 0.8,
-				"volume": 0.9
-			}
-		]
-	},
-	"entity.stormplate_knight.step": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.step",
-		"sounds": [
-			{
-				"name": "minecraft:entity.iron_golem.step",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.stormplate_knight.roar": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.roar",
-		"sounds": [
-			{
-				"name": "minecraft:entity.ravager.roar",
-				"type": "event",
-				"pitch": 0.8,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.stormplate_knight.windup": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.windup",
-		"sounds": [
-			{
-				"name": "minecraft:item.trident.return",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.stormplate_knight.thrust": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.thrust",
-		"sounds": [
-			{
-				"name": "minecraft:item.trident.throw",
-				"type": "event",
-				"pitch": 0.7,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.stormplate_knight.swing": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.swing",
-		"sounds": [
-			{
-				"name": "minecraft:entity.player.attack.sweep",
-				"type": "event",
-				"pitch": 0.6,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.stormplate_knight.charge": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.charge",
-		"sounds": [
-			{
-				"name": "minecraft:item.trident.thunder",
-				"type": "event",
-				"pitch": 1.2,
-				"volume": 0.8
-			}
-		]
-	},
-	"entity.stormplate_knight.thunder": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.thunder",
-		"sounds": [
-			{
-				"name": "minecraft:entity.lightning_bolt.thunder",
-				"type": "event",
-				"pitch": 1.1,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.stormplate_knight.throw": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.throw",
-		"sounds": [
-			{
-				"name": "minecraft:item.trident.riptide_3",
-				"type": "event",
-				"pitch": 0.9,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.stormplate_knight.slam": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.slam",
-		"sounds": [
-			{
-				"name": "minecraft:entity.generic.explode",
-				"type": "event",
-				"pitch": 0.7,
-				"volume": 1.0
-			}
-		]
-	},
-	"entity.stormplate_knight.puddle": {
-		"subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.puddle",
-		"sounds": [
-			{
-				"name": "minecraft:entity.lightning_bolt.impact",
-				"type": "event",
-				"pitch": 1.6,
-				"volume": 0.6
-			}
-		]
-	}
+  "block.fog_wall.close": {
+    "subtitle": "subtitles.blocksouls_bosses.block.fog_wall.close",
+    "sounds": [
+      "blocksouls_bosses:boss/arena/fog_close1"
+    ]
+  },
+  "block.fog_wall.open": {
+    "subtitle": "subtitles.blocksouls_bosses.block.fog_wall.open",
+    "sounds": [
+      "blocksouls_bosses:boss/arena/fog_open1"
+    ]
+  },
+  "ui.lock_on": {
+    "sounds": [
+      "blocksouls_bosses:boss/arena/lock_on1"
+    ]
+  },
+  "entity.furnace_knight.ambient": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.ambient",
+    "sounds": [
+      "blocksouls_bosses:boss/furnace_knight/ambient1",
+      "blocksouls_bosses:boss/furnace_knight/ambient2"
+    ]
+  },
+  "entity.furnace_knight.hurt": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.hurt",
+    "sounds": [
+      "blocksouls_bosses:boss/furnace_knight/hurt1",
+      "blocksouls_bosses:boss/furnace_knight/hurt2"
+    ]
+  },
+  "entity.furnace_knight.death": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.death",
+    "sounds": [
+      "blocksouls_bosses:boss/furnace_knight/death1"
+    ]
+  },
+  "entity.furnace_knight.step": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.step",
+    "sounds": [
+      "blocksouls_bosses:boss/furnace_knight/step1",
+      "blocksouls_bosses:boss/furnace_knight/step2",
+      "blocksouls_bosses:boss/furnace_knight/step3"
+    ]
+  },
+  "entity.furnace_knight.roar": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.roar",
+    "sounds": [
+      "blocksouls_bosses:boss/furnace_knight/roar1"
+    ]
+  },
+  "entity.furnace_knight.windup": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.windup",
+    "sounds": [
+      "blocksouls_bosses:boss/furnace_knight/windup1",
+      "blocksouls_bosses:boss/furnace_knight/windup2"
+    ]
+  },
+  "entity.furnace_knight.slam": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.slam",
+    "sounds": [
+      "blocksouls_bosses:boss/furnace_knight/slam1",
+      "blocksouls_bosses:boss/furnace_knight/slam2"
+    ]
+  },
+  "entity.furnace_knight.swing": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.swing",
+    "sounds": [
+      "blocksouls_bosses:boss/furnace_knight/swing1",
+      "blocksouls_bosses:boss/furnace_knight/swing2"
+    ]
+  },
+  "entity.furnace_knight.breath": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.breath",
+    "sounds": [
+      "blocksouls_bosses:boss/furnace_knight/breath1",
+      "blocksouls_bosses:boss/furnace_knight/breath2"
+    ]
+  },
+  "entity.furnace_knight.charge": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.charge",
+    "sounds": [
+      "blocksouls_bosses:boss/furnace_knight/charge1"
+    ]
+  },
+  "entity.furnace_knight.pillar": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.furnace_knight.pillar",
+    "sounds": [
+      "blocksouls_bosses:boss/furnace_knight/pillar1",
+      "blocksouls_bosses:boss/furnace_knight/pillar2"
+    ]
+  },
+  "entity.pale_rider.ambient": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.ambient",
+    "sounds": [
+      "blocksouls_bosses:boss/pale_rider/ambient1",
+      "blocksouls_bosses:boss/pale_rider/ambient2"
+    ]
+  },
+  "entity.pale_rider.hurt": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.hurt",
+    "sounds": [
+      "blocksouls_bosses:boss/pale_rider/hurt1",
+      "blocksouls_bosses:boss/pale_rider/hurt2"
+    ]
+  },
+  "entity.pale_rider.death": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.death",
+    "sounds": [
+      "blocksouls_bosses:boss/pale_rider/death1"
+    ]
+  },
+  "entity.pale_rider.hooves": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.hooves",
+    "sounds": [
+      "blocksouls_bosses:boss/pale_rider/hooves1",
+      "blocksouls_bosses:boss/pale_rider/hooves2",
+      "blocksouls_bosses:boss/pale_rider/hooves3"
+    ]
+  },
+  "entity.pale_rider.scream": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.scream",
+    "sounds": [
+      "blocksouls_bosses:boss/pale_rider/scream1",
+      "blocksouls_bosses:boss/pale_rider/scream2"
+    ]
+  },
+  "entity.pale_rider.windup": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.windup",
+    "sounds": [
+      "blocksouls_bosses:boss/pale_rider/windup1",
+      "blocksouls_bosses:boss/pale_rider/windup2"
+    ]
+  },
+  "entity.pale_rider.charge": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.charge",
+    "sounds": [
+      "blocksouls_bosses:boss/pale_rider/charge1"
+    ]
+  },
+  "entity.pale_rider.swing": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.swing",
+    "sounds": [
+      "blocksouls_bosses:boss/pale_rider/swing1",
+      "blocksouls_bosses:boss/pale_rider/swing2"
+    ]
+  },
+  "entity.pale_rider.stomp": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.stomp",
+    "sounds": [
+      "blocksouls_bosses:boss/pale_rider/stomp1",
+      "blocksouls_bosses:boss/pale_rider/stomp2"
+    ]
+  },
+  "entity.pale_rider.call": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.call",
+    "sounds": [
+      "blocksouls_bosses:boss/pale_rider/call1"
+    ]
+  },
+  "entity.pale_rider.throw": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.throw",
+    "sounds": [
+      "blocksouls_bosses:boss/pale_rider/throw1",
+      "blocksouls_bosses:boss/pale_rider/throw2"
+    ]
+  },
+  "entity.pale_rider.blink": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.pale_rider.blink",
+    "sounds": [
+      "blocksouls_bosses:boss/pale_rider/blink1",
+      "blocksouls_bosses:boss/pale_rider/blink2"
+    ]
+  },
+  "entity.ashwyrm.ambient": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.ambient",
+    "sounds": [
+      "blocksouls_bosses:boss/ashwyrm/ambient1",
+      "blocksouls_bosses:boss/ashwyrm/ambient2"
+    ]
+  },
+  "entity.ashwyrm.hurt": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.hurt",
+    "sounds": [
+      "blocksouls_bosses:boss/ashwyrm/hurt1",
+      "blocksouls_bosses:boss/ashwyrm/hurt2"
+    ]
+  },
+  "entity.ashwyrm.death": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.death",
+    "sounds": [
+      "blocksouls_bosses:boss/ashwyrm/death1"
+    ]
+  },
+  "entity.ashwyrm.step": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.step",
+    "sounds": [
+      "blocksouls_bosses:boss/ashwyrm/step1",
+      "blocksouls_bosses:boss/ashwyrm/step2",
+      "blocksouls_bosses:boss/ashwyrm/step3"
+    ]
+  },
+  "entity.ashwyrm.roar": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.roar",
+    "sounds": [
+      "blocksouls_bosses:boss/ashwyrm/roar1",
+      "blocksouls_bosses:boss/ashwyrm/roar2"
+    ]
+  },
+  "entity.ashwyrm.bite": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.bite",
+    "sounds": [
+      "blocksouls_bosses:boss/ashwyrm/bite1",
+      "blocksouls_bosses:boss/ashwyrm/bite2"
+    ]
+  },
+  "entity.ashwyrm.tail": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.tail",
+    "sounds": [
+      "blocksouls_bosses:boss/ashwyrm/tail1",
+      "blocksouls_bosses:boss/ashwyrm/tail2"
+    ]
+  },
+  "entity.ashwyrm.breath": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.breath",
+    "sounds": [
+      "blocksouls_bosses:boss/ashwyrm/breath1",
+      "blocksouls_bosses:boss/ashwyrm/breath2"
+    ]
+  },
+  "entity.ashwyrm.flap": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.flap",
+    "sounds": [
+      "blocksouls_bosses:boss/ashwyrm/flap1",
+      "blocksouls_bosses:boss/ashwyrm/flap2",
+      "blocksouls_bosses:boss/ashwyrm/flap3"
+    ]
+  },
+  "entity.ashwyrm.fireball": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.fireball",
+    "sounds": [
+      "blocksouls_bosses:boss/ashwyrm/fireball1",
+      "blocksouls_bosses:boss/ashwyrm/fireball2"
+    ]
+  },
+  "entity.ashwyrm.impact": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.impact",
+    "sounds": [
+      "blocksouls_bosses:boss/ashwyrm/impact1",
+      "blocksouls_bosses:boss/ashwyrm/impact2"
+    ]
+  },
+  "entity.ashwyrm.land": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.land",
+    "sounds": [
+      "blocksouls_bosses:boss/ashwyrm/land1"
+    ]
+  },
+  "entity.ashwyrm.meteor": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.ashwyrm.meteor",
+    "sounds": [
+      "blocksouls_bosses:boss/ashwyrm/meteor1",
+      "blocksouls_bosses:boss/ashwyrm/meteor2"
+    ]
+  },
+  "entity.stormplate_knight.ambient": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.ambient",
+    "sounds": [
+      "blocksouls_bosses:boss/stormplate_knight/ambient1",
+      "blocksouls_bosses:boss/stormplate_knight/ambient2"
+    ]
+  },
+  "entity.stormplate_knight.hurt": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.hurt",
+    "sounds": [
+      "blocksouls_bosses:boss/stormplate_knight/hurt1",
+      "blocksouls_bosses:boss/stormplate_knight/hurt2"
+    ]
+  },
+  "entity.stormplate_knight.death": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.death",
+    "sounds": [
+      "blocksouls_bosses:boss/stormplate_knight/death1"
+    ]
+  },
+  "entity.stormplate_knight.step": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.step",
+    "sounds": [
+      "blocksouls_bosses:boss/stormplate_knight/step1",
+      "blocksouls_bosses:boss/stormplate_knight/step2",
+      "blocksouls_bosses:boss/stormplate_knight/step3"
+    ]
+  },
+  "entity.stormplate_knight.roar": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.roar",
+    "sounds": [
+      "blocksouls_bosses:boss/stormplate_knight/roar1"
+    ]
+  },
+  "entity.stormplate_knight.windup": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.windup",
+    "sounds": [
+      "blocksouls_bosses:boss/stormplate_knight/windup1",
+      "blocksouls_bosses:boss/stormplate_knight/windup2"
+    ]
+  },
+  "entity.stormplate_knight.thrust": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.thrust",
+    "sounds": [
+      "blocksouls_bosses:boss/stormplate_knight/thrust1",
+      "blocksouls_bosses:boss/stormplate_knight/thrust2"
+    ]
+  },
+  "entity.stormplate_knight.swing": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.swing",
+    "sounds": [
+      "blocksouls_bosses:boss/stormplate_knight/swing1",
+      "blocksouls_bosses:boss/stormplate_knight/swing2"
+    ]
+  },
+  "entity.stormplate_knight.charge": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.charge",
+    "sounds": [
+      "blocksouls_bosses:boss/stormplate_knight/charge1"
+    ]
+  },
+  "entity.stormplate_knight.thunder": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.thunder",
+    "sounds": [
+      "blocksouls_bosses:boss/stormplate_knight/thunder1",
+      "blocksouls_bosses:boss/stormplate_knight/thunder2",
+      "blocksouls_bosses:boss/stormplate_knight/thunder3"
+    ]
+  },
+  "entity.stormplate_knight.throw": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.throw",
+    "sounds": [
+      "blocksouls_bosses:boss/stormplate_knight/throw1",
+      "blocksouls_bosses:boss/stormplate_knight/throw2"
+    ]
+  },
+  "entity.stormplate_knight.slam": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.slam",
+    "sounds": [
+      "blocksouls_bosses:boss/stormplate_knight/slam1",
+      "blocksouls_bosses:boss/stormplate_knight/slam2"
+    ]
+  },
+  "entity.stormplate_knight.puddle": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.stormplate_knight.puddle",
+    "sounds": [
+      "blocksouls_bosses:boss/stormplate_knight/puddle1",
+      "blocksouls_bosses:boss/stormplate_knight/puddle2"
+    ]
+  },
+  "item.wraith_steed_whistle.use": {
+    "subtitle": "subtitles.blocksouls_bosses.item.wraith_steed_whistle.use",
+    "sounds": [
+      "blocksouls_bosses:boss/pale_rider/whistle1"
+    ]
+  },
+  "entity.wraith_steed.fade": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.wraith_steed.fade",
+    "sounds": [
+      "blocksouls_bosses:boss/pale_rider/steed_fade1"
+    ]
+  },
+  "entity.final_dragon.ambient": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.ambient",
+    "sounds": [
+      "blocksouls_bosses:boss/hollow_sovereign/ambient1",
+      "blocksouls_bosses:boss/hollow_sovereign/ambient2"
+    ]
+  },
+  "entity.final_dragon.hurt": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.hurt",
+    "sounds": [
+      "blocksouls_bosses:boss/hollow_sovereign/hurt1",
+      "blocksouls_bosses:boss/hollow_sovereign/hurt2"
+    ]
+  },
+  "entity.final_dragon.death": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.death",
+    "sounds": [
+      "blocksouls_bosses:boss/hollow_sovereign/death1"
+    ]
+  },
+  "entity.final_dragon.flap": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.flap",
+    "sounds": [
+      "blocksouls_bosses:boss/hollow_sovereign/flap1",
+      "blocksouls_bosses:boss/hollow_sovereign/flap2",
+      "blocksouls_bosses:boss/hollow_sovereign/flap3"
+    ]
+  },
+  "entity.final_dragon.roar": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.roar",
+    "sounds": [
+      "blocksouls_bosses:boss/hollow_sovereign/roar1",
+      "blocksouls_bosses:boss/hollow_sovereign/roar2"
+    ]
+  },
+  "entity.final_dragon.screech": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.screech",
+    "sounds": [
+      "blocksouls_bosses:boss/hollow_sovereign/screech1"
+    ]
+  },
+  "entity.final_dragon.breath": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.breath",
+    "sounds": [
+      "blocksouls_bosses:boss/hollow_sovereign/breath1",
+      "blocksouls_bosses:boss/hollow_sovereign/breath2"
+    ]
+  },
+  "entity.final_dragon.gust": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.gust",
+    "sounds": [
+      "blocksouls_bosses:boss/hollow_sovereign/gust1",
+      "blocksouls_bosses:boss/hollow_sovereign/gust2"
+    ]
+  },
+  "entity.final_dragon.tail": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.tail",
+    "sounds": [
+      "blocksouls_bosses:boss/hollow_sovereign/tail1",
+      "blocksouls_bosses:boss/hollow_sovereign/tail2"
+    ]
+  },
+  "entity.final_dragon.orb": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.orb",
+    "sounds": [
+      "blocksouls_bosses:boss/hollow_sovereign/orb1"
+    ]
+  },
+  "entity.final_dragon.orb_pop": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.orb_pop",
+    "sounds": [
+      "blocksouls_bosses:boss/hollow_sovereign/orb_pop1",
+      "blocksouls_bosses:boss/hollow_sovereign/orb_pop2"
+    ]
+  },
+  "entity.final_dragon.meteor": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.meteor",
+    "sounds": [
+      "blocksouls_bosses:boss/hollow_sovereign/meteor1",
+      "blocksouls_bosses:boss/hollow_sovereign/meteor2"
+    ]
+  },
+  "entity.final_dragon.land": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.land",
+    "sounds": [
+      "blocksouls_bosses:boss/hollow_sovereign/land1"
+    ]
+  },
+  "entity.final_dragon.deflect": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.deflect",
+    "sounds": [
+      "blocksouls_bosses:boss/hollow_sovereign/deflect1",
+      "blocksouls_bosses:boss/hollow_sovereign/deflect2"
+    ]
+  },
+  "entity.final_dragon.enrage": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.enrage",
+    "sounds": [
+      "blocksouls_bosses:boss/hollow_sovereign/enrage1"
+    ]
+  },
+  "entity.final_dragon.shield_break": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.shield_break",
+    "sounds": [
+      "blocksouls_bosses:boss/hollow_sovereign/shield_break1"
+    ]
+  },
+  "entity.final_dragon.cast": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.cast",
+    "sounds": [
+      "blocksouls_bosses:boss/hollow_sovereign/cast1"
+    ]
+  },
+  "entity.raid_crystal.chime": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.raid_crystal.chime",
+    "sounds": [
+      "blocksouls_bosses:boss/raid/crystal_chime1"
+    ]
+  },
+  "entity.raid_crystal.shatter": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.raid_crystal.shatter",
+    "sounds": [
+      "blocksouls_bosses:boss/raid/crystal_shatter1",
+      "blocksouls_bosses:boss/raid/crystal_shatter2"
+    ]
+  },
+  "entity.raid_crystal.wrong": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.raid_crystal.wrong",
+    "sounds": [
+      "blocksouls_bosses:boss/raid/crystal_wrong1"
+    ]
+  },
+  "entity.raid_crystal.reform": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.raid_crystal.reform",
+    "sounds": [
+      "blocksouls_bosses:boss/raid/crystal_reform1"
+    ]
+  },
+  "block.raid_plate.hum": {
+    "subtitle": "subtitles.blocksouls_bosses.block.raid_plate.hum",
+    "sounds": [
+      "blocksouls_bosses:boss/raid/plate_hum1"
+    ]
+  },
+  "block.raid_plate.held": {
+    "subtitle": "subtitles.blocksouls_bosses.block.raid_plate.held",
+    "sounds": [
+      "blocksouls_bosses:boss/raid/plate_held1"
+    ]
+  },
+  "block.raid_plate.chains": {
+    "subtitle": "subtitles.blocksouls_bosses.block.raid_plate.chains",
+    "sounds": [
+      "blocksouls_bosses:boss/raid/chains1"
+    ]
+  },
+  "music.furnace_knight": {
+    "sounds": [
+      {
+        "name": "blocksouls_bosses:music/furnace_knight",
+        "stream": true,
+        "volume": 0.6
+      }
+    ]
+  },
+  "music.pale_rider": {
+    "sounds": [
+      {
+        "name": "blocksouls_bosses:music/pale_rider",
+        "stream": true,
+        "volume": 0.6
+      }
+    ]
+  },
+  "music.ashwyrm": {
+    "sounds": [
+      {
+        "name": "blocksouls_bosses:music/ashwyrm",
+        "stream": true,
+        "volume": 0.6
+      }
+    ]
+  },
+  "music.stormplate_knight": {
+    "sounds": [
+      {
+        "name": "blocksouls_bosses:music/stormplate_knight",
+        "stream": true,
+        "volume": 0.6
+      }
+    ]
+  },
+  "music.final_dragon": {
+    "sounds": [
+      {
+        "name": "blocksouls_bosses:music/final_raid",
+        "stream": true,
+        "volume": 0.6
+      }
+    ]
+  }
 }

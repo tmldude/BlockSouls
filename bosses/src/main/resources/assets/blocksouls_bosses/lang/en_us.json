@@ -4,6 +4,8 @@
 	"block.blocksouls_bosses.fog_wall": "Fog Wall",
 	"key.blocksouls.lock_on": "Lock On",
 	"subtitles.blocksouls_bosses.block.fog_wall.close": "Fog wall closes",
+	"subtitles.blocksouls_bosses.block.fog_wall.open": "Fog wall fades",
+	"subtitles.blocksouls_bosses.entity.final_dragon.cast": "Sovereign's End builds",
 	"subtitles.blocksouls_bosses.entity.furnace_knight.ambient": "Furnace Knight breathes",
 	"subtitles.blocksouls_bosses.entity.furnace_knight.hurt": "Furnace Knight hurts",
 	"subtitles.blocksouls_bosses.entity.furnace_knight.death": "Furnace Knight falls",
