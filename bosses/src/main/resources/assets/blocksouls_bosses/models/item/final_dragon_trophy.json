@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "blocksouls_bosses:item/final_dragon_trophy"
+  }
+}

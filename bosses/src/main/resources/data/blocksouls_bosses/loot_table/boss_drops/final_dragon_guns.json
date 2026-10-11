@@ -1,0 +1,85 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "blocksouls_guns"
+      ]
+    }
+  ],
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 2,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_guns:hand_cannon",
+          "weight": 1,
+          "modifier": {
+            "type": "blocksouls_guns:roll_perks",
+            "tier": "legendary"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_guns:auto_rifle",
+          "weight": 1,
+          "modifier": {
+            "type": "blocksouls_guns:roll_perks",
+            "tier": "legendary"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_guns:shotgun",
+          "weight": 1,
+          "modifier": {
+            "type": "blocksouls_guns:roll_perks",
+            "tier": "legendary"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_guns:sniper_rifle",
+          "weight": 1,
+          "modifier": {
+            "type": "blocksouls_guns:roll_perks",
+            "tier": "legendary"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_guns:primary_ammo",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": 64,
+            "add": false
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_guns:special_ammo",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": 32,
+            "add": false
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -31,6 +31,7 @@ import io.github.tmldude.blocksouls.bosses.api.BossDefinition;
 import io.github.tmldude.blocksouls.bosses.api.BossEntity;
 import io.github.tmldude.blocksouls.bosses.api.BossPart;
 import io.github.tmldude.blocksouls.bosses.api.BossPhase;
+import io.github.tmldude.blocksouls.bosses.raid.logic.CrystalOrder;
 import io.github.tmldude.blocksouls.bosses.raid.logic.RaidMath;
 import io.github.tmldude.blocksouls.common.CommonIds;
 import io.github.tmldude.blocksouls.common.player.PlayerStatus;
@@ -200,6 +201,21 @@ public class FinalDragon extends BossEntity {
 
 	VoidOrbs orbs() {
 		return orbs;
+	}
+
+	/** The Crystal Order in play (null outside phase 1). Read-only use: tests, debug. */
+	public @Nullable CrystalOrder crystalOrder() {
+		return puzzle.order();
+	}
+
+	/** Crystals of the order standing right now. */
+	public List<RaidCrystal> standingCrystals() {
+		return level() instanceof ServerLevel level ? puzzle.standing(level) : List.of();
+	}
+
+	/** Centers of the plates set into the island (block positions of the plate surface). */
+	public List<BlockPos> plateCenters() {
+		return List.copyOf(plates.plates());
 	}
 
 	Vec3 perchFacing() {
