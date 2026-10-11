@@ -299,7 +299,7 @@ final class PaleRiderAttacks {
 			if (target != null && target.isAlive() && (run.points().isEmpty() || run.tick() < run.stageLength() * 0.7)) {
 				BossEntity boss = run.boss();
 				double[] spot = PaleRiderMath.behind(boss.getX(), boss.getZ(), target.getX(), target.getZ(), config().blinkBehind);
-				Vec3 dest = new Vec3(spot[0], target.getY(), spot[1]);
+				Vec3 dest = insideArena(boss, new Vec3(spot[0], target.getY(), spot[1]));
 				if (run.points().isEmpty()) {
 					run.points().add(dest);
 				} else {
@@ -307,6 +307,16 @@ final class PaleRiderAttacks {
 				}
 			}
 			return run.points().isEmpty() ? run.boss().position() : run.points().get(0);
+		}
+
+		/** Never blinks through the fog wall: pulls the spot back inside the arena. */
+		private static Vec3 insideArena(BossEntity boss, Vec3 dest) {
+			Vec3 home = Vec3.atBottomCenterOf(boss.home());
+			double max = Math.max(1, boss.arenaRadius() - 1.5);
+			double dx = dest.x - home.x;
+			double dz = dest.z - home.z;
+			double d = Math.sqrt(dx * dx + dz * dz);
+			return d <= max ? dest : new Vec3(home.x + dx / d * max, dest.y, home.z + dz / d * max);
 		}
 
 		@Override
