@@ -55,14 +55,17 @@ subprojects {
 	}
 
 	// Modules with src/gametest get a test mod and `runGameTest` (a headless server running every
-	// @GameTest), which `check` (and so `build`) runs.
+	// @GameTest), which `check` (and so `build`) runs. `integration` also gets `runClientGameTest`
+	// (a real client, run under xvfb in CI).
 	if (file('src/gametest').exists()) {
 		fabricApi {
 			configureTests {
 				createSourceSet = true
 				modId = "${modId}_test"
 				enableGameTests = true
-				enableClientGameTests = false
+				enableClientGameTests = project.name == 'integration'
+				// CI seeds options.txt (graphics backend) in the run directory before the client test.
+				clearRunDirectory = false
 				eula = true
 			}
 		}
