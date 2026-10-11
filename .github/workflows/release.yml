@@ -110,11 +110,21 @@ jobs:
               game_versions: [$mc], version_type: $t, loaders: ["fabric"], featured: true,
               project_id: $p, file_parts: ["pack"], primary_file: "pack"
             }')
-          curl -fsS https://api.modrinth.com/v2/version \
+          version_id=$(curl -fsS https://api.modrinth.com/v2/version \
             -H "Authorization: $MODRINTH_TOKEN" \
             -H "User-Agent: tmldude/BlockSouls release workflow" \
             -F "data=$data" \
-            -F "pack=@dist/BlockSouls-$VERSION.mrpack;type=application/x-modrinth-modpack+zip"
+            -F "pack=@dist/BlockSouls-$VERSION.mrpack;type=application/x-modrinth-modpack+zip" | jq -r .id)
+          echo "Modrinth version $version_id"
+          # Every player and the server need the pack. Uploads otherwise show "Unknown environment"; best effort, so a
+          # change to Modrinth's API can't fail the release (set it by hand on the version page if this warns).
+          if ! curl -fsS -X PATCH "https://api.modrinth.com/v3/version/$version_id" \
+              -H "Authorization: $MODRINTH_TOKEN" \
+              -H "User-Agent: tmldude/BlockSouls release workflow" \
+              -H "Content-Type: application/json" \
+              -d '{"environment": "client_and_server"}'; then
+            echo "::warning::Couldn't set the Modrinth environment for $version_id; set it to Client and server on the version page"
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
