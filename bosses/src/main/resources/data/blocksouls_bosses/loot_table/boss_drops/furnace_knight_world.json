@@ -17,7 +17,7 @@
           "type": "minecraft:item",
           "name": "blocksouls_world:blight_core",
           "modifier": {
-            "function": "minecraft:set_count",
+            "type": "minecraft:set_count",
             "count": 1,
             "add": false
           }

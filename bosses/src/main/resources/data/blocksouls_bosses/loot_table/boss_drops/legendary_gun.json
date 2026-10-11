@@ -18,7 +18,7 @@
           "name": "blocksouls_guns:hand_cannon",
           "weight": 1,
           "modifier": {
-            "function": "blocksouls_guns:roll_perks",
+            "type": "blocksouls_guns:roll_perks",
             "tier": "legendary"
           }
         },
@@ -27,7 +27,7 @@
           "name": "blocksouls_guns:auto_rifle",
           "weight": 1,
           "modifier": {
-            "function": "blocksouls_guns:roll_perks",
+            "type": "blocksouls_guns:roll_perks",
             "tier": "legendary"
           }
         },
@@ -36,7 +36,7 @@
           "name": "blocksouls_guns:shotgun",
           "weight": 1,
           "modifier": {
-            "function": "blocksouls_guns:roll_perks",
+            "type": "blocksouls_guns:roll_perks",
             "tier": "legendary"
           }
         },
@@ -45,7 +45,7 @@
           "name": "blocksouls_guns:sniper_rifle",
           "weight": 1,
           "modifier": {
-            "function": "blocksouls_guns:roll_perks",
+            "type": "blocksouls_guns:roll_perks",
             "tier": "legendary"
           }
         }
