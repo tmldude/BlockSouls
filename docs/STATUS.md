@@ -1,6 +1,6 @@
 # Status (handoff)
 
-Last updated 2026-10-11. Read this after `CLAUDE.md` to know where the work stands.
+Last updated 2026-10-11 (after #24). Read this after `CLAUDE.md` to know where the work stands.
 
 ## Done (on `main`, CI green)
 - Build: Gradle multi-project, Minecraft 26.3 / Fabric API 0.162.0+26.3 / Java 25, CI (`build.yml`), release
@@ -19,9 +19,25 @@ protocol + all session briefs in `docs/sessions/`.
 game-loop, game-players, mobs, guns, world, vehicles, movement merged; CI green on the combined tree. Each
 session's choices are in `docs/decisions/<session>.md`.
 
-## Now: Stage 2
-`bosses` (framework + Furnace Knight) plus `art-mobs` and `art-items` in parallel. When `bosses` merges:
-`boss-pale-rider`, `boss-ashwyrm`, `boss-stormplate`, `final-raid`. Then Stage 3 (integration, balance, v0.9).
+## Stage 2a: done
+`bosses` framework + Furnace Knight (#16), `art-mobs` (#15), `art-items` (#14). Distribution (#12: install script,
+auto-update, server pack, version check), full-pack integration tests (#13: server game tests + a real client on a
+dedicated server, screenshots published to `ci-screenshots/<branch>`), 26.3 loot fix (#17), polish (#22).
+
+## Party scaling (#24): done
+Built for parties of 1–8. Everything player-dependent goes through `common`'s `PartyScaling`
+(`config/blocksouls/party.json`); see `CLAUDE.md` "Party size".
+
+## Now: Stage 2b
+`boss-pale-rider`, `boss-ashwyrm`, `boss-stormplate` are ready; `final-raid` (#21) is finishing (raid restructured:
+vanilla phase → on-foot phase with a wave and a herald field boss → sealed crystals + plates). They merge together
+through `claude/stage2b-integration` (#23). Then route the raid's plate and crystal counts through `PartyScaling`
+with tests at 1 and 8 players.
+
+## Next: v0.9.0 (first trial run with friends)
+Tag `v0.9.0` → `release.yml` publishes the GHCR image, jars, `.mrpack` and server pack (and Modrinth, if its
+secrets are set). The trial run doubles as the first human balance pass. After it: balance to a ~2-hour run,
+performance with a full party at late waves, real art and sounds, then the PLAN.md §0c "Growth" column → v1.0.
 
 ## Decisions that changed late (see DECISIONS.md for all)
 - Downed players stay down until revived (no bleed-out); everyone down at once ends the run; going down costs
