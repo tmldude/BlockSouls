@@ -33,6 +33,11 @@ cd docker && cp .env.example .env && docker compose up -d --build   # local serv
 cd modpack && ./add-mods.sh && packwiz modrinth export             # build the .mrpack
 ```
 
+**No access to maven.fabricmc.net / Mojang?** (some sandboxes) Use `tools/offline-check/`: it type-checks
+against decompiled 26.3 vanilla + Fabric sources and runs unit tests. Run `setup.sh` once, then
+`typecheck.sh` and `runtests.sh` before every commit. For mixins, also grep the vanilla sources in
+`~/.cache/blocksouls-offline-check/mc/client` to confirm the target method name and signature.
+
 ## Layout and rules
 
 - **One mod per feature**: `movement`, `guns`, `zombies`, `bosses`. Each is its own Fabric mod with id
