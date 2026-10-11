@@ -54,6 +54,20 @@ subprojects {
 		}
 	}
 
+	// Modules with src/gametest get a test mod and `runGameTest` (a headless server running every
+	// @GameTest), which `check` (and so `build`) runs.
+	if (file('src/gametest').exists()) {
+		fabricApi {
+			configureTests {
+				createSourceSet = true
+				modId = "${modId}_test"
+				enableGameTests = true
+				enableClientGameTests = false
+				eula = true
+			}
+		}
+	}
+
 	processResources {
 		def props = [
 			version          : project.version,

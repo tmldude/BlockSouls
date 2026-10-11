@@ -12,6 +12,11 @@
 		"sources": "https://github.com/tmldude/blocksouls"
 	},
 	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"io.github.tmldude.blocksouls.common.BlockSoulsCommon"
+		]
+	},
 	"depends": {
 		"fabricloader": ">=${loader_version}",
 		"minecraft": "~${minecraft_version}",

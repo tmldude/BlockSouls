@@ -5,12 +5,13 @@
 REPO=$(cd "$(dirname "$0")/../.." && pwd)
 H=${OFFLINE_CHECK_HOME:-$HOME/.cache/blocksouls-offline-check}
 JDK=${JAVA25_HOME:-/usr/lib/jvm/java-25-openjdk-amd64}/bin
-MODS=${*:-common movement guns zombies bosses}
+ALL=$(sed -n "s/^include //p" "$REPO/settings.gradle" | tr -d "',")
+MODS=${*:-$ALL}
 OUT=$H/test-out
 
 CP=$(ls "$H"/libs/*.jar | tr '\n' ':')
 SP="$REPO/tools/offline-check/test-stubs"
-for m in common movement guns zombies bosses; do SP="$SP:$REPO/$m/src/main/java"; done
+for m in $ALL; do SP="$SP:$REPO/$m/src/main/java"; done
 FILES=$(for m in $MODS; do find "$REPO/$m/src/test/java" -name '*.java' 2>/dev/null; done)
 [ -z "$FILES" ] && { echo "no tests"; exit 0; }
 

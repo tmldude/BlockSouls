@@ -30,7 +30,9 @@ bin/
 
 # fabric
 
-run/
+# dev run folders (root and per module), not source packages named "run"
+/run/
+/*/run/
 
 # java
 

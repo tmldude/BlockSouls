@@ -1,0 +1,83 @@
+package io.github.tmldude.blocksouls.common;
+
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.storage.loot.LootTable;
+
+/**
+ * Ids that one module defines and another references. Feature modules never import each other, so a
+ * cross-module reference goes through a constant here (look the object up in its registry by this id).
+ */
+public final class CommonIds {
+	public static final String GAME = "blocksouls_game";
+	public static final String GUNS = "blocksouls_guns";
+	public static final String MOBS = "blocksouls_mobs";
+	public static final String BOSSES = "blocksouls_bosses";
+	public static final String VEHICLES = "blocksouls_vehicles";
+	public static final String WORLD = "blocksouls_world";
+
+	/** Item (guns): handed out by the game at run start, broken by the game after wave 3. */
+	public static final Identifier STARTER_PISTOL = id(GUNS, "starter_pistol");
+
+	/** Boss id (bosses) whose {@code BossEvents.BOSS_KILLED} switches the run to endless mode. */
+	public static final Identifier FINAL_BOSS = id(BOSSES, "final_dragon");
+	public static final Identifier FURNACE_KNIGHT = id(BOSSES, "furnace_knight");
+	public static final Identifier PALE_RIDER = id(BOSSES, "pale_rider");
+	public static final Identifier ASHWYRM = id(BOSSES, "ashwyrm");
+	public static final Identifier STORMPLATE_KNIGHT = id(BOSSES, "stormplate_knight");
+
+	/** Wave mob entity types (mobs). Their loot tables can be extended by other modules. */
+	public static final Identifier SHAMBLER = id(MOBS, "shambler");
+	public static final Identifier CRAWLER = id(MOBS, "crawler");
+	public static final Identifier SCREAMER = id(MOBS, "screamer");
+	public static final Identifier BLOATER = id(MOBS, "bloater");
+	public static final Identifier BRUTE = id(MOBS, "brute");
+	public static final Identifier MUTANT_BRUTE = id(MOBS, "mutant_brute");
+	public static final Identifier INFECTED_PIGLIN = id(MOBS, "infected_piglin");
+	public static final Identifier ASH_HOUND = id(MOBS, "ash_hound");
+
+	/** Wacky enchantments (world). Guns read these to apply them to bullets. */
+	public static final Identifier BOUNCY = id(WORLD, "bouncy");
+	public static final Identifier COMBUSTION = id(WORLD, "combustion");
+	public static final Identifier VAMPIRIC = id(WORLD, "vampiric");
+	public static final Identifier GRAPPLE = id(WORLD, "grapple");
+	public static final Identifier MAGNETIZED = id(WORLD, "magnetized");
+	public static final Identifier MOONWALK = id(WORLD, "moonwalk");
+
+	/** Crafting materials (world). Other modules' recipes and loot tables use them. */
+	public static final Identifier SCRAP = id(WORLD, "scrap");
+	public static final Identifier GUNMETAL_INGOT = id(WORLD, "gunmetal_ingot");
+	/** Nether material: mined from blight hearts, dropped by the Furnace Knight; blight-forged armor needs it. */
+	public static final Identifier BLIGHT_CORE = id(WORLD, "blight_core");
+
+	/**
+	 * Loot function (guns) that rolls a gun's rarity and perks, e.g.
+	 * {@code {"function": "blocksouls_guns:roll_perks", "tier": "legendary"}}. Any module's loot table may use it.
+	 */
+	public static final Identifier ROLL_PERKS = id(GUNS, "roll_perks");
+
+	/** Entity type (vehicles) placed by world structures as a repairable wreck. */
+	public static final Identifier KART_WRECK = id(VEHICLES, "kart_wreck");
+
+	/**
+	 * Loot tables (owned by game) rolled for wave kills, by tier. Guns, world etc. add their entries with
+	 * {@code LootTableEvents.MODIFY}; the game picks the tier from the wave number.
+	 */
+	public static final ResourceKey<LootTable> WAVE_DROPS_COMMON = lootTable(GAME, "wave_drops/common");
+	public static final ResourceKey<LootTable> WAVE_DROPS_RARE = lootTable(GAME, "wave_drops/rare");
+	public static final ResourceKey<LootTable> WAVE_DROPS_LEGENDARY = lootTable(GAME, "wave_drops/legendary");
+	/** Reward chest for clearing a wave. */
+	public static final ResourceKey<LootTable> WAVE_CLEAR_REWARD = lootTable(GAME, "wave_clear_reward");
+
+	private CommonIds() {
+	}
+
+	public static Identifier id(String namespace, String path) {
+		return Identifier.fromNamespaceAndPath(namespace, path);
+	}
+
+	public static ResourceKey<LootTable> lootTable(String namespace, String path) {
+		return ResourceKey.create(Registries.LOOT_TABLE, id(namespace, path));
+	}
+}

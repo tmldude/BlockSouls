@@ -4,7 +4,8 @@
 REPO=$(cd "$(dirname "$0")/../.." && pwd)
 H=${OFFLINE_CHECK_HOME:-$HOME/.cache/blocksouls-offline-check}
 JAVAC=${JAVA25_HOME:-/usr/lib/jvm/java-25-openjdk-amd64}/bin/javac
-MODS=${*:-common movement guns zombies bosses}
+ALL=$(sed -n "s/^include //p" "$REPO/settings.gradle" | tr -d "',")
+MODS=${*:-$ALL}
 OUT=$H/typecheck-out
 
 SP="$H/mc/client:$H/DataFixerUpper/src/main/java:$H/brigadier/src/main/java:$H/fabric-loader/src/main/java"
@@ -13,7 +14,7 @@ CP=$(ls "$H"/libs/*.jar | grep -v console-standalone | tr '\n' ':')
 
 FILES=()
 for m in $MODS; do
-	while IFS= read -r f; do FILES+=("$f"); done < <(find "$REPO/$m/src/main/java" "$REPO/$m/src/client/java" -name '*.java' 2>/dev/null)
+	while IFS= read -r f; do FILES+=("$f"); done < <(find "$REPO/$m/src/main/java" "$REPO/$m/src/client/java" "$REPO/$m/src/gametest/java" -name '*.java' 2>/dev/null)
 done
 rm -rf "$OUT"; mkdir -p "$OUT"
 # -implicit:none: vanilla/Fabric sources are only used to resolve names, never compiled.
@@ -22,6 +23,6 @@ rm -rf "$OUT"; mkdir -p "$OUT"
 # Errors inside vanilla sources come from closed Mojang libraries (authlib, logging) we don't have.
 # They don't affect checking our code, so only our errors are reported.
 OURS=$(grep -c "^$REPO/.*: error:" "$H/typecheck.log")
-grep -A3 "^$REPO/" "$H/typecheck.log"
+grep -A3 "^$REPO/.*: error:" "$H/typecheck.log"
 echo "typecheck: ${#FILES[@]} files, $OURS error(s) in our sources"
 [ "$OURS" -eq 0 ]

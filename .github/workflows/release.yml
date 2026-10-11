@@ -38,8 +38,9 @@ jobs:
       - name: Collect jars
         run: |
           mkdir dist
-          for m in movement guns zombies bosses; do
-            cp "$m"/build/libs/blocksouls-"$m"-*[0-9].jar dist/
+          for libs in */build/libs; do
+            m=${libs%%/*}; [ "$m" = common ] && continue
+            cp "$libs"/blocksouls-"$m"-*[0-9].jar dist/
           done
 
       # Our jars ride inside the .mrpack as overrides (unversioned names, so a pack update
@@ -53,8 +54,9 @@ jobs:
           go install github.com/packwiz/packwiz@latest
           cd modpack
           mkdir -p mods
-          for m in movement guns zombies bosses; do
-            cp ../dist/blocksouls-"$m"-*.jar mods/blocksouls-"$m".jar
+          for jar in ../dist/blocksouls-*.jar; do
+            m=$(basename "$jar"); m=${m%%-[0-9]*}
+            cp "$jar" "mods/$m.jar"
           done
           sed -i "s/^version = .*/version = \"$VERSION\"/" pack.toml
           packwiz refresh

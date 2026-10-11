@@ -23,7 +23,7 @@ scancodes (`org.lwjgl.sdl.SDLScancode`), not GLFW.
 ./gradlew build                 # build + test all mods; run before every commit
 ./gradlew test                  # unit tests only
 ./gradlew :movement:runClient   # dev client with movement + common loaded
-./gradlew :zombies:runServer    # dev server with zombies + common loaded
+./gradlew :game:runServer       # dev server with game + common loaded
 ```
 
 Jars land in `<module>/build/libs/blocksouls-<module>-<version>.jar`.
@@ -40,8 +40,9 @@ against decompiled 26.3 vanilla + Fabric sources and runs unit tests. Run `setup
 
 ## Layout and rules
 
-- **One mod per feature**: `movement`, `guns`, `zombies`, `bosses`. Each is its own Fabric mod with id
-  `blocksouls_<module>` so a server-only change ships without a client update.
+- **One mod per feature**: `movement`, `guns`, `game`, `mobs`, `world`, `vehicles`, `bosses` (who owns what:
+  PLAN.md §8). Each is its own Fabric mod with id `blocksouls_<module>` so a server-only change ships without a
+  client update. Feature modules never import each other; they talk through `common` (see "Contracts" below).
 - `common` is a library mod (`blocksouls_common`) nested jar-in-jar into each feature mod. It holds
   `Networking` (typed payloads), `Config` (JSON in `config/blocksouls/`), and client-side `Keybinds` /
   `ClientNetworking`.

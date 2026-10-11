@@ -11,4 +11,4 @@ pluginManagement {
 
 rootProject.name = 'blocksouls'
 
-include 'common', 'movement', 'guns', 'zombies', 'bosses'
+include 'common', 'movement', 'guns', 'game', 'mobs', 'world', 'vehicles', 'bosses'

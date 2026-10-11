@@ -8,9 +8,11 @@ RUN ./gradlew build --no-daemon
 
 # Stage unversioned jar names so an image update overwrites the previous jars in /data/mods
 # instead of leaving old versions next to new ones. Versions come from gradle.properties.
+# Every module except common (which is nested inside each feature jar) ships a jar.
 RUN mkdir /out \
-	&& for m in movement guns zombies bosses; do \
-		cp "$m"/build/libs/blocksouls-"$m"-*[0-9].jar /out/blocksouls-"$m".jar; \
+	&& for libs in */build/libs; do \
+		m=${libs%%/*}; [ "$m" = common ] && continue; \
+		cp "$libs"/blocksouls-"$m"-*[0-9].jar /out/blocksouls-"$m".jar; \
 	done \
 	&& printf 'BLOCKSOULS_MC_VERSION=%s\nBLOCKSOULS_LOADER_VERSION=%s\n' \
 		"$(sed -n 's/^minecraft_version=//p' gradle.properties)" \
