@@ -85,6 +85,10 @@ final class FinalDragonAttacks {
 			return 0;
 		}
 
+		private double len(AttackRun run) {
+			return dragon(run).arena().scaled(length.getAsDouble());
+		}
+
 		private Vec3 laneStart(AttackRun run) {
 			return run.points().get(0);
 		}
@@ -97,7 +101,7 @@ final class FinalDragonAttacks {
 			if (dir.lengthSqr() < 1e-4) {
 				dir = new Vec3(1, 0, 0);
 			}
-			run.points().add(center.subtract(dir.scale(length.getAsDouble() / 2)));
+			run.points().add(center.subtract(dir.scale(len(run) / 2)));
 			run.setDirection(dir);
 			run.sound(FinalRaidSounds.BREATH, 4f, 0.6f);
 			dragon.playSound(FinalRaidSounds.ROAR, 4f, 1.2f);
@@ -108,12 +112,13 @@ final class FinalDragonAttacks {
 			FinalDragon dragon = dragon(run);
 			Vec3 start = laneStart(run);
 			// Swing around to a point behind the lane's start, low.
-			Vec3 approach = start.subtract(run.direction().scale(6)).add(0, 7, 0);
+			double k = dragon.arena().scale();
+			Vec3 approach = start.subtract(run.direction().scale(6 * k)).add(0, 7 * k, 0);
 			int left = run.stageLength() - run.tick();
 			dragon.steer(approach, Math.max(1.0, approach.distanceTo(dragon.position()) / Math.max(1, left)), 0.35);
 			dragon.faceVelocity();
 			if (run.tick() % 3 == 0) {
-				Telegraphs.lineFilling(run.level(), OUTLINE, FILL, start, run.direction(), length.getAsDouble(), halfWidth.getAsDouble(), run.progress());
+				Telegraphs.lineFilling(run.level(), OUTLINE, FILL, start, run.direction(), len(run), halfWidth.getAsDouble(), run.progress());
 			}
 		}
 
@@ -122,9 +127,9 @@ final class FinalDragonAttacks {
 			FinalDragon dragon = dragon(run);
 			Vec3 start = laneStart(run);
 			Vec3 dir = run.direction();
-			double len = length.getAsDouble();
+			double len = len(run);
 			double covered = len * run.progress();
-			moveTo(dragon, start.add(dir.scale(covered)).add(0, 6, 0), 1);
+			moveTo(dragon, start.add(dir.scale(covered)).add(0, dragon.arena().scaled(6), 0), 1);
 			dragon.face(dir);
 			dragon.setXRot(10);
 			ServerLevel level = run.level();
@@ -148,7 +153,7 @@ final class FinalDragonAttacks {
 		public void recovery(AttackRun run) {
 			FinalDragon dragon = dragon(run);
 			// The lane keeps burning a moment while it climbs away.
-			breathDamage(run, length.getAsDouble());
+			breathDamage(run, len(run));
 			dragon.steer(dragon.position().add(run.direction().scale(8)).add(0, 4, 0), 1.0, 0.25);
 			dragon.faceVelocity();
 		}
@@ -193,7 +198,8 @@ final class FinalDragonAttacks {
 			}
 			Vec3 shadow = run.points().get(0);
 			// Rear up high behind the shadow.
-			Vec3 perch = shadow.subtract(run.direction().scale(14)).add(0, 14, 0);
+			double back = dragon.arena().scaled(14);
+			Vec3 perch = shadow.subtract(run.direction().scale(back)).add(0, back, 0);
 			dragon.steer(perch, 1.6, 0.3);
 			dragon.face(run.direction());
 			dragon.setXRot(-20);
@@ -211,7 +217,7 @@ final class FinalDragonAttacks {
 		public void active(AttackRun run) {
 			FinalDragon dragon = dragon(run);
 			Vec3 shadow = run.points().get(0);
-			Vec3 end = shadow.add(run.direction().scale(config().diveLength));
+			Vec3 end = shadow.add(run.direction().scale(dragon.arena().scaled(config().diveLength)));
 			int half = Math.max(1, run.stageLength() / 2);
 			int left;
 			Vec3 goal;
@@ -492,7 +498,7 @@ final class FinalDragonAttacks {
 			}
 			Vec3 center = dragon.arena().centerVec();
 			for (int i = 0; i < config().meteorsExtra && !targets.isEmpty(); i++) {
-				run.points().add(scatter(run, center, 24));
+				run.points().add(scatter(run, center, dragon.arena().scaled(24)));
 			}
 		}
 

@@ -130,6 +130,6 @@ public final class FinalRaidEnd {
 			plates.add(home.offset((int) Math.round(Math.cos(a) * 9), -1, (int) Math.round(Math.sin(a) * 9)));
 		}
 		Vec3 center = Vec3.atBottomCenterOf(home);
-		return RaidArena.of(home, crystals, center.add(0, 3, 0), center, plates);
+		return RaidArena.of(home, crystals, center.add(0, 3, 0), center, plates, 0.5);
 	}
 }

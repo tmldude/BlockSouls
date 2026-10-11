@@ -22,20 +22,23 @@ import net.minecraft.world.phys.Vec3;
  * @param obelisk       top of the obelisk: where crystals beam during the show, and where progress rings light up
  * @param perch         where the dragon lands for its DPS window (its feet)
  * @param plates        candidate plate centers (block positions of the plate surface), best spread first
+ * @param scale         flight distances (orbits, approach paths, lanes) are multiplied by this: 1 on the End island,
+ *                      smaller for cramped arenas (game tests, a dragon summoned outside the End)
  */
-public record RaidArena(BlockPos center, int floorY, List<Vec3> crystals, List<Boolean> caged, Vec3 obelisk, Vec3 perch, List<BlockPos> plates) {
+public record RaidArena(BlockPos center, int floorY, List<Vec3> crystals, List<Boolean> caged, Vec3 obelisk, Vec3 perch, List<BlockPos> plates,
+		double scale) {
 	public RaidArena {
 		crystals = List.copyOf(crystals);
 		caged = List.copyOf(caged);
 		plates = List.copyOf(plates);
 	}
 
-	public static RaidArena of(BlockPos center, List<Vec3> crystals, Vec3 obelisk, Vec3 perch, List<BlockPos> plates) {
+	public static RaidArena of(BlockPos center, List<Vec3> crystals, Vec3 obelisk, Vec3 perch, List<BlockPos> plates, double scale) {
 		List<Boolean> caged = new ArrayList<>();
 		for (int i = 0; i < crystals.size(); i++) {
 			caged.add(false);
 		}
-		return new RaidArena(center, center.getY(), crystals, caged, obelisk, perch, plates);
+		return new RaidArena(center, center.getY(), crystals, caged, obelisk, perch, plates, scale);
 	}
 
 	/** The vanilla main island around {@code origin} (the fight origin, normally 0,0). */
@@ -69,7 +72,7 @@ public record RaidArena(BlockPos center, int floorY, List<Vec3> crystals, List<B
 			int y = surface(level, new BlockPos(x, 0, z), floorY);
 			plates.add(new BlockPos(x, y - 1, z));
 		}
-		return new RaidArena(center, floorY, crystals, caged, obelisk, perch, plates);
+		return new RaidArena(center, floorY, crystals, caged, obelisk, perch, plates, 1.0);
 	}
 
 	/** First air y above the surface at {@code pos}'s column, or {@code fallback} over the void. */
@@ -84,8 +87,14 @@ public record RaidArena(BlockPos center, int floorY, List<Vec3> crystals, List<B
 		return new Vec3(center.getX() + 0.5, floorY, center.getZ() + 0.5);
 	}
 
-	/** A point on the circle of {@code radius} around the center at {@code height} above the surface. */
+	/** {@code distance} at this arena's {@link #scale}. */
+	public double scaled(double distance) {
+		return distance * scale;
+	}
+
+	/** A point on the circle of {@code radius} around the center at {@code height} above the surface (both scaled). */
 	public Vec3 orbit(double angle, double radius, double height) {
-		return new Vec3(center.getX() + 0.5 + Math.cos(angle) * radius, floorY + height, center.getZ() + 0.5 + Math.sin(angle) * radius);
+		double r = scaled(radius);
+		return new Vec3(center.getX() + 0.5 + Math.cos(angle) * r, floorY + scaled(height), center.getZ() + 0.5 + Math.sin(angle) * r);
 	}
 }

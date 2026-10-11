@@ -61,7 +61,8 @@ public class FinalRaidGameTests {
 		List<Vec3> crystals = List.of(c.add(-3, 2, -3), c.add(3, 2, -3), c.add(-3, 2, 3));
 		List<BlockPos> plates = List.of(center.offset(-2, -1, 0), center.offset(2, -1, 0));
 		FinalDragon dragon = helper.spawn(FinalRaids.TYPE, CENTER);
-		dragon.setArena(RaidArena.of(center, crystals, c.add(0, 3, 0), c, plates), false);
+		// Small flight scale: the dragon must stay over the test area (outside it, chunks may not tick).
+		dragon.setArena(RaidArena.of(center, crystals, c.add(0, 3, 0), c, plates, 0.15), false);
 		return dragon;
 	}
 

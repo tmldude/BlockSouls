@@ -356,11 +356,13 @@ public class FinalDragon extends BossEntity {
 	/** Not fighting: circle home slowly (and fly back there after a reset). */
 	private void idleFlight(ServerLevel level) {
 		Vec3 home = Vec3.atBottomCenterOf(home());
-		if (isReturning() || distanceToSqr(home) > 40 * 40) {
+		double far = arena().scaled(40);
+		if (isReturning() || distanceToSqr(home) > far * far) {
 			steer(home, 1.2, 0.3);
 		} else {
 			orbitAngle += 0.012;
-			steer(home.add(Math.cos(orbitAngle) * 12, Math.sin(tickCount * 0.03) * 2, Math.sin(orbitAngle) * 12), 0.4, 0.15);
+			double r = arena().scaled(12);
+			steer(home.add(Math.cos(orbitAngle) * r, Math.sin(tickCount * 0.03) * 2, Math.sin(orbitAngle) * r), 0.4, 0.15);
 		}
 		faceVelocity();
 		flapSound(level);
@@ -430,7 +432,7 @@ public class FinalDragon extends BossEntity {
 		double radius = high ? config().highRadius : config().cruiseRadius;
 		double height = high ? config().highHeight : config().cruiseHeight;
 		double speed = config().cruiseSpeed * definition().phase(phase()).speedMult();
-		orbitAngle += speed / radius;
+		orbitAngle += speed / arena().scaled(radius);
 		Vec3 point = arena().orbit(orbitAngle, radius, height + Math.sin(tickCount * 0.05) * 3);
 		steer(point, speed * 1.6, 0.12);
 		faceVelocity();
