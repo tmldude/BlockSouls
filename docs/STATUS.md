@@ -15,9 +15,13 @@ Module restructure (`game`, `mobs`, `world`, `vehicles`), `common` contracts, ga
 generator, world-reset hook, `game` split into `RunSystem` / `PlayerSystem` / `GameHud` / `ClientRun`, worker
 protocol + all session briefs in `docs/sessions/`.
 
-## Now: Stage 1 (parallel sessions)
-`game-loop`, `game-players`, `mobs`, `guns`, `world`, `vehicles`, `movement` — each on `claude/<name>`, one PR each.
-The orchestrator reviews and merges them, then starts Stage 2a (`bosses`), then 2b.
+## Stage 1: done (PR #10)
+game-loop, game-players, mobs, guns, world, vehicles, movement merged; CI green on the combined tree. Each
+session's choices are in `docs/decisions/<session>.md`.
+
+## Now: Stage 2
+`bosses` (framework + Furnace Knight) plus `art-mobs` and `art-items` in parallel. When `bosses` merges:
+`boss-pale-rider`, `boss-ashwyrm`, `boss-stormplate`, `final-raid`. Then Stage 3 (integration, balance, v0.9).
 
 ## Decisions that changed late (see DECISIONS.md for all)
 - Downed players stay down until revived (no bleed-out); everyone down at once ends the run; going down costs
