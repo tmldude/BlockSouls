@@ -1,6 +1,6 @@
 {
   "tier": "common",
-  "icon": "minecraft:ladder",
+  "icon": "blocksouls_game:boon/steady_climber",
   "stackable": 2,
   "effects": [
     {

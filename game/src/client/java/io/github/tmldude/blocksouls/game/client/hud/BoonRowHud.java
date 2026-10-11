@@ -39,7 +39,7 @@ final class BoonRowHud {
 
 			graphics.fill(x, y, x + SLOT, y + SLOT, 0x90000000);
 			graphics.outline(x, y, SLOT, SLOT, color);
-			graphics.fakeItem(BoonStyle.icon(boon), x + 1, y + 1);
+			BoonStyle.drawIcon(graphics, boon.icon(), x + 1, y + 1, 16);
 
 			if (boon.maxLevel() > 1) {
 				for (int pip = 0; pip < boon.maxLevel(); pip++) {
