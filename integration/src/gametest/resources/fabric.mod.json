@@ -1,0 +1,24 @@
+{
+	"schemaVersion": 1,
+	"id": "blocksouls_integration_test",
+	"version": "${version}",
+	"name": "BlockSouls full-pack tests",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-gametest": [
+			"io.github.tmldude.blocksouls.integration.FullPackGameTests"
+		],
+		"fabric-client-gametest": [
+			"io.github.tmldude.blocksouls.integration.FullPackClientTest"
+		]
+	},
+	"depends": {
+		"blocksouls_game": "*",
+		"blocksouls_guns": "*",
+		"blocksouls_mobs": "*",
+		"blocksouls_world": "*",
+		"blocksouls_vehicles": "*",
+		"blocksouls_movement": "*",
+		"blocksouls_bosses": "*"
+	}
+}

@@ -1,0 +1,25 @@
+// Test-only project: puts every BlockSouls mod on one classpath so the game tests see the full pack
+// (cross-module ids, mixins, recipes, waves spawning real mobs). Its jar is never shipped.
+def features = ['movement', 'guns', 'game', 'mobs', 'world', 'vehicles', 'bosses']
+
+loom {
+	mods {
+		features.each { m ->
+			register("blocksouls_${m}") {
+				sourceSet 'main', ":${m}"
+				sourceSet 'client', ":${m}"
+			}
+		}
+	}
+}
+
+dependencies {
+	features.each { m ->
+		def feature = rootProject.project(":${m}")
+		implementation project(":${m}")
+		clientImplementation files(
+				feature.layout.buildDirectory.dir('classes/java/client'),
+				feature.layout.buildDirectory.dir('resources/client')
+		).builtBy(":${m}:clientClasses")
+	}
+}

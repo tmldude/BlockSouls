@@ -39,7 +39,7 @@ jobs:
         run: |
           mkdir dist
           for libs in */build/libs; do
-            m=${libs%%/*}; [ "$m" = common ] && continue
+            m=${libs%%/*}; { [ "$m" = common ] || [ "$m" = integration ]; } && continue
             cp "$libs"/blocksouls-"$m"-*[0-9].jar dist/
           done
 

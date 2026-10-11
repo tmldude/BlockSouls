@@ -20,6 +20,18 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
       - name: Build and test
         run: ./gradlew build test
+      # A real client joins a dedicated server with every mod loaded; screenshots are uploaded below.
+      - name: Client game test (full pack)
+        run: |
+          sudo apt-get install -yq xvfb > /dev/null
+          xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew :integration:runClientGameTest
+      - name: Upload client screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: client-screenshots
+          path: integration/build/run/clientGameTest/screenshots/
+          if-no-files-found: ignore
       - name: Upload mod jars
         uses: actions/upload-artifact@v7
         with:
@@ -27,3 +39,4 @@ jobs:
           path: |
             */build/libs/*.jar
             !*/build/libs/*-sources.jar
+            !integration/build/libs/*.jar
