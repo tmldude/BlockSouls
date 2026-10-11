@@ -186,7 +186,10 @@ public class StormplateGameTests {
 			helper.assertTrue(!golem.isOnFire(), "the strike set the target on fire");
 			for (int x = 0; x < 8; x++) {
 				for (int z = 0; z < 8; z++) {
-					helper.assertBlockPresent(Blocks.GRASS_BLOCK, x, 0, z);
+					if (!(z == 4 && (x == 1 || x == 7))) {
+						// Grass under the hay and planks may decay to dirt on its own; everywhere else it must survive.
+						helper.assertBlockPresent(Blocks.GRASS_BLOCK, x, 0, z);
+					}
 					for (int y = 1; y < 6; y++) {
 						BlockState state = helper.getBlockState(new BlockPos(x, y, z));
 						helper.assertTrue(!state.is(Blocks.FIRE), "fire at " + x + "," + y + "," + z);
