@@ -1,0 +1,15 @@
+{
+	"schemaVersion": 1,
+	"id": "blocksouls_guns_test",
+	"version": "${version}",
+	"name": "BlockSouls Guns game tests",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-gametest": [
+			"io.github.tmldude.blocksouls.guns.test.GunsGameTests"
+		]
+	},
+	"depends": {
+		"blocksouls_guns": "*"
+	}
+}
