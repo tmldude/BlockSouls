@@ -35,7 +35,8 @@ Run length: **player-paced**; tune curves to a ~2.5-hour median. All pacing numb
 | Finale | The End (existing raid) | final portal at the Act 4 camp, ignited by the Act 4 portal charge | — | reworked Ender Dragon (exists) | — |
 
 - **No fixed siege count per act** (owner). An act lasts exactly as long as the party chooses to stay.
-- **Dimension names are placeholders** — owner's taste call. Original names only (no "Aether").
+- **Dimension names confirmed by the owner (2026-10-11): the Blightheart and the Skyrift.** Original
+  names only (no "Aether").
 - Strongholds / Ender Eye hunting are **removed from the run** (Classic mode keeps them).
 - Endless mode after the finale: endless sieges in the act of the party's choice.
 
@@ -107,6 +108,23 @@ e. **Classic mode** (`game-run.json`: `"runShape": "classic" | "expedition"`): t
 - A **build line on the HUD/tab list**: the player's top two tags get an icon + name
   ("Fire · Ricochet"). Legibility is the point.
 
+**Deck-building layer** (owner: "a combo between Slay the Spire and Hades"):
+- **Boon levels:** picking a boon you already own upgrades it (Hades-style); the relic can also offer an
+  "upgrade a random owned boon" card. Levels shown as pips on the HUD boon row.
+- **Skip pays:** declining all cards converts the relic to souls. Never a dead choice.
+- **Curses** — negative boons: greed objects price in curses (the cursed chest adds one; the blood altar
+  can offer "take a curse instead of paying hearts"). Examples: *Hemorrhage* (healing 25% weaker),
+  *Loud* (mobs aggro from further), *Heavy Pockets* (−souls on going down). **Purging** a curse costs
+  souls at the shopkeeper or a free cleanse at a blood altar (which then offers no reward). Curses are
+  lost on going down like boons — going down is already the punishment.
+- **Trinkets** — the Slay-the-Spire relic analogue, a second collection axis that **survives going
+  down** (softens the boon-wipe sting without removing it): passive artifacts, **3 slots**, no levels.
+  Sources: field bosses offer a **pick-1-of-3 trinket** on death; challenge pylons and rare cursed
+  chests drop one. Examples: *Dawn Clock* (prep phases 20% longer), *Last Shell* (once per siege,
+  survive a down at 1 heart), *Magnet Core* (drops fly to you), *Siege Lens* (see the next siege's
+  modifier two days out). Naming: the dawn drop stays "relic" (it offers boons); trinkets are the
+  carried items.
+
 ### 3b. AI Director — `game`
 
 Replaces "waves on a timer" with a hunter. Tracks per-party **stress** (recent damage taken, downs,
@@ -146,21 +164,40 @@ defend a crashed supply drop 90 s; carry a volatile core to the camp while the h
 carrier; kill the fleeing glowing zombie before it escapes; keep the generator (light source) alive.
 Data-driven list so acts can add themed ones.
 
-### 3f. Origins (run-start classes) — `game` (player side)
+### 3f. Origins (classes) — `game` + `movement`
 
-Picked at run start (item in the starter kit; solo defaults allowed). Each = kit + passive + weighted
-boon tags + one drawback. Seed eight ("go crazy" per owner):
+Owner (2026-10-11): **movement itself is class identity.** Not everyone is Mario *and* Spider-Man —
+you pick where you start. One guardrail: the **Souls core stays universal** (dodge roll + i-frames,
+stamina, the downed/revive loop, the improved hold-jump feel), because the combat rhythm and revive
+play must read the same for the whole party; everything above that baseline is origin identity.
+Character customization = origin × boons × gear: the origin sets the movement verbs, boons deepen them
+(§3a tag weighting), gear does the rest.
 
-| Origin | Kit / passive | Drawback |
-|---|---|---|
-| Gunslinger | rare Hand Cannon, +20% reload | −25 max stamina |
-| Webhead | Web Shooter from minute 0, swing boons weighted | −2 max hearts |
-| Juggernaut | scrap-plate set, revives allies 2× faster | can't triple-jump |
-| Tinkerer | wrench: deployable scrap turret, half-cost barricades/vehicle repair | ammo drops −25% |
-| Bloodbound | blood altars cost half; +1 heart per boss killed | healing items 50% effective |
-| Pale Courier | starts with a (weaker) Wraith Steed whistle | no starter pistol |
-| Warden | taunt horn (pulls aggro 10 s), +2 hearts | −15% move speed |
-| Gambler | every relic offers 4 cards, one always Wildcard | all cards are hidden until taken |
+An origin = **movement signature + kit/passive + drawback**, picked at run start (item in the starter
+kit; solo gets a default). Seed ten; the pool is data-driven and open (bench: Pale Courier — starts with
+a weaker Wraith Steed; Warden — taunt horn, +2 hearts, −15% speed):
+
+| Origin | Movement signature | Kit / passive | Drawback |
+|---|---|---|---|
+| **Drifter** | the full Mario kit: triple-jump chain + innate double jump | +10% move speed | cannot climb or swing |
+| **Webslinger** | web swing + wall climb + ledge grab | Web Shooter from minute 0 | no triple/double jump; −25 max stamina |
+| **Tidecaller** | fish: infinite water breathing, dolphin-speed swimming, clear vision and full-speed gunfire underwater | heals in rain; +damage to blight mobs | burns 2× longer |
+| **Ashborn** | fire & lava immune; walks on magma; swims lava like water (Acts 2–3 open up: lava routes, fire floors ignorable) | fire-tag boons weighted | water slows them badly; −10% move speed |
+| **Zephyr** | flight: stamina-drain glide wings; rides updrafts hard (Skyrift updrafts, dusk thermals elsewhere) | no fall damage | −2 max hearts (hollow bones) |
+| **Juggernaut** | baseline only — can't climb, swing, or glide | scrap-plate set; revives allies 2× faster; knockback immune | −15% move speed |
+| **Gunslinger** | baseline | rare Hand Cannon; +20% reload | −25 max stamina |
+| **Tinkerer** | baseline | wrench: deployable scrap turret, half-cost barricades/vehicle repair | ammo drops −25% |
+| **Bloodbound** | baseline + roll leaves a brief blinding blood mist | blood altars cost half; +1 heart per boss kill | healing items 50% effective |
+| **Gambler** | baseline | every relic offers 4 cards, one always a Wildcard | all cards are hidden until taken |
+
+- **Implementation:** `movement` keeps every mechanic but gates each behind an origin **capability set**
+  (contract in `common`, synced from `game`). Classic mode grants everyone everything — the v1 behavior,
+  for free.
+- **Dimension interplay is deliberate:** Ashborn owns Nether/Blightheart terrain, Tidecaller owns oceans
+  and blight pools, Zephyr owns the Skyrift. Party composition becomes a routing decision.
+- Movement boons can cross-train late (a legendary "Webslinger's Memento" grants climb to anyone) so a
+  long greedy run can still collect verbs — at legendary prices.
+- Balance rule: **every origin must be able to finish solo**; tested at 1 and 8 players, as ever.
 
 ### 3g. Solo & co-op feel — `game`
 
@@ -218,13 +255,13 @@ a learned Director trained on real run summaries. Not scheduled.
 
 | Module | v2 additions |
 |---|---|
-| `common` | synergy tag vocabulary; act/siege state + events (act started, siege started/ended, portal charging/ignited); Director stress inputs contract; origin registry contract |
-| `game` | SiegeClock, acts, Director, economy objects' logic, shopkeeper trades, origins, Last Stand, cross-player boons, run summary v2, Classic mode flag |
+| `common` | synergy tag vocabulary; act/siege state + events (act started, siege started/ended, portal charging/ignited); Director stress inputs contract; origin registry + **movement capability set** contract |
+| `game` | SiegeClock, acts, Director, economy objects' logic, shopkeeper trades, origins, boon levels/curses/trinkets, Last Stand, cross-player boons, run summary v2, Classic mode flag |
 | `world` | **both new dimensions** (worldgen, portals, camps, act ores/gear materials), altar/chest/pylon structures |
 | `mobs` | act 3/4 rosters (blight + sky mobs), influence-map pathing, affix system on elites |
 | `bosses` | attack archetypes, posture, part breaks, 2 new bosses, boss relocations per act, affixes on field bosses, name-splash |
 | `guns` | perk tags, forge ritual hooks, act-tier recipes |
-| `movement` | nothing structural (boon hooks only) |
+| `movement` | gate each mechanic behind the origin capability set (Classic mode = all granted); Zephyr glide + updrafts; boon cross-training hooks |
 | `vehicles` | act-aware spawning (wrecks in all acts; the speeder's radioactive core moves to the Blightheart) |
 
 Contract changes land as their own small PRs in Wave 4 and are then frozen, per v1 rules.
@@ -241,7 +278,7 @@ Everything that scales with players goes through `PartyScaling`, tested at 1 and
   |---|---|
   | Dimensions | Blightheart + Skyrift worldgen, portals, camps, act ores |
   | Director & economy | §3b + §3c + §3e |
-  | Builds & origins | §3a + §3f + forge ritual + shopkeeper trades |
+  | Builds & origins | §3a (incl. levels, curses, trinkets) + §3f (incl. `movement` capability gating + glide) + forge ritual + shopkeeper trades |
   | Bosses v2 | §3h archetypes + posture + part breaks + affixes |
   | New bosses | Blightheart boss + Skyrift boss (design sub-sessions for models, per v1 practice) |
   | Mobs v2 | act rosters, influence map, elite affixes |
@@ -257,6 +294,10 @@ Everything that scales with players goes through `PartyScaling`, tested at 1 and
 - **The Director can make nights feel unfair** if stress inputs are wrong; its decision log and hard
   config bounds exist for exactly that. Ship conservative defaults.
 - **Synergy balance explosion**: tags multiply; cap stacking (one keystone per trigger tag) from day one.
+- **Movement gating can hurt the feel layer** — v1's movement is the game's best-tested joy, and an
+  origin that locks most of it away must be fun for other reasons. Mitigations: the Souls core and
+  hold-jump stay universal, every movement origin's signature must feel as good as the v1 kit, legendary
+  cross-training boons exist, and solo-completable is a hard rule per origin.
 - **Pacing is player-owned, so it can bloat or trivialize.** The threat curve on bosses (§1) is the
   balancing lever: lingering must get genuinely dangerous and rushing genuinely under-geared. Playtest
   the curve; keep the counter visible so the choice is informed. A config soft-cap (threat growth

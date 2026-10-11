@@ -258,5 +258,19 @@ Owner refinements over the first draft:
 
 Orchestrator notes:
 - 26.3's "new biome" is the Dappled Forest (an overworld forest biome, not a dimension), and vanilla has
-  no aether — so acts 3–4 are **our own custom dimensions** with original names (placeholders:
-  "the Blightheart", "the Skyrift"; no "Aether" per the asset-name rule). Names still the owner's call.
+  no aether — so acts 3–4 are **our own custom dimensions** with original names (no "Aether" per the
+  asset-name rule).
+
+**Round 3 (same day, from the owner):**
+- **Dimension names confirmed: the Blightheart and the Skyrift.**
+- **Movement becomes class identity** (origins): you pick where you start — Mario kit, web/climb,
+  aquatic, fire/lava-immune, or glide-flight — instead of everyone having everything. Orchestrator
+  guardrail (to confirm by playtest, logged in PLAN2.md §3f): the Souls core (roll + i-frames, stamina,
+  downed/revive) and the hold-jump feel stay universal; capability set contract in `common`, gating in
+  `movement`; Classic mode grants all (v1 behavior); every origin solo-completable.
+- **Boons/relics deepened, "Slay the Spire × Hades"**: boon levels (duplicate pick upgrades), skip-for-
+  souls, **curses** priced into greed objects (purgeable at the shopkeeper / a free altar cleanse), and
+  **trinkets** — a 3-slot StS-relic-style collection that survives going down (field bosses offer a
+  pick-1-of-3). The dawn drop keeps the name "relic"; the carried items are "trinkets".
+- **Coordination:** before v2 Wave 4 starts, confirm with the v1 detailing/sound session that its PRs
+  are merged or don't overlap `game`/`movement`/`common` (message sent 2026-10-11; awaiting reply).
