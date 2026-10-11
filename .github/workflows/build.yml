@@ -7,7 +7,7 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     permissions:
-      contents: write   # publishes client screenshots to the ci/screenshots branch
+      contents: write   # publishes client screenshots to ci-screenshots/<branch>
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -50,8 +50,8 @@ jobs:
             integration/build/run/clientGameTest/logs/
           if-no-files-found: ignore
       # The latest screenshots + client log as a git branch, so they can be read with plain git (artifact storage
-      # isn't reachable from every dev sandbox). One branch per source branch: ci/screenshots/<branch>.
-      - name: Publish screenshots to ci/screenshots
+      # isn't reachable from every dev sandbox). One branch per source branch: ci-screenshots/<branch>.
+      - name: Publish screenshots to ci-screenshots/<branch>
         if: always() && github.event_name == 'push'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -62,7 +62,7 @@ jobs:
           cp -r "$run/screenshots/." "$out/"
           cp "$run/logs/latest.log" "$out/client.log" 2>/dev/null || true
           cd "$out"
-          dest="ci/screenshots/${GITHUB_REF_NAME//\//-}"
+          dest="ci-screenshots/${GITHUB_REF_NAME//\//-}"
           git init -q -b "$dest"
           git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "screenshots: $GITHUB_REF_NAME $GITHUB_SHA" --allow-empty
           git add -A
