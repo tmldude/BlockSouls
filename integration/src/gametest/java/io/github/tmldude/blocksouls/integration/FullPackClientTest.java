@@ -1,9 +1,17 @@
 package io.github.tmldude.blocksouls.integration;
 
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.level.Level;
+
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerConnection;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerContext;
+
+import io.github.tmldude.blocksouls.common.CommonIds;
 
 /**
  * A real client joins a dedicated server running the full pack: every client mixin, renderer, HUD element and payload
@@ -50,6 +58,7 @@ public class FullPackClientTest implements FabricClientGameTest {
 
 			// Every boss, one at a time, in front of the player (boss bar + model).
 			server.runCommand("kill @e[type=!minecraft:player]");
+			context.waitTicks(60); // let the death smoke clear
 			String[] bosses = {"furnace_knight", "pale_rider", "ashwyrm", "stormplate_knight", "final_dragon"};
 			for (int i = 0; i < bosses.length; i++) {
 				server.runCommand("execute as @a at @s rotated ~ 0 run summon blocksouls_bosses:" + bosses[i] + " ^ ^ ^14 {NoAI:1b}");
@@ -57,6 +66,21 @@ public class FullPackClientTest implements FabricClientGameTest {
 				context.takeScreenshot(String.format("%02d-boss-%s", 10 + i, bosses[i]));
 				server.runCommand("kill @e[type=blocksouls_bosses:" + bosses[i] + "]");
 			}
+
+			// The final raid's handoff in the real End: the vanilla dragon dies and falls, and ours takes its place.
+			server.runCommand("effect give @a minecraft:slow_falling infinite 0 true");
+			server.runCommand("execute in minecraft:the_end run tp @a 0 90 30");
+			server.waitFor(s -> !s.getLevel(Level.END).getEntities(EntityTypes.ENDER_DRAGON, Entity::isAlive).isEmpty(), 1200);
+			context.waitTicks(100);
+			context.takeScreenshot("15-end-vanilla-dragon");
+			server.runCommand("kill @e[type=minecraft:ender_dragon]");
+			EntityType<?> finalDragon = BuiltInRegistries.ENTITY_TYPE.getValue(CommonIds.FINAL_BOSS);
+			server.waitFor(s -> !s.getLevel(Level.END).getEntities(finalDragon, Entity::isAlive).isEmpty(), 400);
+			context.waitTicks(200); // the fall and the dazed sprawl
+			server.runCommand("execute as @a at @s facing entity @e[type=blocksouls_bosses:final_dragon,limit=1] feet run tp @s ~ ~ ~ ~ ~");
+			context.waitTicks(20);
+			context.takeScreenshot("16-end-final-dragon");
+			server.runCommand("effect clear @a minecraft:slow_falling");
 
 			// The Nether: blight and ash fog. Teleport first so the chunks load, then clear a pocket around the player
 			// (a fill in unloaded chunks does nothing): a hollow glass box keeps the lava out and the view clear.
