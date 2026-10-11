@@ -99,6 +99,7 @@ public abstract class BossEntity extends Monster {
 	private double damageMultiplier = 1;
 	private boolean scalingApplied;
 	private int attacksFinished;
+	private boolean fogWallEnabled = true;
 
 	protected BossEntity(EntityType<? extends BossEntity> type, Level level) {
 		super(type, level);
@@ -133,6 +134,19 @@ public abstract class BossEntity extends Monster {
 	protected void fightTick(ServerLevel level, @Nullable LivingEntity target) {
 	}
 
+	/**
+	 * Whether engaging raises the fog wall ring around {@link #home()}. Open-air arenas (the final raid's whole island)
+	 * turn it off and define the arena through {@link #inArena} instead. Default: {@link #setFogWallEnabled}.
+	 */
+	protected boolean raisesFogWall() {
+		return fogWallEnabled;
+	}
+
+	/** Per instance: no fog wall for this boss (e.g. summoned as an add inside another boss's arena). Not saved. */
+	public void setFogWallEnabled(boolean enabled) {
+		this.fogWallEnabled = enabled;
+	}
+
 	/** Distance the boss tries to close to before it stops walking (it still picks ranged attacks from afar). */
 	protected double preferredDistance() {
 		return 3.0;
@@ -150,8 +164,12 @@ public abstract class BossEntity extends Monster {
 		BossPart part = new BossPart(this, name, width, height, damageMultiplier, offset);
 		parts = Arrays.copyOf(parts, parts.length + 1);
 		parts[parts.length - 1] = part;
-		// Parts take the ids right after the boss's (the client mirrors this in recreateFromPacket).
-		part.setId(getId() + parts.length);
+		// Parts take the ids right after the boss's (the client mirrors this in recreateFromPacket). A client-side boss
+		// has no id yet while it's being constructed (getId() would throw and drop the connection); setId and
+		// recreateFromPacket number the parts once the spawn packet assigns it, as vanilla's dragon does.
+		if (!level().isClientSide()) {
+			part.setId(getId() + parts.length);
+		}
 		return part;
 	}
 
@@ -736,7 +754,9 @@ public abstract class BossEntity extends Monster {
 		gap = framework().attackGapTicks * 2;
 		mostPlayersInFight = 0;
 		refreshScaling(level);
-		wall.raise(level, home(), arenaRadius(), framework().fogWallBelow, framework().fogWallAbove);
+		if (raisesFogWall()) {
+			wall.raise(level, home(), arenaRadius(), framework().fogWallBelow, framework().fogWallAbove);
+		}
 		level.playSound(null, home(), io.github.tmldude.blocksouls.bosses.registry.BossSounds.FOG_WALL_CLOSE, SoundSource.HOSTILE, 2.0f, 0.8f);
 		onEngage();
 		BossEvents.ENGAGED.invoker().onBoss(level, definition().id(), this, participants());

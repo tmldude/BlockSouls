@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_bosses:final_dragon_trophy"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:dragon_breath",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": 4,
+            "add": false
+          }
+        }
+      ]
+    }
+  ],
+  "random_sequence": "blocksouls_bosses:entities/final_dragon"
+}
