@@ -33,6 +33,10 @@ Code: `bosses/src/main/java/.../bosses/raid/`, client in `.../bosses/client/raid
   after a restart.
 - A dragon spawned outside the End (spawn egg, `/bs boss spawn`, `/bs raid summon`) builds a small arena around its
   spot: 8 floating crystal spots in a 14-block ring, plates 9 blocks out.
+- **Flight scale:** every flight distance (circling radius and height, approach paths, lane and dive lengths) is
+  multiplied by the arena's scale: 1 on the End island, 0.5 for those small summoned arenas, 0.08 in game tests (the
+  dragon must stay over the test area, the only chunks guaranteed to tick). Attack recoveries steer back onto the
+  circle, so the dragon never coasts off the island.
 
 ## The fight
 - **Phases at 70% / 30%** as briefed. Health 1000 base (framework scaling: +50% per extra player, × difficulty).

@@ -427,16 +427,29 @@ public class FinalDragon extends BossEntity {
 		if (mode() != Mode.FLYING) {
 			return;
 		}
-		// Circle the island: close and low in P1 (strafing), high and wide in P2/P3 (out of reach).
+		circle(0.12);
+		flapSound(level);
+	}
+
+	/**
+	 * Circles the island: close and low in P1 (strafing), high and wide in P2/P3 (out of reach). Attack recoveries use
+	 * it too ({@code ease} higher to swing back onto the circle), so the dragon always returns to its path.
+	 */
+	void circle(double ease) {
 		boolean high = phase() >= 1;
 		double radius = high ? config().highRadius : config().cruiseRadius;
 		double height = high ? config().highHeight : config().cruiseHeight;
 		double speed = config().cruiseSpeed * definition().phase(phase()).speedMult();
+		Vec3 center = arena().centerVec();
+		double current = Math.atan2(getZ() - center.z, getX() - center.x);
+		// Keep the angle near where it actually is, so coming back from an attack doesn't cut across the island.
+		if (Math.abs(Math.atan2(Math.sin(current - orbitAngle), Math.cos(current - orbitAngle))) > 0.6) {
+			orbitAngle = current;
+		}
 		orbitAngle += speed / arena().scaled(radius);
 		Vec3 point = arena().orbit(orbitAngle, radius, height + Math.sin(tickCount * 0.05) * 3);
-		steer(point, speed * 1.6, 0.12);
+		steer(point, speed * 1.6, ease);
 		faceVelocity();
-		flapSound(level);
 	}
 
 	/**

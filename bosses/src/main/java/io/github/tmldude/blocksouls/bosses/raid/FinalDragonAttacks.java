@@ -154,8 +154,7 @@ final class FinalDragonAttacks {
 			FinalDragon dragon = dragon(run);
 			// The lane keeps burning a moment while it climbs away.
 			breathDamage(run, len(run));
-			dragon.steer(dragon.position().add(run.direction().scale(8)).add(0, 4, 0), 1.0, 0.25);
-			dragon.faceVelocity();
+			dragon.circle(0.25);
 		}
 
 		private void breathDamage(AttackRun run, double covered) {
@@ -248,8 +247,7 @@ final class FinalDragonAttacks {
 		@Override
 		public void recovery(AttackRun run) {
 			FinalDragon dragon = dragon(run);
-			dragon.steer(dragon.position().add(run.direction().scale(10)).add(0, 6, 0), 1.2, 0.25);
-			dragon.faceVelocity();
+			dragon.circle(0.25);
 		}
 	}
 
@@ -291,11 +289,21 @@ final class FinalDragonAttacks {
 		}
 
 		@Override
+		public void recovery(AttackRun run) {
+			if (flying(run.boss())) {
+				dragon(run).circle(0.2);
+			}
+		}
+
+		@Override
 		public void active(AttackRun run) {
+			FinalDragon dragon = dragon(run);
+			if (flying(dragon)) {
+				dragon.setDeltaMovement(dragon.getDeltaMovement().scale(0.85));
+			}
 			if (!run.first()) {
 				return;
 			}
-			FinalDragon dragon = dragon(run);
 			List<LivingEntity> targets = new ArrayList<>();
 			for (ServerPlayer player : dragon.participants()) {
 				if (dragon.inFight(player) && !player.isCreative()) {
@@ -510,6 +518,7 @@ final class FinalDragonAttacks {
 
 		@Override
 		public void windup(AttackRun run) {
+			dragon(run).circle(0.12);
 			if (run.tick() % 3 == 0) {
 				for (Vec3 point : run.points()) {
 					Telegraphs.circleFilling(run.level(), OUTLINE, FILL, point, config().meteorRadius, run.progress());
@@ -549,8 +558,7 @@ final class FinalDragonAttacks {
 			}
 			// It keeps circling while the sky falls.
 			FinalDragon dragon = dragon(run);
-			dragon.steer(dragon.position().add(dragon.getDeltaMovement().scale(4)), 0.8, 0.1);
-			dragon.faceVelocity();
+			dragon.circle(0.25);
 		}
 
 		/** The floor under {@code pos}: a standable surface a few blocks up or down, else {@code pos}. */
