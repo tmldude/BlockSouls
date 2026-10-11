@@ -15,6 +15,7 @@ public final class CommonIds {
 	public static final String MOBS = "blocksouls_mobs";
 	public static final String BOSSES = "blocksouls_bosses";
 	public static final String VEHICLES = "blocksouls_vehicles";
+	public static final String WORLD = "blocksouls_world";
 
 	/** Item (guns): handed out by the game at run start, broken by the game after wave 3. */
 	public static final Identifier STARTER_PISTOL = id(GUNS, "starter_pistol");
@@ -25,6 +26,24 @@ public final class CommonIds {
 	public static final Identifier PALE_RIDER = id(BOSSES, "pale_rider");
 	public static final Identifier ASHWYRM = id(BOSSES, "ashwyrm");
 	public static final Identifier STORMPLATE_KNIGHT = id(BOSSES, "stormplate_knight");
+
+	/** Wave mob entity types (mobs). Their loot tables can be extended by other modules. */
+	public static final Identifier SHAMBLER = id(MOBS, "shambler");
+	public static final Identifier CRAWLER = id(MOBS, "crawler");
+	public static final Identifier SCREAMER = id(MOBS, "screamer");
+	public static final Identifier BLOATER = id(MOBS, "bloater");
+	public static final Identifier BRUTE = id(MOBS, "brute");
+	public static final Identifier MUTANT_BRUTE = id(MOBS, "mutant_brute");
+	public static final Identifier INFECTED_PIGLIN = id(MOBS, "infected_piglin");
+	public static final Identifier ASH_HOUND = id(MOBS, "ash_hound");
+
+	/** Wacky enchantments (world). Guns read these to apply them to bullets. */
+	public static final Identifier BOUNCY = id(WORLD, "bouncy");
+	public static final Identifier COMBUSTION = id(WORLD, "combustion");
+	public static final Identifier VAMPIRIC = id(WORLD, "vampiric");
+	public static final Identifier GRAPPLE = id(WORLD, "grapple");
+	public static final Identifier MAGNETIZED = id(WORLD, "magnetized");
+	public static final Identifier MOONWALK = id(WORLD, "moonwalk");
 
 	/** Entity type (vehicles) placed by world structures as a repairable wreck. */
 	public static final Identifier KART_WRECK = id(VEHICLES, "kart_wreck");

@@ -23,6 +23,6 @@ rm -rf "$OUT"; mkdir -p "$OUT"
 # Errors inside vanilla sources come from closed Mojang libraries (authlib, logging) we don't have.
 # They don't affect checking our code, so only our errors are reported.
 OURS=$(grep -c "^$REPO/.*: error:" "$H/typecheck.log")
-grep -A3 "^$REPO/" "$H/typecheck.log"
+grep -A3 "^$REPO/.*: error:" "$H/typecheck.log"
 echo "typecheck: ${#FILES[@]} files, $OURS error(s) in our sources"
 [ "$OURS" -eq 0 ]
