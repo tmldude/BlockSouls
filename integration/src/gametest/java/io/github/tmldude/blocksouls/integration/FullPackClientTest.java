@@ -48,6 +48,16 @@ public class FullPackClientTest implements FabricClientGameTest {
 			context.waitTicks(200);
 			context.takeScreenshot("05-wave-incoming");
 
+			// Every boss, one at a time, in front of the player (boss bar + model).
+			server.runCommand("kill @e[type=!minecraft:player]");
+			String[] bosses = {"furnace_knight", "pale_rider", "ashwyrm", "stormplate_knight", "final_dragon"};
+			for (int i = 0; i < bosses.length; i++) {
+				server.runCommand("execute as @a at @s rotated ~ 0 run summon blocksouls_bosses:" + bosses[i] + " ^ ^ ^14 {NoAI:1b}");
+				context.waitTicks(40);
+				context.takeScreenshot(String.format("%02d-boss-%s", 10 + i, bosses[i]));
+				server.runCommand("kill @e[type=blocksouls_bosses:" + bosses[i] + "]");
+			}
+
 			// The Nether: blight and ash fog. Teleport first so the chunks load, then clear a pocket around the player
 			// (a fill in unloaded chunks does nothing): a hollow glass box keeps the lava out and the view clear.
 			server.runCommand("effect give @a minecraft:fire_resistance infinite 0 true");
