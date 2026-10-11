@@ -17,7 +17,6 @@ import net.minecraft.world.level.dimension.end.EnderDragonFight;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-import io.github.tmldude.blocksouls.bosses.raid.logic.CrystalOrder;
 import io.github.tmldude.blocksouls.common.debug.DebugCommands;
 
 /**
@@ -84,12 +83,7 @@ final class RaidCommands {
 
 	private static int info(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
 		FinalDragon dragon = nearest(ctx);
-		CrystalOrder order = dragon.puzzle().order();
-		String text = String.format("Final dragon: phase %d, %s, hp %.0f/%.0f, fight %ds%s%s, crystals %s, plates %d (held %d, armed %s), orbs %d",
-				dragon.phase() + 1, dragon.mode(), dragon.getHealth(), dragon.getMaxHealth(), dragon.fightTicks() / 20,
-				dragon.isEngaged() ? ", engaged" : "", dragon.enraged() ? ", ENRAGED" : "",
-				order == null ? "none" : order.remaining() + " (" + order.destroyed() + " done)", dragon.plates().plates().size(),
-				dragon.plates().lastHeld(), dragon.plates().armed(), dragon.orbs().count());
+		String text = "Final dragon: " + dragon.debugInfo();
 		ctx.getSource().sendSuccess(() -> Component.literal(text), false);
 		return 1;
 	}

@@ -184,7 +184,8 @@ public class FinalRaidGameTests {
 			player.teleportTo(on.x, on.y, on.z);
 		});
 		helper.succeedWhen(() -> {
-			helper.assertTrue(dragon.mode() == FinalDragon.Mode.PERCHED, "not perched yet: " + dragon.mode());
+			helper.assertTrue(dragon.mode() == FinalDragon.Mode.PERCHED, "not perched yet: " + dragon.debugInfo() + "; player at "
+					+ player.position() + " in fight " + dragon.inFight(player) + ", plate " + plate.toShortString());
 			Vec3 perch = dragon.arena().perch();
 			helper.assertTrue(dragon.position().distanceTo(perch) < 0.5, "perched away from the perch");
 		});

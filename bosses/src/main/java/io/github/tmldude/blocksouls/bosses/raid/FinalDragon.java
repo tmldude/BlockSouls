@@ -218,6 +218,16 @@ public class FinalDragon extends BossEntity {
 		return List.copyOf(plates.plates());
 	}
 
+	/** One line of raid state for debug output (`/bs raid info`, test failures). */
+	public String debugInfo() {
+		CrystalOrder order = puzzle.order();
+		return String.format("phase %d, %s%s, hp %.0f/%.0f, fight %ds%s%s, crystals %s, plates %d (held %d, armed %s, hold %.2f), orbs %d, at %s",
+				phase() + 1, mode(), isStaggered() ? " (staggered)" : "", getHealth(), getMaxHealth(), fightTicks / 20,
+				isEngaged() ? ", engaged" : "", enraged() ? ", ENRAGED" : "",
+				order == null ? "none" : order.remaining() + " (" + order.destroyed() + " done)", plates.plates().size(), plates.lastHeld(),
+				plates.armed(), plates.progress(), orbs.count(), blockPosition().toShortString());
+	}
+
 	Vec3 perchFacing() {
 		return perchFacing;
 	}
