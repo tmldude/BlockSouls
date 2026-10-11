@@ -13,7 +13,9 @@ Each file here is a brief for one parallel session (PLAN.md §8). A session is s
    - Never import another feature module's classes. Cross-module calls go through `common` (events, `Runs`,
      `WaveMobs`, `PlayerTraits`, `PlayerStatus`, `CommonIds`, `CommonTags`, `DebugCommands`).
    - **Data files may reference other modules' ids** (recipes, loot tables, tags), because the pack always ships
-     every module. Isolated test runs will log missing-id warnings for those; that's fine.
+     every module. But in 26.3 **one unknown item id in a recipe fails the whole recipe registry** (the server won't
+     start), so recipes using another module's items need `"fabric:load_conditions": [{"condition":
+     "fabric:all_mods_loaded", "values": ["blocksouls_<module>"]}]`. Tag entries use `"required": false`.
    - `common` is frozen. You may *add* to it (a new constant in `CommonIds`, a new event) when you truly need to;
      never change or remove existing signatures. List any additions under "Contract additions" in your PR.
 4. **Verify like CI does.** This sandbox can't reach Fabric's maven, so:
