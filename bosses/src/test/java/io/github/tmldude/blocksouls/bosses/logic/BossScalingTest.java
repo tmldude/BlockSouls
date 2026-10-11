@@ -8,21 +8,25 @@ import org.junit.jupiter.api.Test;
 
 class BossScalingTest {
 	@Test
-	void healthGrowsHalfPerExtraPlayer() {
-		assertEquals(1.0, BossScaling.healthMultiplier(1, 0.5, 1.0), 1e-9);
-		assertEquals(1.5, BossScaling.healthMultiplier(2, 0.5, 1.0), 1e-9);
-		assertEquals(2.5, BossScaling.healthMultiplier(4, 0.5, 1.0), 1e-9);
+	void healthFollowsThePartyCurve() {
+		// Common's party curve: 1 + 0.5 · (players − 1)^0.9.
+		assertEquals(1.0, BossScaling.healthMultiplier(1, 1.0), 1e-9);
+		assertEquals(1.5, BossScaling.healthMultiplier(2, 1.0), 1e-9);
+		assertEquals(1 + 0.5 * Math.pow(3, 0.9), BossScaling.healthMultiplier(4, 1.0), 1e-9);
+		assertEquals(1 + 0.5 * Math.pow(7, 0.9), BossScaling.healthMultiplier(8, 1.0), 1e-9);
+		// Parties above 8 count as 8.
+		assertEquals(BossScaling.healthMultiplier(8, 1.0), BossScaling.healthMultiplier(12, 1.0), 1e-9);
 	}
 
 	@Test
 	void noPlayersCountsAsOne() {
-		assertEquals(1.0, BossScaling.healthMultiplier(0, 0.5, 1.0), 1e-9);
+		assertEquals(1.0, BossScaling.healthMultiplier(0, 1.0), 1e-9);
 	}
 
 	@Test
 	void difficultyMultipliesHealth() {
-		assertEquals(3.0, BossScaling.healthMultiplier(2, 0.5, 2.0), 1e-9);
-		assertEquals(400 * 1.5 * 1.25, 400 * BossScaling.healthMultiplier(2, 0.5, 1.25), 1e-9);
+		assertEquals(3.0, BossScaling.healthMultiplier(2, 2.0), 1e-9);
+		assertEquals(400 * 1.5 * 1.25, 400 * BossScaling.healthMultiplier(2, 1.25), 1e-9);
 	}
 
 	@Test

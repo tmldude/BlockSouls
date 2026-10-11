@@ -6,6 +6,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write   # publishes client screenshots to ci-screenshots/<branch>
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -20,6 +22,52 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
       - name: Build and test
         run: ./gradlew build test
+      # A real client joins a dedicated server with every mod loaded; screenshots are uploaded below.
+      # Same setup as Fabric API's own client tests: no display, Mesa's software Vulkan (lavapipe).
+      - name: Client game test (full pack)
+        timeout-minutes: 20
+        run: |
+          sudo apt-get update -q && sudo apt-get install -yq mesa-vulkan-drivers > /dev/null
+          dir=integration/build/run/clientGameTest
+          rm -rf "$dir" && mkdir -p "$dir"
+          # version = SharedConstants.WORLD_VERSION for 26.3, so the options aren't run through the fixers.
+          printf 'version:5023\npreferredGraphicsBackend:"vulkan"\n' > "$dir/options.txt"
+          status=0
+          timeout 15m ./gradlew :integration:runClientGameTest || status=$?
+          if [ "$status" -ne 0 ]; then
+            echo "::group::client latest.log (tail)"
+            tail -n 300 "$dir/logs/latest.log" || true
+            echo "::endgroup::"
+          fi
+          exit $status
+      - name: Upload client screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: client-screenshots
+          path: |
+            integration/build/run/clientGameTest/screenshots/
+            integration/build/run/clientGameTest/logs/
+          if-no-files-found: ignore
+      # The latest screenshots + client log as a git branch, so they can be read with plain git (artifact storage
+      # isn't reachable from every dev sandbox). One branch per source branch: ci-screenshots/<branch>.
+      - name: Publish screenshots to ci-screenshots/<branch>
+        if: always() && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          run=integration/build/run/clientGameTest
+          [ -d "$run/screenshots" ] || exit 0
+          out=$(mktemp -d)
+          cp -r "$run/screenshots/." "$out/"
+          cp "$run/logs/latest.log" "$out/client.log" 2>/dev/null || true
+          cd "$out"
+          dest="ci-screenshots/${GITHUB_REF_NAME//\//-}"
+          git init -q -b "$dest"
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "screenshots: $GITHUB_REF_NAME $GITHUB_SHA" --allow-empty
+          git add -A
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "screenshots: $GITHUB_REF_NAME $GITHUB_SHA"
+          git push -qf "https://x-access-token:$GH_TOKEN@github.com/$GITHUB_REPOSITORY.git" "$dest"
       - name: Upload mod jars
         uses: actions/upload-artifact@v7
         with:
@@ -27,6 +75,7 @@ jobs:
           path: |
             */build/libs/*.jar
             !*/build/libs/*-sources.jar
+            !integration/build/libs/*.jar
 
   # Resolves the third-party mods against Modrinth and exports a test .mrpack (without our jars), so a missing
   # 26.3 build shows up on every push instead of at release time.

@@ -1,5 +1,7 @@
 package io.github.tmldude.blocksouls.bosses.logic;
 
+import io.github.tmldude.blocksouls.common.party.PartyScaling;
+
 /**
  * Bosses ignore the run's wave scaling except for these: health grows with the players in the fight and the
  * difficulty's mob health; damage follows the difficulty's mob damage.
@@ -8,9 +10,12 @@ public final class BossScaling {
 	private BossScaling() {
 	}
 
-	/** {@code (1 + perExtraPlayer·(players − 1)) × difficultyHealth}; fewer than one player counts as one. */
-	public static double healthMultiplier(int players, double perExtraPlayer, double difficultyHealth) {
-		return (1 + perExtraPlayer * (Math.max(1, players) - 1)) * Math.max(0, difficultyHealth);
+	/**
+	 * Party curve × difficulty health: {@link PartyScaling#bossHealth} (tuned in common's party.json for parties of
+	 * 1–8); fewer than one player counts as one.
+	 */
+	public static double healthMultiplier(int players, double difficultyHealth) {
+		return PartyScaling.bossHealth(players) * Math.max(0, difficultyHealth);
 	}
 
 	public static double damage(double base, double difficultyDamage, double phaseMultiplier) {

@@ -2,6 +2,8 @@ package io.github.tmldude.blocksouls.game.run;
 
 import java.util.List;
 
+import io.github.tmldude.blocksouls.common.party.PartyScaling;
+
 /** The run's numbers as pure functions (no Minecraft classes), so they can be unit-tested. */
 public final class WaveMath {
 	public static final int DAY_TICKS = 24000;
@@ -15,13 +17,9 @@ public final class WaveMath {
 	private WaveMath() {
 	}
 
-	public static double playerFactor(int players, RunConfig config) {
-		return config.playerFactorBase + config.playerFactorPerPlayer * Math.max(1, players);
-	}
-
-	/** How many mobs a wave spawns in total (at least 1). */
+	/** How many mobs a wave spawns in total (at least 1). Party size scales it through {@link PartyScaling#waveSize}. */
 	public static int waveCount(int wave, int players, double difficultyWaveSize, double modifierFactor, RunConfig config) {
-		double raw = (config.baseCount + config.countPerWave * wave) * playerFactor(players, config) * difficultyWaveSize * modifierFactor;
+		double raw = (config.baseCount + config.countPerWave * wave) * PartyScaling.waveSize(players) * difficultyWaveSize * modifierFactor;
 		return Math.max(1, (int) Math.round(raw));
 	}
 
@@ -38,8 +36,10 @@ public final class WaveMath {
 		return Math.min(config.breakerBase + config.breakerPerWave * Math.max(0, wave - 1), config.breakerMax);
 	}
 
-	public static int maxElites(int wave, RunConfig config) {
-		return config.eliteBase + (config.wavesPerExtraElite > 0 ? wave / config.wavesPerExtraElite : 0);
+	/** Elites allowed in a wave: grows with the wave and, through {@link PartyScaling#elites}, with the party. */
+	public static int maxElites(int wave, int players, RunConfig config) {
+		int base = config.eliteBase + (config.wavesPerExtraElite > 0 ? wave / config.wavesPerExtraElite : 0);
+		return (int) Math.round(base * PartyScaling.elites(players));
 	}
 
 	/** How many waves night {@code night} (from 1) gets. */

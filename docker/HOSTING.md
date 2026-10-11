@@ -1,6 +1,7 @@
 # Hosting the BlockSouls server
 
-Target: a Hetzner CPX31 (4 vCPU, 8 GB RAM) or any Linux box with 8 GB RAM running Docker.
+Target: a Hetzner CPX31 (4 vCPU, 8 GB RAM) for up to ~5 players, or a CPX41 (8 vCPU, 16 GB RAM, set `MEMORY: 12G` in
+`compose.yml`) for 6–8 players, who spread out and keep many areas loaded. Any Linux box running Docker works.
 The server uses 6 GB (`MEMORY` in `compose.yml`); the rest is for the OS and the backup container.
 
 ## Quick start (one command)

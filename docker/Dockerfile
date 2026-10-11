@@ -11,7 +11,7 @@ RUN ./gradlew build --no-daemon
 # Every module except common (which is nested inside each feature jar) ships a jar.
 RUN mkdir /out \
 	&& for libs in */build/libs; do \
-		m=${libs%%/*}; [ "$m" = common ] && continue; \
+		m=${libs%%/*}; { [ "$m" = common ] || [ "$m" = integration ]; } && continue; \
 		cp "$libs"/blocksouls-"$m"-*[0-9].jar /out/blocksouls-"$m".jar; \
 	done \
 	&& printf 'BLOCKSOULS_MC_VERSION=%s\nBLOCKSOULS_LOADER_VERSION=%s\n' \

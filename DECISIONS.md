@@ -207,3 +207,16 @@ My defaults, to confirm:
   `MODRINTH_PROJECT_ID`, publish the `.mrpack` as a new Modrinth version (beta while 0.x).
 - **Version check on join** (common): the server sends its BlockSouls version; a client on a different version gets a
   chat line telling them to update the pack.
+
+## Party scaling, 1–8 players (2026-10-11, from the owner)
+
+- **Target party size is 1–8 players** (owner). One shared curve in `common` (`PartyScaling`, `party.json`) replaces the
+  per-module formulas: `1 + perExtraPlayer · (players − 1)^exponent`, so solo is 1 and each extra player adds a bit less.
+  Parties above 8 count as 8.
+- **Defaults:** wave size ×1.55 / ×2.5 / ×4.2 at 2 / 4 / 8 players (was `0.6 + 0.4·players`, ×3.8 at 8); mobs alive at
+  once `12 + 5·players`, max 60 (was a flat 30); elites per wave ×1.35 / ×1.9 / ×3 (was not scaled); boss health
+  ×1.5 / ×2.3 / ×3.9 (was +50% per player, ×4.5 at 8); field bosses' daily chance ×1.7 at 8; final-raid plates
+  `ceil(players / 2)`, 1–4 (was at most 2).
+- **Rule for all future work** (CLAUDE.md, worker protocol): anything that scales with player count goes through
+  `PartyScaling` and is tested at 1 and 8 players.
+- **Hosting:** 8 spread-out players means many loaded areas; HOSTING.md recommends the 16 GB VPS tier for 6–8 players.
