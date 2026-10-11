@@ -1,0 +1,12 @@
+{
+  "tier": "common",
+  "icon": "minecraft:ladder",
+  "stackable": 2,
+  "effects": [
+    {
+      "type": "trait",
+      "trait": "blocksouls:climb_speed",
+      "level": 1
+    }
+  ]
+}

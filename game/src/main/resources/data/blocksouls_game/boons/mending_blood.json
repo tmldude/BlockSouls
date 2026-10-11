@@ -1,0 +1,11 @@
+{
+  "tier": "legendary",
+  "icon": "minecraft:ghast_tear",
+  "effects": [
+    {
+      "type": "effect",
+      "effect": "minecraft:regeneration",
+      "amplifier": 0
+    }
+  ]
+}

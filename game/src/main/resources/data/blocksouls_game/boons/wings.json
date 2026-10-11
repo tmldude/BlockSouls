@@ -1,0 +1,11 @@
+{
+  "tier": "legendary",
+  "icon": "minecraft:phantom_membrane",
+  "effects": [
+    {
+      "type": "trait",
+      "trait": "blocksouls:flight",
+      "level": 1
+    }
+  ]
+}

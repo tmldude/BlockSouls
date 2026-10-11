@@ -1,0 +1,17 @@
+{
+  "tier": "legendary",
+  "icon": "minecraft:netherite_chestplate",
+  "effects": [
+    {
+      "type": "attribute",
+      "attribute": "minecraft:max_health",
+      "amount": 10,
+      "operation": "add_value"
+    },
+    {
+      "type": "effect",
+      "effect": "minecraft:resistance",
+      "amplifier": 0
+    }
+  ]
+}

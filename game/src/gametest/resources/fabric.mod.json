@@ -9,7 +9,9 @@
 			"io.github.tmldude.blocksouls.game.test.RunTestMod"
 		],
 		"fabric-gametest": [
-			"io.github.tmldude.blocksouls.game.test.RunGameTests"
+			"io.github.tmldude.blocksouls.game.test.RunGameTests",
+			"io.github.tmldude.blocksouls.game.test.DownedGameTests",
+			"io.github.tmldude.blocksouls.game.test.BoonGameTests"
 		]
 	},
 	"depends": {

@@ -1,0 +1,11 @@
+{
+  "tier": "rare",
+  "icon": "minecraft:feather",
+  "effects": [
+    {
+      "type": "effect",
+      "effect": "minecraft:slow_falling",
+      "amplifier": 0
+    }
+  ]
+}

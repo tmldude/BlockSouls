@@ -1,0 +1,12 @@
+{
+  "tier": "rare",
+  "icon": "minecraft:slime_ball",
+  "stackable": 2,
+  "effects": [
+    {
+      "type": "trait",
+      "trait": "blocksouls:roll_iframes",
+      "level": 2
+    }
+  ]
+}

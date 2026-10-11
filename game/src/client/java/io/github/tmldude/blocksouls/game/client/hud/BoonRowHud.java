@@ -1,0 +1,52 @@
+package io.github.tmldude.blocksouls.game.client.hud;
+
+import java.util.List;
+
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+
+import io.github.tmldude.blocksouls.game.client.player.ClientBoons;
+import io.github.tmldude.blocksouls.game.player.boon.BoonPayloads.BoonView;
+
+/**
+ * Owned boons as small framed icons to the left of the hotbar (past the offhand slot), growing leftward and
+ * wrapping upward. Level pips sit above stackable boons.
+ */
+final class BoonRowHud {
+	private static final int SLOT = 18;
+	private static final int STEP = 20;
+	private static final int ROW_STEP = 23;
+	private static final int PER_ROW = 6;
+
+	private BoonRowHud() {
+	}
+
+	static void extract(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (GameHud.hidden(minecraft) || !GameHud.config().showBoons || minecraft.player.isSpectator()) {
+			return;
+		}
+
+		List<BoonView> boons = ClientBoons.get();
+		int right = graphics.guiWidth() / 2 - 91 - 29 - 4;
+		int bottom = graphics.guiHeight() - 2;
+		for (int i = 0; i < boons.size(); i++) {
+			BoonView boon = boons.get(i);
+			int x = right - (i % PER_ROW + 1) * STEP + 2;
+			int y = bottom - SLOT - (i / PER_ROW) * ROW_STEP;
+			int color = BoonStyle.color(boon);
+
+			graphics.fill(x, y, x + SLOT, y + SLOT, 0x90000000);
+			graphics.outline(x, y, SLOT, SLOT, color);
+			graphics.fakeItem(BoonStyle.icon(boon), x + 1, y + 1);
+
+			if (boon.maxLevel() > 1) {
+				for (int pip = 0; pip < boon.maxLevel(); pip++) {
+					int px = x + 1 + pip * 4;
+					graphics.fill(px, y - 3, px + 3, y - 1, pip < boon.level() ? color : 0x80404040);
+				}
+			}
+		}
+	}
+}

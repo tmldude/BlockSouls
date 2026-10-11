@@ -1,0 +1,11 @@
+{
+  "tier": "rare",
+  "icon": "minecraft:magma_cream",
+  "effects": [
+    {
+      "type": "effect",
+      "effect": "minecraft:fire_resistance",
+      "amplifier": 0
+    }
+  ]
+}

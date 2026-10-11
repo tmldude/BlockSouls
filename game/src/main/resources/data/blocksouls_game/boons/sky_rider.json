@@ -1,0 +1,10 @@
+{
+  "tier": "legendary",
+  "icon": "minecraft:elytra",
+  "effects": [
+    {
+      "type": "item",
+      "item": "minecraft:elytra"
+    }
+  ]
+}

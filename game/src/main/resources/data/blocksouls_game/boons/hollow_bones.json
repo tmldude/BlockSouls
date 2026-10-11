@@ -1,0 +1,11 @@
+{
+  "tier": "rare",
+  "icon": "minecraft:bone",
+  "effects": [
+    {
+      "type": "trait",
+      "trait": "blocksouls:double_jump",
+      "level": 1
+    }
+  ]
+}
