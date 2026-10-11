@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "GIG"
+  ],
+  "key": {
+    "G": "blocksouls_world:gunmetal_ingot",
+    "I": "minecraft:iron_ingot"
+  },
+  "result": {
+    "id": "blocksouls_guns:gun_barrel"
+  }
+}

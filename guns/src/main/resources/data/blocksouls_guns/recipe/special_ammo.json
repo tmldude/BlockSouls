@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "PMP",
+    " I "
+  ],
+  "key": {
+    "P": "minecraft:gunpowder",
+    "M": "blocksouls_world:gunmetal_ingot",
+    "I": "minecraft:iron_ingot"
+  },
+  "result": {
+    "id": "blocksouls_guns:special_ammo",
+    "count": 6
+  }
+}

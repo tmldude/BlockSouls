@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " S",
+    "PP"
+  ],
+  "key": {
+    "S": "blocksouls_world:scrap",
+    "P": "#minecraft:planks"
+  },
+  "result": {
+    "id": "blocksouls_guns:gun_stock"
+  }
+}
