@@ -67,7 +67,7 @@ docker compose pull && docker compose up -d
 The new image replaces our mod jars in `data/mods/` on start; third-party mods are managed by
 `MODRINTH_PROJECTS`. Then tell friends to update the pack in the Modrinth App.
 
-To pin a release instead of `latest`, set `BLOCKSOULS_TAG=v0.9.0` in `.env`.
+To pin a release instead of `latest`, set `BLOCKSOULS_TAG=v0.10.0` in `.env`.
 
 ## 4. New run
 
