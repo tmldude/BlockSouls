@@ -66,8 +66,7 @@ final class RaidAdds {
 	void startWave(ServerLevel level, int players) {
 		clearWave(level);
 		waveTicks = 0;
-		int count = RaidMath.waveSize(players, config().waveBase, config().wavePerPlayer,
-				config().waveMax);
+		int count = RaidMath.waveSize(players, config().waveSolo, config().waveMax);
 		RaidArena arena = dragon.arena();
 		Vec3 center = arena.centerVec();
 		double radius = arena.scaled(config().waveRadius);

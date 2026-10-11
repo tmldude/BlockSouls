@@ -318,7 +318,7 @@ public class FinalDragon extends BossEntity {
 				level() instanceof ServerLevel level && !level.isPositionEntityTicking(blockPosition()) ? ", NOT ENTITY-TICKING" : "");
 	}
 
-	/** Players the mechanics count: in the fight right now, at least 1, at most {@code maxScaledPlayers}. */
+	/** Players the mechanics count: in the fight right now, at least 1, at most party.json's cap (8). */
 	int playersInFight() {
 		int count = 0;
 		for (ServerPlayer player : participants()) {
@@ -326,7 +326,7 @@ public class FinalDragon extends BossEntity {
 				count++;
 			}
 		}
-		return RaidMath.scaledPlayers(count, config().maxScaledPlayers);
+		return RaidMath.scaledPlayers(count);
 	}
 
 	/** Where its mouth is (attacks spawn from here). */

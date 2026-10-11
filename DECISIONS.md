@@ -220,3 +220,6 @@ My defaults, to confirm:
 - **Rule for all future work** (CLAUDE.md, worker protocol): anything that scales with player count goes through
   `PartyScaling` and is tested at 1 and 8 players.
 - **Hosting:** 8 spread-out players means many loaded areas; HOSTING.md recommends the 16 GB VPS tier for 6–8 players.
+- **Final raid** (after #21): plates to hold `ceil(players / 2)` (1–4; was min(players, 2)), one spare placed (the End
+  arena now has 5 spots); crystals 3 × a `raidCrystals` curve (0.3, 0.9): 3 / 4 / 5 / 8 at 1 / 2 / 4 / 8 (was +1 per
+  player); wave 7 × the wave curve (29 at 8; was 4 + 3 per player). `maxScaledPlayers` is gone: party.json's `maxParty`.

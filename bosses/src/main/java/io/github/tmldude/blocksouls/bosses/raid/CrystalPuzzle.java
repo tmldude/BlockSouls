@@ -91,8 +91,7 @@ final class CrystalPuzzle {
 		for (int i = 0; i < arena.crystals().size(); i++) {
 			(arena.caged().get(i) ? caged : open).add(i);
 		}
-		int count = RaidMath.crystalCount(players, config().crystalsSolo, config().crystalsPerExtraPlayer,
-				config().crystalsMax);
+		int count = RaidMath.crystalCount(players, config().crystalsSolo, config().crystalsMax);
 		order = CrystalOrder.generate(open, caged, count, random());
 		total = order.remaining().size();
 		for (int slot : order.remaining()) {

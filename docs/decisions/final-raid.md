@@ -56,7 +56,7 @@ Three phases, Destiny-raid style (Leviathan / Eater of Worlds / Last Wish as the
   target), charge (telegraphed line), stomp (expanding shockwave ring; jump it), void orbs. While airborne over an
   interlude: breath lines, dives, void orbs.
 - **Interludes can't be skipped:** damage stops at 85% until the wave is done and at 60% until the herald is.
-- **Wave:** 4 + 3 per player (max 30) mobs from the mobs module's wave pool (wave tier 15; plain zombies without it),
+- **Wave:** 7 solo × party.json's wave curve (29 for 8 players, max 40) mobs from the mobs module's wave pool (wave tier 15; plain zombies without it),
   in a ring 24 blocks out, glowing so they read across the island, re-targeted at players. It comes down when the wave
   is dead, or after 90 s.
 - **Herald:** picked from the field-boss pool, preferring bosses not killed this run; ×0.6 health; no fog wall; it
@@ -67,18 +67,18 @@ Three phases, Destiny-raid style (Leviathan / Eater of Worlds / Last Wish as the
 ## Phase 3 details
 - **Cast:** 60 s (×1.25 solo), ×0.85 each cycle, never under 30 s. A wrong crystal pushes it 10% forward. Sovereign's
   End: 10000 indirect magic to everyone in the fight (totems can survive it), then the cast restarts.
-- **Crystals:** 3 solo +1 per extra player (max 8), open pillars before caged ones (cages are gone anyway). Order
+- **Crystals:** 3 solo × party.json's `raidCrystals` curve (4 / 5 / 8 at 2 / 4 / 8 players, max 8), open pillars before caged ones (cages are gone anyway). Order
   random per cycle; the obelisk plays it on a loop (each crystal flares in its color white→violet, beams at the
   obelisk, a bell chime rising in pitch). Rings on the obelisk count progress. Wrong crystal: harmless burst, heals the
   dragon 5% (visible stream), re-forms after 5 s, the order reshuffles.
-- **Seal:** crystals are sealed (dark, violet shell, hits clink) unless min(players, 2) plates are held right now
-  (placed: players + 1, 2–4). While open, chains of light run from the held plates to the obelisk.
+- **Seal:** crystals are sealed (dark, violet shell, hits clink) unless `PartyScaling.raidPlates` plates are held right now
+  (one per two players: 1 solo, 4 for 8; placed: one spare, so 2–5; the End arena has 5 spots). While open, chains of light run from the held plates to the obelisk.
 - **Airborne damage** ×0.15 (the stuns are the damage); **stun** 10 s at ×2.
 - **Soft enrage** at 12 minutes of our fight: ×1.5 damage. Restarts on a wipe.
 
 ## Scaling and wipes
-- Mechanics (crystals, plates, wave size, cast) scale with players up to **`maxScaledPlayers` = 8**. Health scaling is
-  the framework's (+50% per extra player, uncapped; the main session owns tuning it).
+- Mechanics (crystals, plates, wave size) scale through common's `PartyScaling` (party.json, parties of 1–8; bigger
+  counts as 8); the cast keeps its solo bonus. Health scaling is the framework's (`PartyScaling.bossHealth`).
 - **Wipe** = the framework's reset (everyone dead/downed/out for 10 s): healed to the **last checkpoint**: 100%, 85%
   after the wave, 60% after the herald, 35% in phase 3. Cleared interludes stay cleared; phase 3's crystals, plates and
   cast restart on the next engage. A restart mid-fight keeps the phase and the cleared interludes.

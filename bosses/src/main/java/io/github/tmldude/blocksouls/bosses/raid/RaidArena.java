@@ -10,6 +10,9 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.EndSpikeFeature;
 import net.minecraft.world.phys.Vec3;
 
+import io.github.tmldude.blocksouls.bosses.raid.logic.RaidMath;
+import io.github.tmldude.blocksouls.common.party.PartyScaling;
+
 /**
  * Where the final raid happens: the island center and surface, the crystal spots (pillar tops), the obelisk that
  * shows the Crystal Order (the exit portal's bedrock column), the perch and the plate spots. Built from the End's
@@ -68,11 +71,12 @@ public record RaidArena(BlockPos center, int floorY, List<Vec3> crystals, List<B
 		Vec3 obelisk = new Vec3(podium.getX() + 0.5, Math.max(columnTop, floorY + 3), podium.getZ() + 0.5);
 		Vec3 perch = new Vec3(podium.getX() + 0.5, floorY, podium.getZ() + 0.5);
 
-		// Four plate spots on the island between the podium and the pillars, offset from the pillar ring's angles.
+		// Plate spots on the island between the podium and the pillars: enough for the biggest party (party.json's
+		// raidPlatesMax, plus a spare), evenly around the podium.
 		List<BlockPos> plates = new ArrayList<>();
-		for (int i = 0; i < 4; i++) {
-			// 1st and 2nd opposite each other, then the other two (so two plates are always far apart).
-			double angle = Math.PI / 4 + (i % 2) * Math.PI + (i / 2) * Math.PI / 2;
+		int spots = plateSpotCount();
+		for (int i = 0; i < spots; i++) {
+			double angle = plateAngle(i, spots);
 			double r = config.plateDistance;
 			int x = podium.getX() + (int) Math.round(Math.cos(angle) * r);
 			int z = podium.getZ() + (int) Math.round(Math.sin(angle) * r);
@@ -80,6 +84,28 @@ public record RaidArena(BlockPos center, int floorY, List<Vec3> crystals, List<B
 			plates.add(new BlockPos(x, y - 1, z));
 		}
 		return new RaidArena(center, floorY, crystals, caged, obelisk, perch, plates, 1.0, radii, true);
+	}
+
+	/** Plate spots an arena offers: enough for the biggest party (party.json) plus a spare. */
+	static int plateSpotCount() {
+		return RaidMath.plateSpots(PartyScaling.config().maxParty);
+	}
+
+	/**
+	 * Angle of plate spot {@code i} of {@code spots} around the center. Each spot skips about half the ring from the
+	 * last one (a step coprime with the count, so every spot is used once): the first few plates, the ones small
+	 * parties get, are always far apart.
+	 */
+	static double plateAngle(int i, int spots) {
+		int step = Math.max(1, spots / 2);
+		while (gcd(step, spots) != 1) {
+			step--;
+		}
+		return Math.PI / 4 + (i * step % spots) * 2 * Math.PI / spots;
+	}
+
+	private static int gcd(int a, int b) {
+		return b == 0 ? a : gcd(b, a % b);
 	}
 
 	/** First air y above the surface at {@code pos}'s column, or {@code fallback} over the void. */

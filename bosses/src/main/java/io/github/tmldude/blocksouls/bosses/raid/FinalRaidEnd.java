@@ -150,8 +150,9 @@ public final class FinalRaidEnd {
 			crystals.add(new Vec3(home.getX() + 0.5 + Math.cos(a) * 14, home.getY(), home.getZ() + 0.5 + Math.sin(a) * 14));
 		}
 		List<BlockPos> plates = new ArrayList<>();
-		for (int i = 0; i < 4; i++) {
-			double a = Math.PI / 4 + (i % 2) * Math.PI + (i / 2) * Math.PI / 2;
+		int spots = RaidArena.plateSpotCount();
+		for (int i = 0; i < spots; i++) {
+			double a = RaidArena.plateAngle(i, spots);
 			plates.add(home.offset((int) Math.round(Math.cos(a) * 9), -1, (int) Math.round(Math.sin(a) * 9)));
 		}
 		Vec3 center = Vec3.atBottomCenterOf(home);

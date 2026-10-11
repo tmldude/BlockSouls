@@ -156,7 +156,8 @@ final class PlateGate {
 			level.playSound(null, c.x, c.y, c.z, FinalRaidSounds.PLATE_HELD, SoundSource.HOSTILE, 1.5f, 0.8f + 0.2f * held);
 		}
 		lastHeld = held;
-		boolean nowOpen = held >= RaidMath.requiredPlates(players);
+		// Never more than are placed (a small test arena may have fewer spots than a big party needs).
+		boolean nowOpen = held >= Math.min(RaidMath.requiredPlates(players), plates.size());
 		if (nowOpen && !open) {
 			Vec3 c = dragon.arena().obelisk();
 			level.playSound(null, c.x, c.y, c.z, FinalRaidSounds.CHAINS, SoundSource.HOSTILE, 4f, 0.8f);
