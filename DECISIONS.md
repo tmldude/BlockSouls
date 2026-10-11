@@ -70,3 +70,18 @@ Elden Ring-style random field bosses; a polished custom boss health bar.
   builds for 26.3 exist on Modrinth before depending on one; otherwise use the plan's fallback (own minimal
   hitscan/projectile system in `guns`).
 - Verify GeckoLib, Mod Menu, Cloth Config, Lithium, Sodium and Iris all have 26.3 builds.
+
+## Phase A — Movement (2026-10-11)
+
+### A1 jump
+- **Client-side only for now.** Vanilla player movement is client-authoritative, so jump physics run on the
+  local player. The plan's "server validates the hold count" is deferred to the anti-cheat pass at the end of
+  Phase A, since vanilla's own movement checks already bound what a client can do. Each client reads its own
+  `movement.json` for now; syncing the server's values is part of that same pass.
+- **Defaults** give heights of: tap 1.06 blocks, held 1.37, vanilla 1.25, held 3rd chain jump 2.19.
+  Falls use 1.6× gravity but stop accelerating at 3.9 blocks/tick (vanilla terminal velocity) so long falls
+  don't trip "moved too quickly".
+- **Buffered presses fire on landing even if the key is still held**: the shorter airtime can land before
+  vanilla's 10-tick jump cooldown expires, which would otherwise eat the jump.
+- **No extra fall gravity / hold boost** while flying, gliding, in liquid, climbing, riding, spectating, or with
+  Slow Falling / Levitation.
