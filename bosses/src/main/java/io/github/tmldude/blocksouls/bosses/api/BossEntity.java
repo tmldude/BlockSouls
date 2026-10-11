@@ -133,6 +133,14 @@ public abstract class BossEntity extends Monster {
 	protected void fightTick(ServerLevel level, @Nullable LivingEntity target) {
 	}
 
+	/**
+	 * Whether engaging raises the fog wall ring around {@link #home()}. Open-air arenas (the final raid's whole island)
+	 * turn it off and define the arena through {@link #inArena} instead.
+	 */
+	protected boolean raisesFogWall() {
+		return true;
+	}
+
 	/** Distance the boss tries to close to before it stops walking (it still picks ranged attacks from afar). */
 	protected double preferredDistance() {
 		return 3.0;
@@ -736,7 +744,9 @@ public abstract class BossEntity extends Monster {
 		gap = framework().attackGapTicks * 2;
 		mostPlayersInFight = 0;
 		refreshScaling(level);
-		wall.raise(level, home(), arenaRadius(), framework().fogWallBelow, framework().fogWallAbove);
+		if (raisesFogWall()) {
+			wall.raise(level, home(), arenaRadius(), framework().fogWallBelow, framework().fogWallAbove);
+		}
 		level.playSound(null, home(), io.github.tmldude.blocksouls.bosses.registry.BossSounds.FOG_WALL_CLOSE, SoundSource.HOSTILE, 2.0f, 0.8f);
 		onEngage();
 		BossEvents.ENGAGED.invoker().onBoss(level, definition().id(), this, participants());
