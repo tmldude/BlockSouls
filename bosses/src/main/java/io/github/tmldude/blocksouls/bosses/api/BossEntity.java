@@ -417,6 +417,12 @@ public abstract class BossEntity extends Monster {
 		}
 
 		if (fieldBoss) {
+			int beacon = FieldBosses.config().beaconIntervalTicks;
+			if (beacon > 0 && tickCount % beacon == 0) {
+				// A smoke column over an unengaged field boss: visible from far off, says "something is over there".
+				level.sendParticles(ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, true, true, getX(), getY() + getBbHeight() + 0.5, getZ(), 1, 0.3, 0.2, 0.3,
+						0.01);
+			}
 			boolean someoneNear = !level.getPlayers(p -> !p.isSpectator() && p.distanceToSqr(this) < FieldBosses.config().leaveCheckRange
 					* FieldBosses.config().leaveCheckRange).isEmpty();
 			unattendedTicks = someoneNear ? 0 : unattendedTicks + 1;
@@ -727,7 +733,7 @@ public abstract class BossEntity extends Monster {
 		mostPlayersInFight = 0;
 		refreshScaling(level);
 		wall.raise(level, home(), arenaRadius(), framework().fogWallBelow, framework().fogWallAbove);
-		level.playSound(null, home(), SoundEvents.WITHER_SPAWN, SoundSource.HOSTILE, 0.6f, 0.6f);
+		level.playSound(null, home(), io.github.tmldude.blocksouls.bosses.registry.BossSounds.FOG_WALL_CLOSE, SoundSource.HOSTILE, 2.0f, 0.8f);
 		onEngage();
 		BossEvents.ENGAGED.invoker().onBoss(level, definition().id(), this, participants());
 		FieldBosses.onEngaged(level, this);
