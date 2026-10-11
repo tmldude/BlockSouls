@@ -24,6 +24,8 @@ public abstract class RunAttributeProbeMixin {
 			cir.setReturnValue(RunSkyEffects.fogEnd((Float) value));
 		} else if (attribute == EnvironmentAttributes.FOG_START_DISTANCE) {
 			cir.setReturnValue(RunSkyEffects.fogStart((Float) value));
+		} else if (attribute == EnvironmentAttributes.BLOCK_LIGHT_TINT) {
+			cir.setReturnValue(RunSkyEffects.blockLightTint((Vector3fc) value));
 		}
 	}
 }
