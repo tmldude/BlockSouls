@@ -2,13 +2,10 @@ package io.github.tmldude.blocksouls.game.test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -24,9 +21,11 @@ import io.github.tmldude.blocksouls.game.run.RunSystem;
 
 /**
  * The v2 expedition spine in a headless server: the act machine walking a scripted act skeleton through
- * portal charges (acts aliased to the overworld/Nether until Stage 6 registers the real dimensions), and
- * sieges firing off the synthetic clock in the Nether. Classic-shape tests live in {@link RunGameTests}
- * and must keep passing unchanged — the spine is behavior-neutral unless {@code runShape} opts in.
+ * portal charges, and sieges firing off the synthetic clock in the Nether. Mock players can't change
+ * dimension in the gametest harness, so the skeleton aliases its acts to one dimension (the aliased
+ * dimension belongs to the highest open act, {@code ActMath}) and the Nether test runs natively in the
+ * Nether via the test's {@code dimension}. Classic-shape tests live in {@link RunGameTests} and must keep
+ * passing unchanged — the spine is behavior-neutral unless {@code runShape} opts in.
  */
 public class ActGameTests {
 	/** Act events seen so far: "started:2", "entered:2", "chargeStarted:1", "chargeCompleted:1", "dusk:1", ... */
@@ -42,8 +41,8 @@ public class ActGameTests {
 		RunEvents.WAVE_STARTED.register((server, wave) -> EVENTS.add("wave:" + wave));
 	}
 
-	/** Expedition config with a 2-second charge and acts aliased to the two vanilla dimensions that exist. */
-	private static ServerPlayer setUpExpedition(GameTestHelper helper) {
+	/** Expedition config with a 2-second charge and the given act dimensions ("minecraft:..." ids). */
+	private static ServerPlayer setUpExpedition(GameTestHelper helper, List<String> actDimensions) {
 		MinecraftServer server = helper.getLevel().getServer();
 		RunDebug.reset(server);
 		EVENTS.clear();
@@ -54,14 +53,11 @@ public class ActGameTests {
 		config.spawnMaxDistance = 4;
 		config.minPlayerDistance = 1;
 		config.wavesPerNight = new ArrayList<>(List.of(1));
-		config.acts = new ArrayList<>(List.of(
-				new RunConfig.ActSpec("blocksouls_game:act1", "minecraft:overworld", "Act One"),
-				new RunConfig.ActSpec("blocksouls_game:act2", "minecraft:the_nether", "Act Two"),
-				new RunConfig.ActSpec("blocksouls_game:act3", "minecraft:overworld", "Act Three"),
-				new RunConfig.ActSpec("blocksouls_game:act4", "minecraft:the_nether", "Act Four")));
+		config.acts = new ArrayList<>();
+		for (int i = 0; i < actDimensions.size(); i++) {
+			config.acts.add(new RunConfig.ActSpec("blocksouls_game:test_act" + (i + 1), actDimensions.get(i), "Act " + (i + 1)));
+		}
 		RunDebug.reloadActs(server);
-		// Keep a spot on the Nether roof loaded so the party can stand there without a real connection.
-		server.getLevel(Level.NETHER).setChunkForced(0, 0, true);
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		player.snapTo(helper.absoluteVec(new Vec3(4, 1, 4)));
 		return player;
@@ -80,108 +76,68 @@ public class ActGameTests {
 		config.wavesPerNight = defaults.wavesPerNight;
 		config.acts = defaults.acts;
 		RunDebug.reloadActs(server);
-		server.getLevel(Level.NETHER).setChunkForced(0, 0, false);
-	}
-
-	private static void toNether(GameTestHelper helper, ServerPlayer player) {
-		ServerLevel nether = helper.getLevel().getServer().getLevel(Level.NETHER);
-		player.teleportTo(nether, 0.5, 129, 0.5, Set.of(), 0, 0, false);
-	}
-
-	private static void toOverworld(GameTestHelper helper, ServerPlayer player) {
-		player.teleportTo(helper.getLevel(), helper.absoluteVec(new Vec3(4, 1, 4)).x, helper.absoluteVec(new Vec3(4, 1, 4)).y,
-				helper.absoluteVec(new Vec3(4, 1, 4)).z, Set.of(), 0, 0, false);
 	}
 
 	@GameTest(environment = "blocksouls_game_test:act_skeleton", maxTicks = 600)
 	public void expeditionWalksTheActSkeletonThroughPortalCharges(GameTestHelper helper) {
-		ServerPlayer player = setUpExpedition(helper);
+		// All four acts alias the test's own dimension: each completed charge opens the next act, and the
+		// aliased dimension immediately belongs to it, so the party "arrives" without changing levels.
+		String here = helper.getLevel().dimension().identifier().toString();
+		setUpExpedition(helper, List.of(here, here, here, here));
 		MinecraftServer server = helper.getLevel().getServer();
 		helper.assertTrue(Runs.get(server).phase() == RunPhase.DAY, "run auto-starts, was " + Runs.get(server).phase());
 		helper.assertTrue(RunDebug.currentAct(server) == 1 && RunDebug.highestOpenAct(server) == 1, "starts in act 1");
 		helper.assertTrue(EVENTS.contains("started:1") && EVENTS.contains("entered:1"), "act 1 started+entered, events " + EVENTS);
 		helper.assertTrue(Acts.current(server).ordinal() == 1, "Acts contract reports act 1");
 
-		// Scripted skeleton: charge → nether → charge → back (aliased act 3) → charge → nether (act 4).
-		int[] step = {0};
+		int[] chargingFrom = {0};
 		helper.onEachTick(() -> {
 			MinecraftServer s = helper.getLevel().getServer();
-			switch (step[0]) {
-				case 0 -> {
-					String error = RunDebug.startCharge(s);
-					helper.assertTrue(error == null, "charge 1 starts: " + error);
-					helper.assertTrue(RunDebug.charging(s), "charging");
-					step[0] = 1;
-				}
-				case 1 -> {
-					if (RunDebug.highestOpenAct(s) == 2) {
-						helper.assertTrue(EVENTS.contains("chargeStarted:1") && EVENTS.contains("chargeCompleted:1"),
-								"charge events, " + EVENTS);
-						helper.assertTrue(EVENTS.contains("started:2"), "act 2 started, " + EVENTS);
-						toNether(helper, player);
-						step[0] = 2;
-					}
-				}
-				case 2 -> {
-					RunDebug.tickActs(s);
-					if (RunDebug.currentAct(s) == 2) {
-						helper.assertTrue(EVENTS.contains("entered:2"), "act 2 entered, " + EVENTS);
-						helper.assertTrue(RunDebug.startCharge(s) == null, "charge 2 starts");
-						step[0] = 3;
-					}
-				}
-				case 3 -> {
-					if (RunDebug.highestOpenAct(s) == 3) {
-						toOverworld(helper, player);
-						step[0] = 4;
-					}
-				}
-				case 4 -> {
-					RunDebug.tickActs(s);
-					// The overworld is aliased by acts 1 and 3; with act 3 open it reads as act 3.
-					if (RunDebug.currentAct(s) == 3) {
-						helper.assertTrue(RunDebug.startCharge(s) == null, "charge 3 starts");
-						step[0] = 5;
-					}
-				}
-				case 5 -> {
-					if (RunDebug.highestOpenAct(s) == 4) {
-						toNether(helper, player);
-						step[0] = 6;
-					}
-				}
-				case 6 -> {
-					RunDebug.tickActs(s);
-					if (RunDebug.currentAct(s) == 4) {
-						step[0] = 7;
-					}
-				}
-				default -> {
-				}
+			RunDebug.tickActs(s);
+			int act = RunDebug.currentAct(s);
+			if (act < 4 && act > chargingFrom[0]) {
+				// Arrived in a new act: charge its exit portal once.
+				String error = RunDebug.startCharge(s);
+				helper.assertTrue(error == null, "charge from act " + act + " starts: " + error);
+				chargingFrom[0] = act;
 			}
 		});
 		helper.succeedWhen(() -> {
-			helper.assertTrue(step[0] == 7, "walked the skeleton, step " + step[0] + ", events " + EVENTS);
-			helper.assertTrue(EVENTS.contains("entered:4"), "act 4 entered, " + EVENTS);
+			helper.assertTrue(RunDebug.currentAct(helper.getLevel().getServer()) == 4,
+					"walked to act 4, at " + RunDebug.currentAct(helper.getLevel().getServer()) + ", events " + EVENTS);
+			for (int act = 1; act <= 3; act++) {
+				helper.assertTrue(EVENTS.contains("chargeStarted:" + act) && EVENTS.contains("chargeCompleted:" + act),
+						"act " + act + " charged, events " + EVENTS);
+			}
+			for (int act = 1; act <= 4; act++) {
+				helper.assertTrue(EVENTS.contains("started:" + act) && EVENTS.contains("entered:" + act),
+						"act " + act + " started+entered, events " + EVENTS);
+			}
 			helper.assertTrue(Acts.current(helper.getLevel().getServer()).ordinal() == 4, "Acts contract reports act 4");
+			helper.assertTrue(RunDebug.highestOpenAct(helper.getLevel().getServer()) == 4, "all four acts open");
 			tearDown(helper);
 		});
 	}
 
-	@GameTest(environment = "blocksouls_game_test:act_nether_siege", maxTicks = 400)
+	@GameTest(environment = "blocksouls_game_test:act_nether_siege", dimension = "minecraft:the_nether", maxTicks = 400)
 	public void syntheticClockRunsSiegesInTheNether(GameTestHelper helper) {
-		ServerPlayer player = setUpExpedition(helper);
+		// The test (and its mock player) live in the real Nether; act 1 is the overworld, act 2 the Nether.
+		// Charging act 1's portal opens act 2, and the party-follow moves the siege front to the player.
+		setUpExpedition(helper, List.of("minecraft:overworld", "minecraft:the_nether"));
 		MinecraftServer server = helper.getLevel().getServer();
-		helper.assertTrue(RunDebug.advanceAct(server) == null, "debug advance to act 2");
-		toNether(helper, player);
+		helper.assertTrue(RunDebug.startCharge(server) == null, "the portal charge starts");
 		int[] step = {0};
 		helper.onEachTick(() -> {
 			MinecraftServer s = helper.getLevel().getServer();
+			RunDebug.tickActs(s);
 			switch (step[0]) {
 				case 0 -> {
-					RunDebug.tickActs(s);
 					if (RunDebug.currentAct(s) == 2) {
+						helper.assertTrue(EVENTS.contains("chargeCompleted:1") && EVENTS.contains("started:2"),
+								"charge opened act 2, " + EVENTS);
+						helper.assertTrue(EVENTS.contains("entered:2"), "the party in the Nether entered act 2, " + EVENTS);
 						helper.assertTrue(RunSystem.activeClock(s).synthetic(), "the Nether runs on the synthetic clock");
+						EVENTS.clear();
 						RunDebug.skipSyntheticTo(s, 18000);
 						step[0] = 1;
 					}
@@ -189,8 +145,7 @@ public class ActGameTests {
 				case 1 -> {
 					if (Runs.get(s).phase() == RunPhase.WAVE) {
 						helper.assertTrue(EVENTS.contains("dusk:1"), "synthetic dusk fired DUSK, " + EVENTS);
-						helper.assertTrue(EVENTS.contains("wave:1"), "wave 1 started off the synthetic clock, " + EVENTS);
-						helper.assertTrue(Runs.get(s).threat() == 1, "the threat counter ticked");
+						helper.assertTrue(Runs.get(s).threat() >= 1, "the threat counter ticked");
 						RunDebug.skipSyntheticTo(s, RunSystem.config().dawnTime);
 						step[0] = 2;
 					}

@@ -63,8 +63,15 @@ Same style as `DECISIONS.md`: where this conflicts with a plan file, this logs w
   "wiping the attempt just means re-triggering it later". A charge on the last act fires
   `PORTAL_CHARGE_COMPLETED` with nothing to open — Stage 6/7 wires the finale portal to it.
 - **Aliased act dimensions** (two acts sharing a dimension — only in test skeletons until Stage 6): the
-  dimension belongs to the current act if it matches, else to the highest open act with it; the
-  "ties → earlier act" rule stays for player counts across distinct dimensions (`ActMath`).
+  dimension belongs to the **highest open act** with it, so opening the next act in a shared dimension
+  moves the party forward; the "ties → earlier act" rule stays for player counts across distinct
+  dimensions (`ActMath`). Real acts have unique dimensions, so live runs never hit the alias rule.
+- **Gametests avoid cross-dimension player teleports**: `ServerPlayer.teleportTo(otherLevel, …)` on a
+  mock player does not take effect in the gametest harness (observed on CI; the party stayed counted in
+  the overworld). The Nether siege test instead runs natively in the Nether via the `@GameTest
+  (dimension = "minecraft:the_nether")` field, which also exercises real cross-dimension party-follow
+  (the player genuinely sits in the Nether when act 2 opens); the act-skeleton walk aliases all acts to
+  the test's own dimension and advances purely by charges via the alias rule above.
 - **Threat command is the wave counter**: `/bs threat get|set` reads/writes `RunData.wave` — one value,
   two readings, per the PR 1 decision.
 - **Expedition visuals outside the overworld**: the dusk sky/fog tint plus a modest block-light dim

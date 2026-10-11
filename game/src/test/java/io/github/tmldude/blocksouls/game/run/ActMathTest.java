@@ -36,12 +36,14 @@ class ActMathTest {
 	}
 
 	@Test
-	void aliasedDimensionsBelongToTheHighestOpenActUnlessCurrentMatches() {
-		// Acts 1 and 3 both alias the overworld (test setups): going "back" to the overworld after act 3
-		// opened reads as act 3, not act 1...
+	void aliasedDimensionsBelongToTheHighestOpenAct() {
+		// Acts 1 and 3 both alias the overworld (test setups; real acts have unique dimensions): the
+		// overworld reads as act 3 once act 3 is open, whatever the current act — so opening the next act
+		// in the same dimension moves the party forward.
 		assertEquals(3, ActMath.partyAct(Map.of(OVERWORLD, 2), List.of(OVERWORLD, NETHER, OVERWORLD), 2));
-		// ...but while act 1 is current, the overworld stays act 1 (stability over aliases).
-		assertEquals(1, ActMath.partyAct(Map.of(OVERWORLD, 2), List.of(OVERWORLD, NETHER, OVERWORLD), 1));
+		assertEquals(3, ActMath.partyAct(Map.of(OVERWORLD, 2), List.of(OVERWORLD, NETHER, OVERWORLD), 1));
+		// While only act 1 is open, its dimension is its own.
+		assertEquals(1, ActMath.partyAct(Map.of(OVERWORLD, 2), List.of(OVERWORLD), 1));
 	}
 
 	@Test

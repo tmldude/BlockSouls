@@ -11,9 +11,10 @@ public final class ActMath {
 
 	/**
 	 * The act the party is in: the open act whose dimension holds the most counted (non-downed,
-	 * non-spectator) players; ties go to the earlier act; nobody in any open act's dimension keeps the
-	 * current act. When several open acts share a dimension (aliased test setups), that dimension belongs
-	 * to the current act if it matches, otherwise to the highest open act with it.
+	 * non-spectator) players; ties between dimensions go to the earlier act; nobody in any open act's
+	 * dimension keeps the current act. When several open acts share a dimension (aliased test setups —
+	 * real acts have unique dimensions), the dimension belongs to the <em>highest</em> open act with it:
+	 * opening the next act in the same dimension moves the party forward.
 	 *
 	 * @param playersPerDimension counted players by dimension id
 	 * @param openActDimensions   dimension id per open act, index 0 = act 1
@@ -24,9 +25,6 @@ public final class ActMath {
 		Map<String, Integer> owner = new LinkedHashMap<>();
 		for (int ordinal = 1; ordinal <= openActDimensions.size(); ordinal++) {
 			owner.put(openActDimensions.get(ordinal - 1), ordinal);
-		}
-		if (currentOrdinal >= 1 && currentOrdinal <= openActDimensions.size()) {
-			owner.put(openActDimensions.get(currentOrdinal - 1), currentOrdinal);
 		}
 		int bestOrdinal = currentOrdinal;
 		int bestCount = 0;
