@@ -28,6 +28,11 @@ scancodes (`org.lwjgl.sdl.SDLScancode`), not GLFW.
 
 Jars land in `<module>/build/libs/blocksouls-<module>-<version>.jar`.
 
+```sh
+cd docker && cp .env.example .env && docker compose up -d --build   # local server (see docker/HOSTING.md)
+cd modpack && ./add-mods.sh && packwiz modrinth export             # build the .mrpack
+```
+
 ## Layout and rules
 
 - **One mod per feature**: `movement`, `guns`, `zombies`, `bosses`. Each is its own Fabric mod with id

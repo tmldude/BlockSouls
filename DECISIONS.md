@@ -33,6 +33,27 @@ Elden Ring-style random field bosses; a polished custom boss health bar.
   means an admin config toggle.
 - The arena-based zombies mode stays alongside night waves (assumption; confirm in Phase C).
 
+## Phase 2 — Docker + modpack (2026-10-11)
+
+- **Base image `itzg/minecraft-server:java25`**, build stage `eclipse-temurin:25-jdk` running the Gradle
+  wrapper (so the image builds with the pinned Gradle 9.7.1, not whatever a `gradle:` tag ships).
+- **No custom mod-copy script.** The itzg image already syncs `/mods` into `/data/mods` on every start
+  and leaves other jars alone, so our jars go in `/mods`. They're staged under **unversioned names**
+  (`blocksouls-movement.jar`) so an update overwrites the old jar instead of leaving two versions loaded.
+- **Versions come from `gradle.properties`.** The build stage writes them to `/etc/blocksouls.env`; a small
+  entrypoint defaults `VERSION` / `FABRIC_LOADER_VERSION` from it before handing off to the itzg start
+  script. No `MC_VERSION` to keep in sync in compose.
+- **No `docker/server.properties` file.** itzg generates it from env vars (`VIEW_DISTANCE`, `MOTD`, ...), and a
+  checked-in file would fight that.
+- **Secrets in `docker/.env`** (git-ignored; `.env.example` committed): `WHITELIST`, `OPS`, `RCON_PASSWORD`.
+  The backup service talks to the server over RCON, so both share `RCON_PASSWORD`.
+- **Image `ghcr.io/tmldude/blocksouls`**, tag from `BLOCKSOULS_TAG` (default `latest`). compose also has a
+  `build:` section so `docker compose build` works without a registry.
+- **Healthcheck `start_period` 5m** (image default is 2m) because a modded first start downloads mods and
+  generates the world.
+- **Modpack written by hand** (`pack.toml` + `index.toml`, then `packwiz refresh`) because `packwiz init`
+  needs Mojang's version manifest. `modpack/add-mods.sh` holds the third-party mod list.
+
 ## Open risks to resolve in Phase 2
 
 - The plan's gun frameworks (TACZ, Point Blank) have historically been Forge/NeoForge-first. Verify Fabric
