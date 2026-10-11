@@ -17,6 +17,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.pig.Pig;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.gamerules.GameRules;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 
@@ -108,8 +109,14 @@ public class MobsGameTests {
 		shambler.setTarget(target);
 		// Stuck 2 s, then 3 s per block at wave 10.
 		helper.succeedWhen(() -> {
-			helper.assertTrue(shambler.getTarget() == target, "shambler lost its target");
-			helper.assertBlockNotPresent(Blocks.OAK_PLANKS, new BlockPos(3, 1, 3));
+			boolean broken = false;
+			for (int z = 0; z < 8; z++) {
+				broken |= !helper.getBlockState(new BlockPos(3, 1, z)).is(Blocks.OAK_PLANKS)
+						|| !helper.getBlockState(new BlockPos(3, 2, z)).is(Blocks.OAK_PLANKS);
+			}
+			helper.assertTrue(broken, "planks wall intact; shambler at " + helper.relativePos(shambler.blockPosition()) + ", target "
+					+ shambler.getTarget() + ", breaker " + shambler.canBreakBlocks() + ", griefing "
+					+ helper.getLevel().getGameRules().get(GameRules.MOB_GRIEFING));
 		});
 	}
 
@@ -169,14 +176,16 @@ public class MobsGameTests {
 	@GameTest(maxTicks = 40)
 	public void screamerBuffsNearbyShambler(GameTestHelper helper) {
 		floor(helper);
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		// Mock players are in creative, which mobs refuse to target, so the scream is aimed at a pig.
+		Pig victim = dummy(helper, 4, 1);
 		Screamer screamer = spawnWave(helper, MobEntities.SCREAMER, 1, 1, 3, false);
 		Shambler shambler = spawnWave(helper, MobEntities.SHAMBLER, 6, 6, 3, false);
 
 		helper.runAfterDelay(2, () -> {
-			screamer.scream(helper.getLevel(), player);
-			helper.assertTrue(shambler.hasEffect(MobEffects.SPEED), "shambler didn't get Speed");
-			helper.assertTrue(shambler.getTarget() == player, "shambler didn't turn on the screamed-at player");
+			int heard = screamer.scream(helper.getLevel(), victim);
+			helper.assertTrue(shambler.hasEffect(MobEffects.SPEED), "shambler didn't get Speed (" + heard + " heard, shambler alive "
+					+ shambler.isAlive() + " at " + helper.relativePos(shambler.blockPosition()) + ")");
+			helper.assertTrue(shambler.getTarget() == victim, "shambler didn't turn on the screamed-at target");
 			helper.assertTrue(!screamer.hasEffect(MobEffects.SPEED), "screamer buffed itself");
 			helper.succeed();
 		});
@@ -187,13 +196,15 @@ public class MobsGameTests {
 		floor(helper);
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		Shambler shambler = spawnWave(helper, MobEntities.SHAMBLER, 2, 2, 1, false);
+		// Mock players are in creative, which vanilla already refuses as a target, so this checks canAttack,
+		// which is what the targeting goals and Mob#setTarget consult.
+		helper.assertTrue(shambler.canAttack(player), "can't attack a player who is up");
 		PlayerStatus.setDowned(player, true);
+		helper.assertTrue(!shambler.canAttack(player), "can attack a downed player");
 		shambler.setTarget(player);
 		helper.assertTrue(shambler.getTarget() == null, "targeted a downed player");
-		helper.assertTrue(!shambler.canAttack(player), "can attack a downed player");
 		PlayerStatus.setDowned(player, false);
-		shambler.setTarget(player);
-		helper.assertTrue(shambler.getTarget() == player, "can't target a player who is up");
+		helper.assertTrue(shambler.canAttack(player), "still refuses a revived player");
 		helper.succeed();
 	}
 

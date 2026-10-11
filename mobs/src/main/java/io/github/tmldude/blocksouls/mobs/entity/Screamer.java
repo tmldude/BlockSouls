@@ -47,8 +47,12 @@ public class Screamer extends WaveMob {
 		goalSelector.addGoal(3, new KeepDistanceGoal());
 	}
 
-	/** Screams now at {@code player}: buffs wave mobs around and turns them onto the player. */
-	public void scream(ServerLevel level, Player player) {
+	/**
+	 * Screams now at {@code target}: buffs wave mobs around and turns them onto it.
+	 *
+	 * @return how many wave mobs heard it
+	 */
+	public int scream(ServerLevel level, LivingEntity target) {
 		MobsConfig.Screamer config = config();
 		setAction(ACTION_SCREAM, 0);
 		level.playSound(null, getX(), getY(), getZ(), MobSounds.SCREAMER_SCREAM, SoundSource.HOSTILE, 3.0f, 1.0f);
@@ -56,12 +60,15 @@ public class Screamer extends WaveMob {
 		level.sendParticles(new DustParticleOptions(0xC2456A, 1.5f), getX(), getEyeY(), getZ(), 40, 1.2, 0.6, 1.2, 0.02);
 
 		double r = config.screamRadius;
+		int heard = 0;
 		for (Mob mob : level.getEntitiesOfClass(Mob.class, getBoundingBox().inflate(r), m -> m != this && m.isAlive()
 				&& m.is(CommonTags.WAVE_MOBS) && m.distanceToSqr(this) <= r * r)) {
 			mob.addEffect(new MobEffectInstance(MobEffects.SPEED, config.speedSeconds * 20, 0), this);
-			mob.setTarget(player);
+			mob.setTarget(target);
+			heard++;
 		}
 		nextScream = tickCount + config.cooldownSeconds * 20;
+		return heard;
 	}
 
 	@Override
