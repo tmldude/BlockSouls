@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "blocksouls_world:scrap_plate"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "blocksouls_world:scrap_plate"
+      }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "blocksouls_world:gunmetal_block"
+  ],
+  "result": {
+    "id": "blocksouls_world:gunmetal_ingot",
+    "count": 9
+  }
+}

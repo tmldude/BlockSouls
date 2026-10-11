@@ -1,0 +1,57 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "north": "true"
+      },
+      "apply": {
+        "model": "blocksouls_world:block/blight_veins"
+      }
+    },
+    {
+      "when": {
+        "south": "true"
+      },
+      "apply": {
+        "model": "blocksouls_world:block/blight_veins",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "west": "true"
+      },
+      "apply": {
+        "model": "blocksouls_world:block/blight_veins",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "east": "true"
+      },
+      "apply": {
+        "model": "blocksouls_world:block/blight_veins",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "up": "true"
+      },
+      "apply": {
+        "model": "blocksouls_world:block/blight_veins",
+        "x": 270
+      }
+    },
+    {
+      "when": {
+        "down": "true"
+      },
+      "apply": {
+        "model": "blocksouls_world:block/blight_veins",
+        "x": 90
+      }
+    }
+  ]
+}

@@ -1,0 +1,204 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "blocksouls_world:block/scrap_pile",
+    "pile": "blocksouls_world:block/scrap_pile"
+  },
+  "elements": [
+    {
+      "from": [
+        1,
+        0,
+        1
+      ],
+      "to": [
+        15,
+        3,
+        15
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            1,
+            13,
+            15,
+            16
+          ],
+          "texture": "#pile"
+        },
+        "south": {
+          "uv": [
+            1,
+            13,
+            15,
+            16
+          ],
+          "texture": "#pile"
+        },
+        "east": {
+          "uv": [
+            1,
+            13,
+            15,
+            16
+          ],
+          "texture": "#pile"
+        },
+        "west": {
+          "uv": [
+            1,
+            13,
+            15,
+            16
+          ],
+          "texture": "#pile"
+        },
+        "up": {
+          "uv": [
+            1,
+            1,
+            15,
+            15
+          ],
+          "texture": "#pile"
+        },
+        "down": {
+          "uv": [
+            1,
+            1,
+            15,
+            15
+          ],
+          "texture": "#pile"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        3,
+        2
+      ],
+      "to": [
+        12,
+        6,
+        11
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            3,
+            10,
+            12,
+            13
+          ],
+          "texture": "#pile"
+        },
+        "south": {
+          "uv": [
+            3,
+            10,
+            12,
+            13
+          ],
+          "texture": "#pile"
+        },
+        "east": {
+          "uv": [
+            3,
+            10,
+            12,
+            13
+          ],
+          "texture": "#pile"
+        },
+        "west": {
+          "uv": [
+            3,
+            10,
+            12,
+            13
+          ],
+          "texture": "#pile"
+        },
+        "up": {
+          "uv": [
+            3,
+            2,
+            12,
+            11
+          ],
+          "texture": "#pile"
+        },
+        "down": {
+          "uv": [
+            3,
+            2,
+            12,
+            11
+          ],
+          "texture": "#pile"
+        }
+      }
+    },
+    {
+      "from": [
+        8,
+        3,
+        9
+      ],
+      "to": [
+        14,
+        5,
+        14
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            8,
+            11,
+            14,
+            13
+          ],
+          "texture": "#pile"
+        },
+        "south": {
+          "uv": [
+            8,
+            11,
+            14,
+            13
+          ],
+          "texture": "#pile"
+        },
+        "east": {
+          "uv": [
+            8,
+            11,
+            14,
+            13
+          ],
+          "texture": "#pile"
+        },
+        "west": {
+          "uv": [
+            8,
+            11,
+            14,
+            13
+          ],
+          "texture": "#pile"
+        },
+        "up": {
+          "uv": [
+            8,
+            9,
+            14,
+            14
+          ],
+          "texture": "#pile"
+        }
+      }
+    }
+  ]
+}

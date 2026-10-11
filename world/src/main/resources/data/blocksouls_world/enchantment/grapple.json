@@ -1,0 +1,20 @@
+{
+  "anvil_cost": 4,
+  "description": {
+    "translate": "enchantment.blocksouls_world.grapple"
+  },
+  "max_cost": {
+    "base": 65,
+    "per_level_above_first": 10
+  },
+  "max_level": 1,
+  "min_cost": {
+    "base": 20,
+    "per_level_above_first": 10
+  },
+  "slots": [
+    "mainhand"
+  ],
+  "supported_items": "#blocksouls_world:enchantable/grapple",
+  "weight": 1
+}

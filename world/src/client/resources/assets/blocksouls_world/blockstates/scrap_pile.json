@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "blocksouls_world:block/scrap_pile"
+      },
+      {
+        "model": "blocksouls_world:block/scrap_pile",
+        "y": 90
+      },
+      {
+        "model": "blocksouls_world:block/scrap_pile",
+        "y": 180
+      },
+      {
+        "model": "blocksouls_world:block/scrap_pile",
+        "y": 270
+      }
+    ]
+  }
+}
