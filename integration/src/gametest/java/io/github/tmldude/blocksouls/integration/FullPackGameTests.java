@@ -28,6 +28,7 @@ import io.github.tmldude.blocksouls.common.CommonIds;
 import io.github.tmldude.blocksouls.common.CommonTags;
 import io.github.tmldude.blocksouls.common.mob.WaveContext;
 import io.github.tmldude.blocksouls.common.mob.WaveMobs;
+import io.github.tmldude.blocksouls.common.party.PartyScaling;
 import io.github.tmldude.blocksouls.common.player.PlayerStatus;
 import io.github.tmldude.blocksouls.common.run.Difficulty;
 import io.github.tmldude.blocksouls.game.player.downed.Downed;
@@ -35,6 +36,7 @@ import io.github.tmldude.blocksouls.game.run.RunConfig;
 import io.github.tmldude.blocksouls.game.run.RunDebug;
 import io.github.tmldude.blocksouls.game.run.RunSystem;
 import io.github.tmldude.blocksouls.game.run.StarterKit;
+import io.github.tmldude.blocksouls.game.run.WaveMath;
 
 /**
  * The whole pack in one server: every mod loads together, ids one module references in another resolve, and the
@@ -121,6 +123,41 @@ public class FullPackGameTests {
 			helper.assertTrue(types.size() >= 3, "wave mobs spawned: " + types);
 			helper.assertTrue(types.stream().allMatch(type -> type.getNamespace().equals(CommonIds.MOBS)),
 					"every wave mob comes from the mobs roster, got " + types);
+			RunDebug.reset(server);
+			config.spawnMinDistance = defaults.spawnMinDistance;
+			config.spawnMaxDistance = defaults.spawnMaxDistance;
+			config.minPlayerDistance = defaults.minPlayerDistance;
+		});
+	}
+
+	/**
+	 * A full party of 8: the wave is sized by common's party curve and more than the old flat 30 mobs are alive at once.
+	 * Other tests' mock players may be online too, but party size caps at 8, so the numbers are exact.
+	 */
+	@GameTest(environment = "blocksouls_integration_test:full_pack_party", maxTicks = 400, skyAccess = true)
+	public void aFullPartyOfEightScalesTheWave(GameTestHelper helper) {
+		MinecraftServer server = helper.getLevel().getServer();
+		RunDebug.reset(server);
+		RunConfig config = RunSystem.config();
+		RunConfig defaults = new RunConfig();
+		config.spawnMinDistance = 2;
+		config.spawnMaxDistance = 6;
+		config.minPlayerDistance = 1;
+		for (int i = 0; i < 8; i++) {
+			ServerPlayer player = helper.makeMockServerPlayerInLevel();
+			player.snapTo(helper.absoluteVec(new Vec3(2 + (i % 4) * 2, 1, 2 + (i / 4) * 4)));
+		}
+		RunDebug.skipTo(server, 14000);
+		RunDebug.startWave(server, 6);
+
+		int expected = WaveMath.waveCount(6, 8, 1, 1, config);
+		helper.assertTrue(expected == WaveMath.waveCount(6, 20, 1, 1, config), "party size caps at 8");
+		helper.assertTrue(RunDebug.mobsLeft(server) == expected,
+				"wave 6 for 8 players has " + expected + " mobs, got " + RunDebug.mobsLeft(server));
+		helper.succeedWhen(() -> {
+			int alive = RunDebug.waveMobs(server).size();
+			helper.assertTrue(alive > 30 && alive <= PartyScaling.aliveCap(8),
+					"8 players allow more than 30 mobs at once (cap " + PartyScaling.aliveCap(8) + "), alive " + alive);
 			RunDebug.reset(server);
 			config.spawnMinDistance = defaults.spawnMinDistance;
 			config.spawnMaxDistance = defaults.spawnMaxDistance;

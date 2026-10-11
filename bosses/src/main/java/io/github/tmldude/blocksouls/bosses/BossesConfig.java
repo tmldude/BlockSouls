@@ -2,8 +2,7 @@ package io.github.tmldude.blocksouls.bosses;
 
 /** Framework numbers shared by every boss ({@code config/blocksouls/bosses.json}). Each boss has its own file too. */
 public class BossesConfig {
-	/** Extra health per player in the fight beyond the first (0.5 = +50%). */
-	public double healthPerExtraPlayer = 0.5;
+	// Health per player in the fight: common's party.json (PartyScaling.bossHealth).
 
 	// Telegraph rule: hits worth more than this share of a player's health need this much windup.
 	public double bigHitShareOfHealth = 0.3;

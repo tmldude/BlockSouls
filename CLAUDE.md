@@ -57,6 +57,13 @@ All textures, models, sounds and names are **original**. No Bungie / FromSoftwar
 Nintendo assets or trademarked names. Use generic or inspired-by names ("Hand Cannon" yes, "Gjallarhorn" no).
 Record third-party asset licenses in `ASSETS.md`.
 
+## Party size: 1 to 8 players
+
+BlockSouls is built for parties of **1–8 players**. Anything that depends on how many players there are (wave sizes,
+mobs alive at once, elites, boss health, mechanics that need several players, event frequency, loot shared per party)
+goes through `common`'s `PartyScaling` (curves in `config/blocksouls/party.json`), never a module's own per-player
+formula. Solo must stay completable, and anything that scales needs a test at 1 and at 8 players.
+
 ## Conventions
 
 - Conventional commits, small PRs per task.

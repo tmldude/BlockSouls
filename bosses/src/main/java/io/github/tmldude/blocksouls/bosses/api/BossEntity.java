@@ -791,7 +791,7 @@ public abstract class BossEntity extends Monster {
 		// Players who leave mid-fight don't make the boss weaker.
 		mostPlayersInFight = Math.max(mostPlayersInFight, inFight);
 		var difficulty = Runs.get(level.getServer()).difficulty();
-		double health = BossScaling.healthMultiplier(mostPlayersInFight, framework().healthPerExtraPlayer, difficulty.mobHealth());
+		double health = BossScaling.healthMultiplier(mostPlayersInFight, difficulty.mobHealth());
 		damageMultiplier = difficulty.mobDamage();
 		AttributeInstance maxHealth = getAttribute(Attributes.MAX_HEALTH);
 		if (maxHealth == null) {

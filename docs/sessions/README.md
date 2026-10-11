@@ -51,8 +51,10 @@ Each file here is a brief for one parallel session (PLAN.md §8). A session is s
     SDL key codes. When unsure of an API, read the source (vanilla in the offline-check cache, Fabric API in
     `~/.cache/blocksouls-offline-check/fabric-src`) instead of guessing.
 
-12. **Numbers in briefs are starting points.** Keep them unless they play badly; if you change one, log it.
-13. **Commits:** conventional commits, small and frequent; never commit secrets; never push to `main`.
+12. **Party size 1–8.** Anything that scales with player count uses `common`'s `PartyScaling` (see `CLAUDE.md`), and
+    its tests cover 1 and 8 players (8 mock players via `helper.makeMockServerPlayerInLevel()`).
+13. **Numbers in briefs are starting points.** Keep them unless they play badly; if you change one, log it.
+14. **Commits:** conventional commits, small and frequent; never commit secrets; never push to `main`.
 
 ## Stages
 

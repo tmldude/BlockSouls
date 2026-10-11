@@ -12,12 +12,14 @@ class WaveMathTest {
 
 	@Test
 	void waveCountFollowsTheFormula() {
-		// (6 + 3) · (0.6 + 0.4) = 9
+		// Solo: (6 + 3) · 1 = 9
 		assertEquals(9, WaveMath.waveCount(1, 1, 1, 1, config));
-		// (6 + 30) · (0.6 + 1.6) = 79.2
-		assertEquals(79, WaveMath.waveCount(10, 4, 1, 1, config));
-		// Blood Moon on nightmare, wave 5, 2 players: 21 · 1.4 · 1.6 · 1.5 = 70.56
-		assertEquals(71, WaveMath.waveCount(5, 2, 1.6, 1.5, config));
+		// 4 players: (6 + 30) · (1 + 0.55 · 3^0.9 = 2.478) = 89.2
+		assertEquals(89, WaveMath.waveCount(10, 4, 1, 1, config));
+		// Blood Moon on nightmare, wave 5, 2 players: 21 · 1.55 · 1.6 · 1.5 = 78.12
+		assertEquals(78, WaveMath.waveCount(5, 2, 1.6, 1.5, config));
+		// A full party of 8 at wave 8: 30 · 4.169 = 125.1
+		assertEquals(125, WaveMath.waveCount(8, 8, 1, 1, config));
 		// Zero players still counts as one.
 		assertEquals(9, WaveMath.waveCount(1, 0, 1, 1, config));
 	}
@@ -40,9 +42,11 @@ class WaveMathTest {
 
 	@Test
 	void elitesPerWave() {
-		assertEquals(1, WaveMath.maxElites(1, config));
-		assertEquals(2, WaveMath.maxElites(4, config));
-		assertEquals(3, WaveMath.maxElites(9, config));
+		assertEquals(1, WaveMath.maxElites(1, 1, config));
+		assertEquals(2, WaveMath.maxElites(4, 1, config));
+		assertEquals(3, WaveMath.maxElites(9, 1, config));
+		// 8 players: (1 + 8/4) · 3.017 = 9
+		assertEquals(9, WaveMath.maxElites(8, 8, config));
 	}
 
 	@Test
