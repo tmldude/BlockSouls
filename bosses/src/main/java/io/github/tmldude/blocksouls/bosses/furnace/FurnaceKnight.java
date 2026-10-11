@@ -46,6 +46,9 @@ public class FurnaceKnight extends BossEntity {
 				.health(c.health)
 				.arenaRadius(c.arenaRadius)
 				.music(FurnaceKnightSounds.MUSIC)
+				// Blight core (world) and a legendary gun (guns), only when those modules are installed.
+				.extraLoot(CommonIds.id(CommonIds.BOSSES, "boss_drops/furnace_knight_world"),
+						CommonIds.id(CommonIds.BOSSES, "boss_drops/legendary_gun"))
 				.phase(BossPhase.first().attacks(slam, sweep, breath, charge))
 				.phase(BossPhase.below(c.phase2Threshold)
 						.attacks(slam, sweep, breath, charge, pillars)

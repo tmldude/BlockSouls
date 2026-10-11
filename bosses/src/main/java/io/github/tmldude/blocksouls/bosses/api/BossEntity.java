@@ -838,6 +838,14 @@ public abstract class BossEntity extends Monster {
 		}
 	}
 
+	@Override
+	protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean killedByPlayer) {
+		super.dropCustomDeathLoot(level, source, killedByPlayer);
+		for (var table : definition().extraLoot()) {
+			dropFromLootTable(level, source, killedByPlayer, table);
+		}
+	}
+
 	/** Field bosses that nobody engaged walk off: a puff of smoke and gone. */
 	public void leave(ServerLevel level) {
 		level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, getX(), getY() + 1, getZ(), 30, 0.8, 1.2, 0.8, 0.02);

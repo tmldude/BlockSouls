@@ -7,8 +7,11 @@ import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
 
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.level.storage.loot.LootTable;
 
 import io.github.tmldude.blocksouls.bosses.logic.PhaseMath;
 
@@ -26,6 +29,7 @@ public final class BossDefinition {
 	private final List<Attack> attacks;
 	private final double[] thresholds;
 	private final double chaseSpeed;
+	private final List<ResourceKey<LootTable>> extraLoot;
 
 	private BossDefinition(Builder builder) {
 		this.id = builder.id;
@@ -34,6 +38,7 @@ public final class BossDefinition {
 		this.music = builder.music;
 		this.phases = List.copyOf(builder.phases);
 		this.chaseSpeed = builder.chaseSpeed;
+		this.extraLoot = List.copyOf(builder.extraLoot);
 		Map<String, Attack> byName = new LinkedHashMap<>();
 		for (BossPhase phase : phases) {
 			for (Attack attack : phase.attacks()) {
@@ -104,6 +109,11 @@ public final class BossDefinition {
 		return chaseSpeed;
 	}
 
+	/** Extra loot tables rolled on death after the entity's own (see {@link Builder#extraLoot}). */
+	public List<ResourceKey<LootTable>> extraLoot() {
+		return extraLoot;
+	}
+
 	public static final class Builder {
 		private final Identifier id;
 		private double baseHealth = 200;
@@ -111,6 +121,7 @@ public final class BossDefinition {
 		private @Nullable SoundEvent music;
 		private final List<BossPhase> phases = new ArrayList<>();
 		private double chaseSpeed = 1.0;
+		private final List<ResourceKey<LootTable>> extraLoot = new ArrayList<>();
 
 		private Builder(Identifier id) {
 			this.id = id;
@@ -135,6 +146,18 @@ public final class BossDefinition {
 
 		public Builder chaseSpeed(double speed) {
 			this.chaseSpeed = speed;
+			return this;
+		}
+
+		/**
+		 * Loot tables rolled on death on top of {@code loot_table/entities/<boss>.json}. Use these for drops from other
+		 * modules: put them in a separate table with a {@code fabric:load_conditions} block. A table that didn't load
+		 * just drops nothing, whereas referencing it from the main table would fail the whole loot registry.
+		 */
+		public Builder extraLoot(Identifier... tables) {
+			for (Identifier table : tables) {
+				extraLoot.add(ResourceKey.create(Registries.LOOT_TABLE, table));
+			}
 			return this;
 		}
 
