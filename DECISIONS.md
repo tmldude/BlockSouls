@@ -85,3 +85,18 @@ Elden Ring-style random field bosses; a polished custom boss health bar.
   vanilla's 10-tick jump cooldown expires, which would otherwise eat the jump.
 - **No extra fall gravity / hold boost** while flying, gliding, in liquid, climbing, riding, spectating, or with
   Slow Falling / Levitation.
+
+### A2 dodge roll + stamina
+- **Server decides, client moves.** The client checks stamina/ground, sends an empty `roll` packet and
+  drives the roll movement (vanilla movement is client-side). The server re-checks, spends stamina and
+  runs the 12-tick roll timer; i-frames (ticks 2–8) cancel damage via `ServerLivingEntityEvents.ALLOW_DAMAGE`,
+  except damage tagged `bypasses_invulnerability` (void, `/kill`). On a server without the mod the key does
+  nothing, so there's never a roll without i-frames.
+- **Roll movement:** 0.6 blocks/tick for 7 ticks, easing to 0 by tick 12 (~5.5 blocks). Direction from
+  WASD input, or facing if none. Vanilla only kicks above 10 blocks/tick, so no movement-check changes needed.
+- **Stamina** is a Fabric attachment synced to its own player only, not saved (full on login). It only syncs
+  when it changes, so a player at full stamina sends nothing. Max 100, roll 25, regen 15/s after 1s.
+- **HUD:** a thin bar right-aligned above the hunger row, shown only while stamina isn't full; hidden in
+  creative/spectator. Turns red under 25%.
+- **Deferred to Phase E polish:** the roll's camera tilt and lowered eye height (cosmetic; needs camera
+  mixins). Not done yet.

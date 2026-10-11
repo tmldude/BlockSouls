@@ -3,6 +3,8 @@ package io.github.tmldude.blocksouls.movement;
 /** {@code config/blocksouls/movement.json}. Velocities are blocks/tick, times are ticks. */
 public class MovementConfig {
 	public Jump jump = new Jump();
+	public Roll roll = new Roll();
+	public Stamina stamina = new Stamina();
 
 	public static class Jump {
 		public boolean enabled = true;
@@ -25,5 +27,24 @@ public class MovementConfig {
 		/** Launch bonus for the 2nd and 3rd jump of a chain. */
 		public double secondJumpBonus = 0.15;
 		public double thirdJumpBonus = 0.30;
+	}
+
+	public static class Roll {
+		public boolean enabled = true;
+		public int durationTicks = 12;
+		/** Damage is ignored on ticks [iframeStart, iframeEnd] of the roll (tick 0 = the press). */
+		public int iframeStart = 2;
+		public int iframeEnd = 8;
+		/** Horizontal speed held for the first {@link #fullSpeedTicks}, then eased to 0 by the end. */
+		public double speed = 0.6;
+		public int fullSpeedTicks = 7;
+		public double staminaCost = 25;
+	}
+
+	public static class Stamina {
+		public double max = 100;
+		public double regenPerSecond = 15;
+		/** Ticks after spending stamina before it starts regenerating. */
+		public int regenDelayTicks = 20;
 	}
 }
