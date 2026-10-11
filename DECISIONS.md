@@ -127,3 +127,16 @@ My defaults, to confirm:
   an optional side raid.
 - **"Better bosses should not despawn"** read as: elite / mini-boss wave mobs survive dawn and keep hunting you;
   ordinary wave zombies burn at dawn.
+
+## Game design pass 2 (2026-10-11, from the owner)
+
+- **Boons are lost on death** (zombies-perk style). Tiers Common/Rare/Legendary; 3 random cards plus an occasional
+  Wildcard pick; include potion effects, stat boosts, movement upgrades, combos and rare wild ones (flight, Elytra).
+- **Nether theme:** the source of the infection. Fleshy netherrack, ash fog, overrun piglins, a hidden "dread"
+  meter that brings hunters the longer you stay.
+- **Art:** procedural placeholders generated in-theme for now.
+- **Field bosses** are optional, with mini arenas or open-field roaming, lock-on, never despawn mid-fight. Pool: Furnace
+  Knight (MVP), Ashwyrm, Stormplate Knight, Pale Rider (drops a Wraith Steed). Names are original; Elden Ring /
+  Dark Souls references stay inspiration only (no "Torrent", no "Dragonslayer").
+- **Run variety:** night modifiers, shuffled roster, 1–3 field bosses per run; MVP ships one boss + the final raid.
+- **MVP scope** defined in PLAN.md §0c.

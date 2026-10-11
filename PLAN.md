@@ -60,9 +60,25 @@ every night and keep scaling, COD-style, with no reset.
 - **Other dimensions don't get waves, but they're no escape:** the wave counter still advances on nights nobody
   is in the overworld (you just miss that night's loot). The Nether has its own pressure; see "Nether" below.
 
-**Run rewards (roguelike boons):** at dawn after surviving a night, each player picks 1 of 3 boons. Boons improve
-physical attributes and playstyle (health, speed, stamina, jump, reload, loot luck, radiation resistance, ...),
-with rarities and a few synergies.
+**Run rewards (roguelike boons):** at dawn after surviving a night, a relic drops at each player's feet; using it
+offers **3 random boons**. Occasionally one card is a **Wildcard** that lets you pick any boon of that tier instead.
+- **Tiers: Common / Rare / Legendary**, with odds that improve as waves climb.
+- **Lost on death**, like zombies perks; the run's gear and boons are what you're protecting.
+- **Kinds:**
+  - **Effects:** any vanilla potion effect as a permanent run buff (speed, strength, jump boost, night vision,
+    fire resistance, ...).
+  - **Stat boosts:** +50% jump height, sprint speed, max health, stamina pool/regen, reload speed, loot luck.
+  - **Movement upgrades** that build on our movement: longer web reach, double jump, faster climbing,
+    i-frames on more roll ticks, a free roll after a kill.
+  - **Combos:** owning two related boons unlocks a stronger third, e.g. Spring Legs + Featherfall → Moon Boots.
+  - **Wild ones:** rare and legendary picks like short flight, a free Elytra, or "every night starts with a lightning strike on your best enemy".
+- All boons are data-driven (JSON), so adding more is content work, not code.
+
+**Run variety:** no two runs play the same.
+- **Night modifiers** are rolled per night, shown through the world rather than text: fog nights, sprinter
+  nights, a Blood Moon every 4th night, swarm nights with more but weaker mobs.
+- The **wave roster's order** shuffles within tiers each run.
+- **Field bosses:** 1–3 appear over a run, picked from a pool (MVP ships 1).
 
 **Vehicles: repairable wrecks, made fun.** Broken-down vehicles in the world get fixed with parts:
 - a 4-seat kart-style buggy (bouncy, drifty);
@@ -72,6 +88,23 @@ with rarities and a few synergies.
 **Framing: show, don't tell.** No lore dumps or quest text. The world explains itself: wrecks, ruins, rad
 craters, an infected Nether, sky and sound cues before dusk, item names that hint. Tooltips state mechanics,
 never story.
+
+## 0c. MVP: the first playable run
+
+The first goal is one complete, fun run end to end, not every idea. Everything else is "growth" after friends have played it.
+
+| Area | MVP | Growth (later) |
+|---|---|---|
+| Game loop | Short day/night, multi-wave nights + dawn pause, dusk cues, sleep + dimension rules, starter kit + breaking pistol, difficulty presets, endless mode | More night modifiers |
+| Run variety | Blood Moon + 2 night modifiers, shuffled roster | Modifier pool, run seeds |
+| Boons | ~20 boons over 3 tiers incl. Wildcard, lost on death, 2 combos | Big data-driven pool |
+| Movement | Jump, roll, climb (done), basic web swing | Boon-driven upgrades |
+| Guns | Own framework, Starter Pistol + 4 guns, ammo, rarity, 4 perks, headshots | Full 6 + exotics |
+| Mobs | 5 wave types + Mutant Brute elite + 2 Nether mobs; block breaking | Full roster, Stalker, Spreader |
+| World | Scrap, 1 new ore, 2 wreck/ruin structures, loot injection, Ender Eye sources, infected Nether look | Radiation zones, more structures |
+| Vehicles | 4-seat kart from a repaired wreck | Gun truck, hover speeder |
+| Bosses | Framework, boss bar, lock-on, **Furnace Knight**, **final dragon raid** | Ashwyrm, Stormplate Knight, Pale Rider, side raid |
+| Art | Procedural, in-theme placeholders for everything | Real models, sounds |
 
 ## 1. Repo skeleton
 
@@ -258,6 +291,16 @@ Each weapon = one JSON definition in the framework's format + a GeckoLib or JSON
 ### D2b. Random boss events (field bosses)
 - Like Elden Ring's field bosses / invasions: bosses occasionally appear in the overworld near players (e.g. a dragon landing on a mountain, a giant knight at a ruin at night), announced with a sound + title + map marker. Spawn chance, cooldowns and biome rules in config; never inside claimed/arena areas or near spawn by default.
 - Uses the D1 framework so every boss can be a field boss. Fog wall goes up only when a player engages.
+- **Optional**: you can walk away. They hold a **mini arena** (a ruin, a bastion, a crater) or roam open fields,
+  and support **lock-on**. Field bosses never despawn mid-fight.
+- **Boss pool** (original names, inspired-by only):
+
+  | Boss | Where | Drop |
+  |---|---|---|
+  | **Furnace Knight** (MVP) | Guards a Nether bastion; mid-run milestone | Blaze rods, an Ender Eye, a blight core |
+  | **Ashwyrm** | A dragon that lands on mountains | Fire-themed gun parts |
+  | **Stormplate Knight** | A towering knight in dragon-scale armor, lightning spear, ruined arena | Dragonscale armor set |
+  | **The Pale Rider** | A ghostly horseman roaming plains at night | **Wraith Steed whistle**: a summonable spectral horse with a double jump |
 
 ### D3. Final raid — the reworked Ender Dragon (§0b)
 - The vanilla Ender Dragon fight becomes the finale: multi-phase, telegraphed attacks, mechanics for 2–4 players
