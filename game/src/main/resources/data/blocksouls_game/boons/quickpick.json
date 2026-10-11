@@ -1,6 +1,6 @@
 {
   "tier": "rare",
-  "icon": "minecraft:golden_pickaxe",
+  "icon": "blocksouls_game:boon/quickpick",
   "effects": [
     {
       "type": "effect",

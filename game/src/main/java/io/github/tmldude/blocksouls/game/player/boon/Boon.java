@@ -6,7 +6,7 @@ import java.util.List;
  * A boon definition from {@code data/<ns>/boons/<path>.json}.
  *
  * @param id       {@code <ns>:<path>}
- * @param icon     item id drawn on cards and in the HUD
+ * @param icon     drawn on cards and in the HUD: an item id or a GUI sprite id ({@link BoonIcons})
  * @param maxLevel how many times it can be picked (1 = not stackable)
  * @param requires boon ids that must all be owned for this to be offered (combos)
  */

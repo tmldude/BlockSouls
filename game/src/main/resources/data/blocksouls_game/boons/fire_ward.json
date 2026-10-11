@@ -1,6 +1,6 @@
 {
   "tier": "rare",
-  "icon": "minecraft:magma_cream",
+  "icon": "blocksouls_game:boon/fire_ward",
   "effects": [
     {
       "type": "effect",

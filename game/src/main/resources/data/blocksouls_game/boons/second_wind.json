@@ -1,6 +1,6 @@
 {
   "tier": "rare",
-  "icon": "minecraft:wind_charge",
+  "icon": "blocksouls_game:boon/second_wind",
   "effects": [
     {
       "type": "trait",

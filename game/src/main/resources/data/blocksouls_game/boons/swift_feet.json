@@ -1,6 +1,6 @@
 {
   "tier": "common",
-  "icon": "minecraft:sugar",
+  "icon": "blocksouls_game:boon/swift_feet",
   "effects": [
     {
       "type": "effect",

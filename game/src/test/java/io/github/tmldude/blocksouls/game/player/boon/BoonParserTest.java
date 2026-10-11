@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import com.google.gson.JsonParseException;
@@ -81,17 +82,46 @@ class BoonParserTest {
 		assertThrows(JsonParseException.class, () -> BoonParser.parse("Bad Id", "{}"));
 	}
 
+	private static final String EFFECTS = "\"effects\": [{\"type\": \"effect\", \"effect\": \"minecraft:speed\"}]";
+
+	@Test
+	void acceptsItemAndSpriteIcons() {
+		Boon item = BoonParser.parse("blocksouls_game:test",
+				"{\"tier\": \"common\", \"icon\": \"minecraft:sugar\", " + EFFECTS + "}", sprite -> false);
+		assertEquals("minecraft:sugar", item.icon());
+		assertFalse(BoonIcons.isSprite(item.icon()), "item icons are never checked against sprites");
+
+		Boon sprite = BoonParser.parse("blocksouls_game:test",
+				"{\"tier\": \"common\", \"icon\": \"blocksouls_game:boon/test\", " + EFFECTS + "}",
+				"blocksouls_game:boon/test"::equals);
+		assertEquals("blocksouls_game:boon/test", sprite.icon());
+		assertTrue(BoonIcons.isSprite(sprite.icon()));
+		assertEquals("assets/blocksouls_game/textures/gui/sprites/boon/test.png", BoonIcons.texturePath(sprite.icon()));
+	}
+
+	@Test
+	void rejectsMissingSprite() {
+		JsonParseException e = assertThrows(JsonParseException.class, () -> BoonParser.parse("blocksouls_game:test",
+				"{\"tier\": \"common\", \"icon\": \"blocksouls_game:boon/nope\", " + EFFECTS + "}", sprite -> false));
+		assertTrue(e.getMessage().contains("boon/nope"), e.getMessage());
+	}
+
 	@Test
 	void shippedBoonsParseAndCombosResolve() throws IOException {
-		Path dir = Stream.of("src/main/resources/data/blocksouls_game/boons", "game/src/main/resources/data/blocksouls_game/boons")
+		Path resources = Stream.of("src/main/resources", "game/src/main/resources")
 				.map(Path::of).filter(Files::isDirectory).findFirst().orElseThrow();
+		Path dir = resources.resolve("data/blocksouls_game/boons");
+		Predicate<String> spriteExists = icon -> Files.isRegularFile(resources.resolve(BoonIcons.texturePath(icon)));
 		Map<String, Boon> boons = new HashMap<>();
 		try (Stream<Path> files = Files.list(dir)) {
 			for (Path file : files.toList()) {
 				String id = "blocksouls_game:" + file.getFileName().toString().replace(".json", "");
-				boons.put(id, BoonParser.parse(id, Files.readString(file)));
+				Boon boon = BoonParser.parse(id, Files.readString(file), spriteExists);
+				assertEquals("blocksouls_game:boon/" + id.substring(id.indexOf(':') + 1), boon.icon(), "every shipped boon has its own sprite");
+				boons.put(id, boon);
 			}
 		}
+		assertTrue(spriteExists.test(BoonIcons.WILDCARD), "the Wildcard card back ships");
 
 		assertTrue(boons.size() >= 20, "ships ~20 boons, found " + boons.size());
 		for (BoonTier tier : BoonTier.values()) {

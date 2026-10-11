@@ -51,6 +51,13 @@ public class FullPackClientTest implements FabricClientGameTest {
 			context.waitTicks(20);
 			context.takeScreenshot("04-gun-and-wreck");
 
+			// The boon row left of the hotbar: one of each tier plus a combo, drawn with their own icons.
+			for (String boon : new String[] {"swift_feet", "iron_skin", "brawler", "fire_ward", "wings", "spring_legs", "featherfall", "moon_boots"}) {
+				server.runCommand("bs boon give @p blocksouls_game:" + boon);
+			}
+			context.waitTicks(10);
+			context.takeScreenshot("04b-boon-row");
+
 			// A wave in progress (mobs come from 24-40 blocks out).
 			server.runCommand("kill @e[type=blocksouls_mobs:shambler,nbt={NoAI:1b}]");
 			context.waitTicks(200);

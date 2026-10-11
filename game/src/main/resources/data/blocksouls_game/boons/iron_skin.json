@@ -1,6 +1,6 @@
 {
   "tier": "common",
-  "icon": "minecraft:iron_chestplate",
+  "icon": "blocksouls_game:boon/iron_skin",
   "stackable": 2,
   "effects": [
     {

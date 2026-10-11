@@ -1,6 +1,6 @@
 {
   "tier": "common",
-  "icon": "minecraft:glass_bottle",
+  "icon": "blocksouls_game:boon/deep_lungs",
   "stackable": 2,
   "effects": [
     {

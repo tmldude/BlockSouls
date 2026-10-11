@@ -1,6 +1,6 @@
 {
   "tier": "legendary",
-  "icon": "minecraft:chainmail_boots",
+  "icon": "blocksouls_game:boon/moon_boots",
   "requires": [
     "blocksouls_game:spring_legs",
     "blocksouls_game:featherfall"
