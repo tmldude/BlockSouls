@@ -225,7 +225,9 @@ public class FinalDragon extends BossEntity {
 				phase() + 1, mode(), isStaggered() ? " (staggered)" : "", getHealth(), getMaxHealth(), fightTicks / 20,
 				isEngaged() ? ", engaged" : "", enraged() ? ", ENRAGED" : "",
 				order == null ? "none" : order.remaining() + " (" + order.destroyed() + " done)", plates.plates().size(), plates.lastHeld(),
-				plates.armed(), plates.progress(), orbs.count(), blockPosition().toShortString());
+				plates.armed(), plates.progress(), orbs.count(), blockPosition().toShortString())
+				+ String.format(", ticks %d%s%s", tickCount, isRemoved() ? ", REMOVED " + getRemovalReason() : "",
+						level() instanceof ServerLevel level && !level.isPositionEntityTicking(blockPosition()) ? ", NOT ENTITY-TICKING" : "");
 	}
 
 	Vec3 perchFacing() {

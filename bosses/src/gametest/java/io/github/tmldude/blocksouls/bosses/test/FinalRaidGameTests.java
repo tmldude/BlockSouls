@@ -133,7 +133,7 @@ public class FinalRaidGameTests {
 		helper.assertTrue(crystalAt(dragon, wrong) == null, "the wrong crystal burst");
 
 		helper.runAfterDelay(FinalRaids.CONFIG.crystalReformTicks + 5, () -> {
-			helper.assertTrue(crystalAt(dragon, wrong) != null, "the wrong crystal didn't re-form");
+			helper.assertTrue(crystalAt(dragon, wrong) != null, "the wrong crystal didn't re-form: " + dragon.debugInfo());
 			while (!order.isDone()) {
 				breakCrystal(helper, dragon, order.next(), player);
 			}
@@ -246,7 +246,7 @@ public class FinalRaidGameTests {
 		int[] mark = {0, -1, -1};
 		helper.runAfterDelay(10, () -> dragon.setHealth(dragon.getMaxHealth() * 0.6f));
 		helper.runAfterDelay(400, () -> {
-			helper.assertTrue(dragon.phase() == 1, "not in phase 2 at 60%");
+			helper.assertTrue(dragon.phase() == 1, "not in phase 2 at 60%: " + dragon.debugInfo());
 			helper.assertTrue(dragon.attacksFinished() >= 2, "only " + dragon.attacksFinished() + " attacks in phase 2 (flying)");
 			mark[1] = dragon.attacksFinished();
 			dragon.forcePerch();
