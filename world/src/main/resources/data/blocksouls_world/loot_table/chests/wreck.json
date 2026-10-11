@@ -1,0 +1,167 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_world:scrap",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 6
+            }
+          },
+          "weight": 30
+        },
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_world:raw_gunmetal",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 3
+            }
+          },
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_world:gunmetal_nugget",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 7
+            }
+          },
+          "weight": 12
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_ingot",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 3
+            }
+          },
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_nugget",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 3,
+              "max": 9
+            }
+          },
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:bread",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 3
+            }
+          },
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:cooked_beef",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 2
+            }
+          },
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:dried_kelp",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 6
+            }
+          },
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:coal",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 4
+            }
+          },
+          "weight": 8
+        }
+      ],
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 3,
+        "max": 6
+      }
+    },
+    {
+      "entries": [
+        {
+          "type": "minecraft:empty",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:tag",
+          "items": "#blocksouls_world:loot/ammo",
+          "expand": true,
+          "weight": 6,
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 4,
+              "max": 12
+            }
+          }
+        },
+        {
+          "type": "minecraft:tag",
+          "items": "#blocksouls_world:loot/vehicle_wheels",
+          "expand": true,
+          "weight": 4
+        },
+        {
+          "type": "minecraft:tag",
+          "items": "#blocksouls_world:loot/vehicle_engines",
+          "expand": true,
+          "weight": 1
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "blocksouls_world:chests/wreck"
+}

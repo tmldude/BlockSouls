@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "modifier": {
+            "type": "minecraft:enchant_randomly",
+            "options": "#blocksouls_world:wacky"
+          },
+          "weight": 1
+        }
+      ],
+      "rolls": 1
+    }
+  ]
+}

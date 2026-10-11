@@ -1,0 +1,19 @@
+{
+  "feature": "blocksouls_world:scrap_piles",
+  "placement": [
+    {
+      "type": "blocksouls_world:config_rarity",
+      "key": "scrap_pile"
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:heightmap",
+      "heightmap": "MOTION_BLOCKING_NO_LEAVES"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

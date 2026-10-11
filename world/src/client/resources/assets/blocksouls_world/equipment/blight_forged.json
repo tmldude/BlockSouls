@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "blocksouls_world:blight_forged"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "blocksouls_world:blight_forged"
+      }
+    ]
+  }
+}

@@ -2,7 +2,9 @@
 	"required": true,
 	"package": "io.github.tmldude.blocksouls.world.client.mixin",
 	"compatibilityLevel": "JAVA_25",
-	"client": [],
+	"client": [
+		"FogRendererMixin"
+	],
 	"injectors": {
 		"defaultRequire": 1
 	},

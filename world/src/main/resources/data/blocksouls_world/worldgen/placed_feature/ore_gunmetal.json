@@ -1,0 +1,27 @@
+{
+  "feature": "blocksouls_world:ore_gunmetal",
+  "placement": [
+    {
+      "type": "blocksouls_world:config_count",
+      "key": "gunmetal_ore"
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:trapezoid",
+        "min_inclusive": {
+          "absolute": -32
+        },
+        "max_inclusive": {
+          "absolute": 48
+        }
+      }
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}
