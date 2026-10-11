@@ -52,7 +52,7 @@ public class BlockSoulsMobsClient implements ClientModInitializer {
 		EntityRendererRegistry.register(MobEntities.SCREAMER, ctx ->
 				new BlockSoulsMobRenderer<>(ctx, new ScreamerModel(ctx.bakeLayer(SCREAMER)), 0.4f, "screamer", 1f, false));
 		EntityRendererRegistry.register(MobEntities.BLOATER, ctx ->
-				new BlockSoulsMobRenderer<>(ctx, new BloaterModel(ctx.bakeLayer(BLOATER)), 0.9f, "bloater", 1f, false));
+				new BlockSoulsMobRenderer<>(ctx, new BloaterModel(ctx.bakeLayer(BLOATER)), 0.9f, "bloater", 1f, true));
 		EntityRendererRegistry.register(MobEntities.BRUTE, ctx ->
 				new BlockSoulsMobRenderer<>(ctx, new BruteAnimations.BruteSlam(ctx.bakeLayer(BRUTE)), 1.0f, "brute", 1.15f, false));
 		EntityRendererRegistry.register(MobEntities.MUTANT_BRUTE, ctx ->

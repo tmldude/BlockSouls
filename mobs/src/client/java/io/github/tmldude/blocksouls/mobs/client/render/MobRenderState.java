@@ -11,4 +11,8 @@ public class MobRenderState extends LivingEntityRenderState {
 	/** 0..1 through a melee swing. */
 	public float swing;
 	public boolean aggressive;
+	/** Off the ground and out of water: mid-pounce or mid-leap. */
+	public boolean airborne;
+	/** Per-mob offset (ticks) for idle loops, so a horde doesn't twitch in sync. */
+	public float phase;
 }
