@@ -112,3 +112,18 @@ Elden Ring-style random field bosses; a polished custom boss health bar.
   teleport-style snap would fight vanilla's server-side "moved wrongly" collision re-check. Instead, once the
   wall's top is ≤ 1.3 blocks above the feet and there's room to stand there, the player gets a pull-up boost
   (0.45 up, 0.2 forward) and climbing pauses 8 ticks so the boost isn't repeated every tick.
+
+## Game design pass (2026-10-11, from the owner)
+
+Recorded as PLAN.md §0b. Owner decisions: ~2-hour run to the final raid; waves 8–10 before it; several waves per
+night with a pause at dawn; vanilla mobs keep spawning; Ender Eyes from bosses / teleporting mobs; first-join kit
+of a stone pickaxe + an infinite-ammo Starter Pistol that breaks after wave 3; vanilla death (lose everything,
+pistol included); endless waves after the finale, no New Game+; admin difficulty preset at world start.
+
+My defaults, to confirm:
+- **Day/night cycle ~17 min** (15% shorter than vanilla, from the owner's "10–15% shorter"). With ~7 nights in
+  2 hours, several waves per night gets to waves 8–10.
+- **The Ender Dragon itself becomes the final raid boss** (from "the final ender dragon raid"). "The Vault" becomes
+  an optional side raid.
+- **"Better bosses should not despawn"** read as: elite / mini-boss wave mobs survive dawn and keep hunting you;
+  ordinary wave zombies burn at dawn.

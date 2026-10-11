@@ -19,6 +19,40 @@ This file is written for Claude Code. Work top-down, one phase at a time. Each p
 - **Testing:** Fabric's `fabric-loader-junit` for unit tests of pure logic (wave math, damage calc, physics helpers). Gametest framework (`fabric-gametest-api`) for in-world checks where cheap.
 - **Ask the human** only when a decision is irreversible or taste-dependent (names, art direction, balance numbers). Otherwise choose a sensible default and note it in `DECISIONS.md`.
 
+## 0b. The game (design target — every phase serves this)
+
+A friends' server plays like a normal Minecraft run to the Ender Dragon, but with a night-wave clock that
+pushes difficulty up, and a Souls-style raid as the finale.
+
+**Run length:** ~2 hours from a fresh world to the final raid. Everything below is tuned for that and lives in config.
+
+**Day/night:** the full cycle is ~17 minutes (15% shorter than vanilla's 20), so a 2-hour run has ~7 nights.
+
+**Waves:**
+- One server-wide wave counter that only ever counts up. Waves run only at night, only when someone is online.
+- **Several waves per night.** The first wave starts at dusk. When a wave is cleared there's a short break, and
+  the next wave starts if enough night is left. Dawn is the "pause": no new waves start, the current one ends,
+  and ordinary wave zombies burn in the sun. **Elite / mini-boss wave mobs don't despawn at dawn**; they keep
+  hunting you into the day until killed.
+- Target: **waves 8–10 reached by the final raid**, scaling for real (more mobs, tougher mobs, new mob types
+  unlocked by wave number, mutants late). Wave kills drop guns, ammo and materials, better as waves climb.
+- **Vanilla mobs still spawn** normally alongside the waves.
+
+**Progression stays vanilla-shaped:** overworld → Nether → stronghold → The End. New ores, items, mobs and
+crafting slot into the existing tiers instead of replacing them. To fit 2 hours, Ender Eyes also come from
+bosses, and teleporting mobs drop Ender Pearls more readily.
+
+**Start:** each player's first join gives a **stone pickaxe** and a **Starter Pistol** with infinite ammo. The
+pistol **breaks at the end of wave 3** (with a suitably silly sound and message).
+
+**Death:** vanilla rules: you drop everything, Starter Pistol included, and it isn't re-issued.
+
+**Finale:** the **Ender Dragon is reworked into the final Souls-style raid boss** in The End (phases, telegraphed
+attacks, mechanics for 2–4 players). Killing it switches the world to **endless mode**: waves keep coming
+every night and keep scaling, COD-style, with no reset.
+
+**Difficulty:** admins pick a difficulty preset when starting a world (multiplies wave size, mob health and damage).
+
 ## 1. Repo skeleton
 
 ```
@@ -159,7 +193,7 @@ Each weapon = one JSON definition in the framework's format + a GeckoLib or JSON
 
 ## 5. Phase C — Zombies wave mode (mod: `zombies`, server-heavy)
 
-**Nightly waves:** each in-game night is a server-wide zombie wave, and the wave number counts up night after night. A night only counts (and only spawns a wave) when at least one player is online. Admins can switch night waves off in config. Wave kills drop guns and ammo, scaled to the wave number. The arena mode below also stays available for built maps.
+**Night waves are the core game loop; see §0b for the design.** Admins can switch them off in config. The arena mode below stays available as a side mode for built maps.
 
 ### C1. Arena + round manager
 - A `ZombiesArena` is a world-saved data object: bounding box, spawn points (list), barricade positions, start trigger block, current round, players in, points per player.
@@ -179,9 +213,11 @@ Each weapon = one JSON definition in the framework's format + a GeckoLib or JSON
 ### C4. Perk machines (v2)
 - Juggernog (+hp), Speed Cola (reload), Stamin-Up (stamina regen). Lose on death. Max 4.
 
-- **Nightly wave:** at dusk, if anyone is online, the server-wide night counter increments and every online overworld player gets a "Night N" title; Horde Zombies spawn around each of them in survival terrain using the same round scaling. Wave ends at dawn or when cleared. Kills roll gun/ammo drops (rarity weighted by wave number); clearing a wave gives a reward chest.
+- **Night waves (§0b):** at dusk, if anyone is online, wave N starts with a "Wave N" title for every overworld player; Horde Zombies spawn around each of them in survival terrain using the round scaling. Cleared waves chain into the next after a short break while night lasts; dawn ends the current wave. Kills roll gun/ammo/material drops (rarity weighted by wave number); clearing a wave gives a reward chest.
+- **Starting kit + Starter Pistol** (first join only) and the pistol breaking at the end of wave 3.
+- **Shorter day/night cycle** (§0b).
 
-**Done when:** a night wave triggers server-wide at dusk with players online, the night counter persists across restarts and skips empty nights, and wave kills drop guns/ammo; `/zombies start` in a built arena runs rounds to at least 20 with 4 players without server TPS < 18; downed/revive loop works; unit tests for round scaling and point math.
+**Done when:** waves trigger server-wide at dusk with players online, chain within a night and stop at dawn; the wave counter persists across restarts and skips empty nights; elites survive dawn; wave kills drop guns/ammo; the Starter Pistol breaks after wave 3; `/zombies start` in a built arena runs rounds to at least 20 with 4 players without server TPS < 18; downed/revive loop works; unit tests for round scaling and point math.
 
 ## 6. Phase D — Bosses & raids (mod: `bosses`)
 
@@ -203,7 +239,12 @@ Each weapon = one JSON definition in the framework's format + a GeckoLib or JSON
 - Like Elden Ring's field bosses / invasions: bosses occasionally appear in the overworld near players (e.g. a dragon landing on a mountain, a giant knight at a ruin at night), announced with a sound + title + map marker. Spawn chance, cooldowns and biome rules in config; never inside claimed/arena areas or near spawn by default.
 - Uses the D1 framework so every boss can be a field boss. Fog wall goes up only when a player engages.
 
-### D3. Raid encounter 1 — "The Vault" (v2)
+### D3. Final raid — the reworked Ender Dragon (§0b)
+- The vanilla Ender Dragon fight becomes the finale: multi-phase, telegraphed attacks, mechanics for 2–4 players
+  (the plate / relic-carrier / crystal-order ideas from "The Vault" below fit here). Uses the D1 framework and boss bar.
+- Its death flips the world to endless mode (zombies mod listens for it).
+
+### D3b. Raid encounter — "The Vault" (v2, optional side raid)
 - Multi-room gauntlet with mechanics requiring coordination: plate-standing to open doors (needs 2 players), "relic carrier" buff item (cleanses a debuff on others), DPS phase on a mini-boss gated by destroying 3 crystals in order shown by a symbol display. Ends in a boss (reuse framework, new model).
 - Checkpoint system: wipe → respawn at last checkpoint.
 
