@@ -1,0 +1,15 @@
+{
+	"required": true,
+	"package": "io.github.tmldude.blocksouls.bosses.raid.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"EnderDragonFightMixin",
+		"EnderDragonMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}

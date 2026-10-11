@@ -140,5 +140,268 @@
         "volume": 1.0
       }
     ]
+  },
+  "entity.final_dragon.ambient": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.ambient",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ender_dragon.ambient",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.final_dragon.hurt": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.hurt",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ender_dragon.hurt",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.final_dragon.death": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.death",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ender_dragon.death",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.final_dragon.flap": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.flap",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ender_dragon.flap",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.final_dragon.roar": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.roar",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ender_dragon.growl",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.final_dragon.screech": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.screech",
+    "sounds": [
+      {
+        "name": "minecraft:entity.phantom.swoop",
+        "type": "event",
+        "pitch": 0.5,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.final_dragon.breath": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.breath",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ender_dragon.shoot",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.final_dragon.gust": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.gust",
+    "sounds": [
+      {
+        "name": "minecraft:entity.breeze.wind_burst",
+        "type": "event",
+        "pitch": 0.5,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.final_dragon.tail": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.tail",
+    "sounds": [
+      {
+        "name": "minecraft:entity.player.attack.sweep",
+        "type": "event",
+        "pitch": 0.4,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.final_dragon.orb": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.orb",
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.ambient",
+        "type": "event",
+        "pitch": 1.4,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.final_dragon.orb_pop": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.orb_pop",
+    "sounds": [
+      {
+        "name": "minecraft:entity.shulker_bullet.hit",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.final_dragon.meteor": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.meteor",
+    "sounds": [
+      {
+        "name": "minecraft:entity.generic.explode",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.final_dragon.land": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.land",
+    "sounds": [
+      {
+        "name": "minecraft:entity.ravager.stunned",
+        "type": "event",
+        "pitch": 0.5,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.final_dragon.deflect": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.deflect",
+    "sounds": [
+      {
+        "name": "minecraft:item.shield.block",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.final_dragon.enrage": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.enrage",
+    "sounds": [
+      {
+        "name": "minecraft:entity.wither.spawn",
+        "type": "event",
+        "pitch": 0.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.final_dragon.shield_break": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.final_dragon.shield_break",
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.deactivate",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.raid_crystal.chime": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.raid_crystal.chime",
+    "sounds": [
+      {
+        "name": "minecraft:block.note_block.bell",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.raid_crystal.shatter": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.raid_crystal.shatter",
+    "sounds": [
+      {
+        "name": "minecraft:block.glass.break",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.raid_crystal.wrong": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.raid_crystal.wrong",
+    "sounds": [
+      {
+        "name": "minecraft:block.respawn_anchor.deplete",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "entity.raid_crystal.reform": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.raid_crystal.reform",
+    "sounds": [
+      {
+        "name": "minecraft:block.amethyst_block.chime",
+        "type": "event",
+        "pitch": 0.8,
+        "volume": 1.0
+      }
+    ]
+  },
+  "block.raid_plate.hum": {
+    "subtitle": "subtitles.blocksouls_bosses.block.raid_plate.hum",
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.activate",
+        "type": "event",
+        "pitch": 1.2,
+        "volume": 1.0
+      }
+    ]
+  },
+  "block.raid_plate.held": {
+    "subtitle": "subtitles.blocksouls_bosses.block.raid_plate.held",
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.power_select",
+        "type": "event",
+        "pitch": 1.0,
+        "volume": 1.0
+      }
+    ]
+  },
+  "block.raid_plate.chains": {
+    "subtitle": "subtitles.blocksouls_bosses.block.raid_plate.chains",
+    "sounds": [
+      {
+        "name": "minecraft:block.chain.place",
+        "type": "event",
+        "pitch": 0.6,
+        "volume": 1.0
+      }
+    ]
+  },
+  "music.final_dragon": {
+    "sounds": [
+      {
+        "name": "minecraft:music.dragon",
+        "type": "event",
+        "pitch": 0.85,
+        "volume": 1.0
+      }
+    ]
   }
 }
