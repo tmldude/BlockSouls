@@ -4,90 +4,93 @@ Defaults picked by the `final-raid` session. Same rules as `DECISIONS.md` (the r
 Code: `bosses/src/main/java/.../bosses/raid/`, client in `.../bosses/client/raid/`; numbers in
 `config/blocksouls/boss-final_dragon.json` (`FinalRaidConfig`).
 
-## Replacing the vanilla dragon
-- **One mixin, into `EnderDragonFight`, not a re-driven vanilla dragon.** Vanilla's fight object already decides
-  *when* a dragon should exist (first visit, the 60 s "haven't seen it" check, respawn), and its kill hook builds the
-  exit portal, egg and gateway. So we hook the one place it *creates* a dragon (`createNewDragon` → spawn ours
-  instead) and keep everything else. Re-driving `EnderDragon`'s phase manager would have needed mixins into the
-  dragon, its phases, its parts and its renderer, and still fought vanilla's crystal healing and perch AI.
-- The mixin (`raid/mixin/EnderDragonFightMixin`, own config `blocksouls_bosses_raid.mixins.json`) does four small
-  things: spawn ours in `createNewDragon`; cancel `tryRespawn`; force the vanilla boss bar invisible (ours draws its
-  own; also stops vanilla's End music and fog); every second, discard any vanilla dragon (old worlds) and spawn ours.
-  It also exposes `dragonUUID` / `ticksSinceDragonSeen` so the fight points at our dragon and our dragon keeps it
-  from looking for another.
-- **On death** we hand vanilla's `setDragonKilled` a stand-in `EnderDragon` that never enters the world, carrying our
-  UUID: exit portal, first-kill egg and the next gateway come from vanilla's own code, unchanged.
-- **Re-summoning is disabled** (one final boss per run). End crystals placed on the exit portal stay ordinary
-  crystals (explosive blocks), nothing more. After the kill the pillars stay bare: the raid's own crystals are gone
-  and the vanilla crystals were removed when the fight started (they would explode for 6 when shot).
-- `replaceVanillaDragon: false` in the config gives the vanilla fight back (debug/escape hatch).
+## Shape of the raid (set with the user)
+Three phases, Destiny-raid style (Leviathan / Eater of Worlds / Last Wish as the feel):
+1. **Phase 1: the vanilla Ender Dragon fight, untouched** (crystals, perches, vanilla boss bar).
+2. **Phase 2: Grounded.** When the vanilla dragon dies it doesn't rise in light: it **falls**. Our dragon (the
+   **Hollow Sovereign**) tears out of the fall, lies dazed for 5 s while **the obsidian towers collapse** one after
+   another, then rises and fights **on foot**. At 85% it takes to the air (untouchable) and calls a **zombie wave**; at 60%
+   it calls a **herald**, one of the field bosses. Clearing the wave brings it down; killing the herald **crashes it down
+   stunned** (10 s, ×2 damage).
+3. **Phase 3: Final Stand** (below 35%). It hovers and casts **Sovereign's End**, a violet ring closing on the island
+   center; when it completes, everyone in the fight dies (a wipe). **Crystals** stand on the tower stumps, **sealed**
+   unless the **plates** are held; broken in the order the obelisk shows, they break the cast and crash it down stunned.
+   Then a new order and a shorter cast: a **damage check**.
+
+## Replacing the vanilla dragon's death, not the dragon
+- **Two mixins** (own config `blocksouls_bosses_raid.mixins.json`):
+  - `EnderDragonMixin.tickDeath` (HEAD, cancellable): for the dragon of an End fight, skip the 10 s light show and call
+    `FinalRaidEnd.vanillaDragonFell`, which spawns our dragon where it died, in its falling state, and discards the
+    vanilla one.
+  - `EnderDragonFightMixin`: `setDragonKilled` for the fight's own vanilla dragon also starts the fall (covers
+    `/kill`) instead of ending the fight. `createNewDragon` does nothing while our dragon lives (vanilla's 60 s "no
+    dragon seen" check would otherwise spawn a second one). The vanilla bar is hidden while ours lives.
+    `tryRespawn` is off (one final boss per run).
+- **On our dragon's death** vanilla's `setDragonKilled` gets a stand-in `EnderDragon` carrying our UUID (a static
+  flag lets that call through): exit portal, first-kill egg and the next gateway come from vanilla's own code.
+- **XP:** phase 1 drops none (its death becomes the fall); our dragon drops the vanilla first-kill 12000.
+- `replaceVanillaDragon: false` gives the plain vanilla fight back.
+- `BossEvents.ENGAGED` fires when our dragon's fight starts (phase 2), `KILLED` on its death, both with `FINAL_BOSS`.
 
 ## Arena
-- **No fog wall** (framework hook `BossEntity.raisesFogWall()`, default true): the arena is the whole main island,
-  and dead players respawn in the Overworld and must come back through the portal onto the arrival platform; a
-  one-way wall would lock them out. "In the arena" is a cylinder 110 blocks around the island center (covers the
-  arrival platform at x=100), 60 below to 100 above the surface. So **entering The End engages the raid**.
-- **Obelisk** = the exit portal's bedrock column (the display). **Perch** = on the podium, like vanilla.
-- **Plates** = 3×3 crying obsidian set into the island 20 blocks from the center, at 45° off the axes, first two
-  spots opposite each other. Replaced blocks are remembered (and saved) and put back on reset, phase 1, death and
-  after a restart.
-- A dragon spawned outside the End (spawn egg, `/bs boss spawn`, `/bs raid summon`) builds a small arena around its
-  spot: 8 floating crystal spots in a 14-block ring, plates 9 blocks out.
-- **Flight scale:** every flight distance (circling radius and height, approach paths, lane and dive lengths) is
-  multiplied by the arena's scale: 1 on the End island, 0.5 for those small summoned arenas, 0.08 in game tests (the
-  dragon must stay over the test area, the only chunks guaranteed to tick). Attack recoveries steer back onto the
-  circle, so the dragon never coasts off the island; on top of that its movement is leashed to half the fight radius
-  from the island center (55 blocks in the End, outside its 46-block circle). The fight radius scales the same way.
+- **No fog wall** on the island (framework hook `raisesFogWall()`, and per instance `setFogWallEnabled`, used for the
+  herald): dead players respawn in the Overworld and come back through the portal onto the arrival platform; a
+  one-way wall would lock them out. "In the arena" = 110 blocks around the island center (covers the platform), 60
+  below to 100 above the surface.
+- **Towers stay down** after the fall (it's the finale; the world goes endless afterwards). The collapse clears
+  obsidian, iron bars and bedrock tops in the pillar footprint down to the surface, top first, two layers a tick, with
+  a 1.5 s rumble at each foot first; a tenth of the obsidian flies off as falling blocks (rubble on the island). The
+  last vanilla crystals are removed (they'd explode for 6 when shot).
+- **Obelisk** = the exit portal's bedrock column. **Perch** (where it crashes when stunned) = the podium.
+- **Plates** = 3×3 crying obsidian 20 blocks out at 45° angles; put back on reset, death and after a restart.
+- **Flight scale:** all flight distances and the fight radius are multiplied by the arena's scale: 1 in the End, 0.5
+  for dragons summoned elsewhere (`/bs raid summon`, spawn egg), 0.08 in game tests (the dragon must stay over its test
+  area, the only chunks guaranteed to tick, and neighbouring tests' players must not count). Movement is leashed to
+  half the fight radius from the center (55 blocks in the End).
 
-## The fight
-- **Phases at 70% / 30%** as briefed. Health 1000 base (framework scaling: +50% per extra player, × difficulty).
-- **P1 shield = ×0.15 damage, not immunity**, and while it's up the dragon can't drop below 70.5% (can't skip into
-  P2). Immunity would make the "wrong crystal heals 5%" penalty meaningless at full health; this way chip damage
-  counts but the puzzle is the way forward. A muted hit gives a clink and violet sparks (shield) so it reads.
-- **Crystal count:** 5 solo, +1 per extra player, max 8, chosen from the 8 open pillars before the 2 caged ones (no
-  cage-breaking needed with ≤ 8). Order is random per fight.
-- **Wrong crystal re-forms** (after 5 s, particles streaming in) instead of staying broken: otherwise breaking all
-  crystals in any order would finish the puzzle and the order wouldn't matter. It heals the dragon 5% (a visible
-  violet stream to it) and reshuffles the remaining order (always into a different order).
-- **Show, don't tell:** the obelisk plays the order on a loop: each crystal in turn flares full-bright in its color
-  (white for 1st, deepening to violet), beams at the obelisk, a colored particle stream runs along the beam, and a
-  bell chime rings at both ends, pitch rising with the position. 1.3 s per crystal, 3.5 s pause, repeat; restarts
-  after every hit. Rings stacked on the obelisk, one per crystal of the order, turn white as they're done.
-- **P2/P3 out of reach = ×0.35 damage while airborne** (with the same clink), so the perch is where the damage is.
-  Perched: ×1.5; the head part ×2 more (only while perched).
-- **Plates:** required = min(players, 2) (solo: 1), placed = players + 1 (2–4), so there's always a spare. Hold 3 s
-  (2 s in P3); the hold drains as fast as it fills when people step off. Pull (2 s of chains of light from every plate
-  to the dragon) → perch 8 s (5.5 s in P3) → takeoff → plates dark for 12 s (7 s in P3). The perch timer pauses during
-  a phase-change roar so the roar doesn't eat the DPS window.
-- **Perched attacks read by facing:** the dragon lands facing the way it was dragged in and doesn't turn. Tail sweep
-  hits a low 280° arc around everything but its head (jump it, or stand at the head); wing gust hits a 140° cone in
-  front and throws you away from the island center (toward the void edge). So "where is safe" is always "the other
-  attack's zone", which teaches both.
-- **Void orbs** are server-side particle orbs, not entities: one per player plus one, slow (0.17 b/t), pop on
-  contact or after 11 s. Can't be shot down (kept simple; they're dodgeable by outrunning).
-- **Meteor shower** (P3): one circle under each player plus one near them, plus 3 random on the island; impacts roll
-  across the 1 s active window.
-- **Soft enrage** at 12 minutes of fight time: ×1.5 damage (applied through `damageMultiplier()`), violet-white
-  flames off the body, the enraged glow layer, a roar. The clock restarts on a wipe (a retry gets a fair 12 minutes).
-- **Wipe** = the framework's reset (everyone dead/downed/out of the arena for 10 s). We override it to keep the
-  phase and heal to that phase's start (100% / 70% / 30%); the phase's mechanic (crystals or plates) is rebuilt on the
-  next engage. The resumed fight opens with the phase roar.
-- **Endermen** in the arena have their anger cleared every 5 ticks, and Enderman damage to players near an engaged
-  final dragon is cancelled outright.
+## Phase 2 details
+- **Movement:** it walks on the island surface (heightmap) through rubble (no collision), stalking its target to ~5
+  blocks. It stands still unless walking or an attack moves it.
+- **Ground moveset:** bite (short front cone), tail sweep (280° low arc behind; jump it or stand at the head), wing
+  gust (front cone, throws you away from the center toward the void), ground breath (cone that slowly follows its
+  target), charge (telegraphed line), stomp (expanding shockwave ring; jump it), void orbs. While airborne over an
+  interlude: breath lines, dives, void orbs.
+- **Interludes can't be skipped:** damage stops at 85% until the wave is done and at 60% until the herald is.
+- **Wave:** 4 + 3 per player (max 30) mobs from the mobs module's wave pool (wave tier 15; plain zombies without it),
+  in a ring 24 blocks out, glowing so they read across the island, re-targeted at players. It comes down when the wave
+  is dead, or after 90 s.
+- **Herald:** picked from the field-boss pool, preferring bosses not killed this run; ×0.6 health; no fog wall; it
+  engages the group straight away. Its kill counts as killing that boss this run (it won't return as a field boss)
+  and it drops its own loot. Without any field boss registered the interlude is skipped.
+- **Head weak point** ×2 while it's on foot or stunned.
+
+## Phase 3 details
+- **Cast:** 60 s (×1.25 solo), ×0.85 each cycle, never under 30 s. A wrong crystal pushes it 10% forward. Sovereign's
+  End: 10000 indirect magic to everyone in the fight (totems can survive it), then the cast restarts.
+- **Crystals:** 3 solo +1 per extra player (max 8), open pillars before caged ones (cages are gone anyway). Order
+  random per cycle; the obelisk plays it on a loop (each crystal flares in its color white→violet, beams at the
+  obelisk, a bell chime rising in pitch). Rings on the obelisk count progress. Wrong crystal: harmless burst, heals the
+  dragon 5% (visible stream), re-forms after 5 s, the order reshuffles.
+- **Seal:** crystals are sealed (dark, violet shell, hits clink) unless min(players, 2) plates are held right now
+  (placed: players + 1, 2–4). While open, chains of light run from the held plates to the obelisk.
+- **Airborne damage** ×0.15 (the stuns are the damage); **stun** 10 s at ×2.
+- **Soft enrage** at 12 minutes of our fight: ×1.5 damage. Restarts on a wipe.
+
+## Scaling and wipes
+- Mechanics (crystals, plates, wave size, cast) scale with players up to **`maxScaledPlayers` = 8**. Health scaling is
+  the framework's (+50% per extra player, uncapped; the main session owns tuning it).
+- **Wipe** = the framework's reset (everyone dead/downed/out for 10 s): healed to the **last checkpoint**: 100%, 85%
+  after the wave, 60% after the herald, 35% in phase 3. Cleared interludes stay cleared; phase 3's crystals, plates and
+  cast restart on the next engage. A restart mid-fight keeps the phase and the cleared interludes.
 
 ## Look, sound, drops
-- **Name: "Hollow Sovereign"** (original). Crystals: "Order Crystal". Trophy: "Hollow Crown".
-- Model: vanilla Java model at 2× scale, 256×128 skin from `tools/assets/raid_skins.py` (its own script, so the
-  shared `boss_skins.py` isn't a merge hotspot). Wingspan ≈ 19 blocks. Glow layers: violet cracks always; white-hot
-  cracks in P3 or when enraged. Wings fold on the perch.
-- Crystals reuse vanilla's crystal *model* with our own bone/violet texture, tinted full-bright in their sequence
-  color when lit.
-- Sounds are re-pitched vanilla events (placeholders), music placeholder = `music.dragon` at 0.85 pitch.
-- **Drops:** vanilla dragon XP (12000), the egg (vanilla, first kill), 4 dragon's breath, the Hollow Crown (pure
-  trophy, epic, fire-resistant), and from `boss_drops/final_dragon_guns` (guns module only): 2 legendary guns (two
-  rolls of the shared legendary table) + 64 primary + 32 special ammo.
-- Death: 4 s of light bursting from the cracks, then it's gone (vanilla's 10 s light show is the vanilla dragon's).
+- Name **"Hollow Sovereign"** (original). Crystals: "Order Crystal". Trophy: "Hollow Crown".
+- Model: vanilla Java model at 2× scale (256×128 skin from `tools/assets/raid_skins.py`), ~19-block wingspan. Poses:
+  walking (folded wings, four-legged gait), flying (flaps; frantic when falling or crashing), sprawled (dazed and
+  stunned: belly down, wings flung out, head low). Glow: violet cracks always; white-hot cracks in phase 3 or enraged.
+- Sounds are re-pitched vanilla events (placeholders); music placeholder `music.dragon` at 0.85 pitch.
+- **Drops:** 12000 XP, the egg (vanilla, first kill), 4 dragon's breath, the Hollow Crown, and (guns module only)
+  2 legendary guns + 64 primary + 32 special ammo.
 
 ## Debug
-`/bs raid summon | crystals skip | perch | enrage | wipe | info` (nearest final dragon within 256 blocks), plus the
-framework's `/bs boss ...`.
+`/bs raid summon | wave | herald | stun | crystals skip | enrage | wipe | info`; phase 3: `/bs boss health 30`.
