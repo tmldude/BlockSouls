@@ -13,6 +13,7 @@ import io.github.tmldude.blocksouls.bosses.client.bar.ClientBossBars;
 import io.github.tmldude.blocksouls.bosses.client.furnace.FurnaceKnightClient;
 import io.github.tmldude.blocksouls.bosses.client.lockon.LockOn;
 import io.github.tmldude.blocksouls.bosses.client.raid.FinalDragonClient;
+import io.github.tmldude.blocksouls.bosses.client.palerider.PaleRiderClient;
 import io.github.tmldude.blocksouls.bosses.client.lockon.LockOnReticle;
 import io.github.tmldude.blocksouls.common.CommonIds;
 
@@ -39,5 +40,6 @@ public class BlockSoulsBossesClient implements ClientModInitializer {
 		// Bosses: one line each. Stage 2b sessions add theirs below.
 		FurnaceKnightClient.register();
 		FinalDragonClient.register();
+		PaleRiderClient.register();
 	}
 }

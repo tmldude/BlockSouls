@@ -1,7 +1,8 @@
 {
-  "replace": false,
-  "values": [
-    "blocksouls_bosses:furnace_knight",
-    "blocksouls_bosses:final_dragon"
-  ]
+	"replace": false,
+	"values": [
+		"blocksouls_bosses:furnace_knight",
+		"blocksouls_bosses:final_dragon",
+		"blocksouls_bosses:pale_rider"
+	]
 }
