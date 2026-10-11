@@ -84,6 +84,15 @@ subprojects {
 		}
 	}
 
+	// Test mods (src/gametest) declare "${version}" too.
+	tasks.matching { it.name == 'processGametestResources' }.configureEach {
+		def props = [version: project.version]
+		inputs.properties props
+		filesMatching('fabric.mod.json') {
+			expand props
+		}
+	}
+
 	tasks.withType(JavaCompile).configureEach {
 		it.options.release = 25
 		it.options.encoding = 'UTF-8'

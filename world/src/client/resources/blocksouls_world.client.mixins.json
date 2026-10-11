@@ -3,7 +3,8 @@
 	"package": "io.github.tmldude.blocksouls.world.client.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
-		"FogRendererMixin"
+		"FogRendererMixin",
+		"NetherAttributeProbeMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
