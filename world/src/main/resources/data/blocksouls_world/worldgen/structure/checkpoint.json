@@ -1,0 +1,7 @@
+{
+  "type": "blocksouls_world:ruin",
+  "kind": "checkpoint",
+  "biomes": "#blocksouls_world:has_structure/checkpoint",
+  "spawn_overrides": {},
+  "step": "surface_structures"
+}

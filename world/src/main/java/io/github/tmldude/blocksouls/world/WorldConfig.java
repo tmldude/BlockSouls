@@ -14,10 +14,15 @@ public class WorldConfig {
 	public static class Gen {
 		/** Gunmetal veins per chunk (iron's middle band has 10; this is a little rarer). */
 		public int gunmetalVeinsPerChunk = 7;
-		/** Wrecks: on average one per this many chunks (12×12). 0 disables them. */
-		public int wreckRarityChunks = 144;
-		/** Checkpoints: on average one per this many chunks (24×24). 0 disables them. */
-		public int checkpointRarityChunks = 576;
+		/**
+		 * Wrecks: one attempt per this many chunks square (12 = one per 12×12 chunks), at least the separation apart.
+		 * Read at world load / {@code /reload}. 0 disables them.
+		 */
+		public int wreckSpacingChunks = 12;
+		public int wreckSeparationChunks = 4;
+		/** Checkpoints: one attempt per 24×24 chunks. 0 disables them. */
+		public int checkpointSpacingChunks = 24;
+		public int checkpointSeparationChunks = 8;
 		/** Loose scrap piles: on average one per this many overworld chunks. 0 disables them. */
 		public int scrapPileRarityChunks = 24;
 		/** Blight patches per Nether chunk in crimson forests and nether wastes. */

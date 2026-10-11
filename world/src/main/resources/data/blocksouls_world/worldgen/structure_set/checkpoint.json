@@ -1,0 +1,13 @@
+{
+  "structures": [
+    {
+      "structure": "blocksouls_world:checkpoint",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "blocksouls_world:config_spread",
+    "key": "checkpoint",
+    "salt": 905125277
+  }
+}
