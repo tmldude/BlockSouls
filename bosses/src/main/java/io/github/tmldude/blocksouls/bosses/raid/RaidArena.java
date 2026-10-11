@@ -24,21 +24,26 @@ import net.minecraft.world.phys.Vec3;
  * @param plates        candidate plate centers (block positions of the plate surface), best spread first
  * @param scale         flight distances (orbits, approach paths, lanes) are multiplied by this: 1 on the End island,
  *                      smaller for cramped arenas (game tests, a dragon summoned outside the End)
+ * @param spikeRadii    per crystal spot: radius of its obsidian tower (0 without one)
+ * @param onStumps      crystals stand on the stumps of collapsed towers (the End): their height is the ground there
  */
 public record RaidArena(BlockPos center, int floorY, List<Vec3> crystals, List<Boolean> caged, Vec3 obelisk, Vec3 perch, List<BlockPos> plates,
-		double scale) {
+		double scale, List<Integer> spikeRadii, boolean onStumps) {
 	public RaidArena {
 		crystals = List.copyOf(crystals);
 		caged = List.copyOf(caged);
 		plates = List.copyOf(plates);
+		spikeRadii = List.copyOf(spikeRadii);
 	}
 
 	public static RaidArena of(BlockPos center, List<Vec3> crystals, Vec3 obelisk, Vec3 perch, List<BlockPos> plates, double scale) {
 		List<Boolean> caged = new ArrayList<>();
+		List<Integer> radii = new ArrayList<>();
 		for (int i = 0; i < crystals.size(); i++) {
 			caged.add(false);
+			radii.add(0);
 		}
-		return new RaidArena(center, center.getY(), crystals, caged, obelisk, perch, plates, scale);
+		return new RaidArena(center, center.getY(), crystals, caged, obelisk, perch, plates, scale, radii, false);
 	}
 
 	/** The vanilla main island around {@code origin} (the fight origin, normally 0,0). */
@@ -51,9 +56,11 @@ public record RaidArena(BlockPos center, int floorY, List<Vec3> crystals, List<B
 
 		List<Vec3> crystals = new ArrayList<>();
 		List<Boolean> caged = new ArrayList<>();
+		List<Integer> radii = new ArrayList<>();
 		for (EndSpikeFeature.EndSpike spike : EndSpikeFeature.getSpikesForLevel(level)) {
 			crystals.add(new Vec3(spike.getCenterX() + 0.5, spike.getHeight() + 1, spike.getCenterZ() + 0.5));
 			caged.add(spike.isGuarded());
+			radii.add(spike.getRadius());
 		}
 
 		// The podium's center column (inactive portal: 4 bedrock above the bowl).
@@ -72,7 +79,7 @@ public record RaidArena(BlockPos center, int floorY, List<Vec3> crystals, List<B
 			int y = surface(level, new BlockPos(x, 0, z), floorY);
 			plates.add(new BlockPos(x, y - 1, z));
 		}
-		return new RaidArena(center, floorY, crystals, caged, obelisk, perch, plates, 1.0);
+		return new RaidArena(center, floorY, crystals, caged, obelisk, perch, plates, 1.0, radii, true);
 	}
 
 	/** First air y above the surface at {@code pos}'s column, or {@code fallback} over the void. */
@@ -85,6 +92,27 @@ public record RaidArena(BlockPos center, int floorY, List<Vec3> crystals, List<B
 	/** Island center at surface level, as a position. */
 	public Vec3 centerVec() {
 		return new Vec3(center.getX() + 0.5, floorY, center.getZ() + 0.5);
+	}
+
+	/** Where the crystal of spot {@code slot} stands: on its pillar's stump (the ground there) in the End. */
+	public Vec3 crystalSpot(ServerLevel level, int slot) {
+		Vec3 spot = crystals.get(slot);
+		if (!onStumps) {
+			return spot;
+		}
+		int x = (int) Math.floor(spot.x);
+		int z = (int) Math.floor(spot.z);
+		return new Vec3(spot.x, surface(level, new BlockPos(x, 0, z), floorY), spot.z);
+	}
+
+	/** The ground under {@code (x, z)}: first air above the surface, or {@code floorY} over the void. */
+	public int groundY(ServerLevel level, double x, double z) {
+		BlockPos pos = BlockPos.containing(x, 0, z);
+		if (!level.hasChunkAt(pos)) {
+			return floorY;
+		}
+		int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ());
+		return y <= level.getMinY() + 1 ? floorY : y;
 	}
 
 	/** {@code distance} at this arena's {@link #scale}. */

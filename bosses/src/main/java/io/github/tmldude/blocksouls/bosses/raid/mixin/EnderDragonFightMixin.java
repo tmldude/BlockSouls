@@ -16,14 +16,16 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.level.dimension.end.EnderDragonFight;
 
+import io.github.tmldude.blocksouls.bosses.raid.FinalDragon;
 import io.github.tmldude.blocksouls.bosses.raid.FinalRaidEnd;
 import io.github.tmldude.blocksouls.bosses.raid.FinalRaidFight;
 
 /**
- * Swaps the Ender Dragon for the final raid's dragon in vanilla's own fight bookkeeping (see
- * {@code docs/decisions/final-raid.md}): wherever vanilla would create its dragon, ours is spawned instead; the vanilla
- * boss bar stays hidden (ours draws its own); summoning a new dragon with crystals is off (one final boss per run).
- * Everything else (exit portal, egg, gateways) still runs vanilla's code when our dragon dies.
+ * Hands vanilla's dragon fight over to the final raid (see {@code docs/decisions/final-raid.md}). Phase 1 is vanilla's
+ * fight, untouched. When its dragon is reported dead, the fight doesn't end: our dragon takes over (normally the fall
+ * starts earlier, from {@code EnderDragonMixin}; this covers {@code /kill}). While ours lives, vanilla never makes a
+ * new dragon and its boss bar stays hidden (ours draws its own); only our dragon's death ends the fight. Summoning a
+ * new dragon with crystals is off: one final boss per run.
  */
 @Mixin(EnderDragonFight.class)
 abstract class EnderDragonFightMixin implements FinalRaidFight {
@@ -48,11 +50,28 @@ abstract class EnderDragonFightMixin implements FinalRaidFight {
 		this.ticksSinceDragonSeen = 0;
 	}
 
+	@Override
+	public BlockPos blocksouls$origin() {
+		return origin;
+	}
+
 	@Inject(method = "createNewDragon", at = @At("HEAD"), cancellable = true)
-	private void blocksouls$spawnFinalDragon(CallbackInfoReturnable<@Nullable EnderDragon> cir) {
+	private void blocksouls$keepFinalDragon(CallbackInfoReturnable<@Nullable EnderDragon> cir) {
 		if (FinalRaidEnd.enabled()) {
-			FinalRaidEnd.spawn(level, origin, (EnderDragonFight) (Object) this);
-			cir.setReturnValue(null);
+			FinalDragon ours = FinalRaidEnd.finalDragon(level, dragonUUID);
+			if (ours != null) {
+				blocksouls$setDragonUuid(ours.getUUID());
+				cir.setReturnValue(null);
+			}
+		}
+	}
+
+	@Inject(method = "setDragonKilled", at = @At("HEAD"), cancellable = true)
+	private void blocksouls$phaseTwo(EnderDragon dragon, CallbackInfo ci) {
+		// Only the fight's own dragon (vanilla ignores others too).
+		if (FinalRaidEnd.enabled() && !FinalRaidEnd.completing() && dragon.getUUID().equals(dragonUUID)) {
+			FinalRaidEnd.vanillaDragonFell(level, dragon, (EnderDragonFight) (Object) this);
+			ci.cancel();
 		}
 	}
 
@@ -65,13 +84,6 @@ abstract class EnderDragonFightMixin implements FinalRaidFight {
 
 	@ModifyArg(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerBossEvent;setVisible(Z)V"))
 	private boolean blocksouls$hideVanillaBar(boolean visible) {
-		return visible && !FinalRaidEnd.enabled();
-	}
-
-	@Inject(method = "tick", at = @At("TAIL"))
-	private void blocksouls$replaceVanillaDragon(CallbackInfo ci) {
-		if (FinalRaidEnd.enabled() && level.getGameTime() % 20 == 0) {
-			FinalRaidEnd.replaceVanillaDragons(level, origin, (EnderDragonFight) (Object) this);
-		}
+		return visible && !(FinalRaidEnd.enabled() && dragonUUID != null && level.getEntity(dragonUUID) instanceof FinalDragon);
 	}
 }

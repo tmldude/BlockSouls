@@ -11,13 +11,16 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.pig.Pig;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 
+import io.github.tmldude.blocksouls.bosses.api.BossEntity;
 import io.github.tmldude.blocksouls.bosses.raid.FinalDragon;
 import io.github.tmldude.blocksouls.bosses.raid.FinalRaids;
 import io.github.tmldude.blocksouls.bosses.raid.RaidArena;
@@ -28,8 +31,11 @@ import io.github.tmldude.blocksouls.common.CommonTags;
 import io.github.tmldude.blocksouls.common.event.BossEvents;
 
 /**
- * The final raid without the End: a scripted arena in the test area (three crystal spots, two plate spots, a perch at
- * the center) and scripted health, so the phase machine and every mechanic can be checked on a headless server.
+ * The final raid's phases 2 and 3 without the End (phase 1 is vanilla's fight): a scripted arena in the test area
+ * (three crystal spots, two plate spots, a perch at the center) and scripted health.
+ *
+ * <p>All game tests share one world: the arena is tiny (flight scale 0.08) so the dragon stays over its own test area
+ * (the only chunks guaranteed to tick) and neighbouring tests' mock players never count as being in this fight.
  */
 public class FinalRaidGameTests {
 	private static final String ENV = "blocksouls_bosses_test:normal";
@@ -53,7 +59,7 @@ public class FinalRaidGameTests {
 		}
 	}
 
-	/** A final dragon in a scripted arena: crystals at three corners, plates two blocks east and west of the center. */
+	/** A final dragon on foot in a scripted arena: crystals at three corners, plates two blocks east and west. */
 	private static FinalDragon dragon(GameTestHelper helper) {
 		floor(helper);
 		BlockPos center = helper.absolutePos(CENTER);
@@ -61,13 +67,11 @@ public class FinalRaidGameTests {
 		List<Vec3> crystals = List.of(c.add(-3, 2, -3), c.add(3, 2, -3), c.add(-3, 2, 3));
 		List<BlockPos> plates = List.of(center.offset(-2, -1, 0), center.offset(2, -1, 0));
 		FinalDragon dragon = helper.spawn(FinalRaids.TYPE, CENTER);
-		// Tiny flight scale: every orbit (P2/P3 at most 46 × 0.08 ≈ 3.7 blocks) stays over the 9×9 test area, whose chunks
-		// are the only ones guaranteed to tick.
 		dragon.setArena(RaidArena.of(center, crystals, c.add(0, 3, 0), c, plates, 0.08), false);
 		return dragon;
 	}
 
-	/** A (creative, so never targeted) mock player standing at the arena center: it counts as one player in the fight. */
+	/** A (creative, so never targeted) mock player at the arena center: one player in the fight. */
 	private static ServerPlayer player(GameTestHelper helper) {
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		Vec3 at = Vec3.atBottomCenterOf(helper.absolutePos(CENTER));
@@ -77,6 +81,7 @@ public class FinalRaidGameTests {
 		return player;
 	}
 
+	/** Something to fight that can't die or move, so the fight never resets while a test waits. */
 	private static Pig dummy(GameTestHelper helper) {
 		Pig pig = helper.spawn(EntityTypes.PIG, new BlockPos(6, 1, 6));
 		pig.setNoAi(true);
@@ -88,11 +93,19 @@ public class FinalRaidGameTests {
 		return dragon.standingCrystals().stream().filter(c -> c.slot() == slot).findFirst().orElse(null);
 	}
 
-	private static void breakCrystal(GameTestHelper helper, FinalDragon dragon, int slot, ServerPlayer player) {
+	private static void hitCrystal(GameTestHelper helper, FinalDragon dragon, int slot, ServerPlayer player) {
 		RaidCrystal crystal = crystalAt(dragon, slot);
-		helper.assertTrue(crystal != null, "no crystal standing in slot " + slot);
+		helper.assertTrue(crystal != null, "no crystal standing in slot " + slot + ": " + dragon.debugInfo());
 		ServerLevel level = helper.getLevel();
 		crystal.hurtServer(level, level.damageSources().playerAttack(player), 1);
+	}
+
+	private static float lostTo(GameTestHelper helper, FinalDragon dragon, float damage) {
+		float before = dragon.getHealth();
+		dragon.setInvulnerableTime(0);
+		// Magic ignores armor, so the numbers are exact.
+		dragon.hurtServer(helper.getLevel(), helper.getLevel().damageSources().magic(), damage);
+		return before - dragon.getHealth();
 	}
 
 	@GameTest(environment = ENV)
@@ -101,166 +114,189 @@ public class FinalRaidGameTests {
 		helper.assertTrue(dragon.is(CommonTags.BOSSES), "final dragon missing from #blocksouls:bosses");
 		helper.assertTrue(dragon.definition().id().equals(CommonIds.FINAL_BOSS), "boss id " + dragon.definition().id());
 		helper.assertTrue(dragon.getMaxHealth() >= FinalRaids.CONFIG.health - 0.01, "base health " + dragon.getMaxHealth());
-		helper.assertTrue(dragon.definition().phases().size() == 3, "three phases");
+		helper.assertTrue(dragon.definition().phases().size() == 2, "Grounded and Final Stand");
+		helper.assertTrue(dragon.mode() == FinalDragon.Mode.GROUNDED, "spawns on foot outside the End");
 		helper.succeed();
 	}
 
-	/** Breaking the next crystal advances; a wrong one heals 5%, re-forms and reshuffles; the full order drops the shield. */
-	@GameTest(environment = ENV, maxTicks = 400)
-	public void crystalOrderRightWrongAndDone(GameTestHelper helper) {
+	/** On foot, its ground attacks keep finishing (no softlock) and it stays on the ground. */
+	@GameTest(environment = ENV, maxTicks = 500)
+	public void groundedAttacksFinish(GameTestHelper helper) {
 		FinalDragon dragon = dragon(helper);
-		ServerPlayer player = player(helper);
-		dragon.engage(player);
-		CrystalOrder order = dragon.crystalOrder();
-		helper.assertTrue(order != null && order.remaining().size() == 3, "expected 3 crystals in the order, got " + order);
-		helper.assertTrue(dragon.standingCrystals().size() == 3, "crystals standing: " + dragon.standingCrystals().size());
-
-		// Right one first.
-		int first = order.next();
-		breakCrystal(helper, dragon, first, player);
-		helper.assertTrue(order.destroyed() == 1 && !order.contains(first), "the right crystal didn't count");
-
-		// Then a wrong one.
-		dragon.setHealth(dragon.getMaxHealth() * 0.8f);
-		List<Integer> before = List.copyOf(order.remaining());
-		int wrong = before.get(1);
-		breakCrystal(helper, dragon, wrong, player);
-		float healed = dragon.getHealth() / dragon.getMaxHealth();
-		helper.assertTrue(Math.abs(healed - 0.85f) < 0.002f, "wrong crystal should heal 5%: at " + healed);
-		helper.assertTrue(order.remaining().size() == 2 && order.contains(wrong), "the wrong crystal must stay in the order");
-		helper.assertTrue(!order.remaining().equals(before), "the order must reshuffle after a mistake");
-		helper.assertTrue(order.destroyed() == 1, "a mistake isn't progress");
-		helper.assertTrue(crystalAt(dragon, wrong) == null, "the wrong crystal burst");
-
-		helper.runAfterDelay(FinalRaids.CONFIG.crystalReformTicks + 5, () -> {
-			helper.assertTrue(crystalAt(dragon, wrong) != null, "the wrong crystal didn't re-form: " + dragon.debugInfo());
-			while (!order.isDone()) {
-				breakCrystal(helper, dragon, order.next(), player);
-			}
-		});
+		dragon.engage(player(helper));
+		dragon.forceTarget(dummy(helper));
 		helper.succeedWhen(() -> {
-			helper.assertTrue(order.isDone(), "order not done");
-			helper.assertTrue(!dragon.shielded(), "shield still up");
-			helper.assertTrue(dragon.standingCrystals().isEmpty(), "crystals left standing");
+			helper.assertTrue(dragon.attacksFinished() >= 3, "only " + dragon.attacksFinished() + " attacks: " + dragon.debugInfo());
+			helper.assertTrue(dragon.mode() == FinalDragon.Mode.GROUNDED, "left the ground: " + dragon.debugInfo());
+			helper.assertTrue(dragon.isEngaged(), "fight reset");
 		});
 	}
 
-	/** While the shield is up, damage is mostly turned away and can't push the dragon out of phase 1. */
-	@GameTest(environment = ENV, maxTicks = 100)
-	public void shieldHoldsPhaseOne(GameTestHelper helper) {
+	/** Damage can't skip the interludes: a huge hit at full health stops at the wave's threshold. */
+	@GameTest(environment = ENV)
+	public void interludesCantBeSkipped(GameTestHelper helper) {
 		FinalDragon dragon = dragon(helper);
 		dragon.engage(player(helper));
-		ServerLevel level = helper.getLevel();
-		float before = dragon.getHealth();
-		dragon.hurtServer(level, level.damageSources().magic(), 10);
-		float lost = before - dragon.getHealth();
-		helper.assertTrue(Math.abs(lost - 10 * FinalRaids.CONFIG.shieldDamageMult) < 0.01, "shielded hit took " + lost);
-		dragon.hurtServer(level, level.damageSources().magic(), 100000);
-		helper.assertTrue(dragon.isAlive(), "died through the shield");
-		helper.assertTrue(dragon.getHealth() / dragon.getMaxHealth() > FinalRaids.CONFIG.phase2Threshold, "pushed below phase 2's threshold");
-		helper.runAfterDelay(20, () -> {
-			helper.assertTrue(dragon.phase() == 0, "left phase 1 with the shield up");
+		lostTo(helper, dragon, 100000);
+		float fraction = dragon.getHealth() / dragon.getMaxHealth();
+		helper.assertTrue(Math.abs(fraction - FinalRaids.CONFIG.waveThreshold) < 0.002, "stopped at " + fraction);
+		helper.assertTrue(dragon.phase() == 0, "skipped to the final stand");
+		helper.succeed();
+	}
+
+	/** 85%: it takes off untouchable and calls a wave; clearing the wave brings it back down. */
+	@GameTest(environment = ENV, maxTicks = 400)
+	public void waveInterlude(GameTestHelper helper) {
+		FinalDragon dragon = dragon(helper);
+		dragon.engage(player(helper));
+		dragon.forceTarget(dummy(helper));
+		dragon.setHealth(dragon.getMaxHealth() * (float) FinalRaids.CONFIG.waveThreshold);
+		boolean[] cleared = {false};
+		helper.runAfterDelay(30, () -> {
+			helper.assertTrue(dragon.waveAlive() > 0, "no wave: " + dragon.debugInfo());
+			helper.assertTrue(dragon.mode() == FinalDragon.Mode.TAKEOFF || dragon.mode() == FinalDragon.Mode.AIRBORNE, "not in the air: "
+					+ dragon.debugInfo());
+			helper.assertTrue(lostTo(helper, dragon, 10) == 0, "took damage during the wave");
+			// Clear the wave.
+			for (Mob mob : helper.getLevel().getEntitiesOfClass(Mob.class, new AABB(helper.absolutePos(CENTER)).inflate(16),
+					m -> !(m instanceof BossEntity) && !(m instanceof Pig))) {
+				mob.kill(helper.getLevel());
+			}
+			cleared[0] = true;
+		});
+		helper.succeedWhen(() -> {
+			helper.assertTrue(cleared[0], "wave not cleared yet");
+			helper.assertTrue(dragon.waveDone(), "wave not done: " + dragon.debugInfo());
+			helper.assertTrue(dragon.mode() == FinalDragon.Mode.GROUNDED, "not back on the ground: " + dragon.debugInfo());
+		});
+	}
+
+	/** 60%: a herald answers (weaker than in the field); killing it crashes the dragon down stunned (×2 damage). */
+	@GameTest(environment = ENV, maxTicks = 300)
+	public void heraldInterludeEndsInAStun(GameTestHelper helper) {
+		FinalDragon dragon = dragon(helper);
+		dragon.engage(player(helper));
+		dragon.forceTarget(dummy(helper));
+		dragon.setHealth(dragon.getMaxHealth() * (float) FinalRaids.CONFIG.heraldThreshold);
+		dragon.beginHerald(helper.getLevel());
+		BossEntity herald = dragon.herald();
+		helper.assertTrue(herald != null, "no herald: " + dragon.debugInfo());
+		helper.assertTrue(!herald.fogWall().isUp(), "the herald raised a fog wall on the island");
+		helper.assertTrue(lostTo(helper, dragon, 10) == 0, "took damage while its herald fights");
+		herald.hurtServer(helper.getLevel(), helper.getLevel().damageSources().genericKill(), Float.MAX_VALUE);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(dragon.heraldDone(), "herald not done: " + dragon.debugInfo());
+			helper.assertTrue(dragon.mode() == FinalDragon.Mode.STUNNED, "not stunned: " + dragon.debugInfo());
+			float lost = lostTo(helper, dragon, 10);
+			helper.assertTrue(Math.abs(lost - 10 * FinalRaids.CONFIG.stunDamageMult) < 0.01, "stunned hit took " + lost);
+		});
+	}
+
+	/** Final stand: crystals are sealed until the plate is held; then the order breaks the cast and stuns the dragon. */
+	@GameTest(environment = ENV, maxTicks = 400)
+	public void finalStandCrystalsNeedThePlates(GameTestHelper helper) {
+		FinalDragon dragon = dragon(helper);
+		ServerPlayer player = player(helper);
+		dragon.engage(player);
+		dragon.forceTarget(dummy(helper));
+		dragon.setHealth(dragon.getMaxHealth() * (float) (FinalRaids.CONFIG.finalStandThreshold - 0.05));
+		helper.runAfterDelay(60, () -> {
+			helper.assertTrue(dragon.phase() == 1, "not in the final stand: " + dragon.debugInfo());
+			CrystalOrder order = dragon.crystalOrder();
+			helper.assertTrue(order != null && order.remaining().size() == 3, "expected 3 crystals: " + dragon.debugInfo());
+			helper.assertTrue(dragon.plateCenters().size() == 2, "solo gets two plates: " + dragon.debugInfo());
+			helper.assertTrue(dragon.castLeft() > 0, "no cast: " + dragon.debugInfo());
+			// Sealed: a hit clinks off.
+			hitCrystal(helper, dragon, order.next(), player);
+			helper.assertTrue(order.destroyed() == 0, "broke a sealed crystal");
+			BlockPos plate = dragon.plateCenters().getFirst();
+			Vec3 on = Vec3.atBottomCenterOf(plate.above());
+			player.teleportTo(on.x, on.y, on.z);
+		});
+		helper.runAfterDelay(80, () -> {
+			CrystalOrder order = dragon.crystalOrder();
+			// A wrong one: heals and pushes the cast forward.
+			int castBefore = dragon.castLeft();
+			dragon.setHealth(dragon.getMaxHealth() * 0.2f);
+			int wrong = order.remaining().get(1);
+			hitCrystal(helper, dragon, wrong, player);
+			helper.assertTrue(Math.abs(dragon.getHealth() / dragon.getMaxHealth() - 0.25f) < 0.002, "wrong crystal should heal 5%: "
+					+ dragon.debugInfo());
+			helper.assertTrue(dragon.castLeft() < castBefore - 10, "the cast didn't surge: " + dragon.debugInfo());
+			helper.assertTrue(order.contains(wrong), "the wrong crystal stays in the order");
+		});
+		helper.runAfterDelay(80 + FinalRaids.CONFIG.crystalReformTicks + 5, () -> {
+			CrystalOrder order = dragon.crystalOrder();
+			while (!order.isDone()) {
+				hitCrystal(helper, dragon, order.next(), player);
+			}
+		});
+		helper.succeedWhen(() -> {
+			helper.assertTrue(dragon.mode() == FinalDragon.Mode.STUNNED, "not stunned: " + dragon.debugInfo());
+		});
+	}
+
+	/** Final stand: when the cast completes, Sovereign's End goes off and the next cast begins. */
+	@GameTest(environment = ENV, maxTicks = 200)
+	public void castCompletes(GameTestHelper helper) {
+		FinalDragon dragon = dragon(helper);
+		dragon.engage(player(helper));
+		dragon.forceTarget(dummy(helper));
+		dragon.setHealth(dragon.getMaxHealth() * 0.3f);
+		helper.runAfterDelay(60, () -> {
+			helper.assertTrue(dragon.phase() == 1, "not in the final stand: " + dragon.debugInfo());
+			dragon.finishCastIn(5);
+		});
+		helper.succeedWhen(() -> {
+			helper.assertTrue(dragon.castsCompleted() == 1, "cast didn't go off: " + dragon.debugInfo());
+			helper.assertTrue(dragon.castLeft() > dragon.castTotal() / 2, "next cast didn't start: " + dragon.debugInfo());
+		});
+	}
+
+	/** A wipe keeps the checkpoints: after the herald, phase 2 restarts at 60%; in phase 3 at 35%. */
+	@GameTest(environment = ENV, maxTicks = 200)
+	public void wipeHealsToTheLastCheckpoint(GameTestHelper helper) {
+		FinalDragon dragon = dragon(helper);
+		ServerPlayer player = player(helper);
+		dragon.engage(player);
+		dragon.beginHerald(helper.getLevel());
+		dragon.herald().hurtServer(helper.getLevel(), helper.getLevel().damageSources().genericKill(), Float.MAX_VALUE);
+		helper.runAfterDelay(5, () -> {
+			helper.assertTrue(dragon.heraldDone(), "herald not done: " + dragon.debugInfo());
+			dragon.setHealth(dragon.getMaxHealth() * 0.45f);
+			dragon.resetFight();
+			float fraction = dragon.getHealth() / dragon.getMaxHealth();
+			helper.assertTrue(Math.abs(fraction - FinalRaids.CONFIG.heraldThreshold) < 0.002, "phase 2 wipe healed to " + fraction);
+			helper.assertTrue(dragon.waveDone() && dragon.heraldDone(), "cleared interludes came back");
+
+			dragon.engage(player);
+			dragon.setHealth(dragon.getMaxHealth() * 0.3f);
+		});
+		helper.runAfterDelay(60, () -> {
+			helper.assertTrue(dragon.phase() == 1, "not in the final stand: " + dragon.debugInfo());
+			dragon.setHealth(dragon.getMaxHealth() * 0.1f);
+			dragon.resetFight();
+			float fraction = dragon.getHealth() / dragon.getMaxHealth();
+			helper.assertTrue(dragon.phase() == 1, "a wipe left the final stand");
+			helper.assertTrue(Math.abs(fraction - FinalRaids.CONFIG.finalStandThreshold) < 0.002, "phase 3 wipe healed to " + fraction);
+			helper.assertTrue(dragon.standingCrystals().isEmpty() && dragon.plateCenters().isEmpty(), "mechanics left after the wipe");
 			helper.succeed();
 		});
 	}
 
-	/** Phase 2: nobody on a plate → it stays in the air; one player on a plate (solo needs one) → pulled down and perched. */
-	@GameTest(environment = ENV, maxTicks = 500)
-	public void platesGateThePerch(GameTestHelper helper) {
+	/** Final stand: its airborne attacks keep finishing. */
+	@GameTest(environment = ENV, maxTicks = 600)
+	public void finalStandAttacksFinish(GameTestHelper helper) {
 		FinalDragon dragon = dragon(helper);
-		ServerPlayer player = player(helper);
-		dragon.engage(player);
-		// Something to fight, so the fight never resets while we wait.
-		dragon.forceTarget(dummy(helper));
-		dragon.skipCrystals();
-		dragon.forcePhase(1);
-		helper.assertTrue(dragon.plateCenters().size() == 2, "solo gets two plates, got " + dragon.plateCenters().size());
-		BlockPos plate = dragon.plateCenters().getFirst();
-		helper.assertTrue(helper.getLevel().getBlockState(plate).is(Blocks.CRYING_OBSIDIAN), "plate not set into the floor");
-
-		helper.runAfterDelay(160, () -> {
-			helper.assertTrue(dragon.mode() == FinalDragon.Mode.FLYING, "came down with nobody on a plate: " + dragon.mode());
-			Vec3 on = Vec3.atBottomCenterOf(plate.above());
-			player.teleportTo(on.x, on.y, on.z);
-		});
-		helper.succeedWhen(() -> {
-			helper.assertTrue(dragon.mode() == FinalDragon.Mode.PERCHED, "not perched yet: " + dragon.debugInfo() + "; player at "
-					+ player.position() + " in fight " + dragon.inFight(player) + ", plate " + plate.toShortString());
-			Vec3 perch = dragon.arena().perch();
-			helper.assertTrue(dragon.position().distanceTo(perch) < 0.5, "perched away from the perch");
-		});
-	}
-
-	/** A wipe in phase 2 heals to phase 2's start (not full), keeps the phase, and takes the plates out until re-engage. */
-	@GameTest(environment = ENV, maxTicks = 100)
-	public void wipeResetsToThePhaseStart(GameTestHelper helper) {
-		FinalDragon dragon = dragon(helper);
-		ServerPlayer player = player(helper);
-		dragon.engage(player);
-		dragon.skipCrystals();
-		dragon.forcePhase(1);
-		BlockPos plate = dragon.plateCenters().getFirst();
-		dragon.setHealth(dragon.getMaxHealth() * 0.45f);
-
-		dragon.resetFight();
-		helper.assertTrue(!dragon.isEngaged(), "still engaged after the wipe");
-		helper.assertTrue(dragon.phase() == 1, "wipe should keep phase 2, got phase " + (dragon.phase() + 1));
-		float fraction = dragon.getHealth() / dragon.getMaxHealth();
-		helper.assertTrue(Math.abs(fraction - FinalRaids.CONFIG.phase2Threshold) < 0.002, "healed to " + fraction);
-		helper.assertTrue(helper.getLevel().getBlockState(plate).is(Blocks.STONE), "plate not removed");
-
-		// Back in: the phase's mechanic comes back.
-		dragon.engage(player);
-		helper.assertTrue(dragon.plateCenters().size() == 2, "plates not back after re-engaging");
-		helper.succeed();
-	}
-
-	/** A wipe in phase 1 resets the Crystal Order: all crystals back, no progress, full health. */
-	@GameTest(environment = ENV, maxTicks = 100)
-	public void wipeResetsTheCrystals(GameTestHelper helper) {
-		FinalDragon dragon = dragon(helper);
-		ServerPlayer player = player(helper);
-		dragon.engage(player);
-		breakCrystal(helper, dragon, dragon.crystalOrder().next(), player);
-		dragon.setHealth(dragon.getMaxHealth() * 0.9f);
-
-		dragon.resetFight();
-		helper.assertTrue(dragon.phase() == 0, "phase changed");
-		helper.assertTrue(dragon.getHealth() >= dragon.getMaxHealth() - 0.01f, "not healed to full");
-		helper.assertTrue(dragon.standingCrystals().isEmpty(), "crystals left after the wipe");
-		dragon.engage(player);
-		CrystalOrder order = dragon.crystalOrder();
-		helper.assertTrue(order != null && order.remaining().size() == 3 && order.destroyed() == 0, "order not reset: " + order);
-		helper.assertTrue(dragon.standingCrystals().size() == 3, "crystals not back");
-		helper.succeed();
-	}
-
-	/** Scripted health walks P1 → P2 → P3; attacks keep finishing, including on the perch (no softlock). */
-	@GameTest(environment = ENV, maxTicks = 1600)
-	public void phaseMachineWalksAllPhases(GameTestHelper helper) {
-		FinalDragon dragon = dragon(helper);
-		Pig pig = dummy(helper);
 		dragon.engage(player(helper));
-		dragon.forceTarget(pig);
-		dragon.skipCrystals();
-		int[] mark = {0, -1, -1};
-		helper.runAfterDelay(10, () -> dragon.setHealth(dragon.getMaxHealth() * 0.6f));
-		helper.runAfterDelay(400, () -> {
-			helper.assertTrue(dragon.phase() == 1, "not in phase 2 at 60%: " + dragon.debugInfo());
-			helper.assertTrue(dragon.attacksFinished() >= 2, "only " + dragon.attacksFinished() + " attacks in phase 2 (flying): " + dragon.debugInfo());
-			mark[1] = dragon.attacksFinished();
-			dragon.forcePerch();
-		});
-		helper.runAfterDelay(700, () -> {
-			helper.assertTrue(dragon.attacksFinished() > mark[1], "no attack finished while perched: " + dragon.debugInfo());
-			dragon.setHealth(dragon.getMaxHealth() * 0.2f);
-		});
-		helper.runAfterDelay(1000, () -> mark[2] = dragon.attacksFinished());
+		dragon.forceTarget(dummy(helper));
+		dragon.setHealth(dragon.getMaxHealth() * 0.3f);
+		int[] mark = {-1};
+		helper.runAfterDelay(60, () -> mark[0] = dragon.attacksFinished());
 		helper.succeedWhen(() -> {
-			helper.assertTrue(mark[2] >= 0, "not done yet");
-			helper.assertTrue(dragon.phase() == 2, "not in phase 3 at 20%");
-			helper.assertTrue(dragon.attacksFinished() >= mark[2] + 2, "attacks stalled in phase 3: " + dragon.debugInfo());
-			helper.assertTrue(dragon.isEngaged(), "fight reset unexpectedly");
+			helper.assertTrue(mark[0] >= 0, "not started yet");
+			helper.assertTrue(dragon.phase() == 1, "not in the final stand: " + dragon.debugInfo());
+			helper.assertTrue(dragon.attacksFinished() >= mark[0] + 2, "attacks stalled: " + dragon.debugInfo());
 		});
 	}
 
@@ -278,7 +314,6 @@ public class FinalRaidGameTests {
 			helper.assertTrue(kill != null, "no BossEvents.KILLED");
 			helper.assertTrue(kill.id().equals(CommonIds.FINAL_BOSS), "KILLED with id " + kill.id());
 			helper.assertTrue(kill.players().contains(player.getUUID()), "KILLED without the participant");
-			helper.assertTrue(dragon.standingCrystals().isEmpty(), "crystals left after death");
 		});
 	}
 

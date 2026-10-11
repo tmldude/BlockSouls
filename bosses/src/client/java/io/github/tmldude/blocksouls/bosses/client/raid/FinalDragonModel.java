@@ -143,11 +143,8 @@ public class FinalDragonModel extends BossModel {
 	@Override
 	protected void idle(BossRenderState state) {
 		FinalDragonRenderState s = state instanceof FinalDragonRenderState f ? f : null;
-		FinalDragon.Mode mode = s == null ? FinalDragon.Mode.FLYING : s.mode;
+		FinalDragon.Mode mode = s == null ? FinalDragon.Mode.GROUNDED : s.mode;
 		float t = state.ageInTicks;
-		boolean onGround = mode == FinalDragon.Mode.PERCHED;
-		// Body pitch follows its flight (dives nose-down, climbs nose-up).
-		body.xRot = onGround ? Mth.sin(t * 0.08f) * 0.02f : Mth.clamp(state.xRot, -40, 40) * Mth.DEG_TO_RAD * 0.8f;
 		// The neck turns toward what it looks at.
 		float look = Mth.clamp(state.yRot, -60, 60) * Mth.DEG_TO_RAD;
 		neck1.yRot = look * 0.3f;
@@ -156,8 +153,38 @@ public class FinalDragonModel extends BossModel {
 		neck2.xRot += Mth.sin(t * 0.07f) * 0.04f;
 		jaw.xRot = 0.05f + Mth.sin(t * 0.05f) * 0.03f;
 
-		if (onGround) {
-			// Wings folded along the flanks, tail curled on the ground, legs planted.
+		if (mode.sprawled()) {
+			// Dazed or stunned: belly on the ground, legs splayed, wings flung out flat, head down, slow heavy breaths.
+			body.y += 7;
+			body.xRot = 0.05f;
+			for (int i = 0; i < legs.length; i++) {
+				boolean front = i < 2;
+				legs[i].xRot = front ? -1.2f : 1.2f;
+				shins[i].xRot = front ? 0.6f : -0.6f;
+			}
+			leftWing.zRot = 0.25f;
+			leftWing.yRot = -0.35f;
+			leftWingTip.zRot = 0.2f;
+			rightWing.zRot = -0.25f;
+			rightWing.yRot = 0.35f;
+			rightWingTip.zRot = -0.2f;
+			neck1.xRot = 0.55f + Mth.sin(t * 0.05f) * 0.03f;
+			neck2.xRot = 0.15f;
+			head.xRot = 0.1f;
+			jaw.xRot = 0.25f + Mth.sin(t * 0.05f) * 0.08f;
+			body.y += Mth.sin(t * 0.05f) * 0.4f;
+			for (int i = 0; i < tail.length; i++) {
+				tail[i].yRot = 0.15f;
+				tail[i].xRot = 0.05f;
+			}
+			return;
+		}
+		if (mode.onGround()) {
+			// On foot: wings folded along the flanks, a stalking four-legged gait, tail swaying behind.
+			float pos = state.walkAnimationPos;
+			float speed = Math.min(1f, state.walkAnimationSpeed);
+			body.xRot = Mth.sin(t * 0.08f) * 0.02f;
+			body.y += Math.abs(Mth.cos(pos * 0.4f)) * -0.8f * speed;
 			leftWing.zRot = -0.35f;
 			leftWing.yRot = -1.25f;
 			leftWingTip.zRot = 2.6f;
@@ -165,16 +192,21 @@ public class FinalDragonModel extends BossModel {
 			rightWing.yRot = 1.25f;
 			rightWingTip.zRot = -2.6f;
 			for (int i = 0; i < legs.length; i++) {
-				legs[i].xRot = 0;
-				shins[i].xRot = 0;
+				// Diagonal pairs move together.
+				float phase = (i == 0 || i == 3) ? 0 : Mth.PI;
+				legs[i].xRot = Mth.cos(pos * 0.4f + phase) * 0.7f * speed;
+				shins[i].xRot = Math.max(0, -Mth.cos(pos * 0.4f + phase)) * 0.5f * speed;
 			}
 			for (int i = 0; i < tail.length; i++) {
-				tail[i].yRot = Mth.sin(t * 0.04f + i * 0.6f) * 0.08f + 0.12f;
+				tail[i].yRot = Mth.sin(t * 0.06f + i * 0.6f) * 0.1f + Mth.sin(pos * 0.4f) * 0.06f * speed;
 			}
 			return;
 		}
-		// Flight: slow heavy flaps (faster when pulled down, frantic).
-		float speed = mode == FinalDragon.Mode.PULLED ? 0.45f : 0.16f;
+		// In the air: body pitch follows its flight (dives nose-down, climbs nose-up); slow heavy flaps, frantic when
+		// falling or crashing.
+		body.xRot = Mth.clamp(state.xRot, -40, 40) * Mth.DEG_TO_RAD * 0.8f;
+		boolean frantic = mode == FinalDragon.Mode.FALLING || mode == FinalDragon.Mode.CRASHING;
+		float speed = frantic ? 0.45f : 0.16f;
 		float flap = Mth.sin(t * speed);
 		leftWing.zRot = flap * 0.55f - 0.1f;
 		rightWing.zRot = -flap * 0.55f + 0.1f;
@@ -215,6 +247,10 @@ public class FinalDragonModel extends BossModel {
 			case "tail_sweep" -> tailSweep(config().tailSweep, stage);
 			case "wing_gust" -> gust(config().wingGust, stage);
 			case "meteor_shower" -> meteors(config().meteorShower, stage);
+			case "bite" -> bite(config().bite, stage);
+			case "ground_breath" -> breath(config().groundBreath, stage);
+			case "charge" -> charge(config().charge, stage);
+			case "stomp" -> stomp(config().stomp, stage);
 			default -> null;
 		};
 	}
@@ -391,6 +427,90 @@ public class FinalDragonModel extends BossModel {
 					.rot("neck1", 0, -50, 0, 0, r, 0, 0, 0)
 					.rot("head", 0, -30, 0, 0, r, 0, 0, 0)
 					.rot("jaw", 0, 45, 0, 0, r, 0, 0, 0)
+					.build();
+			default -> null;
+		};
+	}
+
+	/** Bite: the head draws back on the neck, then snaps forward with the jaws wide. */
+	private static @Nullable AnimationDefinition bite(AttackStats a, Stage stage) {
+		float w = seconds(a.windupTicks);
+		float act = seconds(a.activeTicks);
+		float r = seconds(a.recoveryTicks);
+		return switch (stage) {
+			case WINDUP -> Anim.of(w)
+					.rot("neck1", 0, 0, 0, 0, w, -30, 0, 0)
+					.rot("neck2", 0, 0, 0, 0, w, -15, 0, 0)
+					.rot("jaw", 0, 0, 0, 0, w, 35, 0, 0)
+					.build();
+			case ACTIVE -> Anim.of(act)
+					.rot("neck1", 0, -30, 0, 0, act, 30, 0, 0)
+					.rot("neck2", 0, -15, 0, 0, act, 10, 0, 0)
+					.rot("jaw", 0, 35, 0, 0, act * 0.6f, 45, 0, 0, act, 0, 0, 0)
+					.build();
+			case RECOVERY -> Anim.of(r)
+					.rot("neck1", 0, 30, 0, 0, r, 0, 0, 0)
+					.rot("neck2", 0, 10, 0, 0, r, 0, 0, 0)
+					.build();
+			default -> null;
+		};
+	}
+
+	/** Charge: head low and forward, wings half open for balance. */
+	private static @Nullable AnimationDefinition charge(AttackStats a, Stage stage) {
+		float w = seconds(a.windupTicks);
+		float act = seconds(a.activeTicks);
+		float r = seconds(a.recoveryTicks);
+		return switch (stage) {
+			case WINDUP -> Anim.of(w)
+					.rot("neck1", 0, 0, 0, 0, w, 25, 0, 0)
+					.rot("body", 0, 0, 0, 0, w, 8, 0, 0)
+					.rot("left_wing", 0, 0, 0, 0, w, 0, 40, -20)
+					.rot("right_wing", 0, 0, 0, 0, w, 0, -40, 20)
+					.build();
+			case ACTIVE -> Anim.of(act)
+					.rot("neck1", 0, 25, 0, 0, act, 25, 0, 0)
+					.rot("body", 0, 8, 0, 0, act, 8, 0, 0)
+					.rot("left_wing", 0, 0, 40, -20, act, 0, 40, -20)
+					.rot("right_wing", 0, 0, -40, 20, act, 0, -40, 20)
+					.build();
+			case RECOVERY -> Anim.of(r)
+					.rot("neck1", 0, 25, 0, 0, r, 0, 0, 0)
+					.rot("body", 0, 8, 0, 0, r, 0, 0, 0)
+					.rot("left_wing", 0, 0, 40, -20, r, 0, 0, 0)
+					.rot("right_wing", 0, 0, -40, 20, r, 0, 0, 0)
+					.build();
+			default -> null;
+		};
+	}
+
+	/** Stomp: rears up on its hind legs, wings up, then slams down. */
+	private static @Nullable AnimationDefinition stomp(AttackStats a, Stage stage) {
+		float w = seconds(a.windupTicks);
+		float act = seconds(a.activeTicks);
+		float r = seconds(a.recoveryTicks);
+		return switch (stage) {
+			case WINDUP -> Anim.of(w)
+					.rot("body", 0, 0, 0, 0, w, -30, 0, 0)
+					.pos("body", 0, 0, 0, 0, w, 0, -6, 0)
+					.rot("front_left_leg", 0, 0, 0, 0, w, -50, 0, 0)
+					.rot("front_right_leg", 0, 0, 0, 0, w, -50, 0, 0)
+					.rot("left_wing", 0, 0, 0, 0, w, 0, 0, -40)
+					.rot("right_wing", 0, 0, 0, 0, w, 0, 0, 40)
+					.build();
+			case ACTIVE -> Anim.of(act)
+					.rot("body", 0, -30, 0, 0, act * 0.3f, 5, 0, 0, act, 5, 0, 0)
+					.pos("body", 0, 0, -6, 0, act * 0.3f, 0, 1, 0, act, 0, 1, 0)
+					.rot("front_left_leg", 0, -50, 0, 0, act * 0.3f, 10, 0, 0, act, 10, 0, 0)
+					.rot("front_right_leg", 0, -50, 0, 0, act * 0.3f, 10, 0, 0, act, 10, 0, 0)
+					.rot("left_wing", 0, 0, 0, -40, act * 0.3f, 0, 0, 0, act, 0, 0, 0)
+					.rot("right_wing", 0, 0, 0, 40, act * 0.3f, 0, 0, 0, act, 0, 0, 0)
+					.build();
+			case RECOVERY -> Anim.of(r)
+					.rot("body", 0, 5, 0, 0, r, 0, 0, 0)
+					.pos("body", 0, 0, 1, 0, r, 0, 0, 0)
+					.rot("front_left_leg", 0, 10, 0, 0, r, 0, 0, 0)
+					.rot("front_right_leg", 0, 10, 0, 0, r, 0, 0, 0)
 					.build();
 			default -> null;
 		};

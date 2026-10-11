@@ -3,7 +3,8 @@
 	"package": "io.github.tmldude.blocksouls.bosses.raid.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
-		"EnderDragonFightMixin"
+		"EnderDragonFightMixin",
+		"EnderDragonMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

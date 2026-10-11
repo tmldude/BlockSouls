@@ -10,7 +10,7 @@ import io.github.tmldude.blocksouls.common.CommonIds;
 
 /**
  * Client registration for the final raid: the dragon (cracks glow violet always; brighter, white-hot cracks in the
- * last phase and the soft enrage) and the crystals of the order.
+ * final stand and the soft enrage) and the crystals of the order.
  */
 public final class FinalDragonClient {
 	public static final ModelLayerLocation LAYER = new ModelLayerLocation(CommonIds.id(CommonIds.BOSSES, "final_dragon"), "main");
@@ -22,7 +22,7 @@ public final class FinalDragonClient {
 		ModelLayerRegistry.registerModelLayer(LAYER, FinalDragonModel::createBodyLayer);
 		EntityRendererRegistry.register(FinalRaids.TYPE, ctx -> new FinalDragonRenderer(ctx)
 				.glow("final_dragon_glow", state -> true)
-				.glow("final_dragon_enraged_glow", state -> state.phase >= 2 || state instanceof FinalDragonRenderState s && s.enraged));
+				.glow("final_dragon_enraged_glow", state -> state.phase >= 1 || state instanceof FinalDragonRenderState s && s.enraged));
 		EntityRendererRegistry.register(FinalRaids.CRYSTAL, RaidCrystalRenderer::new);
 	}
 }

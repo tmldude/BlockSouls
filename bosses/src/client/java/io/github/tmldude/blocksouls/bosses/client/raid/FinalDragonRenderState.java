@@ -5,7 +5,7 @@ import io.github.tmldude.blocksouls.bosses.raid.FinalDragon;
 
 /** The final dragon's render state: the framework's plus its flight mode, shield and enrage. */
 public class FinalDragonRenderState extends BossRenderState {
-	public FinalDragon.Mode mode = FinalDragon.Mode.FLYING;
+	public FinalDragon.Mode mode = FinalDragon.Mode.GROUNDED;
 	public boolean shielded;
 	public boolean enraged;
 }

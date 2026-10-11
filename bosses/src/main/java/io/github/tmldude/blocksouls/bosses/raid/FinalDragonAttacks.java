@@ -43,12 +43,14 @@ final class FinalDragonAttacks {
 		return (FinalDragon) run.boss();
 	}
 
+	/** In the air and free to attack (hovering through the interludes and phase 3). */
 	private static boolean flying(BossEntity boss) {
-		return boss instanceof FinalDragon dragon && dragon.mode() == FinalDragon.Mode.FLYING;
+		return boss instanceof FinalDragon dragon && dragon.mode() == FinalDragon.Mode.AIRBORNE;
 	}
 
-	private static boolean perched(BossEntity boss) {
-		return boss instanceof FinalDragon dragon && dragon.mode() == FinalDragon.Mode.PERCHED;
+	/** On foot (phase 2). */
+	private static boolean grounded(BossEntity boss) {
+		return boss instanceof FinalDragon dragon && dragon.mode() == FinalDragon.Mode.GROUNDED;
 	}
 
 	/** Where {@code target} stands, or the island center without one. */
@@ -154,7 +156,7 @@ final class FinalDragonAttacks {
 			FinalDragon dragon = dragon(run);
 			// The lane keeps burning a moment while it climbs away.
 			breathDamage(run, len(run));
-			dragon.circle(0.25);
+			dragon.hover(0.25);
 		}
 
 		private void breathDamage(AttackRun run, double covered) {
@@ -247,7 +249,7 @@ final class FinalDragonAttacks {
 		@Override
 		public void recovery(AttackRun run) {
 			FinalDragon dragon = dragon(run);
-			dragon.circle(0.25);
+			dragon.hover(0.25);
 		}
 	}
 
@@ -259,7 +261,7 @@ final class FinalDragonAttacks {
 
 		@Override
 		public boolean canUse(BossEntity boss, LivingEntity target) {
-			return flying(boss) || perched(boss);
+			return flying(boss) || grounded(boss);
 		}
 
 		@Override
@@ -270,16 +272,15 @@ final class FinalDragonAttacks {
 		@Override
 		public void start(AttackRun run) {
 			run.sound(FinalRaidSounds.ORB, 4f, 0.5f);
-			if (perched(run.boss())) {
-				run.boss().face(dragon(run).perchFacing());
-			}
 		}
 
 		@Override
 		public void windup(AttackRun run) {
 			FinalDragon dragon = dragon(run);
-			if (dragon.mode() == FinalDragon.Mode.FLYING) {
+			if (flying(dragon)) {
 				dragon.setDeltaMovement(dragon.getDeltaMovement().scale(0.85));
+			} else {
+				walk(dragon, Vec3.ZERO);
 			}
 			if (run.tick() % 2 == 0) {
 				Vec3 mouth = dragon.mouth();
@@ -291,7 +292,9 @@ final class FinalDragonAttacks {
 		@Override
 		public void recovery(AttackRun run) {
 			if (flying(run.boss())) {
-				dragon(run).circle(0.2);
+				dragon(run).hover(0.2);
+			} else {
+				walk(dragon(run), Vec3.ZERO);
 			}
 		}
 
@@ -300,6 +303,8 @@ final class FinalDragonAttacks {
 			FinalDragon dragon = dragon(run);
 			if (flying(dragon)) {
 				dragon.setDeltaMovement(dragon.getDeltaMovement().scale(0.85));
+			} else {
+				walk(dragon, Vec3.ZERO);
 			}
 			if (!run.first()) {
 				return;
@@ -338,7 +343,7 @@ final class FinalDragonAttacks {
 
 		@Override
 		public boolean canUse(BossEntity boss, LivingEntity target) {
-			return perched(boss);
+			return grounded(boss);
 		}
 
 		@Override
@@ -346,14 +351,15 @@ final class FinalDragonAttacks {
 			return 0;
 		}
 
+		/** Locked at the start: away from its head (the head faces the target). */
 		private static Vec3 back(AttackRun run) {
-			return dragon(run).perchFacing().scale(-1);
+			return run.direction();
 		}
 
 		@Override
 		public void start(AttackRun run) {
-			run.boss().face(dragon(run).perchFacing());
-			run.setDirection(back(run));
+			run.boss().face(run.direction());
+			run.setDirection(run.direction().scale(-1));
 			run.sound(FinalRaidSounds.TAIL, 4f, 0.7f);
 		}
 
@@ -408,7 +414,7 @@ final class FinalDragonAttacks {
 
 		@Override
 		public boolean canUse(BossEntity boss, LivingEntity target) {
-			return perched(boss);
+			return grounded(boss);
 		}
 
 		@Override
@@ -418,8 +424,7 @@ final class FinalDragonAttacks {
 
 		@Override
 		public void start(AttackRun run) {
-			run.boss().face(dragon(run).perchFacing());
-			run.setDirection(dragon(run).perchFacing());
+			run.boss().face(run.direction());
 			run.sound(FinalRaidSounds.GUST, 4f, 0.6f);
 		}
 
@@ -482,7 +487,7 @@ final class FinalDragonAttacks {
 
 		@Override
 		public boolean canUse(BossEntity boss, LivingEntity target) {
-			return flying(boss);
+			return flying(boss) && boss.phase() >= 1;
 		}
 
 		@Override
@@ -518,7 +523,7 @@ final class FinalDragonAttacks {
 
 		@Override
 		public void windup(AttackRun run) {
-			dragon(run).circle(0.12);
+			dragon(run).hover(0.12);
 			if (run.tick() % 3 == 0) {
 				for (Vec3 point : run.points()) {
 					Telegraphs.circleFilling(run.level(), OUTLINE, FILL, point, config().meteorRadius, run.progress());
@@ -558,7 +563,7 @@ final class FinalDragonAttacks {
 			}
 			// It keeps circling while the sky falls.
 			FinalDragon dragon = dragon(run);
-			dragon.circle(0.25);
+			dragon.hover(0.25);
 		}
 
 		/** The floor under {@code pos}: a standable surface a few blocks up or down, else {@code pos}. */
@@ -572,5 +577,242 @@ final class FinalDragonAttacks {
 			}
 			return pos;
 		}
+	}
+
+	/** Keeps the dragon's feet on the island while it moves {@code velocity} on foot. */
+	private static void walk(FinalDragon dragon, Vec3 velocity) {
+		double nx = dragon.getX() + velocity.x;
+		double nz = dragon.getZ() + velocity.z;
+		double ground = dragon.groundAt(nx, nz);
+		dragon.setDeltaMovement(velocity.x, (ground - dragon.getY()) * 0.5, velocity.z);
+	}
+
+	/** Bite (grounded): it draws its head back, then lunges with the jaws: a short cone in front. */
+	static final class Bite extends Attack {
+		Bite() {
+			super("bite", config().bite);
+		}
+
+		@Override
+		public boolean canUse(BossEntity boss, LivingEntity target) {
+			return grounded(boss);
+		}
+
+		@Override
+		public void start(AttackRun run) {
+			run.sound(FinalRaidSounds.ROAR, 3f, 1.5f);
+		}
+
+		@Override
+		public void windup(AttackRun run) {
+			walk(dragon(run), Vec3.ZERO);
+			if (run.tick() % 3 == 0) {
+				Telegraphs.arc(run.level(), OUTLINE, run.boss().position(), run.direction(), config().biteRange, config().biteAngle);
+				if (run.progress() > 0.4f) {
+					Telegraphs.arc(run.level(), FILL, run.boss().position(), run.direction(), config().biteRange * run.progress(), config().biteAngle);
+				}
+			}
+		}
+
+		@Override
+		public void active(AttackRun run) {
+			FinalDragon dragon = dragon(run);
+			// The lunge carries it forward a little.
+			walk(dragon, run.direction().scale(0.35));
+			if (!run.first()) {
+				return;
+			}
+			run.sound(FinalRaidSounds.TAIL, 4f, 0.6f);
+			Vec3 mouth = dragon.position().add(run.direction().scale(config().biteRange * 0.7)).add(0, 1.5, 0);
+			run.level().sendParticles(ParticleTypes.SWEEP_ATTACK, true, true, mouth.x, mouth.y, mouth.z, 3, 0.8, 0.3, 0.8, 0);
+			for (LivingEntity victim : Hitboxes.inArc(dragon, dragon.position(), run.direction(), config().biteRange, config().biteAngle, 3.5)) {
+				run.hurt(victim);
+			}
+		}
+
+		@Override
+		public void recovery(AttackRun run) {
+			walk(dragon(run), Vec3.ZERO);
+		}
+	}
+
+	/** Ground breath (grounded): a cone of void fire pours from its jaws and slowly follows its target. */
+	static final class GroundBreath extends Attack {
+		GroundBreath() {
+			super("ground_breath", config().groundBreath);
+		}
+
+		@Override
+		public boolean canUse(BossEntity boss, LivingEntity target) {
+			return grounded(boss);
+		}
+
+		@Override
+		public void start(AttackRun run) {
+			run.sound(FinalRaidSounds.BREATH, 4f, 0.5f);
+		}
+
+		@Override
+		public void windup(AttackRun run) {
+			walk(dragon(run), Vec3.ZERO);
+			if (run.tick() % 3 == 0) {
+				Telegraphs.arc(run.level(), OUTLINE, run.boss().position(), run.direction(), config().groundBreathLength, config().groundBreathAngle);
+			}
+			if (run.progress() > 0.5f) {
+				Vec3 mouth = dragon(run).mouth();
+				run.level().sendParticles(VOID, true, true, mouth.x, mouth.y, mouth.z, 3, 0.2, 0.2, 0.2, 0);
+			}
+		}
+
+		@Override
+		public void active(AttackRun run) {
+			FinalDragon dragon = dragon(run);
+			walk(dragon, Vec3.ZERO);
+			LivingEntity target = run.target();
+			if (target != null && target.isAlive()) {
+				run.setDirection(turnToward(run.direction(), target.position().subtract(dragon.position()), config().groundBreathTurnRate));
+				dragon.face(run.direction());
+			}
+			ServerLevel level = run.level();
+			if (run.tick() % 6 == 0) {
+				run.sound(FinalRaidSounds.BREATH, 3f, 0.7f + run.random().nextFloat() * 0.2f);
+			}
+			Vec3 mouth = dragon.mouth();
+			for (int i = 0; i < 5; i++) {
+				double spread = Math.toRadians(config().groundBreathAngle / 2) * (run.random().nextDouble() * 2 - 1);
+				Vec3 dir = rotate(run.direction(), spread);
+				level.sendParticles(PowerParticleOption.create(ParticleTypes.DRAGON_BREATH, 1f), true, true, mouth.x, mouth.y, mouth.z, 0, dir.x, -0.25,
+						dir.z, 0.5 + run.random().nextDouble() * 0.2);
+			}
+			for (LivingEntity victim : Hitboxes.inArc(dragon, dragon.position(), run.direction(), config().groundBreathLength, config().groundBreathAngle,
+					4)) {
+				run.hurtEvery(victim, stats().damage, config().breathHitIntervalTicks);
+			}
+		}
+
+		@Override
+		public void recovery(AttackRun run) {
+			walk(dragon(run), Vec3.ZERO);
+		}
+	}
+
+	/** Charge (grounded): head low, it runs a straight line across the island, ramming whoever is in the way. */
+	static final class Charge extends Attack {
+		Charge() {
+			super("charge", config().charge);
+		}
+
+		@Override
+		public boolean canUse(BossEntity boss, LivingEntity target) {
+			return grounded(boss);
+		}
+
+		@Override
+		public double trackFraction() {
+			return 0.6;
+		}
+
+		@Override
+		public void start(AttackRun run) {
+			run.sound(FinalRaidSounds.ROAR, 4f, 0.8f);
+		}
+
+		@Override
+		public void windup(AttackRun run) {
+			walk(dragon(run), Vec3.ZERO);
+			if (run.tick() % 3 == 0) {
+				Telegraphs.lineFilling(run.level(), OUTLINE, FILL, run.boss().position(), run.direction(), dragon(run).arena().scaled(config().chargeDistance),
+						run.boss().getBbWidth() / 2 + 0.5, run.progress());
+			}
+		}
+
+		@Override
+		public void active(AttackRun run) {
+			FinalDragon dragon = dragon(run);
+			double speed = dragon.arena().scaled(config().chargeDistance) / Math.max(1, run.stageLength());
+			Vec3 dir = run.direction();
+			dragon.face(dir);
+			walk(dragon, dir.scale(speed));
+			run.level().sendParticles(ParticleTypes.CLOUD, true, true, dragon.getX(), dragon.getY() + 0.3, dragon.getZ(), 4, 1.5, 0.2, 1.5, 0.02);
+			if (run.tick() % 4 == 0) {
+				run.sound(FinalRaidSounds.LAND, 2f, 1.3f);
+			}
+			for (LivingEntity victim : Hitboxes.inBox(dragon, dragon.getBoundingBox().inflate(0.8, 0, 0.8).expandTowards(dir.scale(speed)))) {
+				if (run.hurt(victim)) {
+					victim.knockback(config().chargeKnockback, -dir.x, -dir.z, run.level().damageSources().mobAttack(dragon), 0);
+					victim.needsSync = true;
+				}
+			}
+		}
+
+		@Override
+		public void recovery(AttackRun run) {
+			walk(dragon(run), Vec3.ZERO);
+		}
+	}
+
+	/** Stomp (grounded): it rears up, slams down, and a shockwave ring rolls out across the ground. Jump the ring. */
+	static final class Stomp extends Attack {
+		Stomp() {
+			super("stomp", config().stomp);
+		}
+
+		@Override
+		public boolean canUse(BossEntity boss, LivingEntity target) {
+			return grounded(boss);
+		}
+
+		@Override
+		public void start(AttackRun run) {
+			run.sound(FinalRaidSounds.ROAR, 4f, 0.6f);
+		}
+
+		@Override
+		public void windup(AttackRun run) {
+			walk(dragon(run), Vec3.ZERO);
+			if (run.tick() % 3 == 0) {
+				Telegraphs.circleFilling(run.level(), OUTLINE, FILL, run.boss().position(), config().stompRadius, run.progress());
+			}
+		}
+
+		@Override
+		public void active(AttackRun run) {
+			FinalDragon dragon = dragon(run);
+			walk(dragon, Vec3.ZERO);
+			ServerLevel level = run.level();
+			if (run.first()) {
+				run.sound(FinalRaidSounds.LAND, 6f, 0.5f);
+				level.sendParticles(ParticleTypes.EXPLOSION, true, true, dragon.getX(), dragon.getY() + 0.3, dragon.getZ(), 4, 1.5, 0.2, 1.5, 0);
+			}
+			// The ring rolls outward over the active window; it hits whoever it passes (once), low to the ground.
+			double r = config().stompRadius * run.progress();
+			Telegraphs.circle(level, ParticleTypes.CLOUD, dragon.position(), r);
+			for (LivingEntity victim : Hitboxes.inCircle(dragon, dragon.position(), r + 0.4, config().stompHeight)) {
+				if (Hitboxes.horizontalDistance(victim, dragon.position()) >= r - 1.6 && run.hurt(victim)) {
+					victim.push(0, 0.6, 0);
+					victim.needsSync = true;
+				}
+			}
+		}
+
+		@Override
+		public void recovery(AttackRun run) {
+			walk(dragon(run), Vec3.ZERO);
+		}
+	}
+
+	private static Vec3 turnToward(Vec3 current, Vec3 wanted, double maxDegrees) {
+		double a = Math.atan2(current.z, current.x);
+		double b = Math.atan2(wanted.z, wanted.x);
+		double delta = Math.atan2(Math.sin(b - a), Math.cos(b - a));
+		double max = Math.toRadians(maxDegrees);
+		double turned = a + Math.clamp(delta, -max, max);
+		return new Vec3(Math.cos(turned), 0, Math.sin(turned));
+	}
+
+	private static Vec3 rotate(Vec3 dir, double radians) {
+		double cos = Math.cos(radians);
+		double sin = Math.sin(radians);
+		return new Vec3(dir.x * cos - dir.z * sin, 0, dir.x * sin + dir.z * cos);
 	}
 }

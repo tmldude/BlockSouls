@@ -37,28 +37,61 @@ import io.github.tmldude.blocksouls.common.CommonIds;
 import io.github.tmldude.blocksouls.common.player.PlayerStatus;
 
 /**
- * The final raid: a gaunt void-black dragon that replaces the Ender Dragon. Three phases on the main island:
- * <ol>
- * <li><b>The Crystal Order</b> (100–70%): shielded while any crystal lives; the obelisk shows the order to break them
- * in ({@link CrystalPuzzle}). It strafes: breath lines and dives.</li>
- * <li><b>Grounding</b> (70–30%): circles out of reach (hits barely land). Held plates ({@link PlateGate}) chain it to
- * its perch for a DPS window: ×1.5 damage, ×2 more on the head. Perched it sweeps its tail, gusts its wings toward the
- * void edge and spits void orbs.</li>
- * <li><b>Fall</b> (30–0%): faster and harder; meteor showers and breath sweeps across the island; perches more often
- * but for shorter. Soft enrage after 12 minutes: +50% damage.</li>
+ * The final raid's dragon, the Hollow Sovereign. The raid has three phases; the first is the vanilla Ender Dragon
+ * fight, untouched. When that dragon dies it doesn't rise and burst: it <b>falls</b>, and this dragon tears out of the
+ * fall ({@link FinalRaidEnd#vanillaDragonFell}), lies dazed while the obsidian towers come down around it, then rises.
+ * <ol start="2">
+ * <li><b>Grounded</b> (100% → 35%, its phase 0): on foot, Souls style: bite, tail sweep, wing gust, ground breath,
+ * charge, stomp, void orbs. At 85% it takes to the air and calls a <b>zombie wave</b>; at 60% it calls a <b>herald</b>
+ * (one of the field bosses). It is untouchable in the air; the wave cleared, it lands; the herald killed, it crashes
+ * down <b>stunned</b> (×2 damage).</li>
+ * <li><b>Final Stand</b> (35% → 0, its phase 1): it hovers over the island and casts <b>Sovereign's End</b> (a closing
+ * violet ring; when it completes, everyone dies). Crystals stand on the tower stumps, <b>sealed</b> unless the plates
+ * are held; broken in the order the obelisk shows, they crash it down stunned. Then it rises and casts again,
+ * faster. A damage check: a group that can't kill it in a few stuns doesn't.</li>
  * </ol>
- * A wipe heals it to the start of the current phase and resets that phase's mechanic. Its death opens the exit portal
- * as vanilla's would ({@link FinalRaidEnd}) and fires {@code BossEvents.KILLED} with {@link CommonIds#FINAL_BOSS}.
+ * A wipe heals it to the last checkpoint (the phase start, or the last cleared interlude). Its death opens the exit
+ * portal as vanilla's would and fires {@code BossEvents.KILLED} with {@link CommonIds#FINAL_BOSS}.
  */
 public class FinalDragon extends BossEntity {
-	/** Flight state (synced: the model folds the wings when perched). */
+	/** What it's doing (synced: the model walks, flies or lies sprawled). */
 	public enum Mode {
-		FLYING, PULLED, PERCHED, TAKEOFF;
+		/** Falling from where the vanilla dragon died. */
+		FALLING,
+		/** Lying where it fell; the towers come down. */
+		DAZED,
+		/** On foot, fighting. */
+		GROUNDED,
+		/** Rising to hover. */
+		TAKEOFF,
+		/** Hovering over the island (interludes, phase 3). */
+		AIRBORNE,
+		/** Coming back down to fight on foot. */
+		LANDING,
+		/** Dropping out of the sky to its perch. */
+		CRASHING,
+		/** Sprawled on its perch: the damage window. */
+		STUNNED;
 
 		static Mode byId(int id) {
 			Mode[] values = values();
 			return values[Math.clamp(id, 0, values.length - 1)];
 		}
+
+		/** Body on the ground (walk cycle or sprawled). */
+		public boolean onGround() {
+			return this == GROUNDED || this == DAZED || this == STUNNED;
+		}
+
+		/** Lying sprawled. */
+		public boolean sprawled() {
+			return this == DAZED || this == STUNNED;
+		}
+	}
+
+	/** Phase 2's breaks. */
+	private enum Interlude {
+		NONE, WAVE, HERALD
 	}
 
 	private static final EntityDataAccessor<Byte> DATA_MODE = SynchedEntityData.defineId(FinalDragon.class, EntityDataSerializers.BYTE);
@@ -66,6 +99,7 @@ public class FinalDragon extends BossEntity {
 	private static final EntityDataAccessor<Boolean> DATA_ENRAGED = SynchedEntityData.defineId(FinalDragon.class, EntityDataSerializers.BOOLEAN);
 	private static final DustParticleOptions SHIELD = new DustParticleOptions(0xB98CFF, 1.8f);
 	private static final DustParticleOptions CRACKS = new DustParticleOptions(0x9B4DFF, 1.4f);
+	private static final DustParticleOptions CAST = new DustParticleOptions(0x7A2FD6, 2.2f);
 
 	private static BossDefinition definition;
 
@@ -75,19 +109,28 @@ public class FinalDragon extends BossEntity {
 	private final CrystalPuzzle puzzle = new CrystalPuzzle(this);
 	private final PlateGate plates = new PlateGate(this);
 	private final VoidOrbs orbs = new VoidOrbs(this);
+	private final RaidAdds adds = new RaidAdds(this);
+	private @Nullable TowerCollapse towers;
 	private @Nullable List<PlateGate.Replaced> savedPlates;
 	private int modeTicks;
-	private Vec3 perchFacing = new Vec3(0, 0, 1);
 	private int fightTicks;
 	private double orbitAngle;
 	private int lastDeflectTick;
+	private Interlude interlude = Interlude.NONE;
+	private boolean waveDone;
+	private boolean heraldDone;
+	private int cycle;
+	private int castTotal;
+	private int castLeft;
+	private int restorePhase;
+	private int castsCompleted;
 
 	public FinalDragon(EntityType<? extends FinalDragon> type, Level level) {
 		super(type, level);
 		this.noPhysics = true;
 		this.xpReward = config().experience;
 		setNoGravity(true);
-		// The head: always hittable, a weak point while perched.
+		// The head: a weak point while it's on the ground.
 		addPart("head", 2.2f, 2.0f, config().headDamageMult, new Vec3(0, 2.6, 5.8));
 	}
 
@@ -98,11 +141,15 @@ public class FinalDragon extends BossEntity {
 	/** Built once, after the config loads. */
 	static BossDefinition createDefinition() {
 		FinalRaidConfig c = config();
-		var breathLine = new FinalDragonAttacks.BreathLine("breath_line", c.breathLine, () -> c.breathLineLength, () -> c.breathLineHalfWidth);
-		var dive = new FinalDragonAttacks.Dive();
-		var orbs = new FinalDragonAttacks.VoidOrbBarrage();
+		var bite = new FinalDragonAttacks.Bite();
 		var tail = new FinalDragonAttacks.TailSweep();
 		var gust = new FinalDragonAttacks.WingGust();
+		var groundBreath = new FinalDragonAttacks.GroundBreath();
+		var charge = new FinalDragonAttacks.Charge();
+		var stomp = new FinalDragonAttacks.Stomp();
+		var orbs = new FinalDragonAttacks.VoidOrbBarrage();
+		var breathLine = new FinalDragonAttacks.BreathLine("breath_line", c.breathLine, () -> c.breathLineLength, () -> c.breathLineHalfWidth);
+		var dive = new FinalDragonAttacks.Dive();
 		var meteors = new FinalDragonAttacks.MeteorShower();
 		var sweep = new FinalDragonAttacks.BreathLine("breath_sweep", c.breathSweep, () -> c.breathSweepLength, () -> c.breathSweepHalfWidth);
 		definition = BossDefinition.builder(CommonIds.FINAL_BOSS)
@@ -111,14 +158,13 @@ public class FinalDragon extends BossEntity {
 				.music(FinalRaidSounds.MUSIC)
 				// Two legendary guns + ammo (guns), only when that module is installed.
 				.extraLoot(CommonIds.id(CommonIds.BOSSES, "boss_drops/final_dragon_guns"))
-				.phase(BossPhase.first().attacks(breathLine, dive))
-				.phase(BossPhase.below(c.phase2Threshold).attacks(breathLine, dive, orbs, tail, gust))
-				.phase(BossPhase.below(c.phase3Threshold)
-						.attacks(breathLine, dive, orbs, tail, gust, meteors, sweep)
-						.damage(c.phase3Damage)
-						.cooldowns(c.phase3Cooldowns)
-						.recovery(c.phase3Recovery)
-						.speed(c.phase3Speed))
+				// Grounded: the ground moveset, plus a few airborne moves for while it hovers over the interludes.
+				.phase(BossPhase.first().attacks(bite, tail, gust, groundBreath, charge, stomp, orbs, breathLine, dive))
+				.phase(BossPhase.below(c.finalStandThreshold)
+						.attacks(orbs, breathLine, dive, meteors, sweep)
+						.damage(c.finalStandDamage)
+						.cooldowns(c.finalStandCooldowns)
+						.recovery(c.finalStandRecovery))
 				.build();
 		return definition;
 	}
@@ -138,7 +184,7 @@ public class FinalDragon extends BossEntity {
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		super.defineSynchedData(builder);
-		builder.define(DATA_MODE, (byte) Mode.FLYING.ordinal());
+		builder.define(DATA_MODE, (byte) Mode.GROUNDED.ordinal());
 		builder.define(DATA_SHIELDED, false);
 		builder.define(DATA_ENRAGED, false);
 	}
@@ -152,7 +198,7 @@ public class FinalDragon extends BossEntity {
 		modeTicks = 0;
 	}
 
-	/** The crystal shield is up (both sides). */
+	/** Untouchable right now (falling, dazed, or hovering over an interlude) (both sides). */
 	public boolean shielded() {
 		return entityData.get(DATA_SHIELDED);
 	}
@@ -188,7 +234,7 @@ public class FinalDragon extends BossEntity {
 		this.arena = arena;
 		this.endArena = end;
 		this.arenaOrigin = arena.center();
-		setHome(BlockPos.containing(arena.orbit(0, 0, config().cruiseHeight)));
+		setHome(arena.center());
 	}
 
 	CrystalPuzzle puzzle() {
@@ -203,7 +249,11 @@ public class FinalDragon extends BossEntity {
 		return orbs;
 	}
 
-	/** The Crystal Order in play (null outside phase 1). Read-only use: tests, debug. */
+	RaidAdds adds() {
+		return adds;
+	}
+
+	/** The Crystal Order in play (null outside phase 3). Read-only use: tests, debug. */
 	public @Nullable CrystalOrder crystalOrder() {
 		return puzzle.order();
 	}
@@ -218,23 +268,57 @@ public class FinalDragon extends BossEntity {
 		return List.copyOf(plates.plates());
 	}
 
-	/** One line of raid state for debug output (`/bs raid info`, test failures). */
+	/** The herald, while it lives (phase 2's second interlude). */
+	public @Nullable BossEntity herald() {
+		return level() instanceof ServerLevel level ? adds.herald(level) : null;
+	}
+
+	/** Wave mobs still alive. */
+	public int waveAlive() {
+		return level() instanceof ServerLevel level ? adds.waveAlive(level) : 0;
+	}
+
+	public boolean waveDone() {
+		return waveDone;
+	}
+
+	public boolean heraldDone() {
+		return heraldDone;
+	}
+
+	/** Ticks left on Sovereign's End (phase 3), and its full length this cycle. */
+	public int castLeft() {
+		return castLeft;
+	}
+
+	public int castTotal() {
+		return castTotal;
+	}
+
+	/** How many times Sovereign's End has gone off this fight. */
+	public int castsCompleted() {
+		return castsCompleted;
+	}
+
+	/** Debug and tests: the cast completes in {@code ticks}. */
+	public void finishCastIn(int ticks) {
+		castLeft = Math.max(1, ticks);
+	}
+
+	/** One line of raid state for debug output ({@code /bs raid info}, test failures). */
 	public String debugInfo() {
 		CrystalOrder order = puzzle.order();
-		return String.format("phase %d, %s%s, hp %.0f/%.0f, fight %ds%s%s, crystals %s, plates %d (held %d, armed %s, hold %.2f), orbs %d, at %s",
-				phase() + 1, mode(), isStaggered() ? " (staggered)" : "", getHealth(), getMaxHealth(), fightTicks / 20,
-				isEngaged() ? ", engaged" : "", enraged() ? ", ENRAGED" : "",
-				order == null ? "none" : order.remaining() + " (" + order.destroyed() + " done)", plates.plates().size(), plates.lastHeld(),
-				plates.armed(), plates.progress(), orbs.count(), blockPosition().toShortString())
-				+ String.format(", ticks %d%s%s", tickCount, isRemoved() ? ", REMOVED " + getRemovalReason() : "",
-						level() instanceof ServerLevel level && !level.isPositionEntityTicking(blockPosition()) ? ", NOT ENTITY-TICKING" : "");
+		return String.format("raid phase %d, %s%s%s, hp %.0f/%.0f, fight %ds%s%s, wave %s, herald %s, cast %d/%d (cycle %d), crystals %s, "
+				+ "plates %d (held %d, open %s), orbs %d, at %s, ticks %d%s",
+				phase() + 2, mode(), interlude != Interlude.NONE ? " " + interlude : "", isStaggered() ? " (staggered)" : "", getHealth(), getMaxHealth(),
+				fightTicks / 20, isEngaged() ? ", engaged" : "", enraged() ? ", ENRAGED" : "", waveDone ? "done" : "pending",
+				heraldDone ? "done" : "pending", castLeft, castTotal, cycle,
+				order == null ? "none" : order.remaining() + " (" + order.destroyed() + " done)", plates.plates().size(), plates.lastHeld(), plates.open(),
+				orbs.count(), blockPosition().toShortString(), tickCount,
+				level() instanceof ServerLevel level && !level.isPositionEntityTicking(blockPosition()) ? ", NOT ENTITY-TICKING" : "");
 	}
 
-	Vec3 perchFacing() {
-		return perchFacing;
-	}
-
-	/** Players in the fight right now (alive, not downed, in the arena), at least 1. */
+	/** Players the mechanics count: in the fight right now, at least 1, at most {@code maxScaledPlayers}. */
 	int playersInFight() {
 		int count = 0;
 		for (ServerPlayer player : participants()) {
@@ -242,13 +326,18 @@ public class FinalDragon extends BossEntity {
 				count++;
 			}
 		}
-		return Math.max(1, count);
+		return RaidMath.scaledPlayers(count, config().maxScaledPlayers);
 	}
 
 	/** Where its mouth is (attacks spawn from here). */
 	Vec3 mouth() {
 		Vec3 look = Vec3.directionFromRotation(0, getYRot());
 		return position().add(look.scale(6.2)).add(0, 2.2, 0);
+	}
+
+	/** The island surface under {@code (x, z)}. */
+	double groundAt(double x, double z) {
+		return level() instanceof ServerLevel level ? arena().groundY(level, x, z) : getY();
 	}
 
 	// ---------------------------------------------------------------------------------------------------------
@@ -275,7 +364,7 @@ public class FinalDragon extends BossEntity {
 
 	@Override
 	protected double preferredDistance() {
-		// It flies; the framework's ground navigation never runs.
+		// It moves itself (walking and flying); the framework's ground navigation never runs.
 		return 1000;
 	}
 
@@ -286,10 +375,10 @@ public class FinalDragon extends BossEntity {
 
 	@Override
 	public void travel(Vec3 input) {
-		// Moves exactly by the velocity the flight code set: no gravity, no friction, through pillars...
+		// Moves exactly by the velocity the movement code set: no gravity, no friction, through rubble...
 		Vec3 velocity = getDeltaMovement();
-		// ...but on a leash: never farther from the island center than half the fight radius (55 blocks in the End,
-		// beyond its circling path), so no attack path can carry it off the island or out of a small arena.
+		// ...but on a leash: never farther from the island center than half the fight radius (55 blocks in the End),
+		// so no attack path can carry it off the island or out of a small arena.
 		RaidArena a = arena();
 		Vec3 center = a.centerVec();
 		double leash = a.scaled(config().arenaRadius * 0.5);
@@ -317,12 +406,12 @@ public class FinalDragon extends BossEntity {
 	}
 
 	private void clientEffects() {
-		// Violet light leaking from the cracks; a shell of sparks while shielded.
+		// Violet light leaking from the cracks; more, and soul fire, in the final stand and the soft enrage.
 		if (tickCount % 3 == 0) {
 			level().addParticle(ParticleTypes.REVERSE_PORTAL, getX() + (random.nextDouble() - 0.5) * 3, getY() + 1 + random.nextDouble() * 2,
 					getZ() + (random.nextDouble() - 0.5) * 3, 0, 0.02, 0);
 		}
-		if (enraged() && tickCount % 2 == 0) {
+		if ((enraged() || phase() >= 1) && tickCount % 2 == 0) {
 			level().addParticle(ParticleTypes.SOUL_FIRE_FLAME, getX() + (random.nextDouble() - 0.5) * 3, getY() + 1 + random.nextDouble() * 2,
 					getZ() + (random.nextDouble() - 0.5) * 3, 0, 0.05, 0);
 		}
@@ -330,19 +419,40 @@ public class FinalDragon extends BossEntity {
 
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
+		if (mode() == Mode.GROUNDED) {
+			// On foot it stands still on the ground unless walking or an attack moves it this tick (no sliding).
+			walk(Vec3.ZERO);
+		}
 		super.customServerAiStep(level);
 		if (savedPlates != null) {
 			plates.restore(level, savedPlates);
 			savedPlates = null;
 		}
+		if (restorePhase > 0) {
+			forcePhase(restorePhase);
+			restorePhase = 0;
+		}
 		if (isDeadOrDying()) {
 			return;
 		}
-		if (!isEngaged()) {
-			if (endArena && tickCount % 20 == 0) {
-				FinalRaidEnd.seen(level, this);
+		if (endArena && tickCount % 20 == 0) {
+			FinalRaidEnd.seen(level, this);
+		}
+		if (towers != null) {
+			towers.tick(level);
+			if (towers.done()) {
+				towers = null;
 			}
-			idleFlight(level);
+		}
+		Mode mode = mode();
+		if (mode == Mode.FALLING || mode == Mode.DAZED) {
+			modeTicks++;
+			entityData.set(DATA_SHIELDED, true);
+			fallTick(level, mode);
+			return;
+		}
+		if (!isEngaged()) {
+			idle(level);
 			if (tickCount % 10 == 0) {
 				for (ServerPlayer player : level.players()) {
 					if (!player.isSpectator() && !player.isCreative() && player.isAlive() && !PlayerStatus.isDowned(player) && inArena(player)) {
@@ -361,121 +471,376 @@ public class FinalDragon extends BossEntity {
 			level.playSound(null, getX(), getY(), getZ(), FinalRaidSounds.ENRAGE, SoundSource.HOSTILE, 6f, 0.6f);
 			level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, true, true, getX(), getY() + 2, getZ(), 120, 2.5, 1.5, 2.5, 0.15);
 		}
-		entityData.set(DATA_SHIELDED, puzzle.shielded());
+		entityData.set(DATA_SHIELDED, incomingMultiplier() <= 0);
 
-		puzzle.tick(level);
 		orbs.tick(level);
-		boolean flyingFree = mode() == Mode.FLYING && !isStaggered();
-		if (plates.tick(level, playersInFight(), flyingFree && phase() >= 1)) {
-			startPull(level);
+		if (phase() == 0) {
+			interludeTick(level);
+		} else {
+			finalStandTick(level);
 		}
 		modeTick(level);
 		if (tickCount % 5 == 0) {
 			FinalRaidEnd.pacifyEndermen(level, this);
-		}
-		if (endArena && tickCount % 20 == 0) {
-			FinalRaidEnd.seen(level, this);
 		}
 		if (shielded() && tickCount % 4 == 0) {
 			shieldShell(level);
 		}
 	}
 
-	/** Not fighting: circle home slowly (and fly back there after a reset). */
-	private void idleFlight(ServerLevel level) {
-		Vec3 home = Vec3.atBottomCenterOf(home());
-		double far = arena().scaled(40);
-		if (isReturning() || distanceToSqr(home) > far * far) {
-			steer(home, 1.2, 0.3);
-		} else {
-			orbitAngle += 0.012;
-			double r = arena().scaled(12);
-			steer(home.add(Math.cos(orbitAngle) * r, Math.sin(tickCount * 0.03) * 2, Math.sin(orbitAngle) * r), 0.4, 0.15);
-		}
-		faceVelocity();
-		flapSound(level);
+	// --- The fall (raid phase 1 → 2) ---
+
+	/** Starts the fall from where the vanilla dragon died (called right after spawning it there). */
+	public void startFall() {
+		setMode(Mode.FALLING);
+		entityData.set(DATA_SHIELDED, true);
 	}
 
-	private void modeTick(ServerLevel level) {
-		switch (mode()) {
-			case FLYING -> {
-				if (isStaggered()) {
-					// The phase roar: hang in the air.
-					setDeltaMovement(getDeltaMovement().scale(0.8));
-				}
-				// Otherwise fightTick (between attacks) or the attack moves it.
+	private void fallTick(ServerLevel level, Mode mode) {
+		if (mode == Mode.FALLING) {
+			double ground = groundAt(getX(), getZ());
+			double speed = config().fallSpeed;
+			setDeltaMovement(getDeltaMovement().x * 0.9, -Math.min(speed, Math.max(0.05, getY() - ground)), getDeltaMovement().z * 0.9);
+			setXRot(35);
+			if (modeTicks % 3 == 0) {
+				level.sendParticles(ParticleTypes.LARGE_SMOKE, true, true, getX(), getY() + 2, getZ(), 6, 1.5, 1, 1.5, 0.02);
 			}
-			case PULLED -> {
-				Vec3 perch = arena().perch();
-				int left = Math.max(1, config().pullTicks - modeTicks);
-				Vec3 delta = perch.subtract(position());
-				setDeltaMovement(delta.scale(1.0 / left));
-				face(perchFacing);
-				setXRot(25);
-				plates.chains(level, position().add(0, 1.5, 0));
-				if (modeTicks % 10 == 0) {
-					playSound(FinalRaidSounds.CHAINS, 4f, 0.6f + modeTicks / (float) config().pullTicks * 0.4f);
+			if (getY() - ground < 0.15 || modeTicks > 20 * 20) {
+				setPos(getX(), ground, getZ());
+				setDeltaMovement(Vec3.ZERO);
+				setXRot(0);
+				impact(level);
+			}
+			return;
+		}
+		// Dazed: lies still while the towers fall, then rises and the second phase begins.
+		setDeltaMovement(Vec3.ZERO);
+		if (modeTicks % 10 == 0) {
+			level.sendParticles(CRACKS, true, true, getX(), getY() + 1, getZ(), 10, 2.5, 0.6, 2.5, 0);
+		}
+		if (modeTicks >= config().dazedTicks) {
+			setMode(Mode.GROUNDED);
+			entityData.set(DATA_SHIELDED, false);
+			level.playSound(null, getX(), getY(), getZ(), FinalRaidSounds.ROAR, SoundSource.HOSTILE, 10f, 0.5f);
+			level.sendParticles(ParticleTypes.REVERSE_PORTAL, true, true, getX(), getY() + 2, getZ(), 200, 3, 2, 3, 0.3);
+		}
+	}
+
+	private void impact(ServerLevel level) {
+		setMode(Mode.DAZED);
+		level.playSound(null, getX(), getY(), getZ(), FinalRaidSounds.LAND, SoundSource.HOSTILE, 10f, 0.4f);
+		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, true, true, getX(), getY() + 1, getZ(), 2, 2, 0.5, 2, 0);
+		level.sendParticles(ParticleTypes.CLOUD, true, true, getX(), getY() + 0.5, getZ(), 80, 6, 0.3, 6, 0.15);
+		if (endArena) {
+			// The impact brings the towers down: the island is the open arena from here on.
+			towers = new TowerCollapse(arena(), config().towerCollapseStaggerTicks);
+		}
+	}
+
+	// --- Idle (not engaged) ---
+
+	private void idle(ServerLevel level) {
+		if (phase() >= 1) {
+			// Over the island, out of reach, waiting.
+			if (mode() != Mode.AIRBORNE) {
+				setMode(Mode.AIRBORNE);
+			}
+			orbitAngle += 0.01;
+			steer(arena().orbit(orbitAngle, config().hoverRadius, config().hoverHeight), 0.6, 0.12);
+			faceVelocity();
+			return;
+		}
+		if (mode() != Mode.GROUNDED) {
+			setMode(Mode.GROUNDED);
+		}
+		Vec3 home = Vec3.atBottomCenterOf(home());
+		double dx = home.x - getX();
+		double dz = home.z - getZ();
+		double distance = Math.sqrt(dx * dx + dz * dz);
+		Vec3 step = distance > 1.5 ? new Vec3(dx, 0, dz).scale(Math.min(config().walkSpeed, distance) / distance) : Vec3.ZERO;
+		walk(step);
+		if (step.lengthSqr() > 0) {
+			face(step);
+		}
+	}
+
+	// --- Phase 2: interludes ---
+
+	private void interludeTick(ServerLevel level) {
+		switch (interlude) {
+			case NONE -> {
+				if (mode() != Mode.GROUNDED || attackRun() != null || isStaggered()) {
+					return;
 				}
-				if (modeTicks >= config().pullTicks) {
+				double fraction = getHealth() / getMaxHealth();
+				if (!waveDone && fraction <= config().waveThreshold + 1e-4) {
+					beginWave(level);
+				} else if (waveDone && !heraldDone && fraction <= config().heraldThreshold + 1e-4) {
+					beginHerald(level);
+				}
+			}
+			case WAVE -> {
+				if (adds.waveOver(level)) {
+					interlude = Interlude.NONE;
+					waveDone = true;
 					land(level);
 				}
 			}
-			case PERCHED -> {
-				setDeltaMovement(Vec3.ZERO);
-				setPos(arena().perch());
-				face(perchFacing);
-				setXRot(0);
+			case HERALD -> {
+				if (adds.heraldOver(level)) {
+					interlude = Interlude.NONE;
+					heraldDone = true;
+					crash(level);
+				}
+			}
+		}
+	}
+
+	/** Debug and tests: start the zombie wave now. */
+	public void beginWave(ServerLevel level) {
+		cancelAttack();
+		interlude = Interlude.WAVE;
+		setMode(Mode.TAKEOFF);
+		level.playSound(null, getX(), getY(), getZ(), FinalRaidSounds.ROAR, SoundSource.HOSTILE, 10f, 0.8f);
+		adds.startWave(level, playersInFight());
+	}
+
+	/** Debug and tests: call the herald now. */
+	public void beginHerald(ServerLevel level) {
+		cancelAttack();
+		waveDone = true;
+		if (!adds.startHerald(level)) {
+			// No boss to call: the interlude is skipped.
+			heraldDone = true;
+			return;
+		}
+		interlude = Interlude.HERALD;
+		setMode(Mode.TAKEOFF);
+		level.playSound(null, getX(), getY(), getZ(), FinalRaidSounds.ROAR, SoundSource.HOSTILE, 10f, 0.6f);
+	}
+
+	// --- Phase 3: the Final Stand ---
+
+	private void setupFinalStand(ServerLevel level) {
+		adds.clear(level);
+		interlude = Interlude.NONE;
+		cycle = 0;
+		int players = playersInFight();
+		plates.place(level, players);
+		puzzle.setup(level, players);
+		startCast(players);
+		setMode(Mode.TAKEOFF);
+		level.playSound(null, getX(), getY(), getZ(), FinalRaidSounds.ENRAGE, SoundSource.HOSTILE, 8f, 0.5f);
+	}
+
+	private void startCast(int players) {
+		castTotal = RaidMath.castTicks(cycle, players, config().castTicks, config().castSoloBonus, config().castCycleFactor, config().castMinTicks);
+		castLeft = castTotal;
+	}
+
+	private void finalStandTick(ServerLevel level) {
+		Mode mode = mode();
+		boolean casting = mode == Mode.AIRBORNE || mode == Mode.TAKEOFF;
+		boolean open = plates.tick(level, playersInFight());
+		if (casting) {
+			puzzle.seal(level, !open);
+			puzzle.tick(level);
+			castTick(level);
+		}
+	}
+
+	private void castTick(ServerLevel level) {
+		if (castTotal <= 0) {
+			startCast(playersInFight());
+		}
+		castLeft--;
+		float progress = 1f - castLeft / (float) castTotal;
+		RaidArena a = arena();
+		Vec3 center = a.centerVec();
+		if (castLeft % 4 == 0) {
+			// A ring of violet closing in on the island center: when it reaches the middle, the cast completes.
+			double r = a.scaled(46) * (1 - progress) + 1;
+			int points = Math.max(12, (int) (r * 1.2));
+			for (int i = 0; i < points; i++) {
+				double angle = i * Math.PI * 2 / points + level.getGameTime() * 0.01;
+				level.sendParticles(CAST, true, true, center.x + Math.cos(angle) * r, center.y + 0.3, center.z + Math.sin(angle) * r, 1, 0, 0.3, 0, 0);
+			}
+			level.sendParticles(CAST, true, true, getX(), getY() + 2, getZ(), 6, 1.5, 1.5, 1.5, 0);
+		}
+		if (castLeft % 40 == 0) {
+			level.playSound(null, center.x, center.y, center.z, FinalRaidSounds.ORB, SoundSource.HOSTILE, 8f, 0.5f + progress);
+		}
+		if (castLeft <= 0) {
+			sovereignsEnd(level);
+		}
+	}
+
+	/** The cast completes: a flash of void across the island, and everyone in the fight dies. */
+	private void sovereignsEnd(ServerLevel level) {
+		Vec3 center = arena().centerVec();
+		level.playSound(null, center.x, center.y, center.z, FinalRaidSounds.DEATH, SoundSource.HOSTILE, 16f, 0.5f);
+		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFF9B4DFF), true, true, center.x, center.y + 3, center.z, 1, 0, 0, 0, 0);
+		level.sendParticles(ParticleTypes.EXPLOSION_EMITTER, true, true, center.x, center.y + 2, center.z, 6, 8, 2, 8, 0);
+		for (ServerPlayer player : participants()) {
+			if (inFight(player)) {
+				player.hurtServer(level, level.damageSources().indirectMagic(this, this), 10000);
+			}
+		}
+		// Whoever survived it (a totem) faces the next cast.
+		castsCompleted++;
+		castLeft = castTotal;
+	}
+
+	/** A wrong crystal: the cast surges forward. */
+	void castPenalty() {
+		castLeft = Math.max(1, castLeft - (int) Math.round(castTotal * config().wrongCrystalCastPenalty));
+	}
+
+	/** The whole Crystal Order broken: the cast breaks and it crashes down stunned. */
+	void onOrderComplete(ServerLevel level) {
+		level.playSound(null, getX(), getY(), getZ(), FinalRaidSounds.SHIELD_BREAK, SoundSource.HOSTILE, 8f, 0.8f);
+		level.sendParticles(ParticleTypes.END_ROD, true, true, getX(), getY() + 1.5, getZ(), 150, 3, 2, 3, 0.4);
+		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFF2ECFF), true, true, getX(), getY() + 1.5, getZ(), 1, 0, 0, 0, 0);
+		crash(level);
+	}
+
+	/** After a stun in phase 3: back up, a new order, a faster cast. */
+	private void nextCycle(ServerLevel level) {
+		cycle++;
+		int players = playersInFight();
+		puzzle.setup(level, players);
+		startCast(players);
+	}
+
+	// --- Movement by mode ---
+
+	private void modeTick(ServerLevel level) {
+		switch (mode()) {
+			case GROUNDED -> {
 				if (isStaggered()) {
-					// The roar doesn't eat the DPS window.
+					walk(Vec3.ZERO);
+				}
+				// Otherwise fightTick (between attacks) or the attack moves it.
+			}
+			case TAKEOFF -> {
+				Vec3 hover = arena().orbit(orbitAngle, config().hoverRadius, config().hoverHeight);
+				steer(hover, config().flySpeed, 0.2);
+				faceVelocity();
+				flapSound(level);
+				if (position().distanceTo(hover) < arena().scaled(3) + 1 || modeTicks > 100) {
+					setMode(Mode.AIRBORNE);
+				}
+			}
+			case AIRBORNE -> {
+				if (isStaggered()) {
+					setDeltaMovement(getDeltaMovement().scale(0.8));
+				}
+			}
+			case LANDING -> {
+				Vec3 spot = landingSpot();
+				int left = Math.max(1, 40 - modeTicks);
+				setDeltaMovement(spot.subtract(position()).scale(1.0 / left));
+				faceVelocity();
+				if (modeTicks >= 40) {
+					setPos(spot);
+					setDeltaMovement(Vec3.ZERO);
+					setXRot(0);
+					setMode(Mode.GROUNDED);
+					level.playSound(null, getX(), getY(), getZ(), FinalRaidSounds.LAND, SoundSource.HOSTILE, 5f, 0.8f);
+					level.sendParticles(ParticleTypes.CLOUD, true, true, getX(), getY() + 0.5, getZ(), 40, 4, 0.2, 4, 0.1);
+				}
+			}
+			case CRASHING -> {
+				Vec3 perch = arena().perch();
+				int left = Math.max(1, 30 - modeTicks);
+				setDeltaMovement(perch.subtract(position()).scale(1.0 / left));
+				setXRot(30);
+				if (modeTicks % 2 == 0) {
+					level.sendParticles(ParticleTypes.LARGE_SMOKE, true, true, getX(), getY() + 2, getZ(), 4, 1.5, 1, 1.5, 0.02);
+				}
+				if (modeTicks >= 30) {
+					setPos(perch);
+					setDeltaMovement(Vec3.ZERO);
+					setXRot(0);
+					setMode(Mode.STUNNED);
+					level.playSound(null, getX(), getY(), getZ(), FinalRaidSounds.LAND, SoundSource.HOSTILE, 8f, 0.5f);
+					level.sendParticles(ParticleTypes.EXPLOSION, true, true, getX(), getY() + 0.5, getZ(), 8, 3, 0.3, 3, 0);
+					level.sendParticles(ParticleTypes.END_ROD, true, true, getX(), getY() + 2, getZ(), 60, 2.5, 1.5, 2.5, 0.2);
+				}
+			}
+			case STUNNED -> {
+				setDeltaMovement(Vec3.ZERO);
+				if (isStaggered()) {
+					// The phase roar doesn't eat the damage window.
 					modeTicks--;
 				}
 				if (modeTicks % 8 == 0) {
-					// Vulnerable: light spills out of the cracks.
-					level.sendParticles(CRACKS, true, true, getX(), getY() + 2, getZ(), 12, 2.2, 1.0, 2.2, 0);
+					// Light spills out of the cracks: hit it now.
+					level.sendParticles(CRACKS, true, true, getX(), getY() + 1.5, getZ(), 14, 2.5, 0.8, 2.5, 0);
 				}
-				int perch = phase() >= 2 ? config().perchTicksPhase3 : config().perchTicks;
-				if (modeTicks >= perch) {
-					takeOff(level);
+				if (modeTicks >= config().stunTicks) {
+					level.playSound(null, getX(), getY(), getZ(), FinalRaidSounds.ROAR, SoundSource.HOSTILE, 6f, 0.9f);
+					if (phase() >= 1) {
+						nextCycle(level);
+						setMode(Mode.TAKEOFF);
+					} else {
+						setMode(Mode.GROUNDED);
+					}
 				}
 			}
-			case TAKEOFF -> {
-				Vec3 up = arena().orbit(orbitAngle, config().highRadius * 0.5, config().highHeight * 0.7);
-				steer(up, 1.0, 0.2);
-				faceVelocity();
-				flapSound(level);
-				if (modeTicks >= config().takeoffTicks) {
-					setMode(Mode.FLYING);
-				}
+			default -> {
 			}
 		}
 	}
 
 	@Override
 	protected void fightTick(ServerLevel level, @Nullable LivingEntity target) {
-		if (mode() != Mode.FLYING) {
-			return;
+		switch (mode()) {
+			case GROUNDED -> stalk(target);
+			case AIRBORNE -> {
+				hover(0.12);
+				flapSound(level);
+			}
+			default -> {
+			}
 		}
-		circle(0.12);
-		flapSound(level);
 	}
 
-	/**
-	 * Circles the island: close and low in P1 (strafing), high and wide in P2/P3 (out of reach). Attack recoveries use
-	 * it too ({@code ease} higher to swing back onto the circle), so the dragon always returns to its path.
-	 */
-	void circle(double ease) {
-		boolean high = phase() >= 1;
-		double radius = high ? config().highRadius : config().cruiseRadius;
-		double height = high ? config().highHeight : config().cruiseHeight;
-		double speed = config().cruiseSpeed * definition().phase(phase()).speedMult();
+	/** On foot between attacks: walk toward the target until close, facing it. */
+	private void stalk(@Nullable LivingEntity target) {
+		if (target == null) {
+			walk(Vec3.ZERO);
+			return;
+		}
+		double dx = target.getX() - getX();
+		double dz = target.getZ() - getZ();
+		double distance = Math.sqrt(dx * dx + dz * dz);
+		double speed = config().walkSpeed * definition().phase(phase()).speedMult();
+		Vec3 step = distance > arena().scaled(config().walkDistance) + 1 ? new Vec3(dx, 0, dz).scale(speed / Math.max(1e-3, distance)) : Vec3.ZERO;
+		walk(step);
+		if (distance > 0.5) {
+			face(new Vec3(dx, 0, dz));
+		}
+	}
+
+	/** Moves {@code step} horizontally with the feet on the island surface. */
+	void walk(Vec3 step) {
+		double ground = groundAt(getX() + step.x, getZ() + step.z);
+		setDeltaMovement(step.x, (ground - getY()) * 0.5, step.z);
+		setXRot(0);
+	}
+
+	/** In the air between attacks: circle over the island (attack recoveries use it to come back to the circle). */
+	void hover(double ease) {
+		double speed = config().flySpeed * definition().phase(phase()).speedMult();
 		Vec3 center = arena().centerVec();
 		double current = Math.atan2(getZ() - center.z, getX() - center.x);
 		// Keep the angle near where it actually is, so coming back from an attack doesn't cut across the island.
 		if (Math.abs(Math.atan2(Math.sin(current - orbitAngle), Math.cos(current - orbitAngle))) > 0.6) {
 			orbitAngle = current;
 		}
-		orbitAngle += speed / arena().scaled(radius);
-		Vec3 point = arena().orbit(orbitAngle, radius, height + Math.sin(tickCount * 0.05) * 3);
+		orbitAngle += speed / Math.max(1, arena().scaled(config().hoverRadius));
+		Vec3 point = arena().orbit(orbitAngle, config().hoverRadius, config().hoverHeight + Math.sin(tickCount * 0.05) * 2);
 		steer(point, speed * 1.6, ease);
 		faceVelocity();
 	}
@@ -500,6 +865,31 @@ public class FinalDragon extends BossEntity {
 		setXRot((float) Math.clamp(-Math.toDegrees(Math.atan2(v.y, Math.max(0.05, v.horizontalDistance()))), -40, 40));
 	}
 
+	private Vec3 landingSpot() {
+		Vec3 center = arena().centerVec();
+		Vec3 out = new Vec3(getX() - center.x, 0, getZ() - center.z);
+		Vec3 spot = out.lengthSqr() < 1e-3 ? center : center.add(out.normalize().scale(arena().scaled(8)));
+		return new Vec3(spot.x, groundAt(spot.x, spot.z), spot.z);
+	}
+
+	private void land(ServerLevel level) {
+		setMode(Mode.LANDING);
+		level.playSound(null, getX(), getY(), getZ(), FinalRaidSounds.ROAR, SoundSource.HOSTILE, 6f, 1.1f);
+	}
+
+	private void crash(ServerLevel level) {
+		cancelAttack();
+		setMode(Mode.CRASHING);
+		level.playSound(null, getX(), getY(), getZ(), FinalRaidSounds.SCREECH, SoundSource.HOSTILE, 8f, 0.6f);
+	}
+
+	/** Debug: crash it down stunned now. */
+	public void forceStun() {
+		if (level() instanceof ServerLevel level) {
+			crash(level);
+		}
+	}
+
 	private void flapSound(ServerLevel level) {
 		if (tickCount % 22 == 0) {
 			level.playSound(null, getX(), getY(), getZ(), FinalRaidSounds.FLAP, SoundSource.HOSTILE, 3f, 0.7f + random.nextFloat() * 0.2f);
@@ -513,46 +903,6 @@ public class FinalDragon extends BossEntity {
 			double b = Math.acos(random.nextDouble() * 2 - 1);
 			level.sendParticles(SHIELD, true, true, getX() + Math.sin(b) * Math.cos(a) * r, getY() + 1.5 + Math.cos(b) * r * 0.7,
 					getZ() + Math.sin(b) * Math.sin(a) * r, 1, 0, 0, 0, 0);
-		}
-	}
-
-	// ---------------------------------------------------------------------------------------------------------
-	// Grounding: pull, perch, take off
-
-	/** The plates were held: chains drag it to the perch. */
-	void startPull(ServerLevel level) {
-		cancelAttack();
-		Vec3 from = position().subtract(arena().perch());
-		Vec3 flat = new Vec3(from.x, 0, from.z);
-		// It lands facing the way it was dragged in from, head toward the island.
-		perchFacing = flat.lengthSqr() < 1e-3 ? new Vec3(0, 0, 1) : flat.normalize().scale(-1);
-		setMode(Mode.PULLED);
-		level.playSound(null, getX(), getY(), getZ(), FinalRaidSounds.ROAR, SoundSource.HOSTILE, 6f, 1.3f);
-		Vec3 c = arena().centerVec();
-		level.playSound(null, c.x, c.y, c.z, FinalRaidSounds.CHAINS, SoundSource.HOSTILE, 6f, 0.5f);
-	}
-
-	private void land(ServerLevel level) {
-		setMode(Mode.PERCHED);
-		setPos(arena().perch());
-		setDeltaMovement(Vec3.ZERO);
-		level.playSound(null, getX(), getY(), getZ(), FinalRaidSounds.LAND, SoundSource.HOSTILE, 5f, 0.6f);
-		level.sendParticles(ParticleTypes.EXPLOSION, true, true, getX(), getY() + 0.5, getZ(), 6, 3, 0.3, 3, 0);
-		level.sendParticles(ParticleTypes.END_ROD, true, true, getX(), getY() + 2, getZ(), 60, 2.5, 1.5, 2.5, 0.2);
-	}
-
-	private void takeOff(ServerLevel level) {
-		cancelAttack();
-		setMode(Mode.TAKEOFF);
-		plates.disarm(phase() >= 2 ? config().plateRearmTicksPhase3 : config().plateRearmTicks);
-		level.playSound(null, getX(), getY(), getZ(), FinalRaidSounds.ROAR, SoundSource.HOSTILE, 5f, 0.9f);
-		level.sendParticles(ParticleTypes.CLOUD, true, true, getX(), getY() + 0.5, getZ(), 40, 4, 0.2, 4, 0.1);
-	}
-
-	/** Debug: pull it down now (as if the plates were held). */
-	public void forcePerch() {
-		if (level() instanceof ServerLevel level) {
-			startPull(level);
 		}
 	}
 
@@ -581,20 +931,11 @@ public class FinalDragon extends BossEntity {
 		setHealth((float) RaidMath.heal(getHealth(), getMaxHealth(), fraction));
 	}
 
-	/** The last crystal of the order broke. */
-	void onShieldBroken(ServerLevel level) {
-		entityData.set(DATA_SHIELDED, false);
-		level.playSound(null, getX(), getY(), getZ(), FinalRaidSounds.SHIELD_BREAK, SoundSource.HOSTILE, 8f, 0.8f);
-		level.playSound(null, getX(), getY(), getZ(), FinalRaidSounds.ROAR, SoundSource.HOSTILE, 6f, 0.7f);
-		level.sendParticles(ParticleTypes.END_ROD, true, true, getX(), getY() + 1.5, getZ(), 150, 3, 2, 3, 0.4);
-		level.sendParticles(ColorParticleOption.create(ParticleTypes.FLASH, 0xFFF2ECFF), true, true, getX(), getY() + 1.5, getZ(), 1, 0, 0, 0, 0);
-	}
-
-	/** Debug: complete the Crystal Order. */
+	/** Debug: complete the current Crystal Order (it crashes down stunned). */
 	public void skipCrystals() {
-		if (level() instanceof ServerLevel level) {
+		if (level() instanceof ServerLevel level && phase() >= 1) {
 			puzzle.skip(level);
-			onShieldBroken(level);
+			onOrderComplete(level);
 		}
 	}
 
@@ -608,47 +949,38 @@ public class FinalDragon extends BossEntity {
 		}
 		fightTicks = 0;
 		entityData.set(DATA_ENRAGED, false);
-		setMode(Mode.FLYING);
-		setupPhase(level, phase());
+		if (phase() >= 1) {
+			setupFinalStand(level);
+		} else if (mode() != Mode.GROUNDED) {
+			setMode(Mode.GROUNDED);
+		}
 		level.playSound(null, getX(), getY(), getZ(), FinalRaidSounds.ROAR, SoundSource.HOSTILE, 8f, 0.6f);
 	}
 
 	@Override
 	protected void onPhaseEnter(int index) {
-		if (level() instanceof ServerLevel level && isEngaged()) {
-			setupPhase(level, index);
-		}
-	}
-
-	/** What a phase needs on the island: crystals for P1, plates from P2. */
-	private void setupPhase(ServerLevel level, int index) {
-		if (index == 0) {
-			plates.remove(level);
-			puzzle.setup(level, playersInFight());
-		} else {
-			puzzle.clear(level);
-			if (!plates.placed()) {
-				plates.place(level, playersInFight());
-			}
-			if (index >= 2) {
-				// The fall: it shakes its wings and burns brighter.
-				level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, true, true, getX(), getY() + 2, getZ(), 80, 3, 1.5, 3, 0.1);
-			}
+		if (level() instanceof ServerLevel level && isEngaged() && index >= 1) {
+			setupFinalStand(level);
 		}
 	}
 
 	/**
-	 * A wipe (everyone dead, downed or gone for a while): back to the start of the current phase, not the whole fight.
-	 * The phase's mechanic resets with it when the next fight starts.
+	 * A wipe (everyone dead, downed or gone for a while): back to the last checkpoint, not the whole fight. Cleared
+	 * interludes stay cleared; the phase's mechanic is rebuilt when the next fight starts.
 	 */
 	@Override
 	public void resetFight() {
 		int keep = phase();
+		double checkpoint = RaidMath.checkpoint(keep, definition().thresholds(), waveDone, config().waveThreshold, heraldDone,
+				config().heraldThreshold);
 		super.resetFight();
-		if (keep > 0 && isAlive()) {
-			forcePhase(keep);
-			setHealth((float) (getMaxHealth() * RaidMath.phaseStartFraction(keep, definition().thresholds())));
+		if (!isAlive()) {
+			return;
 		}
+		if (keep > 0) {
+			forcePhase(keep);
+		}
+		setHealth((float) (getMaxHealth() * checkpoint));
 	}
 
 	@Override
@@ -657,15 +989,19 @@ public class FinalDragon extends BossEntity {
 			cleanup(level);
 		}
 		fightTicks = 0;
+		interlude = Interlude.NONE;
+		cycle = 0;
+		castLeft = 0;
+		castTotal = 0;
 		entityData.set(DATA_ENRAGED, false);
 		entityData.set(DATA_SHIELDED, false);
-		setMode(Mode.FLYING);
 	}
 
 	private void cleanup(ServerLevel level) {
 		puzzle.clear(level);
 		plates.remove(level);
 		orbs.clear();
+		adds.clear(level);
 	}
 
 	// ---------------------------------------------------------------------------------------------------------
@@ -673,13 +1009,14 @@ public class FinalDragon extends BossEntity {
 
 	/** What incoming damage is multiplied by right now. */
 	double incomingMultiplier() {
-		if (puzzle.shielded()) {
-			return config().shieldDamageMult;
+		Mode mode = mode();
+		if (mode == Mode.FALLING || mode == Mode.DAZED || interlude != Interlude.NONE) {
+			return 0;
 		}
-		return switch (mode()) {
-			case PERCHED -> config().perchDamageMult;
-			case PULLED -> 1.0;
-			default -> phase() >= 1 ? config().airborneDamageMult : 1.0;
+		return switch (mode) {
+			case STUNNED -> config().stunDamageMult;
+			case GROUNDED, CRASHING, LANDING -> 1.0;
+			default -> phase() >= 1 ? config().finalStandAirborneDamageMult : 1.0;
 		};
 	}
 
@@ -690,38 +1027,34 @@ public class FinalDragon extends BossEntity {
 		}
 		double mult = incomingMultiplier();
 		float amount = (float) (damage * mult);
-		boolean shielded = puzzle.shielded();
-		if (shielded) {
-			// The shield holds it in phase 1 until the order is done.
-			float floor = (float) (getMaxHealth() * RaidMath.healthFloor(true, definition().thresholds()));
-			amount = Math.min(amount, Math.max(0, getHealth() - floor));
-		}
+		// Phase 2 can't be pushed past an interlude that hasn't happened yet.
+		float floor = phase() == 0
+				? (float) (getMaxHealth() * RaidMath.healthFloor(waveDone, config().waveThreshold, heraldDone, config().heraldThreshold))
+				: 0;
+		amount = Math.min(amount, Math.max(0, getHealth() - floor));
 		if (mult < 1 && source.getEntity() instanceof Player && tickCount - lastDeflectTick >= 6) {
 			lastDeflectTick = tickCount;
-			level.playSound(null, getX(), getY(), getZ(), FinalRaidSounds.DEFLECT, SoundSource.HOSTILE, 2f, shielded ? 1.6f : 0.9f);
-			level.sendParticles(shielded ? SHIELD : ParticleTypes.CRIT, true, true, getX(), getY() + 1.5, getZ(), 8, 1.5, 1, 1.5, 0.1);
+			level.playSound(null, getX(), getY(), getZ(), FinalRaidSounds.DEFLECT, SoundSource.HOSTILE, 2f, mult <= 0 ? 1.6f : 0.9f);
+			level.sendParticles(mult <= 0 ? SHIELD : ParticleTypes.CRIT, true, true, getX(), getY() + 1.5, getZ(), 8, 1.5, 1, 1.5, 0.1);
 		}
 		if (amount <= 0) {
-			// Still counts as joining the fight, just no damage through the shield.
-			if (source.getEntity() instanceof ServerPlayer player && !player.isSpectator()) {
+			// Still counts as joining the fight, just no damage.
+			if (source.getEntity() instanceof ServerPlayer player && !player.isSpectator() && mode() != Mode.FALLING && mode() != Mode.DAZED) {
 				engage(player);
 			}
 			return false;
 		}
 		boolean hurt = super.hurtServer(level, source, amount);
-		if (shielded) {
-			float floor = (float) (getMaxHealth() * RaidMath.healthFloor(true, definition().thresholds()));
-			if (getHealth() < floor && isAlive()) {
-				setHealth(floor);
-			}
+		if (floor > 0 && getHealth() < floor && isAlive()) {
+			setHealth(floor);
 		}
 		return hurt;
 	}
 
 	@Override
 	public boolean hurtFromPart(ServerLevel level, BossPart part, DamageSource source, float damage) {
-		// The head only counts double while it's down on the perch.
-		double mult = mode() == Mode.PERCHED ? part.damageMultiplier() : 1.0;
+		// The head only counts double while it's down where you can reach it.
+		double mult = mode() == Mode.GROUNDED || mode() == Mode.STUNNED ? part.damageMultiplier() : 1.0;
 		return hurtServer(level, source, (float) (damage * mult));
 	}
 
@@ -817,6 +1150,9 @@ public class FinalDragon extends BossEntity {
 		super.addAdditionalSaveData(output);
 		output.store("RaidOrigin", BlockPos.CODEC, arenaOrigin);
 		output.putBoolean("RaidEnd", endArena);
+		output.putBoolean("RaidWaveDone", waveDone);
+		output.putBoolean("RaidHeraldDone", heraldDone);
+		output.putInt("RaidPhase", phase());
 		List<PlateGate.Replaced> saved = plates.saved();
 		if (!saved.isEmpty()) {
 			output.store("RaidPlates", PlateGate.Replaced.CODEC.listOf(), saved);
@@ -828,9 +1164,13 @@ public class FinalDragon extends BossEntity {
 		super.readAdditionalSaveData(input);
 		arenaOrigin = input.read("RaidOrigin", BlockPos.CODEC).orElse(BlockPos.ZERO);
 		endArena = input.getBooleanOr("RaidEnd", false);
+		waveDone = input.getBooleanOr("RaidWaveDone", false);
+		heraldDone = input.getBooleanOr("RaidHeraldDone", false);
 		if (!endArena) {
 			arena = FinalRaidEnd.arenaAround(home());
 		}
+		// A restart keeps the phase (applied on the first tick; its stagger plays when the fight resumes).
+		restorePhase = input.getIntOr("RaidPhase", 0);
 		input.read("RaidPlates", PlateGate.Replaced.CODEC.listOf()).ifPresent(list -> savedPlates = list);
 	}
 }

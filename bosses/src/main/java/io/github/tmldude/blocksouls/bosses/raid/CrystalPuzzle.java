@@ -22,22 +22,28 @@ import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import io.github.tmldude.blocksouls.bosses.api.Telegraphs;
 import io.github.tmldude.blocksouls.bosses.raid.logic.CrystalOrder;
 import io.github.tmldude.blocksouls.bosses.raid.logic.RaidMath;
 
 /**
- * Phase 1, "The Crystal Order". Crystals stand on the pillars; the obelisk at the island center plays the order they
- * must die in, one crystal at a time: that crystal flares in its sequence color, beams at the obelisk and a chime
- * rings, each note higher than the last. Then a pause, and the show repeats. Rings on the obelisk count progress (one
- * per crystal; lit = done). The right crystal shatters with a bright note; a wrong one bursts harmlessly with a low
- * one, the dragon visibly drinks 5% health from it, the crystal re-forms and the obelisk plays the new order.
+ * Phase 3's kill switch, "The Crystal Order". Crystals stand on the stumps of the fallen towers; the obelisk at the
+ * island center plays the order they must die in, one crystal at a time: that crystal flares in its sequence color,
+ * beams at the obelisk and a chime rings, each note higher than the last. Then a pause, and the show repeats. Rings on
+ * the obelisk count progress (one per crystal; lit = done). The crystals are sealed (dark, a violet shell, hits clink
+ * off) unless the plates are held. The right crystal shatters with a bright note; a wrong one bursts harmlessly with a
+ * low one, the dragon visibly drinks 5% health from it and its cast surges, the crystal re-forms and the obelisk plays
+ * the new order. The whole order broken: the dragon crashes down stunned.
  */
 final class CrystalPuzzle {
 	/** Sequence colors, first to last: white-hot to deep violet ("brighter goes first"). */
 	private static final int[] COLORS = {0xFFFFFF, 0xF1DDFF, 0xE0B8FF, 0xCC90FF, 0xB66BFF, 0xA04CF5, 0x8A34E0, 0x7222C8, 0x5C16AE, 0x480C94};
 
+	private static final DustParticleOptions SEAL = new DustParticleOptions(0x6A2BC4, 1.6f);
+
 	private final FinalDragon dragon;
 	private @Nullable CrystalOrder order;
+	private boolean sealed = true;
 	/** Crystal entity per slot (slots index {@link RaidArena#crystals()}). */
 	private final Map<Integer, UUID> crystals = new LinkedHashMap<>();
 	/** Slots whose crystal is re-forming, with ticks left. */
@@ -77,6 +83,7 @@ final class CrystalPuzzle {
 	/** A fresh puzzle for {@code players}: clears the pillars and places the crystals of a new order. */
 	void setup(ServerLevel level, int players) {
 		clear(level);
+		sealed = true;
 		RaidArena arena = dragon.arena();
 		removeVanillaCrystals(level, arena);
 		List<Integer> open = new ArrayList<>();
@@ -96,7 +103,11 @@ final class CrystalPuzzle {
 
 	/** Vanilla crystals on the pillars would explode for 6 when shot; the raid's own crystals replace them. */
 	private static void removeVanillaCrystals(ServerLevel level, RaidArena arena) {
-		for (Vec3 spot : arena.crystals()) {
+		List<Vec3> spots = new ArrayList<>(arena.crystals());
+		for (int i = 0; i < arena.crystals().size(); i++) {
+			spots.add(arena.crystalSpot(level, i));
+		}
+		for (Vec3 spot : spots) {
 			for (EndCrystal crystal : level.getEntitiesOfClass(EndCrystal.class, new AABB(spot, spot).inflate(3))) {
 				crystal.discard();
 			}
@@ -107,12 +118,13 @@ final class CrystalPuzzle {
 	}
 
 	private void spawnCrystal(ServerLevel level, int slot) {
-		Vec3 spot = dragon.arena().crystals().get(slot);
+		Vec3 spot = dragon.arena().crystalSpot(level, slot);
 		RaidCrystal crystal = FinalRaids.CRYSTAL.create(level, EntitySpawnReason.EVENT);
 		if (crystal == null) {
 			return;
 		}
 		crystal.setOwner(dragon.getUUID(), slot);
+		crystal.setSealed(sealed);
 		crystal.snapTo(spot.x, spot.y, spot.z, 0, 0);
 		level.addFreshEntity(crystal);
 		crystals.put(slot, crystal.getUUID());
@@ -130,6 +142,24 @@ final class CrystalPuzzle {
 		order = null;
 		total = 0;
 		lit = -1;
+	}
+
+	/** Seals or opens every crystal (the plates hold them open). */
+	void seal(ServerLevel level, boolean seal) {
+		if (seal != sealed) {
+			sealed = seal;
+			for (RaidCrystal crystal : standing(level)) {
+				crystal.setSealed(seal);
+				Vec3 at = crystal.position().add(0, 1, 0);
+				level.playSound(null, at.x, at.y, at.z, seal ? FinalRaidSounds.DEFLECT : FinalRaidSounds.CRYSTAL_REFORM, SoundSource.HOSTILE, 2f,
+						seal ? 0.6f : 1.5f);
+			}
+		}
+		if (sealed && level.getGameTime() % 6 == 0) {
+			for (RaidCrystal crystal : standing(level)) {
+				Telegraphs.circle(level, SEAL, crystal.position().add(0, 0.2, 0), 1.6);
+			}
+		}
 	}
 
 	/** Debug: completes the order (the shield drops). */
@@ -150,6 +180,12 @@ final class CrystalPuzzle {
 	void onBroken(ServerLevel level, RaidCrystal crystal, ServerPlayer player) {
 		int slot = crystal.slot();
 		Vec3 at = crystal.position().add(0, 1, 0);
+		if (crystal.sealed()) {
+			// Sealed: the hit clinks off the shell.
+			level.sendParticles(SEAL, true, true, at.x, at.y, at.z, 16, 0.6, 0.6, 0.6, 0);
+			level.playSound(null, at.x, at.y, at.z, FinalRaidSounds.DEFLECT, SoundSource.HOSTILE, 2f, 1.6f);
+			return;
+		}
 		crystal.discard();
 		crystals.remove(slot);
 		unlight(level);
@@ -163,7 +199,7 @@ final class CrystalPuzzle {
 			}
 			case DONE -> {
 				shatter(level, at);
-				dragon.onShieldBroken(level);
+				dragon.onOrderComplete(level);
 			}
 			case WRONG -> {
 				// Bursts harmlessly, the dragon drinks from it, the crystal re-forms, the order is shuffled.
@@ -171,6 +207,7 @@ final class CrystalPuzzle {
 				level.sendParticles(ParticleTypes.REVERSE_PORTAL, true, true, at.x, at.y, at.z, 60, 0.8, 0.8, 0.8, 0.2);
 				level.playSound(null, at.x, at.y, at.z, FinalRaidSounds.CRYSTAL_WRONG, SoundSource.HOSTILE, 3f, 0.6f);
 				dragon.drainFrom(level, at, config().wrongCrystalHeal);
+				dragon.castPenalty();
 				reforming.put(slot, config().crystalReformTicks);
 				restartShow(config().crystalReformTicks / 2);
 			}
@@ -193,7 +230,7 @@ final class CrystalPuzzle {
 		for (var it = reforming.entrySet().iterator(); it.hasNext();) {
 			var entry = it.next();
 			int left = entry.getValue() - 1;
-			Vec3 spot = dragon.arena().crystals().get(entry.getKey()).add(0, 1, 0);
+			Vec3 spot = dragon.arena().crystalSpot(level, entry.getKey()).add(0, 1, 0);
 			if (left % 4 == 0) {
 				level.sendParticles(ParticleTypes.PORTAL, true, true, spot.x, spot.y, spot.z, 12, 0.2, 0.2, 0.2, 1.2);
 			}
@@ -234,7 +271,7 @@ final class CrystalPuzzle {
 		int position = order.destroyed() + index;
 		int color = COLORS[Math.min(position, COLORS.length - 1)];
 		Vec3 obelisk = dragon.arena().obelisk();
-		Vec3 spot = dragon.arena().crystals().get(slot).add(0, 1, 0);
+		Vec3 spot = dragon.arena().crystalSpot(level, slot).add(0, 1, 0);
 		if (showClock % step == 0) {
 			unlight(level);
 			RaidCrystal crystal = crystal(level, slot);

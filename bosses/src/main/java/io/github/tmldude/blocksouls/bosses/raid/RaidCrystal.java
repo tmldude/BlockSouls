@@ -31,6 +31,7 @@ import net.minecraft.world.level.storage.ValueOutput;
  */
 public class RaidCrystal extends Entity {
 	private static final EntityDataAccessor<Integer> DATA_COLOR = SynchedEntityData.defineId(RaidCrystal.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Boolean> DATA_SEALED = SynchedEntityData.defineId(RaidCrystal.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Optional<BlockPos>> DATA_BEAM = SynchedEntityData.defineId(RaidCrystal.class,
 			EntityDataSerializers.OPTIONAL_BLOCK_POS);
 
@@ -63,6 +64,15 @@ public class RaidCrystal extends Entity {
 		return entityData.get(DATA_COLOR);
 	}
 
+	/** Sealed crystals can't be broken (hits clink off); the held plates open them. */
+	public boolean sealed() {
+		return entityData.get(DATA_SEALED);
+	}
+
+	public void setSealed(boolean sealed) {
+		entityData.set(DATA_SEALED, sealed);
+	}
+
 	public @Nullable BlockPos beamTarget() {
 		return entityData.get(DATA_BEAM).orElse(null);
 	}
@@ -76,6 +86,7 @@ public class RaidCrystal extends Entity {
 	@Override
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		builder.define(DATA_COLOR, 0);
+		builder.define(DATA_SEALED, false);
 		builder.define(DATA_BEAM, Optional.empty());
 	}
 

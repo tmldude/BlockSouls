@@ -20,8 +20,9 @@ import net.minecraft.world.phys.Vec3;
 import io.github.tmldude.blocksouls.common.debug.DebugCommands;
 
 /**
- * {@code /bs raid summon | crystals skip | perch | enrage | wipe | info}: drive the final raid without playing through
- * it. Everything but {@code summon} acts on the nearest final dragon within 256 blocks.
+ * {@code /bs raid summon | wave | herald | stun | crystals skip | enrage | wipe | info}: drive the final raid without
+ * playing through it. Everything but {@code summon} acts on the nearest final dragon within 256 blocks. Phase 3:
+ * {@code /bs boss health 30}.
  */
 final class RaidCommands {
 	private static final double NEAR = 256;
@@ -32,52 +33,44 @@ final class RaidCommands {
 	static void init() {
 		DebugCommands.register((root, context) -> root.then(Commands.literal("raid")
 				.then(Commands.literal("summon").executes(RaidCommands::summon))
-				.then(Commands.literal("crystals").then(Commands.literal("skip").executes(ctx -> {
-					FinalDragon dragon = nearest(ctx);
-					dragon.skipCrystals();
-					ctx.getSource().sendSuccess(() -> Component.literal("Crystal Order complete: shield down"), true);
-					return 1;
-				})))
-				.then(Commands.literal("perch").executes(ctx -> {
-					FinalDragon dragon = nearest(ctx);
-					dragon.forcePerch();
-					ctx.getSource().sendSuccess(() -> Component.literal("Dragon pulled to its perch"), true);
-					return 1;
-				}))
-				.then(Commands.literal("enrage").executes(ctx -> {
-					FinalDragon dragon = nearest(ctx);
-					dragon.setFightTicks(FinalRaids.CONFIG.softEnrageTicks);
-					ctx.getSource().sendSuccess(() -> Component.literal("Soft enrage on"), true);
-					return 1;
-				}))
-				.then(Commands.literal("wipe").executes(ctx -> {
-					FinalDragon dragon = nearest(ctx);
-					dragon.resetFight();
-					ctx.getSource().sendSuccess(() -> Component.literal("Wiped: back to the start of phase " + (dragon.phase() + 1)), true);
-					return 1;
-				}))
+				.then(Commands.literal("wave").executes(ctx -> act(ctx, "Zombie wave called", d -> d.beginWave((ServerLevel) d.level()))))
+				.then(Commands.literal("herald").executes(ctx -> act(ctx, "Herald called", d -> d.beginHerald((ServerLevel) d.level()))))
+				.then(Commands.literal("stun").executes(ctx -> act(ctx, "Crashing down stunned", FinalDragon::forceStun)))
+				.then(Commands.literal("crystals").then(Commands.literal("skip").executes(ctx -> act(ctx, "Crystal Order complete",
+						FinalDragon::skipCrystals))))
+				.then(Commands.literal("enrage").executes(ctx -> act(ctx, "Soft enrage on",
+						d -> d.setFightTicks(FinalRaids.CONFIG.softEnrageTicks))))
+				.then(Commands.literal("wipe").executes(ctx -> act(ctx, "Wiped: back to the last checkpoint", FinalDragon::resetFight)))
 				.then(Commands.literal("info").executes(RaidCommands::info))));
 	}
 
+	private static int act(CommandContext<CommandSourceStack> ctx, String done, java.util.function.Consumer<FinalDragon> action)
+			throws CommandSyntaxException {
+		FinalDragon dragon = nearest(ctx);
+		action.accept(dragon);
+		ctx.getSource().sendSuccess(() -> Component.literal(done), true);
+		return 1;
+	}
+
+	/** Spawns the final dragon falling where you stand (the End island in the End, a small arena elsewhere). */
 	private static int summon(CommandContext<CommandSourceStack> ctx) {
 		CommandSourceStack source = ctx.getSource();
 		ServerLevel level = source.getLevel();
-		EnderDragonFight fight = level.getDragonFight();
-		if (fight != null) {
-			FinalRaidEnd.spawn(level, BlockPos.ZERO, fight);
-			source.sendSuccess(() -> Component.literal("Final dragon over the main island (one per world)"), true);
-			return 1;
-		}
 		FinalDragon dragon = FinalRaids.TYPE.create(level, EntitySpawnReason.COMMAND);
 		if (dragon == null) {
 			return 0;
 		}
+		EnderDragonFight fight = level.getDragonFight();
 		BlockPos here = BlockPos.containing(source.getPosition());
-		dragon.setArena(FinalRaidEnd.arenaAround(here), false);
-		Vec3 home = Vec3.atBottomCenterOf(dragon.home());
-		dragon.snapTo(home.x, home.y, home.z, 0, 0);
+		dragon.setArena(fight != null ? RaidArena.fromEnd(level, ((FinalRaidFight) fight).blocksouls$origin()) : FinalRaidEnd.arenaAround(here), fight != null);
+		Vec3 at = source.getPosition().add(0, 12, 0);
+		dragon.snapTo(at.x, at.y, at.z, 0, 0);
+		dragon.startFall();
 		level.addFreshEntity(dragon);
-		source.sendSuccess(() -> Component.literal("Final dragon summoned here (floating crystals, plates around you)"), true);
+		if (fight != null) {
+			((FinalRaidFight) fight).blocksouls$setDragonUuid(dragon.getUUID());
+		}
+		source.sendSuccess(() -> Component.literal("The final dragon falls (phase 2 starts when it rises)"), true);
 		return 1;
 	}
 

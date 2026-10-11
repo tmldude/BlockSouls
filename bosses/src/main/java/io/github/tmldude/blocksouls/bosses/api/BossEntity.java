@@ -99,6 +99,7 @@ public abstract class BossEntity extends Monster {
 	private double damageMultiplier = 1;
 	private boolean scalingApplied;
 	private int attacksFinished;
+	private boolean fogWallEnabled = true;
 
 	protected BossEntity(EntityType<? extends BossEntity> type, Level level) {
 		super(type, level);
@@ -135,10 +136,15 @@ public abstract class BossEntity extends Monster {
 
 	/**
 	 * Whether engaging raises the fog wall ring around {@link #home()}. Open-air arenas (the final raid's whole island)
-	 * turn it off and define the arena through {@link #inArena} instead.
+	 * turn it off and define the arena through {@link #inArena} instead. Default: {@link #setFogWallEnabled}.
 	 */
 	protected boolean raisesFogWall() {
-		return true;
+		return fogWallEnabled;
+	}
+
+	/** Per instance: no fog wall for this boss (e.g. summoned as an add inside another boss's arena). Not saved. */
+	public void setFogWallEnabled(boolean enabled) {
+		this.fogWallEnabled = enabled;
 	}
 
 	/** Distance the boss tries to close to before it stops walking (it still picks ranged attacks from afar). */
