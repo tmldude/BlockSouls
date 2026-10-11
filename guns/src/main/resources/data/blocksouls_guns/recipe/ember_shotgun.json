@@ -1,0 +1,32 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "blocksouls_bosses"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "ERK",
+    "S  "
+  ],
+  "key": {
+    "E": "blocksouls_bosses:ember_barrel",
+    "R": "blocksouls_guns:gun_receiver",
+    "K": "blocksouls_guns:gun_stock",
+    "S": "blocksouls_bosses:ashwyrm_scale"
+  },
+  "result": {
+    "id": "blocksouls_guns:shotgun",
+    "components": {
+      "blocksouls_guns:rarity": "rare",
+      "blocksouls_guns:perks": [
+        "blocksouls_guns:explosive_rounds"
+      ],
+      "minecraft:rarity": "rare"
+    }
+  }
+}

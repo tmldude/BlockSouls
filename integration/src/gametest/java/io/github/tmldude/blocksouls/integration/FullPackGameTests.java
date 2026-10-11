@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -17,8 +18,16 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.item.crafting.SmithingRecipeInput;
+import net.minecraft.world.item.crafting.SmithingTransformRecipe;
 import net.minecraft.world.phys.Vec3;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -37,6 +46,9 @@ import io.github.tmldude.blocksouls.game.run.RunDebug;
 import io.github.tmldude.blocksouls.game.run.RunSystem;
 import io.github.tmldude.blocksouls.game.run.StarterKit;
 import io.github.tmldude.blocksouls.game.run.WaveMath;
+import io.github.tmldude.blocksouls.guns.item.GunRolls;
+import io.github.tmldude.blocksouls.guns.logic.GunRarity;
+import io.github.tmldude.blocksouls.guns.logic.Perk;
 
 /**
  * The whole pack in one server: every mod loads together, ids one module references in another resolve, and the
@@ -87,6 +99,68 @@ public class FullPackGameTests {
 			helper.assertTrue(recipes.byKey(ResourceKey.create(Registries.RECIPE, recipe)).isPresent(), "recipe " + recipe);
 		}
 		helper.succeed();
+	}
+
+	/** Crafting-web recipes that mix modules (boss materials, gunmetal nuggets) load with the full pack. */
+	private static final List<Identifier> CRAFTING_WEB_RECIPES = List.of(CommonIds.id(CommonIds.GUNS, "ember_hand_cannon"),
+			CommonIds.id(CommonIds.GUNS, "ember_shotgun"), CommonIds.id(CommonIds.GUNS, "special_ammo_from_nuggets"),
+			CommonIds.id(CommonIds.GUNS, "special_ammo_from_ashwyrm_scale"),
+			CommonIds.id(CommonIds.WORLD, "blight_forged_helmet_ashwyrm_scaled"),
+			CommonIds.id(CommonIds.WORLD, "blight_forged_chestplate_ashwyrm_scaled"),
+			CommonIds.id(CommonIds.WORLD, "blight_forged_leggings_ashwyrm_scaled"),
+			CommonIds.id(CommonIds.WORLD, "blight_forged_boots_ashwyrm_scaled"));
+
+	@GameTest
+	public void craftingWebRecipesLoad(GameTestHelper helper) {
+		var recipes = helper.getLevel().getServer().getRecipeManager();
+		for (Identifier recipe : CRAFTING_WEB_RECIPES) {
+			helper.assertTrue(recipes.byKey(ResourceKey.create(Registries.RECIPE, recipe)).isPresent(), "recipe " + recipe);
+		}
+		helper.succeed();
+	}
+
+	@GameTest
+	public void emberBarrelCraftsAnExplosiveHandCannon(GameTestHelper helper) {
+		Recipe<?> recipe = recipe(helper, CommonIds.id(CommonIds.GUNS, "ember_hand_cannon"));
+		helper.assertTrue(recipe instanceof ShapedRecipe, "ember hand cannon is a shaped recipe");
+		CraftingInput input = CraftingInput.of(2, 2, List.of(stack(CommonIds.EMBER_BARREL), stack(CommonIds.id(CommonIds.GUNS, "gun_receiver")),
+				stack(CommonIds.ASHWYRM_SCALE), stack(CommonIds.GUNMETAL_INGOT)));
+		ShapedRecipe shaped = (ShapedRecipe) recipe;
+		helper.assertTrue(shaped.matches(input, helper.getLevel()), "the pattern matches");
+		ItemStack gun = shaped.assemble(input);
+		helper.assertTrue(BuiltInRegistries.ITEM.getKey(gun.getItem()).equals(CommonIds.id(CommonIds.GUNS, "hand_cannon")), "result is a hand cannon");
+		helper.assertTrue(GunRolls.isRolled(gun), "comes pre-rolled, so the first inventory tick won't re-roll it");
+		helper.assertTrue(GunRolls.rarity(gun) == GunRarity.RARE, "rare");
+		helper.assertTrue(GunRolls.perks(gun).equals(List.of(Perk.EXPLOSIVE_ROUNDS)), "carries Explosive Rounds");
+		helper.succeed();
+	}
+
+	@GameTest
+	public void ashwyrmScaleSmithsBurnResistantArmor(GameTestHelper helper) {
+		Recipe<?> recipe = recipe(helper, CommonIds.id(CommonIds.WORLD, "blight_forged_chestplate_ashwyrm_scaled"));
+		helper.assertTrue(recipe instanceof SmithingTransformRecipe, "a smithing upgrade");
+		ItemStack base = stack(CommonIds.id(CommonIds.WORLD, "blight_forged_chestplate"));
+		ItemStack result = ((SmithingTransformRecipe) recipe).assemble(new SmithingRecipeInput(stack(CommonIds.ASHWYRM_SCALE), base,
+				new ItemStack(Items.MAGMA_CREAM)));
+		ItemAttributeModifiers before = base.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+		ItemAttributeModifiers after = result.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+		helper.assertTrue(result.getItem() == base.getItem(), "same armor piece");
+		// Armor materials hold floats (0.05F), recipe JSON holds doubles: compare loosely.
+		for (ItemAttributeModifiers.Entry entry : before.modifiers()) {
+			helper.assertTrue(after.modifiers().stream().anyMatch(e -> e.attribute().equals(entry.attribute())
+					&& Math.abs(e.modifier().amount() - entry.modifier().amount()) < 1.0E-4 && e.slot() == entry.slot()), "keeps " + entry.attribute().getRegisteredName());
+		}
+		helper.assertTrue(after.modifiers().stream().anyMatch(e -> e.attribute().equals(Attributes.BURNING_TIME) && e.modifier().amount() < 0),
+				"adds shorter burning");
+		helper.succeed();
+	}
+
+	private static Recipe<?> recipe(GameTestHelper helper, Identifier id) {
+		return helper.getLevel().getServer().getRecipeManager().byKey(ResourceKey.create(Registries.RECIPE, id)).orElseThrow().value();
+	}
+
+	private static ItemStack stack(Identifier item) {
+		return new ItemStack(BuiltInRegistries.ITEM.getValue(item));
 	}
 
 	@GameTest
