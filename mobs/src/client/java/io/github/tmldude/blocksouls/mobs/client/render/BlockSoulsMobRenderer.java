@@ -56,6 +56,8 @@ public class BlockSoulsMobRenderer<T extends HostileMob, M extends EntityModel<M
 		super.extractRenderState(entity, state, partialTicks);
 		state.swing = entity.getSwingAnimation(partialTicks);
 		state.aggressive = entity.isAggressive();
+		state.airborne = !entity.onGround() && !entity.isInWater() && !entity.isPassenger();
+		state.phase = (entity.getId() * 0.618034f) % 1f * 200f;
 		if (entity instanceof WaveMob mob && mob.action() != WaveMob.ACTION_NONE) {
 			state.action = mob.action();
 			state.actionTicks = mob.actionTicks() + partialTicks;

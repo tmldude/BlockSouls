@@ -25,8 +25,11 @@ public final class BruteAnimations {
 	}
 
 	public static class Mutant extends BruteModel {
+		private final ModelPart growth;
+
 		public Mutant(ModelPart root) {
 			super(root);
+			growth = rightArm.getChild("growth");
 		}
 
 		@Override
@@ -43,14 +46,23 @@ public final class BruteAnimations {
 		@Override
 		public void setupAnim(MobRenderState state) {
 			super.setupAnim(state);
+			// The tumor on its shoulder throbs.
+			float throb = 1 + Mth.sin((state.ageInTicks + state.phase) * 0.2f) * 0.06f;
+			growth.xScale = throb;
+			growth.yScale = throb;
+			growth.zScale = throb;
 			if (state.action == MutantBrute.ACTION_THROW) {
-				// Only the right arm hauls the debris back; the left braces.
-				leftArm.xRot = -0.6f;
+				// Only the right arm hauls the debris back, the body twisting into it; the left braces.
+				float w = windup(state);
+				leftArm.xRot = -0.9f;
 				leftArm.zRot = -0.3f;
+				body.yRot -= 0.4f * w;
 			}
 			if (state.action == MutantBrute.ACTION_LEAP_WINDUP) {
 				// Crouch before the jump.
 				body.y += 3 * windup(state);
+				rightLeg.xRot -= 0.3f * windup(state);
+				leftLeg.xRot -= 0.3f * windup(state);
 			}
 		}
 	}

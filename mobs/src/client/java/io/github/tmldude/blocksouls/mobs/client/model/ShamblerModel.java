@@ -2,20 +2,21 @@ package io.github.tmldude.blocksouls.mobs.client.model;
 
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.PartPose;
-import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.model.geom.builders.MeshDefinition;
-import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
 import io.github.tmldude.blocksouls.mobs.client.render.MobRenderState;
 
-/** Hunched humanoid, head lolling, the right arm longer and dragging. Humanoid 64×64 UVs. */
+/**
+ * Hunched corpse in a torn work shirt: head lolling, jaw hanging, the long right arm dragging its knuckles along
+ * the ground, the withered left arm reaching for you. Limps on its bare left leg.
+ */
 public class ShamblerModel extends EntityModel<MobRenderState> {
 	private final ModelPart body;
 	private final ModelPart head;
+	private final ModelPart jaw;
 	private final ModelPart rightArm;
+	private final ModelPart rightForearm;
 	private final ModelPart leftArm;
 	private final ModelPart rightLeg;
 	private final ModelPart leftLeg;
@@ -24,29 +25,16 @@ public class ShamblerModel extends EntityModel<MobRenderState> {
 		super(root);
 		body = root.getChild("body");
 		head = body.getChild("head");
+		jaw = head.getChild("jaw");
 		rightArm = body.getChild("right_arm");
+		rightForearm = rightArm.getChild("right_forearm");
 		leftArm = body.getChild("left_arm");
 		rightLeg = root.getChild("right_leg");
 		leftLeg = root.getChild("left_leg");
 	}
 
 	public static LayerDefinition createBodyLayer() {
-		MeshDefinition mesh = new MeshDefinition();
-		PartDefinition root = mesh.getRoot();
-		// Body pivots at the hips so the hunch leans the whole upper half forward.
-		PartDefinition body = root.addOrReplaceChild("body", CubeListBuilder.create().texOffs(16, 16).addBox(-4, -12, -2, 8, 12, 4),
-				PartPose.offsetAndRotation(0, 12, 0, 0.35f, 0, 0));
-		body.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4, -8, -4, 8, 8, 8),
-				PartPose.offsetAndRotation(0, -12, -1, -0.2f, 0, 0.25f));
-		body.addOrReplaceChild("right_arm", CubeListBuilder.create().texOffs(40, 16).addBox(-3, -2, -2, 4, 15, 4),
-				PartPose.offset(-5, -10, 0));
-		body.addOrReplaceChild("left_arm", CubeListBuilder.create().texOffs(32, 48).addBox(-1, -2, -2, 4, 12, 4),
-				PartPose.offset(5, -10, 0));
-		root.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(0, 16).addBox(-2, 0, -2, 4, 12, 4),
-				PartPose.offset(-1.9f, 12, 0));
-		root.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(16, 48).addBox(-2, 0, -2, 4, 12, 4),
-				PartPose.offset(1.9f, 12, 0));
-		return LayerDefinition.create(mesh, 64, 64);
+		return MobGeometry.shambler();
 	}
 
 	@Override
@@ -54,24 +42,36 @@ public class ShamblerModel extends EntityModel<MobRenderState> {
 		super.setupAnim(state);
 		float pos = state.walkAnimationPos;
 		float speed = state.walkAnimationSpeed;
+		float t = state.ageInTicks + state.phase;
 		head.yRot += state.yRot * Mth.DEG_TO_RAD * 0.7f;
-		head.xRot += state.xRot * Mth.DEG_TO_RAD * 0.5f;
+		head.xRot += Mth.clamp(state.xRot, -30, 30) * Mth.DEG_TO_RAD * 0.5f;
+		// Every few seconds the head jerks, like something snapped in the neck.
+		float jerk = Mth.clamp(Mth.sin(t * 0.11f) * 5 - 4, 0, 1);
+		head.zRot += Mth.sin(t * 1.7f) * 0.2f * jerk;
+		jaw.xRot += Mth.sin(t * 0.09f) * 0.1f;
 
-		rightLeg.xRot = Mth.cos(pos * 0.6662f) * 1.2f * speed;
-		leftLeg.xRot = Mth.cos(pos * 0.6662f + Mth.PI) * 1.2f * speed;
-		// A lurching gait: the body rolls with each step.
-		body.zRot = Mth.cos(pos * 0.6662f) * 0.12f * speed;
+		// A limping lurch: full stride on the clothed leg, a short stiff one on the bare one, body rolling.
+		float gait = pos * 0.6662f;
+		rightLeg.xRot = Mth.cos(gait) * 1.1f * speed;
+		leftLeg.xRot = Mth.cos(gait + Mth.PI) * 0.6f * speed;
+		body.zRot += Mth.cos(gait) * 0.14f * speed;
+		body.xRot += Math.abs(Mth.sin(gait)) * 0.08f * speed;
+		body.y += Math.abs(Mth.cos(gait)) * 0.8f * speed;
 
-		// Left arm reaches out; the long right arm hangs and swings, rising only when it attacks.
-		float reach = state.aggressive ? -1.6f : -1.1f;
-		leftArm.xRot = reach - 0.35f + Mth.sin(state.ageInTicks * 0.067f) * 0.08f;
-		rightArm.xRot = -0.35f + Mth.cos(pos * 0.6662f + Mth.PI) * 0.6f * speed;
+		// The dragging arm trails behind the faster it moves; the reaching arm lifts once it has a target.
+		rightArm.xRot += speed * 0.3f + Mth.cos(gait + Mth.PI) * 0.12f * speed;
+		rightArm.zRot += Mth.sin(t * 0.05f) * 0.03f;
+		leftArm.xRot += (state.aggressive ? -0.4f : 0) + Mth.sin(t * 0.067f) * 0.08f + Mth.cos(gait) * 0.2f * speed;
+		leftArm.zRot += Mth.cos(t * 0.09f) * 0.05f;
+
 		if (state.swing > 0) {
+			// The long arm comes up and over like a club.
 			float s = Mth.sin(state.swing * Mth.PI);
-			rightArm.xRot -= s * 2.2f;
-			leftArm.xRot -= s * 0.6f;
+			rightArm.xRot -= s * 2.3f;
+			rightForearm.xRot -= s * 0.5f;
+			leftArm.xRot -= s * 0.3f;
+			body.xRot -= s * 0.2f;
+			jaw.xRot += s * 0.4f;
 		}
-		rightArm.zRot = 0.1f + Mth.cos(state.ageInTicks * 0.09f) * 0.04f;
-		leftArm.zRot = -0.1f - Mth.cos(state.ageInTicks * 0.09f) * 0.04f;
 	}
 }
