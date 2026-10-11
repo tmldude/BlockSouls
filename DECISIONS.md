@@ -174,6 +174,7 @@ My defaults, to confirm:
   Host-from-your-game (tunnel mod) stays a fallback only if a 26.3 tunnel mod exists.
 - **Players: Modrinth project**, auto-published by `release.yml` (needs `MODRINTH_TOKEN` + `MODRINTH_PROJECT_ID`
   repo secrets from the owner). My defaults for what wasn't specified:
-  - **Unlisted** until v1.0 (friends get the link), public after.
+  - **Private, permanently** (owner): the Modrinth project stays unlisted (only people with the link), and the
+    server is whitelist-only.
   - **Watchtower applies updates automatically in a 05:00 server-time window** only, so nobody is kicked mid-run.
-  - **No domain**: friends connect by IP; a DNS record can be added any time.
+  - **No domain** (owner): friends connect by the server's IP; a domain can be added later.
