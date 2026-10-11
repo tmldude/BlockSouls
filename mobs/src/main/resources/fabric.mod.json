@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "blocksouls_mobs",
+	"version": "${version}",
+	"name": "BlockSouls Mobs",
+	"description": "Wave zombies, mutants and Nether mobs.",
+	"authors": [
+		"tmldude"
+	],
+	"license": "MIT",
+	"contact": {
+		"sources": "https://github.com/tmldude/blocksouls"
+	},
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"io.github.tmldude.blocksouls.mobs.BlockSoulsMobs"
+		],
+		"client": [
+			"io.github.tmldude.blocksouls.mobs.client.BlockSoulsMobsClient"
+		]
+	},
+	"mixins": [
+		"blocksouls_mobs.mixins.json",
+		{
+			"config": "blocksouls_mobs.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=${loader_version}",
+		"minecraft": "~${minecraft_version}",
+		"java": ">=25",
+		"fabric-api": "*",
+		"blocksouls_common": "*"
+	}
+}

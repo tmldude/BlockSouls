@@ -158,3 +158,8 @@ My defaults, to confirm:
   sub-sessions**, not re-skinned vanilla bodies.
 - **Execution:** full autonomy for PRs, merges and codebase management; questions only when truly blocking.
   This session orchestrates; workers run as parallel sessions per PLAN.md §8.
+
+- **Update:** the MVP now ships **all 4 field bosses fully built** (Furnace Knight, Pale Rider, Ashwyrm, Stormplate
+  Knight) with custom models.
+- **Distribution (PLAN.md §2d):** Modrinth project auto-published by CI, a "host from your own game" tunnel mod, a
+  one-command VPS install script with Watchtower auto-updates, a server-pack zip, and a version check on join.

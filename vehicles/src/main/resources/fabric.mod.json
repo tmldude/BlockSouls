@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "blocksouls_vehicles",
+	"version": "${version}",
+	"name": "BlockSouls Vehicles",
+	"description": "Repairable wrecked vehicles.",
+	"authors": [
+		"tmldude"
+	],
+	"license": "MIT",
+	"contact": {
+		"sources": "https://github.com/tmldude/blocksouls"
+	},
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"io.github.tmldude.blocksouls.vehicles.BlockSoulsVehicles"
+		],
+		"client": [
+			"io.github.tmldude.blocksouls.vehicles.client.BlockSoulsVehiclesClient"
+		]
+	},
+	"mixins": [
+		"blocksouls_vehicles.mixins.json",
+		{
+			"config": "blocksouls_vehicles.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=${loader_version}",
+		"minecraft": "~${minecraft_version}",
+		"java": ">=25",
+		"fabric-api": "*",
+		"blocksouls_common": "*"
+	}
+}

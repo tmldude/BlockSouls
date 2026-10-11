@@ -120,7 +120,7 @@ The first goal is one complete, fun run end to end, not every idea. Everything e
 | Mobs | 5 wave types + Mutant Brute elite + 2 Nether mobs; block breaking | Full roster, Stalker, Spreader |
 | World | Scrap, 1 new ore, 2 wreck/ruin structures, loot injection, Ender Eye sources, infected Nether look | Radiation zones, more structures |
 | Vehicles | 4-seat kart from a repaired wreck | Gun truck, hover speeder |
-| Bosses | Framework, boss bar, lock-on, **Furnace Knight** + **Pale Rider** (2 of 4 field bosses), **final dragon raid** | Ashwyrm, Stormplate Knight, side raid |
+| Bosses | Framework, boss bar, lock-on, **all 4 field bosses** (Furnace Knight, Pale Rider, Ashwyrm, Stormplate Knight) with custom models, **final dragon raid** | Side raid, more bosses |
 | Art | Procedural, in-theme placeholders for everything | Real models, sounds |
 
 ## 1. Repo skeleton
@@ -196,6 +196,27 @@ blocksouls/
 - Hetzner CPX31 (or equivalent, 8GB RAM) running Docker. `docker compose up -d`. Document in `docker/HOSTING.md`: provisioning, firewall (only 22 + 25565), updating (`docker compose pull && docker compose up -d`).
 
 **Done when:** `docker compose up` locally runs a joinable Fabric server with Fabric API + the empty feature mods; the `.mrpack` imports cleanly into Modrinth App; a friend can connect.
+
+### 2d. Distribution: make it super easy
+
+**Players: one click, auto-updates.**
+- The modpack is published as a **Modrinth project**. `release.yml` uploads every release automatically (needs a
+  `MODRINTH_TOKEN` repo secret and the project id).
+- Players install the Modrinth App, search "BlockSouls", click Install, then Play. Updates show up in the app.
+- A GitHub release `.mrpack` stays as the fallback (drag into Modrinth App or Prism).
+- **Version check on join:** a client whose BlockSouls version doesn't match the server's is turned away with one
+  plain line: "Update BlockSouls in the Modrinth App".
+
+**Hosting: three ways, easiest first.**
+1. **Host from your own game:** the pack bundles a tunnel mod (e4mc or equivalent, if it has a 26.3 build). Open
+   to LAN → it prints a public address → friends join it. No server, no port forwarding. The whole game loop
+   runs in the integrated server.
+2. **Always-on server with one command:** `curl -fsSL <raw github url>/docker/install.sh | sh` on any fresh Linux
+   VPS. It installs Docker, writes `.env` interactively (whitelist, ops), starts the stack and opens the firewall.
+   **Watchtower** in compose pulls each new release image automatically, so updating is just tagging a release.
+3. **Rented Minecraft hosts:** a server-pack zip on each release (mods + config) for hosts that take uploads.
+
+**New run:** `/bs run new` (admin) restarts the server onto a fresh world, keeping the difficulty setting.
 
 ## 3. Phase A — Movement (mod: `movement`)
 
@@ -314,7 +335,7 @@ Each weapon = one JSON definition in the framework's format + a GeckoLib or JSON
 
   | Boss | Where | Drop |
   |---|---|---|
-  | **Furnace Knight** (MVP) | Guards a Nether bastion; mid-run milestone | Blaze rods, an Ender Eye, a blight core |
+  | **Furnace Knight** | Guards a Nether bastion; mid-run milestone | Blaze rods, an Ender Eye, a blight core |
   | **Ashwyrm** | A dragon that lands on mountains | Fire-themed gun parts |
   | **Stormplate Knight** | A towering knight in dragon-scale armor, lightning spear, ruined arena | Dragonscale armor set |
   | **The Pale Rider** | A ghostly horseman roaming plains at night | **Wraith Steed whistle**: a summonable spectral horse with a double jump |
@@ -391,7 +412,8 @@ Rules for parallel work:
 
 ### Wave 3: intersections (sequential)
 Wire it all together: mob roster into waves, drops into recipes into progression gates, boons tuned,
-balance to a ~2-hour run, performance with 4 players at wave 10, full-run gametest with scripted waves →
+balance to a ~2-hour run, performance with 4 players at wave 10, full-run gametest with scripted waves,
+distribution (§2d: Modrinth publish, install script, Watchtower, server pack, version check) →
 `v1.0.0`.
 
 Each wave ends with its branches merged to `main` and CI green, before the next wave starts.

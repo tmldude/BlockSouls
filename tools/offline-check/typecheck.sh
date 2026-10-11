@@ -4,7 +4,8 @@
 REPO=$(cd "$(dirname "$0")/../.." && pwd)
 H=${OFFLINE_CHECK_HOME:-$HOME/.cache/blocksouls-offline-check}
 JAVAC=${JAVA25_HOME:-/usr/lib/jvm/java-25-openjdk-amd64}/bin/javac
-MODS=${*:-common movement guns zombies bosses}
+ALL=$(sed -n "s/^include //p" "$REPO/settings.gradle" | tr -d "',")
+MODS=${*:-$ALL}
 OUT=$H/typecheck-out
 
 SP="$H/mc/client:$H/DataFixerUpper/src/main/java:$H/brigadier/src/main/java:$H/fabric-loader/src/main/java"
