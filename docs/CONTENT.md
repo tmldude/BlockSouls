@@ -37,8 +37,8 @@ content itself.
 
 ## Crafting: every item belongs to the web
 
-The goal: nothing is a dead end, drops always matter, and progression stays vanilla-shaped (overworld → Nether →
-stronghold → End, new tiers slot into existing ones).
+The goal: nothing is a dead end, drops always matter, and progression stays tiered (overworld → Nether → End in
+Classic, the act chain in v2's Expedition; new tiers slot into existing ones).
 
 - **R1: every drop is an ingredient in at least 2 recipes.** Any BlockSouls item that drops from a mob, boss, chest,
   ore or wave loot must be an ingredient in two or more recipes (different results), so picking it up always means
