@@ -1,6 +1,10 @@
 {
   "tier": "rare",
   "icon": "blocksouls_game:boon/hollow_bones",
+  "levels": 1,
+  "tags": [
+    "storm"
+  ],
   "effects": [
     {
       "type": "trait",

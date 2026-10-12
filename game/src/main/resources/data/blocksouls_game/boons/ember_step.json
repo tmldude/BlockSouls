@@ -1,0 +1,15 @@
+{
+  "icon": "blocksouls_game:boon/ember_step",
+  "tier": "rare",
+  "keystone": true,
+  "tags": [
+    "on_roll",
+    "fire"
+  ],
+  "effects": [
+    {
+      "type": "rule",
+      "rule": "ember_step"
+    }
+  ]
+}

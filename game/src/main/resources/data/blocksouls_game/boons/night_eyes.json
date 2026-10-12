@@ -1,6 +1,10 @@
 {
   "tier": "common",
   "icon": "blocksouls_game:boon/night_eyes",
+  "levels": 1,
+  "tags": [
+    "on_precision"
+  ],
   "effects": [
     {
       "type": "effect",

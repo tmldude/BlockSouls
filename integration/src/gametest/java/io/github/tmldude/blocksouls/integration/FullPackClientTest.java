@@ -72,6 +72,15 @@ public class FullPackClientTest implements FabricClientGameTest {
 			context.waitTicks(15);
 			context.takeScreenshot("04c-abilities");
 
+			// v2 builds: a keystone (gold key mark), a curse (red frame) in the row, two trinkets right of the hotbar and the
+			// build line top-left ("Kinetic · Fire").
+			server.runCommand("bs boon give @p blocksouls_game:powder_burn");
+			server.runCommand("bs curse give @p blocksouls_game:hemorrhage");
+			server.runCommand("bs trinket give @p blocksouls_game:last_shell");
+			server.runCommand("bs trinket give @p blocksouls_game:magnet_core");
+			context.waitTicks(10);
+			context.takeScreenshot("04c-build-line-and-trinkets");
+
 			// A wave in progress (mobs come from 24-40 blocks out).
 			server.runCommand("kill @e[type=blocksouls_mobs:shambler,nbt={NoAI:1b}]");
 			context.waitTicks(200);

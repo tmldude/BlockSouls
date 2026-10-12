@@ -1,6 +1,10 @@
 {
   "tier": "legendary",
   "icon": "blocksouls_game:boon/sky_rider",
+  "levels": 1,
+  "tags": [
+    "storm"
+  ],
   "effects": [
     {
       "type": "item",

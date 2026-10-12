@@ -1,7 +1,10 @@
 {
   "tier": "rare",
   "icon": "blocksouls_game:boon/slippery",
-  "stackable": 2,
+  "levels": 3,
+  "tags": [
+    "on_roll"
+  ],
   "effects": [
     {
       "type": "trait",

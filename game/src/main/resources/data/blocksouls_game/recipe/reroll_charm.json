@@ -1,0 +1,25 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "blocksouls_world"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " S ",
+    "GSG",
+    " S "
+  ],
+  "key": {
+    "S": "blocksouls_game:soul",
+    "G": "blocksouls_world:gunmetal_ingot"
+  },
+  "result": {
+    "id": "blocksouls_game:reroll_charm",
+    "count": 1
+  }
+}

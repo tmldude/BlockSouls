@@ -1,6 +1,10 @@
 {
   "tier": "rare",
   "icon": "blocksouls_game:boon/quickpick",
+  "levels": 2,
+  "tags": [
+    "kinetic"
+  ],
   "effects": [
     {
       "type": "effect",

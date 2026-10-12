@@ -1,7 +1,10 @@
 {
   "tier": "common",
   "icon": "blocksouls_game:boon/iron_skin",
-  "stackable": 2,
+  "levels": 3,
+  "tags": [
+    "heal"
+  ],
   "effects": [
     {
       "type": "attribute",
