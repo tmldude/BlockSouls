@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.gametest.v1.GameTest;
 
 import io.github.tmldude.blocksouls.common.act.Acts;
 import io.github.tmldude.blocksouls.common.event.ActEvents;
+import io.github.tmldude.blocksouls.common.event.ConfigEvents;
 import io.github.tmldude.blocksouls.common.event.RunEvents;
 import io.github.tmldude.blocksouls.common.run.RunPhase;
 import io.github.tmldude.blocksouls.common.run.Runs;
@@ -209,6 +210,26 @@ public class ActGameTests {
 		helper.assertTrue(EVENTS.stream().noneMatch(e -> e.startsWith("started:") || e.startsWith("entered:")),
 				"no act events in classic, " + EVENTS);
 		RunDebug.reset(server);
+		helper.succeed();
+	}
+
+	@GameTest(environment = "blocksouls_game_test:act_reload", maxTicks = 40)
+	public void configReloadReparsesTheActList(GameTestHelper helper) {
+		MinecraftServer server = helper.getLevel().getServer();
+		tearDown(helper);
+		RunConfig config = RunSystem.config();
+		helper.assertTrue(Acts.all(server).size() == 1, "classic reports one act before the reload");
+		// Edit the live config the way /bs config reload does, then fire RELOADED: the cached act list
+		// (the one thing the spine parses at init) must follow. Everything else is read at use time.
+		config.runShape = "expedition";
+		config.acts = new ArrayList<>(List.of(
+				new RunConfig.ActSpec("blocksouls_game:reloaded_act", "minecraft:overworld", "Reloaded Act")));
+		ConfigEvents.RELOADED.invoker().onReloaded(RunConfig.FILE, config);
+		helper.assertTrue(Acts.all(server).size() == 1 && Acts.all(server).getFirst().id().toString().equals("blocksouls_game:reloaded_act"),
+				"the act list follows the reload, was " + Acts.all(server));
+		helper.assertTrue(Acts.current(server).displayName().equals("Reloaded Act"), "current act re-resolves");
+		tearDown(helper);
+		helper.assertTrue(Acts.current(server).equals(Acts.CLASSIC), "defaults restored");
 		helper.succeed();
 	}
 }
