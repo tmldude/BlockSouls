@@ -31,6 +31,7 @@ import io.github.tmldude.blocksouls.common.CommonIds;
 import io.github.tmldude.blocksouls.common.Config;
 import io.github.tmldude.blocksouls.common.Networking;
 import io.github.tmldude.blocksouls.common.event.BossEvents;
+import io.github.tmldude.blocksouls.common.event.ConfigEvents;
 import io.github.tmldude.blocksouls.common.event.RunEvents;
 import io.github.tmldude.blocksouls.common.mob.WaveMobSpec;
 import io.github.tmldude.blocksouls.common.mob.WaveMobs;
@@ -68,6 +69,19 @@ public final class RunSystem {
 		Runs.setProvider(server -> RunData.get(server).state());
 		ActMachine.load(config);
 		ActMachine.installProvider();
+		// /bs config reload game-run: the fresh read lands in this same instance, so everything read at use
+		// time (runShape, portalChargeSeconds, dayLengthMinutes, ...) follows on its own; re-run what init
+		// derives from it — the defaults migration of an old file and the parsed act list — and re-sync.
+		ConfigEvents.RELOADED.register((name, reloaded) -> {
+			if (reloaded != config) {
+				return;
+			}
+			if (RunConfig.migrate(config)) {
+				Config.save(RunConfig.FILE, config);
+			}
+			ActMachine.load(config);
+			RunSync.markDirty();
+		});
 		Networking.registerClientbound(RunSyncPayload.TYPE, RunSyncPayload.CODEC);
 
 		ServerLifecycleEvents.SERVER_STARTED.register(RunSystem::onServerStarted);
