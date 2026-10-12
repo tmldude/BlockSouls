@@ -92,8 +92,9 @@ feel pass) where `PLAN2.md` §3j or the brief was silent. Same rules as `DECISIO
 - **Loot:** `roll_perks` grew a `"tier": "exotic"` that swaps any gun entry for a random exotic (weights in
   `loot.exoticWeights`), so tables drop exotics without naming them. Guns adds an exotic pool to the tables in
   `loot.exoticTables` (boss legendary-gun 20%, final dragon 100%, legendary wave tier 1%) through
-  `LootTableEvents.MODIFY`, so no other module's loot JSON changes. The trinket-style offer hook (v2-builds) isn't
-  merged; `tier: "exotic"` is the drop path until pylons and offers exist.
+  `LootTableEvents.MODIFY`, so no other module's loot JSON changes. v2-builds' offer API (`BuildHooks.offerTrinkets`,
+  #51) only offers trinkets (a Trinket Case item), so an exotic pick-1-of-3 would need a new contract; the loot-table
+  path stays the drop path (orchestrator, 2026-10-12) until a generic offer hook exists.
 - **Crafting web:** exotics are exempt end items. **Exotic Catalyst** (soul-infused: 2 souls + 2 gunmetal + a gun
   receiver) is the soul recipe on this side, gated with `fabric:registry_contains` on `blocksouls_game:soul` so
   it only loads once v2-builds registers the item; it feeds five smithing recipes (catalyst + hand cannon →
