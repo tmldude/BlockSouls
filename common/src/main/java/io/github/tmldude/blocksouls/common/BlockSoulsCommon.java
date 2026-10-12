@@ -2,6 +2,7 @@ package io.github.tmldude.blocksouls.common;
 
 import net.fabricmc.api.ModInitializer;
 
+import io.github.tmldude.blocksouls.common.advancement.Milestones;
 import io.github.tmldude.blocksouls.common.debug.DebugCommands;
 import io.github.tmldude.blocksouls.common.party.PartyScaling;
 import io.github.tmldude.blocksouls.common.player.Capabilities;
@@ -19,5 +20,6 @@ public class BlockSoulsCommon implements ModInitializer {
 		VersionCheck.init();
 		PartyScaling.load();
 		Threat.load();
+		Milestones.init();
 	}
 }
