@@ -14,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.fabricmc.loader.api.FabricLoader;
 
 import io.github.tmldude.blocksouls.common.CommonIds;
 import io.github.tmldude.blocksouls.common.event.CombatEvents;
@@ -229,6 +230,9 @@ public class ExoticsGameTests {
 	public void exoticSmithingRecipesLoad(GameTestHelper helper) {
 		var recipes = helper.getLevel().getServer().getRecipeManager();
 		for (var exotic : GunsItems.exotics()) {
+			if (exotic == GunsItems.STRAY_VERDICT && !FabricLoader.getInstance().isModLoaded(CommonIds.WORLD)) {
+				continue; // its addition is world's gunmetal ingot, so the recipe is load-gated on that module
+			}
 			Identifier id = CommonIds.id(CommonIds.GUNS, exotic.weaponId());
 			helper.assertTrue(recipes.byKey(ResourceKey.create(Registries.RECIPE, id)).isPresent(), "smithing recipe " + id);
 		}
