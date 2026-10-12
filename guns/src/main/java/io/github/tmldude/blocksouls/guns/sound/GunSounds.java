@@ -25,6 +25,9 @@ public final class GunSounds {
 	public static final SoundEvent PERK_OUTLAW = register("gun.perk.outlaw");
 	public static final SoundEvent PERK_RAMPAGE = register("gun.perk.rampage");
 	public static final SoundEvent PERK_VORPAL = register("gun.perk.vorpal");
+	/** Stings when a rare / legendary gun lands on the ground. */
+	public static final SoundEvent DROP_RARE = register("gun.drop.rare");
+	public static final SoundEvent DROP_LEGENDARY = register("gun.drop.legendary");
 
 	private GunSounds() {
 	}

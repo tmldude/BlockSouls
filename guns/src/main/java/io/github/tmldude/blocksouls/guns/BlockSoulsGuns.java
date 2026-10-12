@@ -12,6 +12,7 @@ import io.github.tmldude.blocksouls.common.Config;
 import io.github.tmldude.blocksouls.guns.command.GunCommands;
 import io.github.tmldude.blocksouls.guns.item.GunsItems;
 import io.github.tmldude.blocksouls.guns.loot.GunLoot;
+import io.github.tmldude.blocksouls.guns.loot.RarityBeam;
 import io.github.tmldude.blocksouls.guns.shoot.GunServer;
 import io.github.tmldude.blocksouls.guns.sound.GunSounds;
 import io.github.tmldude.blocksouls.guns.weapon.Weapons;
@@ -25,6 +26,9 @@ public class BlockSoulsGuns implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		CONFIG = Config.load("guns", GunsConfig.class, GunsConfig::new);
+		if (GunsConfig.migrate(CONFIG)) {
+			Config.save("guns", CONFIG);
+		}
 		applyWeaponStats();
 		// An integrated server must not keep stats synced from a server the client visited earlier.
 		ServerLifecycleEvents.SERVER_STARTING.register(server -> applyWeaponStats());
@@ -32,6 +36,7 @@ public class BlockSoulsGuns implements ModInitializer {
 		GunSounds.init();
 		GunsItems.register();
 		GunLoot.register();
+		RarityBeam.register();
 		GunServer.register();
 		GunCommands.register();
 	}

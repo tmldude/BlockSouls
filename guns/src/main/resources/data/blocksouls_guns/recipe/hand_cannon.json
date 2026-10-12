@@ -2,13 +2,11 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "pattern": [
-    "BR",
-    " I"
+    "BR"
   ],
   "key": {
     "B": "blocksouls_guns:gun_barrel",
-    "R": "blocksouls_guns:gun_receiver",
-    "I": "minecraft:iron_ingot"
+    "R": "blocksouls_guns:gun_receiver"
   },
   "result": {
     "id": "blocksouls_guns:hand_cannon"

@@ -22,6 +22,9 @@ public class BlockSoulsMobs implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		CONFIG = Config.load("mobs", MobsConfig.class, MobsConfig::new);
+		if (MobsConfig.migrate(CONFIG)) {
+			Config.save("mobs", CONFIG);
+		}
 		MobSounds.init();
 		MobEntities.init();
 		MobWaves.init();

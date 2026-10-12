@@ -10,7 +10,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "GIG"
+    "IGI"
   ],
   "key": {
     "G": "blocksouls_world:gunmetal_ingot",
