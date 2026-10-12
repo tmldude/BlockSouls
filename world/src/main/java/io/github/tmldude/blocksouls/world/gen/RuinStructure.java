@@ -3,6 +3,7 @@ package io.github.tmldude.blocksouls.world.gen;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.LongFunction;
+import java.util.function.ToIntFunction;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -19,8 +20,11 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.storage.loot.LootTable;
 
+import io.github.tmldude.blocksouls.world.BlockSoulsWorld;
+import io.github.tmldude.blocksouls.world.WorldConfig;
 import io.github.tmldude.blocksouls.world.gen.layout.CheckpointLayout;
 import io.github.tmldude.blocksouls.world.gen.layout.Layout;
+import io.github.tmldude.blocksouls.world.gen.layout.ScrapScatter;
 import io.github.tmldude.blocksouls.world.gen.layout.WreckLayout;
 
 /**
@@ -31,9 +35,9 @@ import io.github.tmldude.blocksouls.world.gen.layout.WreckLayout;
 public class RuinStructure extends Structure {
 	public enum Kind implements StringRepresentable {
 		/** Site: corners 2 blocks out within 2 blocks of the centre's height. */
-		WRECK(2, 2, StructurePlacer.WRECK_LOOT, WreckLayout::generate),
+		WRECK(2, 2, StructurePlacer.WRECK_LOOT, WreckLayout::generate, gen -> gen.wreckExtraScrapPiles),
 		/** Site: corners 5 blocks out within 3 blocks of the centre's height. */
-		CHECKPOINT(5, 3, StructurePlacer.CHECKPOINT_LOOT, CheckpointLayout::generate);
+		CHECKPOINT(5, 3, StructurePlacer.CHECKPOINT_LOOT, CheckpointLayout::generate, gen -> gen.checkpointExtraScrapPiles);
 
 		public static final Codec<Kind> CODEC = StringRepresentable.fromEnum(Kind::values);
 
@@ -41,16 +45,19 @@ public class RuinStructure extends Structure {
 		public final int maxStep;
 		public final ResourceKey<LootTable> loot;
 		private final LongFunction<Layout> layout;
+		private final ToIntFunction<WorldConfig.Gen> extraScrap;
 
-		Kind(int halfSize, int maxStep, ResourceKey<LootTable> loot, LongFunction<Layout> layout) {
+		Kind(int halfSize, int maxStep, ResourceKey<LootTable> loot, LongFunction<Layout> layout, ToIntFunction<WorldConfig.Gen> extraScrap) {
 			this.halfSize = halfSize;
 			this.maxStep = maxStep;
 			this.loot = loot;
 			this.layout = layout;
+			this.extraScrap = extraScrap;
 		}
 
+		/** The seeded layout plus the extra scrap piles {@code world.json} asks for around it. */
 		public Layout layout(long seed) {
-			return layout.apply(seed);
+			return ScrapScatter.add(layout.apply(seed), seed, extraScrap.applyAsInt(BlockSoulsWorld.CONFIG.gen));
 		}
 
 		@Override
