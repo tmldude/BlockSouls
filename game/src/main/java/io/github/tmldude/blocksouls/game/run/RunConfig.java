@@ -11,6 +11,14 @@ import java.util.Map;
  */
 public class RunConfig {
 	public static final String FILE = "game-run";
+	/** Defaults revision {@link #migrate} brings older files up to. */
+	public static final int CURRENT_DEFAULTS = 1;
+
+	/**
+	 * Which defaults revision this file was written against. Missing in files from before the field existed (reads as
+	 * 0), so {@link #migrate} can update values that were never changed by hand.
+	 */
+	public int defaultsVersion;
 
 	/**
 	 * The run's shape: {@code "classic"} is the v1 open-world 7-night overworld run (the default until v2
@@ -36,16 +44,16 @@ public class RunConfig {
 	public String nextRunDifficulty = "";
 
 	/** Real minutes for one full day/night cycle (vanilla: 20). */
-	public double dayLengthMinutes = 17.0;
+	public double dayLengthMinutes = 12.0;
 	/** Day times (mod 24000). */
 	public int duskCueTime = 11500;
 	public int duskTime = 13000;
 	public int dawnTime = 23000;
 
 	/** Waves per night, by night number (the last value repeats). */
-	public List<Integer> wavesPerNight = new ArrayList<>(List.of(1, 1, 2, 2, 2, 2, 2, 3));
+	public List<Integer> wavesPerNight = new ArrayList<>(List.of(2, 2, 2, 3, 3, 3, 3, 4));
 	public int endlessExtraWavesPerNight = 1;
-	public int waveBreakSeconds = 20;
+	public int waveBreakSeconds = 8;
 	/** A new wave only starts if at least this much (real) night is left. */
 	public int minNightLeftSeconds = 60;
 
@@ -89,7 +97,7 @@ public class RunConfig {
 	public double sprinterSpeedBonus = 0.3;
 
 	/** Chance that a wave mob killed by a player drops from the wave's tier table. */
-	public double dropChance = 0.35;
+	public double dropChance = 0.5;
 	/** Tier odds by wave: the last entry whose fromWave ≤ wave applies. Weights, normalized. */
 	public List<TierOdds> tierOdds = new ArrayList<>(List.of(
 			new TierOdds(1, 1, 0, 0),
@@ -97,10 +105,40 @@ public class RunConfig {
 			new TierOdds(7, 0.65, 0.3, 0.05)));
 
 	/** Starter Pistols break when this wave ends. Late joiners get one only while wave ≤ this. */
-	public int starterPistolLastWave = 3;
+	public int starterPistolLastWave = 4;
 
 	/** Seconds between client sync packets while a timer is counting down. */
 	public int syncIntervalSeconds = 1;
+
+	/**
+	 * Brings a config written against older defaults up to date: every value still at its old default takes the new one,
+	 * anything changed by hand is kept. Returns whether anything changed (so the caller saves the file).
+	 */
+	public static boolean migrate(RunConfig config) {
+		if (config.defaultsVersion >= CURRENT_DEFAULTS) {
+			return false;
+		}
+		// 1: the playtest pacing pass (v0.10.1): shorter days, more waves, shorter breaks, more drops.
+		if (config.defaultsVersion < 1) {
+			if (config.dayLengthMinutes == 17.0) {
+				config.dayLengthMinutes = 12.0;
+			}
+			if (List.of(1, 1, 2, 2, 2, 2, 2, 3).equals(config.wavesPerNight)) {
+				config.wavesPerNight = new ArrayList<>(List.of(2, 2, 2, 3, 3, 3, 3, 4));
+			}
+			if (config.waveBreakSeconds == 20) {
+				config.waveBreakSeconds = 8;
+			}
+			if (config.dropChance == 0.35) {
+				config.dropChance = 0.5;
+			}
+			if (config.starterPistolLastWave == 3) {
+				config.starterPistolLastWave = 4;
+			}
+		}
+		config.defaultsVersion = CURRENT_DEFAULTS;
+		return true;
+	}
 
 	public static class ActSpec {
 		public String id = "";

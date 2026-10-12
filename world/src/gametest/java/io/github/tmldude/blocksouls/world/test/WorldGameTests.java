@@ -45,13 +45,19 @@ import net.minecraft.world.phys.AABB;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 
 import io.github.tmldude.blocksouls.common.CommonIds;
+import io.github.tmldude.blocksouls.world.BlockSoulsWorld;
 import io.github.tmldude.blocksouls.world.armor.SetBonuses;
 import io.github.tmldude.blocksouls.world.content.WorldBlocks;
 import io.github.tmldude.blocksouls.world.content.WorldItems;
 import io.github.tmldude.blocksouls.world.enchant.WackyEnchantments;
 import io.github.tmldude.blocksouls.world.gen.Blight;
 import io.github.tmldude.blocksouls.world.gen.RuinPiece;
+import io.github.tmldude.blocksouls.world.gen.RuinStructure;
+import io.github.tmldude.blocksouls.world.gen.StructurePlacer;
 import io.github.tmldude.blocksouls.world.gen.WorldGen;
+import io.github.tmldude.blocksouls.world.gen.layout.CheckpointLayout;
+import io.github.tmldude.blocksouls.world.gen.layout.ScrapScatter;
+import io.github.tmldude.blocksouls.world.gen.layout.WreckLayout;
 
 public class WorldGameTests {
 	private static final String FLOOR = "blocksouls_world_test:floor16";
@@ -151,6 +157,40 @@ public class WorldGameTests {
 					e -> BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()).equals(CommonIds.KART_WRECK)).size();
 			helper.assertTrue(karts == (typeExists ? 1 : 0), "kart wreck placed iff its type exists (type exists: " + typeExists + ", karts: " + karts + ")");
 		}
+		helper.succeed();
+	}
+
+	@GameTest(structure = FLOOR, skyAccess = true, maxTicks = 40)
+	public void wreckIsRingedWithExtraScrap(GameTestHelper helper) {
+		countScrapAround(helper, RuinStructure.Kind.WRECK, BlockSoulsWorld.CONFIG.gen.wreckExtraScrapPiles);
+	}
+
+	@GameTest(structure = FLOOR, skyAccess = true, maxTicks = 40)
+	public void checkpointIsRingedWithExtraScrap(GameTestHelper helper) {
+		countScrapAround(helper, RuinStructure.Kind.CHECKPOINT, BlockSoulsWorld.CONFIG.gen.checkpointExtraScrapPiles);
+	}
+
+	/**
+	 * Places a ruin on the flat floor and counts the scrap pile blocks within {@link ScrapScatter#MAX_RADIUS} of it: the
+	 * layout's own debris plus the configured extras, all of which land on flat open ground.
+	 */
+	private static void countScrapAround(GameTestHelper helper, RuinStructure.Kind kind, int extra) {
+		ServerLevel level = helper.getLevel();
+		long seed = 7L;
+		int base = kind == RuinStructure.Kind.WRECK ? WreckLayout.generate(seed).scrapPiles().size() : CheckpointLayout.generate(seed).scrapPiles().size();
+		helper.assertTrue(extra > 0, kind.getSerializedName() + "ExtraScrapPiles should default above 0, is " + extra);
+		BlockPos origin = helper.absolutePos(new BlockPos(8, 1, 8));
+		StructurePlacer.place(level, level.getRandom(), origin, kind.layout(seed), kind.loot);
+
+		int r = ScrapScatter.MAX_RADIUS;
+		int piles = 0;
+		for (BlockPos pos : BlockPos.betweenClosed(origin.offset(-r, -3, -r), origin.offset(r, 3, r))) {
+			if (level.getBlockState(pos).is(WorldBlocks.SCRAP_PILE)) {
+				piles++;
+			}
+		}
+		helper.assertTrue(piles >= base + extra, kind.getSerializedName() + ": " + piles + " scrap piles within " + r
+				+ " blocks, expected at least " + base + " from the layout + " + extra + " extra");
 		helper.succeed();
 	}
 

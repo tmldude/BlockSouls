@@ -52,7 +52,9 @@ public final class WorldLoot {
 			String id = key.identifier().toString();
 
 			if (cfg.materialChests.contains(id)) {
-				nested(table, registries, INJECT_MATERIALS, (float) cfg.materialChance);
+				for (int i = 0; i < cfg.materialRolls; i++) {
+					nested(table, registries, INJECT_MATERIALS, (float) cfg.materialChance);
+				}
 			}
 			if (cfg.bookChests.contains(id)) {
 				nested(table, registries, INJECT_BOOKS, (float) cfg.bookChance);

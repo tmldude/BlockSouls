@@ -11,8 +11,6 @@ import io.github.tmldude.blocksouls.movement.MovementConfig;
 public final class Pendulum {
 	/** Where the rope meets the player: this far above the feet (about hand height). */
 	public static final double ROPE_ATTACH_HEIGHT = 1.2;
-	/** The rope counts as taut within this distance of its full length. */
-	private static final double TAUT_EPSILON = 0.05;
 	private static final double EPSILON = 1.0E-6;
 
 	private Pendulum() {
@@ -62,18 +60,18 @@ public final class Pendulum {
 	 * @param pos     rope attach point on the player now
 	 * @param vel     the player's velocity (last tick's movement)
 	 * @param reel    sneak is held: shorten the rope
-	 * @param gravity the player's gravity (vanilla 0.08)
+	 * @param gravity the player's gravity (vanilla 0.08), scaled by {@code config.gravityMult} while swinging
 	 */
 	public static Step step(Vec pos, Vec vel, Vec anchor, double length, boolean reel, double gravity, MovementConfig.Web config) {
 		if (reel) {
 			length = Math.max(config.minLength, length - config.reelSpeed);
 		}
 
-		Vec v = vel.subtract(new Vec(0, gravity, 0));
+		Vec v = vel.subtract(new Vec(0, gravity * config.gravityMult, 0));
 		Vec offset = pos.subtract(anchor);
 		double distance = offset.length();
 
-		if (distance > EPSILON && distance >= length - TAUT_EPSILON) {
+		if (distance > EPSILON && distance >= length - config.ropeSlack) {
 			Vec normal = offset.scale(1.0 / distance);
 			double radial = v.dot(normal);
 			if (radial > 0) {
@@ -90,7 +88,7 @@ public final class Pendulum {
 		}
 
 		v = v.scale(config.drag);
-		v = constrain(pos, v, anchor, length, distance <= length + TAUT_EPSILON);
+		v = constrain(pos, v, anchor, length, distance <= length + config.ropeSlack);
 
 		if (v.length() > config.maxSpeed) {
 			v = v.withLength(config.maxSpeed);
