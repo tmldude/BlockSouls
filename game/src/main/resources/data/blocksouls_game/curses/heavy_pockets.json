@@ -1,0 +1,9 @@
+{
+  "icon": "blocksouls_game:boon/heavy_pockets",
+  "effects": [
+    {
+      "type": "rule",
+      "rule": "heavy_pockets"
+    }
+  ]
+}

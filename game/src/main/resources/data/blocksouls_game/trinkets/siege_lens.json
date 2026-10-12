@@ -1,0 +1,13 @@
+{
+  "icon": "blocksouls_game:boon/siege_lens",
+  "tier": "rare",
+  "tags": [
+    "storm"
+  ],
+  "effects": [
+    {
+      "type": "rule",
+      "rule": "siege_lens"
+    }
+  ]
+}

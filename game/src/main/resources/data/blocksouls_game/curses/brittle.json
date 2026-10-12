@@ -1,0 +1,11 @@
+{
+  "icon": "blocksouls_game:boon/brittle",
+  "effects": [
+    {
+      "type": "attribute",
+      "attribute": "minecraft:armor",
+      "amount": -4,
+      "operation": "add_value"
+    }
+  ]
+}

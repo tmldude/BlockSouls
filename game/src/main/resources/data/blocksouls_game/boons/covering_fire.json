@@ -1,0 +1,16 @@
+{
+  "icon": "blocksouls_game:boon/covering_fire",
+  "tier": "rare",
+  "levels": 1,
+  "tags": [
+    "on_precision",
+    "on_kill",
+    "kinetic"
+  ],
+  "effects": [
+    {
+      "type": "rule",
+      "rule": "ally_reload"
+    }
+  ]
+}

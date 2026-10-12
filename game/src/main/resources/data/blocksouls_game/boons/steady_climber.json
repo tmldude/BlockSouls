@@ -1,7 +1,10 @@
 {
   "tier": "common",
   "icon": "blocksouls_game:boon/steady_climber",
-  "stackable": 2,
+  "levels": 3,
+  "tags": [
+    "kinetic"
+  ],
   "effects": [
     {
       "type": "trait",

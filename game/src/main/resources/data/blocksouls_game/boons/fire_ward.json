@@ -1,6 +1,10 @@
 {
   "tier": "rare",
   "icon": "blocksouls_game:boon/fire_ward",
+  "levels": 1,
+  "tags": [
+    "fire"
+  ],
   "effects": [
     {
       "type": "effect",

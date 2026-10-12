@@ -1,0 +1,15 @@
+{
+  "icon": "blocksouls_game:boon/sworn_partner",
+  "tier": "common",
+  "levels": 1,
+  "tags": [
+    "on_roll",
+    "heal"
+  ],
+  "effects": [
+    {
+      "type": "rule",
+      "rule": "sworn_partner"
+    }
+  ]
+}

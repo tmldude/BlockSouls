@@ -29,6 +29,9 @@ public class RelicScreen extends Screen {
 	private static final int CARD_FILL_HOVER = 0xF0222A33;
 	private static final int TEXT = 0xFFFFFFFF;
 	private static final int TEXT_DIM = 0xFFB0B8C0;
+	private static final int SKIP_WIDTH = 120;
+	private static final int SKIP_HEIGHT = 16;
+	private static final int SKIP_COLOR = 0xFFD8CEB2;
 
 	private final BoonPayloads.Offer offer;
 	/** Index of the Wildcard card while its list is open, else -1. */
@@ -64,11 +67,22 @@ public class RelicScreen extends Screen {
 		for (int i = 0; i < cards.size(); i++) {
 			extractCard(graphics, cards.get(i), i, cardX(i), cardTop(), mouseX, mouseY);
 		}
+		extractSkip(graphics, mouseX, mouseY);
+	}
+
+	/** Declining every card pays souls: never a dead choice. */
+	private void extractSkip(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+		int x = skipX();
+		int y = skipY();
+		boolean hover = inside(mouseX, mouseY, x, y, SKIP_WIDTH, SKIP_HEIGHT);
+		graphics.fill(x, y, x + SKIP_WIDTH, y + SKIP_HEIGHT, hover ? CARD_FILL_HOVER : CARD_FILL);
+		graphics.outline(x, y, SKIP_WIDTH, SKIP_HEIGHT, SKIP_COLOR);
+		graphics.centeredText(font, Component.translatable("screen.blocksouls_game.relic.skip", offer.skipSouls()), x + SKIP_WIDTH / 2, y + 4, SKIP_COLOR);
 	}
 
 	private void extractCard(GuiGraphicsExtractor graphics, BoonPayloads.Card card, int index, int x, int y, int mouseX, int mouseY) {
 		boolean hover = inside(mouseX, mouseY, x, y, CARD_WIDTH, CARD_HEIGHT);
-		int border = card.wildcard() ? 0xFFFFFFFF : BoonStyle.color(card.boon().orElseThrow());
+		int border = card.boon().map(BoonStyle::color).orElse(card.upgrade() ? BoonStyle.UPGRADE_COLOR : 0xFFFFFFFF);
 		graphics.fill(x, y, x + CARD_WIDTH, y + CARD_HEIGHT, hover ? CARD_FILL_HOVER : CARD_FILL);
 		graphics.outline(x, y, CARD_WIDTH, CARD_HEIGHT, border);
 		if (hover) {
@@ -77,9 +91,16 @@ public class RelicScreen extends Screen {
 		graphics.text(font, String.valueOf(index + 1), x + 4, y + 4, TEXT_DIM);
 
 		int center = x + CARD_WIDTH / 2;
-		BoonStyle.drawIcon(graphics, card.wildcard() ? BoonStyle.WILDCARD_ICON : card.boon().orElseThrow().icon(), center - 16, y + 12, 32);
+		BoonStyle.drawIcon(graphics, card.boon().map(BoonView::icon).orElse(card.upgrade() ? BoonStyle.UPGRADE_ICON : BoonStyle.WILDCARD_ICON),
+				center - 16, y + 12, 32);
 
 		int textY = y + 52;
+		if (card.upgrade()) {
+			graphics.centeredText(font, Component.translatable("screen.blocksouls_game.relic.upgrade_card"), center, textY, TEXT);
+			textY += 14;
+			wrapped(graphics, Component.translatable("screen.blocksouls_game.relic.upgrade_desc"), center, textY);
+			return;
+		}
 		if (card.wildcard()) {
 			graphics.centeredText(font, Component.translatable("screen.blocksouls_game.relic.wildcard_card"), center, textY, TEXT);
 			textY += 12;
@@ -91,8 +112,7 @@ public class RelicScreen extends Screen {
 
 		BoonView boon = card.boon().orElseThrow();
 		textY = wrapped(graphics, BoonStyle.name(boon.id()), center, textY);
-		Component tier = boon.combo() ? Component.translatable("screen.blocksouls_game.relic.combo") : BoonStyle.tierName(boon.tier());
-		graphics.centeredText(font, tier, center, textY, BoonStyle.color(boon));
+		graphics.centeredText(font, BoonStyle.kindName(boon), center, textY, BoonStyle.color(boon));
 		textY += 12;
 		if (boon.maxLevel() > 1) {
 			graphics.centeredText(font, Component.translatable("screen.blocksouls_game.relic.level", boon.level(), boon.maxLevel()), center, textY, TEXT_DIM);
@@ -140,6 +160,10 @@ public class RelicScreen extends Screen {
 						pick(i);
 						return true;
 					}
+				}
+				if (inside(mouseX, mouseY, skipX(), skipY(), SKIP_WIDTH, SKIP_HEIGHT)) {
+					choose(BoonPayloads.Choose.SKIP, Optional.empty());
+					return true;
 				}
 			}
 		}
@@ -190,7 +214,15 @@ public class RelicScreen extends Screen {
 	}
 
 	private int cardTop() {
-		return (height - CARD_HEIGHT) / 2;
+		return (height - CARD_HEIGHT) / 2 - 8;
+	}
+
+	private int skipX() {
+		return (width - SKIP_WIDTH) / 2;
+	}
+
+	private int skipY() {
+		return cardTop() + CARD_HEIGHT + 10;
 	}
 
 	private int columns() {

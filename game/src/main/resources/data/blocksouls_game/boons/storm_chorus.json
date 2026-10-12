@@ -1,0 +1,15 @@
+{
+  "icon": "blocksouls_game:boon/storm_chorus",
+  "tier": "legendary",
+  "keystone": true,
+  "tags": [
+    "on_kill",
+    "storm"
+  ],
+  "effects": [
+    {
+      "type": "rule",
+      "rule": "storm_chorus"
+    }
+  ]
+}

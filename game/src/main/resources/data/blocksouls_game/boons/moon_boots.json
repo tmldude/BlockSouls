@@ -1,6 +1,11 @@
 {
   "tier": "legendary",
   "icon": "blocksouls_game:boon/moon_boots",
+  "levels": 1,
+  "tags": [
+    "storm",
+    "kinetic"
+  ],
   "requires": [
     "blocksouls_game:spring_legs",
     "blocksouls_game:featherfall"

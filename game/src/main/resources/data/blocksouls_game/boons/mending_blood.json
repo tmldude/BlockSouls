@@ -1,6 +1,11 @@
 {
   "tier": "legendary",
   "icon": "blocksouls_game:boon/mending_blood",
+  "levels": 2,
+  "tags": [
+    "heal",
+    "blight"
+  ],
   "effects": [
     {
       "type": "effect",
