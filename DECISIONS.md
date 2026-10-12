@@ -396,3 +396,12 @@ Orchestrator defaults: the open-dimension "expedition" act model is superseded (
 classic mode stays the live default until v2 ships. Per-floor designs (2–6) are discussed with the owner
 before their template pools are built; Floor 1 (Surface) and the template system go first.
 
+## Worker sessions run on Opus, not Fable (2026-10-12, from the owner)
+
+Fable sub-sessions consumed the account's five-hour and weekly usage limits within hours of launch. **Rule:
+every new worker session is created with the Opus model (`claude-opus-5-5`); Fable is not used for
+sub-sessions/sub-agents.** Existing Fable workers finish only the PR they already have open, then stand
+down; remaining work in their briefs moves to Opus sessions that pick up from the branch, the brief and the
+session's decisions file. Slower per session; the orchestrator keeps the parallel count modest (owner:
+"chug on slow opus"). The v1 orchestrator was told the same rule for its v0.11 sessions.
+
