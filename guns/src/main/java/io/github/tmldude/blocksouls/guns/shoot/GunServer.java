@@ -110,9 +110,13 @@ public final class GunServer {
 		Networking.registerClientbound(StatsSyncPayload.TYPE, StatsSyncPayload.CODEC);
 
 		ServerTickEvents.END_SERVER_TICK.register(GunServer::tick);
-		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
-				Networking.sendToPlayer(handler.player, new StatsSyncPayload(GSON.toJson(Weapons.active()))));
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> sendStats(handler.player));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> SHOOTERS.remove(handler.player.getUUID()));
+	}
+
+	/** Sends the server's weapon stats, which the client uses for its own fire timing and spread. */
+	public static void sendStats(ServerPlayer player) {
+		Networking.sendToPlayer(player, new StatsSyncPayload(GSON.toJson(Weapons.active())));
 	}
 
 	public static Shooter shooter(ServerPlayer player) {

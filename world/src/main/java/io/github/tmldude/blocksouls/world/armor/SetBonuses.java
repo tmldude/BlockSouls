@@ -90,9 +90,11 @@ public final class SetBonuses {
 		AttributeInstance knockback = entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
 		if (knockback != null) {
 			boolean scrap = wearsFullSet(entity, ArmorSet.SCRAP_PLATE);
-			if (scrap && !knockback.hasModifier(SCRAP_KNOCKBACK)) {
-				knockback.addTransientModifier(new AttributeModifier(SCRAP_KNOCKBACK,
-						BlockSoulsWorld.CONFIG.armor.scrapKnockbackResistance, AttributeModifier.Operation.ADD_VALUE));
+			double amount = BlockSoulsWorld.CONFIG.armor.scrapKnockbackResistance;
+			AttributeModifier current = knockback.getModifier(SCRAP_KNOCKBACK);
+			if (scrap && (current == null || current.amount() != amount)) {
+				// Also refreshes a stale amount after /bs config reload.
+				knockback.addOrUpdateTransientModifier(new AttributeModifier(SCRAP_KNOCKBACK, amount, AttributeModifier.Operation.ADD_VALUE));
 			} else if (!scrap && knockback.hasModifier(SCRAP_KNOCKBACK)) {
 				knockback.removeModifier(SCRAP_KNOCKBACK);
 			}

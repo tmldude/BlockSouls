@@ -28,6 +28,9 @@ public class BlockSoulsWorld implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		CONFIG = Config.load("world", WorldConfig.class, WorldConfig::new);
+		if (WorldConfig.migrate(CONFIG)) {
+			Config.save("world", CONFIG);
+		}
 		WorldBlocks.init();
 		WorldItems.init();
 		WorldGen.init();

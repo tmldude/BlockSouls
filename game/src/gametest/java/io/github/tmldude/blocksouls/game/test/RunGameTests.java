@@ -158,15 +158,16 @@ public class RunGameTests {
 	}
 
 	@GameTest(environment = "blocksouls_game_test:run_pistol", maxTicks = 40)
-	public void endOfWaveThreeBreaksTheStarterPistol(GameTestHelper helper) {
+	public void endOfTheLastPistolWaveBreaksTheStarterPistol(GameTestHelper helper) {
 		ServerPlayer player = setUp(helper);
 		MinecraftServer server = helper.getLevel().getServer();
 		Item pistol = StarterKit.pistol().orElseThrow();
 		player.getEnderChestInventory().setItem(0, new ItemStack(pistol));
 		helper.assertTrue(holds(player, pistol), "player starts with the pistol");
-		RunDebug.startWave(server, 3);
+		int lastWave = RunSystem.config().starterPistolLastWave;
+		RunDebug.startWave(server, lastWave);
 		RunDebug.endWave(server);
-		helper.assertTrue(EVENTS.contains("ended:3:false"), "wave 3 ended");
+		helper.assertTrue(EVENTS.contains("ended:" + lastWave + ":false"), "wave " + lastWave + " ended");
 		helper.assertTrue(RunDebug.pistolsBroken(server), "pistols are marked broken");
 		helper.assertFalse(holds(player, pistol), "pistol removed from the inventory");
 		helper.assertTrue(player.getEnderChestInventory().getItem(0).isEmpty(), "pistol removed from the ender chest");
