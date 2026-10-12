@@ -62,6 +62,21 @@ public final class PartyScaling {
 		return curve(players, config.raidCrystals);
 	}
 
+	/** v2 floors: island radius multiplier. */
+	public static double floorSize(int players) {
+		return curve(players, config.floorSize);
+	}
+
+	/** v2 floors: resource node count multiplier. */
+	public static double floorNodes(int players) {
+		return curve(players, config.floorNodes);
+	}
+
+	/** v2 floors: crate count multiplier. */
+	public static double floorCrates(int players) {
+		return curve(players, config.floorCrates);
+	}
+
 	public static int raidPlates(int players) {
 		int perPlate = Math.max(1, config.playersPerRaidPlate);
 		int plates = (partySize(players) + perPlate - 1) / perPlate;
