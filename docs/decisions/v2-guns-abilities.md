@@ -52,7 +52,7 @@ feel pass) where `PLAN2.md` §3j or the brief was silent. Same rules as `DECISIO
 - **Ultimate charge:** 4.5% per kill, 2% per precision hit, elites ×2, bosses ×6, all × `PartyScaling.ultimateCharge`;
   solo that is 23 kills, eight players about 10 kills each. `on_kill` / `on_precision` boon stacks add 5% per stack
   (cap 50%). Kills come from Fabric's `AFTER_KILLED_OTHER_ENTITY` (any source), precision hits from
-  `CombatEvents.PRECISION_HIT` (guns, PR 3).
+  `CombatEvents.HIT` with `precision == true` (fired by guns, PR 3).
 - **Synergy scaling** is one number: damage and healing × `1 + 0.08 × shared tag stacks` (cap +60%), where shared
   = the build's stacks of tags the ability also carries. Cooldowns don't scale (legibility: a slot is ready when its
   sweep is done, always).
