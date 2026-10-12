@@ -1,6 +1,10 @@
 {
   "tier": "common",
   "icon": "blocksouls_game:boon/spring_legs",
+  "levels": 2,
+  "tags": [
+    "kinetic"
+  ],
   "effects": [
     {
       "type": "attribute",

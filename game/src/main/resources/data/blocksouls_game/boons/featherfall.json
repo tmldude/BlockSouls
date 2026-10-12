@@ -1,6 +1,10 @@
 {
   "tier": "rare",
   "icon": "blocksouls_game:boon/featherfall",
+  "levels": 1,
+  "tags": [
+    "storm"
+  ],
   "effects": [
     {
       "type": "effect",

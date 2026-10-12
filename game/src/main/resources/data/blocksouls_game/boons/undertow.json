@@ -1,0 +1,15 @@
+{
+  "icon": "blocksouls_game:boon/undertow",
+  "tier": "rare",
+  "keystone": true,
+  "tags": [
+    "on_reload",
+    "pull"
+  ],
+  "effects": [
+    {
+      "type": "rule",
+      "rule": "undertow"
+    }
+  ]
+}

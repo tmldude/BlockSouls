@@ -1,6 +1,10 @@
 {
   "tier": "legendary",
   "icon": "blocksouls_game:boon/wings",
+  "levels": 1,
+  "tags": [
+    "storm"
+  ],
   "effects": [
     {
       "type": "trait",

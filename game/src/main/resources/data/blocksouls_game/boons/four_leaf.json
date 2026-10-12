@@ -1,7 +1,10 @@
 {
   "tier": "common",
   "icon": "blocksouls_game:boon/four_leaf",
-  "stackable": 3,
+  "levels": 3,
+  "tags": [
+    "pull"
+  ],
   "effects": [
     {
       "type": "attribute",

@@ -1,0 +1,9 @@
+{
+  "icon": "blocksouls_game:boon/hemorrhage",
+  "effects": [
+    {
+      "type": "rule",
+      "rule": "hemorrhage"
+    }
+  ]
+}

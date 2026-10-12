@@ -1,6 +1,11 @@
 {
   "tier": "legendary",
   "icon": "blocksouls_game:boon/juggernaut",
+  "levels": 1,
+  "tags": [
+    "heal",
+    "kinetic"
+  ],
   "effects": [
     {
       "type": "attribute",

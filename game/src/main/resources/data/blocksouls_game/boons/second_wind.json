@@ -1,6 +1,11 @@
 {
   "tier": "rare",
   "icon": "blocksouls_game:boon/second_wind",
+  "levels": 1,
+  "tags": [
+    "on_kill",
+    "on_roll"
+  ],
   "effects": [
     {
       "type": "trait",

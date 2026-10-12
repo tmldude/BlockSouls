@@ -3,7 +3,9 @@
 	"package": "io.github.tmldude.blocksouls.game.mixin",
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
-		"player.PlayerMixin"
+		"player.PlayerMixin",
+		"player.FoodDataMixin",
+		"player.LivingEntityMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

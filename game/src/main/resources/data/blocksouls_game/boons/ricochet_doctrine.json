@@ -1,0 +1,16 @@
+{
+  "icon": "blocksouls_game:boon/ricochet_doctrine",
+  "tier": "rare",
+  "keystone": true,
+  "tags": [
+    "ricochet",
+    "kinetic"
+  ],
+  "effects": [
+    {
+      "type": "trait",
+      "trait": "blocksouls:ricochet_inherit",
+      "level": 1
+    }
+  ]
+}
