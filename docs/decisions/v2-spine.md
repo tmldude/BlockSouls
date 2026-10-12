@@ -80,3 +80,15 @@ Same style as `DECISIONS.md`: where this conflicts with a plan file, this logs w
 - **Classic neutrality**: every new sync field is constant in classic (`-1`/`0`/act 1), the act machine
   and synthetic cycle never tick, and `/bs act charge` fails with a pointer at `runShape`. The classic
   gametests are untouched; `act_classic` asserts the contracts read classic values.
+
+## Follow-ups after the spine merges (from the v2 orchestrator, 2026-10-12)
+
+- **v1 PR #42** adds `defaultsVersion` + `RunConfig.migrate` to `game-run.json` (new pacing defaults). If
+  the spine PR needs a base merge over it: keep the `defaultsVersion` field and the `migrate` call, slot
+  `runShape`/`acts`/`portalChargeSeconds` in beside them. From here on, no config-default change in v2
+  work without that migrate pattern (DECISIONS.md rule). The spine's gametests use scripted time (skips,
+  2-second charges), so the new pacing defaults don't affect them.
+- **v1 PR #41** adds `ConfigEvents.RELOADED` (`/bs config reload`). Once #40 and #41 are both in main:
+  a small v2 PR wiring the spine's config reads to it. The synthetic clock already reads
+  `dayLengthMinutes` live through a supplier, so the main candidates are `ActMachine.load` (the parsed
+  act list) and anything else cached from `game-run.json` at init.
