@@ -107,3 +107,11 @@ Five seeds plus three of ours; numbers in `boons.json` `rules.*`:
 - **Trinket row**: three framed slots right of the hotbar (bone-colored frames; empty slots dim).
 - Curses show in the boon row with a blight-red frame; keystones carry a gold key mark on their icon.
 - `boons.json` carries `defaultsVersion` + `migrate()` from day one so a later default change can migrate.
+
+## Takeover (v2-builds-2)
+- #46/#48/#52 merged to `main` while this branch carried #46's branch commits; resolved by merging `origin/main`
+  (git took `main`'s copy of every `common/` file, so `common/` is byte-identical to `main`). No game-side changes.
+- Brief "Done when" checked against #51: all items covered there; no follow-up PR needed for Stage 6A scope.
+- Offline check needs JDK 25 (`apt install openjdk-25-jdk-headless`); without it `typecheck.sh` prints a false
+  "0 errors". The remaining offline errors (`world` WorldItems `CreativeModeTab.Output`, `bosses` gametest
+  `com.mojang.authlib`) are offline-environment gaps in modules this branch doesn't touch.
