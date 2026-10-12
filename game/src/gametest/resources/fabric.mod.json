@@ -13,7 +13,7 @@
 			"io.github.tmldude.blocksouls.game.test.ActGameTests",
 			"io.github.tmldude.blocksouls.game.test.DownedGameTests",
 			"io.github.tmldude.blocksouls.game.test.BoonGameTests",
-			"io.github.tmldude.blocksouls.game.test.OriginGameTests",
+			"io.github.tmldude.blocksouls.game.test.ClassGameTests",
 			"io.github.tmldude.blocksouls.game.test.LastStandGameTests"
 		]
 	},

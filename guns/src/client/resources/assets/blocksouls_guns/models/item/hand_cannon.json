@@ -490,7 +490,7 @@
       "rotation": {
         "axis": "x",
         "angle": 20,
-        "origin": [
+        "player_class": [
           8,
           11.5,
           12.8
@@ -568,7 +568,7 @@
       "rotation": {
         "axis": "x",
         "angle": -25,
-        "origin": [
+        "player_class": [
           8,
           8,
           12.5

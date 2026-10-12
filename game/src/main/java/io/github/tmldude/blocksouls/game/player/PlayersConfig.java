@@ -3,7 +3,7 @@ package io.github.tmldude.blocksouls.game.player;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.github.tmldude.blocksouls.game.player.origin.OriginsConfig;
+import io.github.tmldude.blocksouls.game.player.classes.ClassesConfig;
 
 /** {@code config/blocksouls/game-players.json}. Times are ticks unless named otherwise. */
 public class PlayersConfig {
@@ -13,7 +13,7 @@ public class PlayersConfig {
 	public Boons boons = new Boons();
 	public Hud hud = new Hud();
 	public Ping ping = new Ping();
-	public OriginsConfig origins = new OriginsConfig();
+	public ClassesConfig classes = new ClassesConfig();
 
 	public static class Downed {
 		/** Movement speed change while downed (−0.85 = 85% slower). */

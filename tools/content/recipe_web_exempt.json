@@ -15,7 +15,7 @@
 		"blocksouls_game:relic_common": "consumable (boon relic, dropped by game code, spent on a card pick)",
 		"blocksouls_game:relic_rare": "consumable (boon relic, dropped by game code, spent on a card pick)",
 		"blocksouls_game:relic_legendary": "consumable (boon relic, dropped by game code, spent on a card pick)",
-		"blocksouls_game:origin_sigil": "unique run item (origin pick, handed out at run start, consumed on the pick)"
+		"blocksouls_game:class_sigil": "unique run item (class pick, handed out at run start, consumed on the pick)"
 	},
 	"debt": {}
 }

@@ -11,13 +11,13 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import io.github.tmldude.blocksouls.common.client.ClientNetworking;
 import io.github.tmldude.blocksouls.common.client.Keybinds;
 import io.github.tmldude.blocksouls.game.client.hud.LastStandHud;
-import io.github.tmldude.blocksouls.game.client.hud.OriginSelectScreen;
+import io.github.tmldude.blocksouls.game.client.hud.ClassSelectScreen;
 import io.github.tmldude.blocksouls.game.client.hud.PingHud;
 import io.github.tmldude.blocksouls.game.player.downed.LastStandPayloads;
-import io.github.tmldude.blocksouls.game.player.origin.OriginPayloads;
+import io.github.tmldude.blocksouls.game.player.classes.ClassPayloads;
 import io.github.tmldude.blocksouls.game.player.ping.PingPayloads;
 
-/** Client side of the v2 player layer (origins, Last Stand, pings, the run summary): packet receivers and input. */
+/** Client side of the v2 player layer (classes, Last Stand, pings, the run summary): packet receivers and input. */
 public final class PlayersV2Client {
 	private static KeyMapping ping;
 
@@ -25,8 +25,8 @@ public final class PlayersV2Client {
 	}
 
 	public static void init() {
-		ping = Keybinds.keyboard("ping", SDLScancode.SDL_SCANCODE_G);
-		ClientNetworking.receive(OriginPayloads.Offer.TYPE, (payload, context) -> Minecraft.getInstance().gui.setScreen(new OriginSelectScreen(payload)));
+		ping = Keybinds.keyboard("ping", SDLScancode.SDL_SCANCODE_B);
+		ClientNetworking.receive(ClassPayloads.Offer.TYPE, (payload, context) -> Minecraft.getInstance().gui.setScreen(new ClassSelectScreen(payload)));
 		ClientNetworking.receive(LastStandPayloads.State.TYPE, (payload, context) -> LastStandHud.onState(payload));
 		ClientNetworking.receive(PingPayloads.Pinged.TYPE, (payload, context) -> PingHud.onPinged(payload));
 

@@ -233,7 +233,7 @@ def elements(gun, index):
         el = {"name": name, "from": list(frm), "to": list(to), "faces": faces}
         if "rot" in opts:
             axis, angle, origin = opts["rot"]
-            el["rotation"] = {"axis": axis, "angle": angle, "origin": list(origin)}
+            el["rotation"] = {"axis": axis, "angle": angle, "player_class": list(origin)}
         out.append(el)
     return out
 
@@ -394,7 +394,7 @@ def render_model(mdl, tex, transform, px=256):
         if "rotation" in el:
             rr = el["rotation"]
             er = {"x": rx, "y": ry, "z": rz}[rr["axis"]](rr["angle"])
-            origin = np.array(rr["origin"], float)
+            origin = np.array(rr["player_class"], float)
         for face, spec in el["faces"].items():
             cs = []
             for pick in CORNERS[face]:

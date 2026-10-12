@@ -1111,7 +1111,7 @@
       "rotation": {
         "axis": "x",
         "angle": -22,
-        "origin": [
+        "player_class": [
           8,
           8.4,
           13

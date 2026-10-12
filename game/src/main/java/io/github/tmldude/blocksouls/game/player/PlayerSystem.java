@@ -10,8 +10,9 @@ import io.github.tmldude.blocksouls.game.player.party.PartyCommands;
 import io.github.tmldude.blocksouls.game.player.party.PartyVotes;
 import io.github.tmldude.blocksouls.game.player.ping.Pings;
 import io.github.tmldude.blocksouls.game.player.downed.Revive;
-import io.github.tmldude.blocksouls.game.player.origin.OriginCommands;
-import io.github.tmldude.blocksouls.game.player.origin.PlayerOrigins;
+import io.github.tmldude.blocksouls.game.player.classes.ClassCommands;
+import io.github.tmldude.blocksouls.game.player.classes.ClassMovement;
+import io.github.tmldude.blocksouls.game.player.classes.PlayerClasses;
 import io.github.tmldude.blocksouls.game.player.relic.RelicItems;
 import io.github.tmldude.blocksouls.game.player.relic.RelicOffers;
 
@@ -44,9 +45,10 @@ public final class PlayerSystem {
 		RelicItems.register();
 		RelicOffers.register(CONFIG.boons);
 		BoonCatalog.register();
-		PlayerOrigins.init();
-		PlayerOrigins.register(CONFIG.origins);
-		OriginCommands.register();
+		PlayerClasses.init();
+		PlayerClasses.register(CONFIG.classes);
+		ClassCommands.register();
+		ClassMovement.register();
 		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> PlayerBoons.refreshAll(server));
 		PlayerCommands.register();
 	}
