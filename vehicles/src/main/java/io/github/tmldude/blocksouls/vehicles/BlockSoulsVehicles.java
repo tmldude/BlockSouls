@@ -7,6 +7,7 @@ import net.fabricmc.api.ModInitializer;
 
 import io.github.tmldude.blocksouls.common.Config;
 import io.github.tmldude.blocksouls.vehicles.kart.KartHorn;
+import io.github.tmldude.blocksouls.vehicles.kart.WreckHints;
 
 public class BlockSoulsVehicles implements ModInitializer {
 	public static final String MOD_ID = "blocksouls_vehicles";
@@ -20,5 +21,6 @@ public class BlockSoulsVehicles implements ModInitializer {
 		VehicleRegistry.init();
 		VehicleCommands.register();
 		KartHorn.register();
+		WreckHints.register();
 	}
 }

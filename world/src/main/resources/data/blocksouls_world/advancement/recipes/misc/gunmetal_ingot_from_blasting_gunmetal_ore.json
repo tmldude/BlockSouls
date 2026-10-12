@@ -1,0 +1,42 @@
+{
+	"criteria": {
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipes": "blocksouls_world:gunmetal_ingot_from_blasting_gunmetal_ore"
+			}
+		},
+		"has_gunmetal_ore": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:gunmetal_ore"
+					}
+				]
+			}
+		},
+		"has_scrap": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:scrap"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_gunmetal_ore",
+			"has_scrap"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"blocksouls_world:gunmetal_ingot_from_blasting_gunmetal_ore"
+		]
+	}
+}

@@ -1,0 +1,53 @@
+{
+	"criteria": {
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipes": "blocksouls_guns:shotgun"
+			}
+		},
+		"has_gun_barrel": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_guns:gun_barrel"
+					}
+				]
+			}
+		},
+		"has_gun_receiver": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_guns:gun_receiver"
+					}
+				]
+			}
+		},
+		"has_gun_stock": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_guns:gun_stock"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_gun_barrel",
+			"has_gun_receiver",
+			"has_gun_stock"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"blocksouls_guns:shotgun"
+		]
+	}
+}

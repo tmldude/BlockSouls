@@ -2,6 +2,7 @@ package io.github.tmldude.blocksouls.common;
 
 import net.fabricmc.api.ModInitializer;
 
+import io.github.tmldude.blocksouls.common.advancement.Milestones;
 import io.github.tmldude.blocksouls.common.debug.ConfigCommands;
 import io.github.tmldude.blocksouls.common.debug.DebugCommands;
 import io.github.tmldude.blocksouls.common.event.ConfigEvents;
@@ -24,6 +25,7 @@ public class BlockSoulsCommon implements ModInitializer {
 		VersionCheck.init();
 		PartyScaling.load();
 		Threat.load();
+		Milestones.init();
 		// Reloads copy into the instances loaded above; re-pointing also covers a test that swapped them out.
 		// (Registered here rather than in PartyScaling/Threat so those stay pure, Fabric-free math.)
 		ConfigEvents.RELOADED.register((name, config) -> {

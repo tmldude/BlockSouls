@@ -8,5 +8,6 @@ public class BlockSoulsVehiclesClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		KartClient.register();
+		VehicleTooltips.init();
 	}
 }

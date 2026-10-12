@@ -48,6 +48,10 @@ Classic, the act chain in v2's Expedition; new tiers slot into existing ones).
 - **End items are the exception, with a reason.** Gear (guns, armor, tools), consumables (ammo), unique boss items
   (whistles, trophies) and spawn eggs may be dead ends. List each in `tools/content/recipe_web_exempt.json` under
   `exempt` with a one-line reason.
+- **R3: every recipe is in the recipe book.** Each recipe has a vanilla recipe-unlock advancement
+  (`data/<ns>/advancement/recipes/<category>/<recipe>.json`) keyed on its BlockSouls ingredients. Don't write them by
+  hand: run `python3 tools/content/gen_recipe_advancements.py` after adding, renaming or deleting a recipe (it copies
+  the recipe's load conditions; extra unlock keys go in its `EXTRA_KEYS`).
 - **Checked by CI:** `python3 tools/content/check_recipe_web.py` fails on a violation. Run it before pushing.
   `debt` in the exempt file lists known violations being fixed; it must only shrink.
 - **Format (26.3):** recipe ingredients are plain id strings or `#tag` strings; results are `{"id": ..., "count": n}`.
