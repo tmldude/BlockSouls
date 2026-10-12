@@ -1,0 +1,7 @@
+{
+  "model": "claude-opus-5-5",
+  "autoCompactEnabled": true,
+  "autoCompactWindow": 250000,
+  "precomputeCompactionEnabled": true,
+  "autoContinueAtUsageLimit": true
+}
