@@ -3,8 +3,8 @@
 **Modules:** `game` (run side) + `world` (economy structures) + `common` (additions only).
 **Branch:** `claude/v2-director`. **PR title:** `game: AI Director + economy objects (pacing budget)`.
 
-You own v2's pacing. The owner's verdict on the playtest was "remarkably terribly slow"; the Director is
-the system that owns the fix. Read `docs/sessions/README.md`, `PLAN2.md` **§0 (pacing budget), §3b, §3c,
+You own v2's pacing **and the floor's day loop** (PLAN2 §0–§2, revised 2026-10-12: the Floor Loop). The owner's
+verdict on the playtest was "remarkably terribly slow"; the Director is the system that owns the fix. Read `docs/sessions/README.md`, `PLAN2.md` **§0 (pacing budget), §3b, §3c,
 §3e**, `docs/CONTENT.md`, DECISIONS.md's v2 entries, and `docs/decisions/v2-spine.md` (how SiegeClock and
 the act machine work). You build on #37 (contracts) and #40 (spine) — both merged before you start.
 
@@ -15,6 +15,13 @@ the act machine work). You build on #37 (contracts) and #40 (spine) — both mer
   structures/blocks per CONTENT.md; camp **shopkeeper** entity + trades + overclock horn + soul wager
   (block/entity side). Logic for all of them lives in `game` behind `common` events.
 - `docs/decisions/v2-director.md`.
+
+## The day loop (PLAN2 §1 — yours)
+- **Day timer** per floor (default 8 min, config per floor) on the spine's synthetic clock; HUD exposure via `ClientRun`.
+- **The horn** at the camp: ends the day early; buff scales with time skipped (loot rarity tier / free boon / souls; config curve). The siege then starts at once.
+- **Random event pool** (one per floor, data-driven: altar, cursed chest, challenge pylon, wandering trader, stranded ally, ambush) — placement hook provided by the Floors session; you own the event logic.
+- **Mini-boss rotation** per floor from the field-boss pool (through `common` boss spawn-by-id), **day mobs** (affixed elites, scouts) and **loot cadence** (a small win every 30–60 s: when the next crate/node/drop should appear relative to pressure).
+- **Shopkeeper trade board**: offers show prices as *source icons* (tree, ore node, mob, floor rare); rare items need two resource kinds; stock rotates per floor; curse purge, perk reroll; souls as currency. Entity + GUI are yours (world/game split per CONTENT.md).
 
 ## Director (PLAN2 §3b)
 - **Stress model** per party: recent damage taken, downs, ammo state, DPS trend, boon count vs threat.

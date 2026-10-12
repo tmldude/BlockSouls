@@ -374,3 +374,25 @@ Operational note: all four v2 workers stalled at the same account usage limit (f
 ~20 minutes of launch, with uncommitted work staged. Workers are now told to commit WIP before long
 operations; the orchestrator re-arms a roster check-in just after each reset.
 
+## The Floor Loop — v2 pivots from open-world acts to floors (2026-10-12, from the owner)
+
+After the v0.9 playtest the owner weighed a custom engine (Slay the Spire 2-style). Orchestrator's
+recommendation, accepted: **stay on Minecraft as the engine, delete the survival loop** — validate the
+roguelike design with friends in weeks; a cost-boxed engine spike (Godot 4) runs alongside only if asked.
+
+Owner's design, now PLAN2 §0–§2: six small island floors in a void dimension (glass edge), each a
+5–10-minute day of optional things to do around a **central shopkeeper** (resources as surface nodes and
+one shallow cave, a structure, a rotating mini-boss, one secret per floor (Gungeon), one random event
+per floor (StS "?"), a cave dungeon, a wreck repaired with scrap lying around it, day mobs), then the
+siege, then the exit portal. **No recipe learning**: the trade board shows prices as icons of where
+ingredients come from. **The horn** ends the day early for a buff (core risk-reward). Floors escalate
+subtly with floor number. **Four classes** (Warden / Striker / Arcanist / Ranger, Destiny mold) with
+permanent **rune trees** (meta-progression) replace the ten origins; the universal v1 movement kit stays
+on for everyone with a class signature on top. Getting strong is easy and fast; threat makes it matter.
+
+Orchestrator defaults: the open-dimension "expedition" act model is superseded (its spine is reused: act
+= floor, portal charge = exit portal, synthetic clock = floor timer); the Dimensions session becomes
+**Floors** (6A); the Director takes the day timer, horn, events, mini-boss rotation and loot cadence;
+classic mode stays the live default until v2 ships. Per-floor designs (2–6) are discussed with the owner
+before their template pools are built; Floor 1 (Surface) and the template system go first.
+

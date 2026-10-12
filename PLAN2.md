@@ -10,96 +10,81 @@ so playtests can compare run shapes.
 
 ---
 
-## 0. The pitch
+## 0. The pitch — the Floor Loop (revised 2026-10-12 after the owner's playtest)
 
-v1 is "Minecraft + night waves." v2 is its own game: a 1–8 player roguelike **expedition through four
-acts** — Overworld → infected Nether → the Blightheart → the Skyrift — ending in the End raid. Each act
-is a whole open dimension: mine its ores, build, roam, fight its field bosses. Nights bring sieges,
-everywhere, forever — **the waves do not care how long you stay**. The party leaves an act whenever it
-chooses by charging the portal; the global threat counter never stops climbing, and every boss ahead
-(final raid included) scales with it. Stay and you're stronger against harder bosses; rush and you're
-weaker against easier ones. That trade is the game.
-Builds emerge from tag synergies across boons, guns and enchantments; an AI Director runs the sieges;
-every run ends in a shareable run summary.
+v1 is "Minecraft + night waves." The playtest verdict: the roguelike parts (loot, boons, guns, bosses,
+movement) are the fun; Minecraft's survival parts (mining, recipe-hunting, waiting) are the drag. So v2
+**keeps Minecraft as the engine and deletes the survival loop**: a 1–8 player roguelike run across
+**six floors** — small, dense, hand-shaped maps on a timer — each a day of *lots to do* around a
+**shopkeeper at the center**, then a siege, then the next floor. Closer to Enter the Gungeon / Risk of
+Rain / Slay the Spire than to a survival world. Fast: a floor is **5–10 minutes of day + the siege**; a
+run is ~60–90 minutes. You get strong *fast* and the game gets strong with you.
 
-Run length: **player-paced**; tune curves to a ~2.5-hour median. All pacing numbers in config.
+**Design laws:**
+1. **No recipe to learn, no Y-level to grind.** Everything you can get is on the shopkeeper's board with
+   its price shown as *icons of where the ingredients come from* (a tree, an ore node, a mob). Crafting is
+   trading. Resources are on the surface or in one shallow cave; ore nodes pop in a few hits.
+2. **A lottery you keep winning.** A small win every 30–60 s (crates, nodes, drops), a visible jackpot
+   every floor (mini-boss, secret, event), pity so every player leaves each floor stronger. Difficulty
+   matches through the threat ratchet and the Director.
+3. **Lots to do, all optional, all legible.** On every floor: resources, a structure, a mini-boss you can
+   choose to fight, one secret, one random event, a cave dungeon, a wreck. None mandatory; the day timer
+   is the only pressure, and *you can end the day early for a buff* (risk vs. reward, every floor).
+4. **Show, don't tell.** Every objective is visible or hinted in-world; tooltips state mechanics.
+5. **Pacing budget:** no stretch over ~90 s without a decision or a threat; shooting something that
+   matters within the first 3 minutes of a run.
 
-**Pacing is a design goal, not a tuning afterthought** (owner, 2026-10-12: the v0.9 playtest felt
-"remarkably terribly slow"). The budget every system is held to: **no stretch longer than ~90 seconds
-without a meaningful decision or threat**, and the core loop must be running — gun in hand, shooting at
-something that matters — **within the first 10 minutes** of a fresh run. The Director's lull ceiling,
-siege intermissions, day-phase length, first-gun cost and drop guarantees all serve this budget and are
-measured against it in playtests.
+**Focus order** (owner): builds, guns, abilities and boons first; then pacing; then everything else.
 
-**Focus order for the next build** (owner, 2026-10-12): 1) cooler guns, **abilities** and boons — the
-build/fun content (§3a, §3j, §3f); 2) pacing (above); then the rest. Stage 6 starts its sessions in that
-order (§5).
+## 1. A floor
 
-## 1. The act structure
+A floor is a **small island map** (~150×150 blocks, config) in a dedicated void dimension: ground level
+with terrain and trees, a glass wall at the edge, void beyond. Floors are **templates** from a pool,
+picked and varied per run (layout, resource placement, which structure, which mini-boss, where the
+secret is), and the pool **escalates subtly with floor number** (Gungeon-style: more elites, stingier
+nodes, meaner mini-boss) — the kind of ramp players feel but don't notice.
 
-| Act | Dimension | Entry | Resource tier | Field bosses | Camp |
-|---|---|---|---|---|---|
-| 1 | Overworld | run start | scrap, gunmetal | Pale Rider, Ashwyrm | spawns near run start |
-| 2 | Infected Nether (exists) | nether portal, ignited by the Act 1 portal charge | blight ore / blight cores | Furnace Knight | near arrival portal |
-| 3 | **The Blightheart** (new dimension; the source of the infection) | portal built deep in the Nether, ignited by the Act 2 portal charge | blightheart ore (name TBD) | 1 new boss (blight-themed; e.g. a wall-crawling blight knight that uses the players' own climb mechanic) | near arrival portal |
-| 4 | **The Skyrift** (new sky dimension; floating islands, storms) | glowstone-framed portal, ignited by the Act 3 portal charge | skysteel (name TBD) | Stormplate Knight (relocated home), 1 new boss | near arrival portal |
-| Finale | The End (existing raid) | final portal at the Act 4 camp, ignited by the Act 4 portal charge | — | reworked Ender Dragon (exists) | — |
+| Thing on the floor | What it gives | Notes |
+|---|---|---|
+| **Shopkeeper + camp** (center) | The trade board; the horn; relic altar; forge/upgrade bench | Safe-ish aura; the siege converges here |
+| **Resource nodes** (surface + shallow cave) | Wood, scrap, gunmetal, floor-specific rare (blight, skysteel, ...) | Pop in 2–4 hits with a burst; no deep mining |
+| **Structure** (ruin / wreck yard / outpost; pool per floor) | A chest (gear, enchantment, early boon), a wall-buy, lore-free set dressing | Always one; mini-dungeon layout |
+| **Mini-boss** (rotating from the field-boss pool) | Trinket pick-1-of-3, rare resource, souls | Optional; a fog-wall arena on the map |
+| **Secret** (one per floor) | Exotic / legendary boon / trinket | Gungeon-style: a cracked wall, a hidden drop under the structure, a hint item; findable, never required |
+| **Random event** (one per floor; the StS "?") | A choice with a risk: altar, cursed chest, challenge pylon, wandering trader, a stranded ally, an ambush | Data-driven event pool |
+| **Cave dungeon** (one entrance) | A short underground run: nodes, a chest, sometimes the secret | Breakable terrain is *tactical* (cover, shortcuts), not an economy |
+| **Wreck** (car) | Repair with **scrap lying around it** → drive the floor, carry the party, ram the siege | Repair is one interaction; parts are visible nearby |
+| **Day mobs** | Interesting roaming mobs during the day (elites with affixes, scouts) | Director-placed |
 
-- **No fixed siege count per act** (owner). An act lasts exactly as long as the party chooses to stay.
-- **Dimension names confirmed by the owner (2026-10-11): the Blightheart and the Skyrift.** Original
-  names only (no "Aether").
-- Strongholds / Ender Eye hunting are **removed from the run** (Classic mode keeps them).
-- Endless mode after the finale: endless sieges in the act of the party's choice.
+**The day:** a visible timer (default 8 min, config per floor). Do what you like. **The horn** at the shop
+ends the day early: the earlier you blow it, the bigger tonight's buff (loot rarity / a free boon /
+souls) — the core risk-reward. When the timer runs out or the horn blows, **the siege** comes to the
+camp (the v1 wave chain, Director-paced, threat-scaled). Survive → the **exit portal lights** at the camp
+→ next floor. Floor 6 is the final boss arena.
 
-### One rhythm: day and night everywhere
+**Six floors:** Surface → Caverns (the breakable-ground floor) → Infernal → the Blightheart → the Skyrift
+→ the Final Arena (the reworked dragon raid). Each has its own template pool, resource rare, mob roster,
+mini-boss rotation and look (floor "vibe switch" on the synthetic clock, §2).
 
-Every act runs the ~17-minute day/night cycle, so the v1 siege rules apply unchanged in every dimension:
-sieges start at dusk wherever the party is, chain through the night, pause at dawn; days are prep.
-- The overworld binds to the real sun. Dimensions without one get a **synthetic cycle — the "vibe
-  switch"** (owner): no fake sun, just the world turning hostile on the same clock. Ambient light and
-  fog color lerp down at dusk (Nether: ash-glow dims to ember-dark), the soundscape shifts (distant
-  horns, growl layers), hostile aggression and spawn pressure rise, and dawn visibly releases it.
-  Client renders from a synced cycle phase; the server drives sieges off the same clock.
-- `game` grows a `SiegeClock` abstraction over the v1 scheduler: one implementation reads the sun,
-  the other drives the synthetic cycle. Wave chaining, dawn rules, relic drops: one code path.
-- The **threat counter** (the v1 wave counter, promoted) ticks up every night of the run, in every act,
-  and never pauses. Mob *rosters* come from the current act; wave size/toughness come from the counter.
+## 2. The run shape and what it keeps from v1
 
-### Greed vs. safety: the ratchet (core rule)
-
-- **The waves do not care how long you stay.** Sieges keep coming every night at ever-higher threat.
-  There is no "clearing" an act.
-- **Every boss ahead scales with the threat counter at engage time** — field bosses, portal-charge
-  sieges, and the final raid — via a config curve (`threat.json`), separate from and multiplied with
-  `PartyScaling`. Staying longer = stronger build vs. harder bosses; rushing = weaker build vs. easier
-  bosses. Both are legitimate runs; the curve is the balance lever.
-- The HUD shows the threat counter prominently (and the shopkeeper comments on it), so greed is always
-  an informed choice, never a hidden tax.
-
-### Portal charge (leaving an act, whenever you dare)
-
-The next act's portal frame generates near the camp (Act 1 uses the party's own nether portal). **Any
-player can start the charge at any time**: ~3 minutes of defense while the Director throws a siege at
-the portal, at current threat, day or night. Charge completes → the portal ignites permanently. No
-crafted key items, no structure hunt, no minimum sieges survived; the climax is a fight you pick the
-moment for. Wiping the attempt just means re-triggering it later.
-
-## 2. Open-world stance (the rules that keep acts from feeling like rails)
-
-a. **The portal never pulls.** It waits for a player to start the charge, and once lit it waits again.
-   Staying to mine/loot/over-prepare is always legal; sieges keep coming on the clock and the threat
-   counter keeps climbing (§1). Advancing is a party decision.
-b. **Two-way portals.** Backtracking to earlier acts and the home base is allowed. The siege front
-   follows the party: once act N is unlocked, sieges target whatever dimension the party is in.
-   (Split parties: the siege targets the dimension with the most non-downed players; stragglers get a
-   warning line.)
-c. **The Camp.** On first entry to an act, a camp structure generates near the arrival portal (skin on
-   26.3's Abandoned Camp bones where possible): shopkeeper, forge, relic altar, light safe aura (hostile
-   wave mobs won't path within ~24 blocks unless a siege targets the camp). Camps are landmarks, not walls.
-d. **Act transitions are party-scaled moments.** Portal entry teleports everyone within 48 blocks after a
-   10 s countdown; players further away get 60 s and are then pulled. No one herds stragglers manually.
-e. **Classic mode** (`game-run.json`: `"runShape": "classic" | "expedition"`): the v1 open-world 7-night
-   run with strongholds stays playable. Cheap (it is the existing code) and it lets playtests A/B the shapes.
+- **Run shape** `game-run.json` → `runShape`: `"classic"` (v1 open world — stays as the live default
+  until v2 ships), `"floors"` (this plan). The `"expedition"` open-dimension act model from the first v2
+  draft is **superseded** by floors; its spine (SiegeClock, act machine, portal charge, threat) is reused:
+  an act = a floor, the portal charge = the exit portal after a siege, the synthetic clock = the floor
+  timer and its day/night look.
+- **Classes, not origins** (owner): **four classes** in the Destiny mold — working names **Warden**
+  (tank), **Striker** (warrior), **Arcanist** (mage), **Ranger** (archer) — each with a kit, a signature
+  ability, a movement signature on top of the **universal v1 movement kit** (roll, hold-jump, climb,
+  swing — all on, because it's fun and friction-free), and a **permanent rune tree**: meta-progression
+  unlocked across runs with souls kept at run end. In-run power is boons, trinkets, gear, enchantments.
+  The ten-origin list in §3f becomes flavor for class kits / runes.
+- **Everything through the world:** early boons and relics come from structures, mini-bosses, secrets
+  and events, not only dawn relics. Armor and enchantments drop and trade freely — getting strong is easy;
+  the threat ratchet is what makes it matter.
+- **Party of 1–8** stays: floor size, node counts, siege size and mini-boss health through `PartyScaling`.
+- **Replayability levers:** template variation, resource mix per run, the rotating mini-boss, which event
+  and secret you got, class × runes × boons, and the horn gamble.
 
 ## 3. Systems
 
@@ -175,7 +160,12 @@ defend a crashed supply drop 90 s; carry a volatile core to the camp while the h
 carrier; kill the fleeing glowing zombie before it escapes; keep the generator (light source) alive.
 Data-driven list so acts can add themed ones.
 
-### 3f. Origins (classes) — `game` + `movement`
+### 3f. Classes and runes (was: origins) — `game` + `movement`
+
+**Revised 2026-10-12 (§2):** four classes with permanent rune trees replace the ten origins; the universal
+movement kit stays on for everyone and classes add a signature. The origin table below is kept as the
+source pool for class kits, drawbacks and runes; `Capabilities` gating now serves runes (e.g. glide is a
+Ranger rune), not class restriction.
 
 Owner (2026-10-11): **movement itself is class identity.** Not everyone is Mario *and* Spider-Man —
 you pick where you start. One guardrail: the **Souls core stays universal** (dodge roll + i-frames,
@@ -349,12 +339,12 @@ orchestrator — neither merges the other's.
   |---|---|---|
   | 6A | Builds & boons | §3a in full (tags, keystones, levels, curses, trinkets) + forge ritual + shopkeeper trades |
   | 6A | Guns & abilities | §3j: exotics, gun feel pass, the `abilities` module (tactical/signature/ultimate) |
-  | 6A | Director & economy | §3b + §3c + §3e — the Director owns the **pacing budget** (§0): lull ceiling ~90 s, intermission tightening |
+  | 6A | Director & economy | §3b + §3c + §3e — the Director owns the **pacing budget** (§0), the day timer, the **horn** (end the day early for a buff), event pool, mini-boss rotation, day mobs, loot cadence; the **shopkeeper trade board** (prices as source icons) |
   | 6A | Origins & players | §3f (incl. `movement` capability gating + glide) + §3g solo/co-op + run summary v2 + HUD build line |
   | 6B | Bosses v2 | §3h archetypes + posture + part breaks + affixes |
   | 6B | New bosses | Blightheart boss + Skyrift boss (design sub-sessions for models, per v1 practice) |
   | 6B | Mobs v2 | act rosters, influence map, elite affixes |
-  | 6B | Dimensions | Blightheart + Skyrift worldgen, portals, camps, act ores |
+  | 6A | **Floors** (replaces Dimensions) | the void floor dimension, the template pool + variation, resource nodes, structure/cave/secret/event/wreck placement, glass-and-void edge, floor escalation |
 - **Stage 7 — intersections (sequential):** acts wired to rosters/drops/recipes; Director tuned;
   balance to a ~2.5 h median; perf with 8 players in act 3; full-run gametest across all four acts;
   Expedition becomes the default run shape; `v2.0.0`.
