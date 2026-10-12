@@ -25,6 +25,14 @@ public final class GunSounds {
 	public static final SoundEvent PERK_OUTLAW = register("gun.perk.outlaw");
 	public static final SoundEvent PERK_RAMPAGE = register("gun.perk.rampage");
 	public static final SoundEvent PERK_VORPAL = register("gun.perk.vorpal");
+	/** The shooter's own confirmation on a kill. */
+	public static final SoundEvent KILL_CONFIRM = register("gun.kill_confirm");
+	/** Kindling Engine overheating and venting. */
+	public static final SoundEvent EXOTIC_VENT = register("gun.exotic.vent");
+	/** Tether Lance rocket bursting into web. */
+	public static final SoundEvent EXOTIC_TETHER = register("gun.exotic.tether");
+	/** Lantern Eye marking targets. */
+	public static final SoundEvent EXOTIC_MARK = register("gun.exotic.mark");
 
 	private GunSounds() {
 	}
@@ -34,7 +42,10 @@ public final class GunSounds {
 			case "hand_cannon" -> HAND_CANNON_FIRE;
 			case "auto_rifle" -> AUTO_RIFLE_FIRE;
 			case "shotgun" -> SHOTGUN_FIRE;
-			case "sniper_rifle" -> SNIPER_RIFLE_FIRE;
+			case "sniper_rifle", "lantern_eye" -> SNIPER_RIFLE_FIRE;
+			case "stray_verdict" -> HAND_CANNON_FIRE;
+			case "backdraft", "tether_lance" -> SHOTGUN_FIRE;
+			case "kindling_engine" -> AUTO_RIFLE_FIRE;
 			default -> PISTOL_FIRE;
 		};
 	}

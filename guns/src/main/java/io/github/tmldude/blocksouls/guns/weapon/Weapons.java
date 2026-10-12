@@ -14,6 +14,14 @@ public final class Weapons {
 	public static final String SHOTGUN = "shotgun";
 	public static final String SNIPER_RIFLE = "sniper_rifle";
 
+	// Exotics: one per archetype, each with a behavior class in {@code exotic}.
+	public static final String STRAY_VERDICT = "stray_verdict";
+	public static final String LANTERN_EYE = "lantern_eye";
+	public static final String BACKDRAFT = "backdraft";
+	public static final String KINDLING_ENGINE = "kindling_engine";
+	public static final String TETHER_LANCE = "tether_lance";
+	public static final List<String> EXOTICS = List.of(STRAY_VERDICT, LANTERN_EYE, BACKDRAFT, KINDLING_ENGINE, TETHER_LANCE);
+
 	private static final Map<String, GunStats> DEFAULTS = new LinkedHashMap<>();
 	private static Map<String, GunStats> active = Map.of();
 
@@ -24,6 +32,12 @@ public final class Weapons {
 		DEFAULTS.put(AUTO_RIFLE, new GunStats("primary", "auto", 3.5, 1, 600, 30, 2.0, 1.6, 60, 2.5, 0.8, 1.3, 1.2, 32, 0.6, 0.05, false, true));
 		DEFAULTS.put(SHOTGUN, new GunStats("special", "semi", 3.0, 8, 70, 5, 2.4, 1.25, 20, 6.0, 4.5, 1.15, 7.0, 8, 0.3, 0.12, false, true));
 		DEFAULTS.put(SNIPER_RIFLE, new GunStats("special", "semi", 22.0, 1, 45, 4, 2.6, 3.0, 120, 6.0, 0.0, 4.0, 8.0, 120, 1.0, 0.4, true, true));
+		// Exotics: the archetype's numbers with a twist that pays for the behavior (smaller mags, slower reloads).
+		DEFAULTS.put(STRAY_VERDICT, new GunStats("primary", "semi", 10.0, 1, 130, 5, 1.8, 2.0, 80, 1.2, 0.25, 1.35, 6.5, 48, 0.6, 0.35, false, true));
+		DEFAULTS.put(LANTERN_EYE, new GunStats("special", "semi", 20.0, 1, 45, 3, 2.8, 3.2, 120, 6.0, 0.0, 4.0, 8.0, 120, 1.0, 0.4, true, true));
+		DEFAULTS.put(BACKDRAFT, new GunStats("special", "semi", 3.0, 9, 60, 4, 2.6, 1.25, 18, 7.0, 5.0, 1.15, 9.0, 7, 0.3, 0.15, false, true));
+		DEFAULTS.put(KINDLING_ENGINE, new GunStats("primary", "auto", 3.2, 1, 540, 36, 2.4, 1.6, 55, 2.6, 0.9, 1.3, 1.1, 30, 0.6, 0.05, false, true));
+		DEFAULTS.put(TETHER_LANCE, new GunStats("special", "semi", 14.0, 1, 40, 1, 3.0, 1.0, 60, 0.6, 0.2, 1.2, 7.0, 60, 1.0, 0.8, false, true));
 		active = Collections.unmodifiableMap(new LinkedHashMap<>(DEFAULTS));
 	}
 

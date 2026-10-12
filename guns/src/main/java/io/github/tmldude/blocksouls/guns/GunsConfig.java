@@ -15,11 +15,13 @@ public class GunsConfig {
 	public Perks perks = new Perks();
 	public Shooting shooting = new Shooting();
 	public Loot loot = new Loot();
+	public Exotics exotics = new Exotics();
 
 	public static class Rarity {
 		public double commonDamageMult = 1.0;
 		public double rareDamageMult = 1.1;
 		public double legendaryDamageMult = 1.2;
+		public double exoticDamageMult = 1.2;
 		/** Odds [common, rare, legendary] for guns with no rolled rarity (crafted, {@code /give}). */
 		public double[] craftedOdds = {70, 25, 5};
 		/** Odds for {@code roll_perks} with {@code "tier": "common"}. */
@@ -52,6 +54,8 @@ public class GunsConfig {
 		public double hitboxMargin = 0.3;
 		/** Walk speed multiplier while aiming down sights (vanilla item use is 0.2). */
 		public double adsMoveSpeed = 0.6;
+		/** A dodge roll finishes a reload that is at least this far along (0..1); 1 disables reload-cancel. */
+		public double reloadCancelThreshold = 0.8;
 	}
 
 	public static class Loot {
@@ -72,6 +76,39 @@ public class GunsConfig {
 		public double waveLegendaryGunChance = 0.04;
 		/** Wave-clear reward chest: one gun (rare tier) at this chance, plus ammo. */
 		public double waveClearGunChance = 0.5;
+
+		/** Weights of each exotic when a {@code roll_perks} entry with {@code "tier": "exotic"} picks one. */
+		public Map<String, Integer> exoticWeights = defaultExoticWeights();
+		/** Loot tables that get an extra exotic pool, with the chance per roll. Boss drops and the legendary wave tier. */
+		public Map<String, Double> exoticTables = defaultExoticTables();
+	}
+
+	/** Each exotic's own numbers (base stats are in {@code weapons}). */
+	public static class Exotics {
+		/** Stray Verdict: the last round in the mag ricochets to a second target within this range, at this damage share. */
+		public double strayVerdictRange = 10;
+		public double strayVerdictDamageMult = 0.8;
+		/** Lantern Eye: precision kills mark hostiles within the radius; marked targets take extra damage from any gun. */
+		public double lanternEyeMarkRadius = 8;
+		public int lanternEyeMarkTicks = 160;
+		public double lanternEyeMarkedDamageMult = 1.25;
+		/** Backdraft: each shot launches the shooter backward with this speed (blocks/tick) and a little lift. */
+		public double backdraftLaunch = 0.9;
+		public double backdraftLift = 0.25;
+		/** Kindling Engine: each hit adds heat; heat decays per tick; at 100 the gun vents for a while. Fire rate ramps with heat. */
+		public double kindlingHeatPerHit = 9;
+		public double kindlingHeatDecayPerTick = 1.2;
+		public int kindlingVentTicks = 50;
+		/** Fire-rate multiplier at full heat (1.8 = 80% faster). */
+		public double kindlingMaxRateMult = 1.8;
+		/** Heat above which hits set the target on fire, and for how long. */
+		public double kindlingIgniteHeat = 60;
+		public int kindlingIgniteTicks = 60;
+		/** Tether Lance: the rocket bursts at the first thing it hits; nearby hostiles take blast damage and the two nearest are tethered. */
+		public double tetherBlastRadius = 3.5;
+		public double tetherBlastDamage = 12;
+		public int tetherTicks = 60;
+		public double tetherPull = 0.18;
 	}
 
 	/**
@@ -98,6 +135,24 @@ public class GunsConfig {
 		chests.put("minecraft:chests/ancient_city", new ChestLoot("legendary", 0.12, 0.40));
 		chests.put("minecraft:chests/end_city_treasure", new ChestLoot("legendary", 0.15, 0.40));
 		return chests;
+	}
+
+	private static Map<String, Integer> defaultExoticWeights() {
+		Map<String, Integer> weights = new LinkedHashMap<>();
+		weights.put(Weapons.STRAY_VERDICT, 1);
+		weights.put(Weapons.LANTERN_EYE, 1);
+		weights.put(Weapons.BACKDRAFT, 1);
+		weights.put(Weapons.KINDLING_ENGINE, 1);
+		weights.put(Weapons.TETHER_LANCE, 1);
+		return weights;
+	}
+
+	private static Map<String, Double> defaultExoticTables() {
+		Map<String, Double> tables = new LinkedHashMap<>();
+		tables.put("blocksouls_bosses:boss_drops/legendary_gun", 0.2);
+		tables.put("blocksouls_bosses:boss_drops/final_dragon_guns", 1.0);
+		tables.put("blocksouls_game:wave_drops/legendary", 0.01);
+		return tables;
 	}
 
 	private static Map<String, Integer> defaultGunWeights() {
