@@ -21,8 +21,10 @@ import io.github.tmldude.blocksouls.common.CommonIds;
  * The movement capability set on a player: which movement verbs (climb, swing, extra jumps, glide, ...)
  * this player has at all. The movement module gates each mechanic on {@link #has}; the game module
  * restricts the set when v2 origins pick a movement signature. <strong>The default — no set attached —
- * grants everything</strong>, which is exactly the v1 behavior and the classic run shape, so a world
- * without origins never changes.
+ * grants every v1 verb</strong> ({@link #V1_VERBS}: climb, swing, multi-jump), which is exactly the v1
+ * behavior and the classic run shape, so a world without classes never changes. Verbs v1 never had
+ * ({@link #GLIDE}) are opt-in: only an explicit set (a class signature, or a rune / cross-training boon
+ * through {@link #grant}) holds them, so a default player never starts gliding by pressing jump in the air.
  *
  * <p>Capabilities are on/off verbs; magnitudes (climb speed, web reach, ...) stay in {@link PlayerTraits}.
  * Saved with the player and synced to every client (other players' climb/glide poses render too). Unlike
@@ -35,8 +37,11 @@ public final class Capabilities {
 	public static final Identifier SWING = capability("swing");
 	/** Double/triple jump chains (the hold-jump feel itself is universal, not a capability). */
 	public static final Identifier MULTI_JUMP = capability("multi_jump");
-	/** Stamina-drain glide wings. */
+	/** Stamina-drain glide wings (v2, Zephyr): never in the default set, see {@link #V1_VERBS}. */
 	public static final Identifier GLIDE = capability("glide");
+
+	/** The verbs the default (no set attached) player has: everything v1 shipped. */
+	public static final Set<Identifier> V1_VERBS = Set.of(CLIMB, SWING, MULTI_JUMP);
 
 	private static final Codec<Set<Identifier>> CODEC = Identifier.CODEC.listOf().xmap(Set::copyOf, List::copyOf);
 	private static final AttachmentType<Set<Identifier>> TYPE = AttachmentRegistry.create(
@@ -48,13 +53,13 @@ public final class Capabilities {
 	private Capabilities() {
 	}
 
-	/** Whether the player has this movement verb. True for every verb while no explicit set is attached. */
+	/** Whether the player has this movement verb. While no explicit set is attached: true for every v1 verb. */
 	public static boolean has(Player player, Identifier capability) {
 		Set<Identifier> set = ((AttachmentTarget) player).getAttached(TYPE);
-		return set == null || set.contains(capability);
+		return set == null ? V1_VERBS.contains(capability) : set.contains(capability);
 	}
 
-	/** Whether the player is on the default all-granted set (v1 / classic behavior). */
+	/** Whether the player is on the default all-granted set (v1 / classic behavior: every v1 verb, nothing else). */
 	public static boolean allGranted(Player player) {
 		return ((AttachmentTarget) player).getAttached(TYPE) == null;
 	}
@@ -69,10 +74,16 @@ public final class Capabilities {
 		((AttachmentTarget) player).setAttached(TYPE, Set.copyOf(capabilities));
 	}
 
-	/** Server side: adds one capability (e.g. a cross-training boon). No-op while everything is granted. */
+	/**
+	 * Server side: adds one capability (e.g. a cross-training boon or rune). On a default player this materializes
+	 * the v1 set plus the new verb, so granting glide to someone with no set attached works like it reads.
+	 */
 	public static void grant(Player player, Identifier capability) {
 		Set<Identifier> set = ((AttachmentTarget) player).getAttached(TYPE);
-		if (set == null || set.contains(capability)) {
+		if (set == null) {
+			set = V1_VERBS;
+		}
+		if (set.contains(capability)) {
 			return;
 		}
 		Set<Identifier> grown = new HashSet<>(set);
