@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
@@ -132,8 +133,12 @@ public class ActGameTests {
 	public void syntheticClockRunsSiegesInTheNether(GameTestHelper helper) {
 		// The test (and its mock player) live in the real Nether; act 1 is the overworld, act 2 the Nether.
 		// Charging act 1's portal opens act 2, and the party-follow moves the siege front to the player.
-		setUpExpedition(helper, List.of("minecraft:overworld", "minecraft:the_nether"));
+		ServerPlayer player = setUpExpedition(helper, List.of("minecraft:overworld", "minecraft:the_nether"));
 		MinecraftServer server = helper.getLevel().getServer();
+		helper.assertTrue(helper.getLevel().dimension() == Level.NETHER,
+				"test runs in the Nether, was " + helper.getLevel().dimension().identifier());
+		helper.assertTrue(player.level() == helper.getLevel(),
+				"mock player spawned in the test level, was " + player.level().dimension().identifier());
 		helper.assertTrue(RunDebug.startCharge(server) == null, "the portal charge starts");
 		int[] step = {0};
 		helper.onEachTick(() -> {
@@ -169,7 +174,8 @@ public class ActGameTests {
 			}
 		});
 		helper.succeedWhen(() -> {
-			helper.assertTrue(step[0] == 3, "siege ran dusk→dawn in the Nether, step " + step[0] + ", events " + EVENTS);
+			helper.assertTrue(step[0] == 3, "siege ran dusk→dawn in the Nether, step " + step[0] + ", events " + EVENTS
+					+ ", " + RunDebug.actDebug(helper.getLevel().getServer()));
 			helper.assertTrue(EVENTS.contains("dawn:1"), "synthetic dawn fired DAWN, " + EVENTS);
 			tearDown(helper);
 		});

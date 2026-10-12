@@ -120,4 +120,30 @@ public final class RunDebug {
 	public static void tickActs(MinecraftServer server) {
 		ActMachine.tick(server, RunData.get(server));
 	}
+
+	/** One line of act-machine state for test failures and debugging: shape, acts, and who is where. */
+	public static String actDebug(MinecraftServer server) {
+		RunData data = RunData.get(server);
+		StringBuilder sb = new StringBuilder("shape=").append(RunSystem.config().runShape)
+				.append(" act=").append(data.actOrdinal)
+				.append(" open=").append(data.highestOpenAct)
+				.append(" charging=").append(data.chargingAct)
+				.append(" active=").append(RunSystem.activeLevel(server).dimension().identifier())
+				.append(" acts=").append(ActMachine.acts().stream().map(a -> a.dimension().toString()).toList())
+				.append(" players=[");
+		for (net.minecraft.server.level.ServerPlayer player : server.getPlayerList().getPlayers()) {
+			sb.append(player.getScoreboardName()).append('@').append(player.level().dimension().identifier());
+			if (!player.isAlive()) {
+				sb.append(",dead");
+			}
+			if (player.isSpectator()) {
+				sb.append(",spectator");
+			}
+			if (io.github.tmldude.blocksouls.common.player.PlayerStatus.isDowned(player)) {
+				sb.append(",downed");
+			}
+			sb.append(' ');
+		}
+		return sb.append(']').toString();
+	}
 }
