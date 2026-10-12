@@ -1,0 +1,50 @@
+{
+	"fabric:load_conditions": [
+		{
+			"condition": "fabric:all_mods_loaded",
+			"values": [
+				"blocksouls_bosses"
+			]
+		}
+	],
+	"criteria": {
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipes": "blocksouls_world:blight_forged_boots_ashwyrm_scaled"
+			}
+		},
+		"has_ashwyrm_scale": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_bosses:ashwyrm_scale"
+					}
+				]
+			}
+		},
+		"has_blight_forged_boots": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:blight_forged_boots"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_ashwyrm_scale",
+			"has_blight_forged_boots"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"blocksouls_world:blight_forged_boots_ashwyrm_scaled"
+		]
+	}
+}

@@ -1,0 +1,39 @@
+{
+	"fabric:load_conditions": [
+		{
+			"condition": "fabric:all_mods_loaded",
+			"values": [
+				"blocksouls_world"
+			]
+		}
+	],
+	"criteria": {
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipes": "blocksouls_vehicles:wheel"
+			}
+		},
+		"has_scrap": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:scrap"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_scrap"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"blocksouls_vehicles:wheel"
+		]
+	}
+}

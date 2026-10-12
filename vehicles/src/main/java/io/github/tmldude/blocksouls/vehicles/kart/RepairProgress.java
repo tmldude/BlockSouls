@@ -35,6 +35,11 @@ public record RepairProgress(int wheels, int engines, int scrap) {
 		return wheels >= cfg.wheels && engines >= cfg.engines && scrap >= cfg.scrap;
 	}
 
+	/** What's still missing: per part, how many more it needs (never negative). */
+	public RepairProgress remaining(VehiclesConfig.Wreck cfg) {
+		return new RepairProgress(Math.max(0, cfg.wheels - wheels), Math.max(0, cfg.engines - engines), Math.max(0, cfg.scrap - scrap));
+	}
+
 	/** Share of all parts fitted, 0..1. */
 	public double fraction(VehiclesConfig.Wreck cfg) {
 		int total = cfg.wheels + cfg.engines + cfg.scrap;
