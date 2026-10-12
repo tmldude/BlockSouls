@@ -62,6 +62,16 @@ public final class PartyScaling {
 		return curve(players, config.raidCrystals);
 	}
 
+	/** Abilities: multiplier on ultimate charge per kill / precision hit. */
+	public static double ultimateCharge(int players) {
+		return curve(players, config.ultimateCharge);
+	}
+
+	/** Abilities: multiplier on healing dart and party overshield amounts. */
+	public static double abilityHeal(int players) {
+		return curve(players, config.abilityHeal);
+	}
+
 	public static int raidPlates(int players) {
 		int perPlate = Math.max(1, config.playersPerRaidPlate);
 		int plates = (partySize(players) + perPlate - 1) / perPlate;
