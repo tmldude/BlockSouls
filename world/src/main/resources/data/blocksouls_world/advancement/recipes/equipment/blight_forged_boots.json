@@ -1,0 +1,42 @@
+{
+	"criteria": {
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipes": "blocksouls_world:blight_forged_boots"
+			}
+		},
+		"has_gunmetal_ingot": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:gunmetal_ingot"
+					}
+				]
+			}
+		},
+		"has_blight_core": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:blight_core"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_gunmetal_ingot",
+			"has_blight_core"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"blocksouls_world:blight_forged_boots"
+		]
+	}
+}

@@ -3,7 +3,9 @@
 
   R1  every BlockSouls item that drops (mob, boss, chest or ore loot) is an ingredient in at least 2 recipes;
   R2  every BlockSouls item that is crafted connects: its recipe uses a BlockSouls item, or it is itself an
-      ingredient in another recipe (no recipes that only turn vanilla items into a dead end).
+      ingredient in another recipe (no recipes that only turn vanilla items into a dead end);
+  R3  every recipe has a recipe-unlock advancement (written by gen_recipe_advancements.py), so it appears in the
+      recipe book as soon as a player holds an ingredient.
 
 Gear, trophies and other end items that are meant to be dead ends are listed with a reason in
 tools/content/recipe_web_exempt.json. Run from anywhere:  python3 tools/content/check_recipe_web.py [--report]
@@ -152,6 +154,8 @@ def main():
     stale = [k for k in list(exempt) + list(debt) if k not in items]
     for k in stale:
         problems.append(f"exempt list names {k}, which isn't a BlockSouls item any more")
+    from gen_recipe_advancements import problems as unlock_problems
+    problems += [f"R3 {p}" for p in unlock_problems()]
     if report:
         print(f"{len(items)} items, {len(rs)} recipes")
     for p in problems:

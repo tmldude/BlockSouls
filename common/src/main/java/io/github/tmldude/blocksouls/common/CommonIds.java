@@ -76,6 +76,17 @@ public final class CommonIds {
 	/** Entity type (vehicles) placed by world structures as a repairable wreck. */
 	public static final Identifier KART_WRECK = id(VEHICLES, "kart_wreck");
 
+	/** The v2 floor dimension (world): every floor of a floors-shape run is an island in it. */
+	public static final Identifier FLOORS_DIMENSION = id(WORLD, "floors");
+	/** Resource node blocks (world): pop in a few hits with a burst. Their ids are the {@code NODE} slot tags. */
+	public static final Identifier SCRAP_NODE = id(WORLD, "scrap_node");
+	public static final Identifier GUNMETAL_NODE = id(WORLD, "gunmetal_node");
+	public static final Identifier RESIN_NODE = id(WORLD, "resin_node");
+	/** The Surface floor's rare material (world), from resin nodes. */
+	public static final Identifier AMBER_RESIN = id(WORLD, "amber_resin");
+	/** The camp's exit portal block (world); using it starts the act's portal charge, lit it leads on. */
+	public static final Identifier FLOOR_PORTAL = id(WORLD, "floor_portal");
+
 	/**
 	 * Loot tables (owned by game) rolled for wave kills, by tier. Guns, world etc. add their entries with
 	 * {@code LootTableEvents.MODIFY}; the game picks the tier from the wave number.

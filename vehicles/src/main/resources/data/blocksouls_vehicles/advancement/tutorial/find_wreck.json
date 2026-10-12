@@ -1,0 +1,33 @@
+{
+	"parent": "blocksouls:tutorial/root",
+	"display": {
+		"icon": {
+			"id": "blocksouls_vehicles:wheel"
+		},
+		"title": {
+			"translate": "advancements.blocksouls.tutorial.find_wreck.title"
+		},
+		"description": {
+			"translate": "advancements.blocksouls.tutorial.find_wreck.description"
+		}
+	},
+	"criteria": {
+		"found_wreck": {
+			"trigger": "minecraft:player_interacted_with_entity",
+			"conditions": {
+				"entity": {
+					"type": "minecraft:entity_properties",
+					"entity": "this",
+					"predicate": {
+						"entity_type": "blocksouls_vehicles:kart_wreck"
+					}
+				}
+			}
+		}
+	},
+	"requirements": [
+		[
+			"found_wreck"
+		]
+	]
+}

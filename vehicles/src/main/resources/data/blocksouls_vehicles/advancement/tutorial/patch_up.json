@@ -1,0 +1,36 @@
+{
+	"parent": "blocksouls_vehicles:tutorial/fit_parts",
+	"display": {
+		"icon": {
+			"id": "minecraft:iron_nugget"
+		},
+		"title": {
+			"translate": "advancements.blocksouls.tutorial.patch_up.title"
+		},
+		"description": {
+			"translate": "advancements.blocksouls.tutorial.patch_up.description"
+		}
+	},
+	"criteria": {
+		"patched": {
+			"trigger": "minecraft:player_interacted_with_entity",
+			"conditions": {
+				"entity": {
+					"type": "minecraft:entity_properties",
+					"entity": "this",
+					"predicate": {
+						"entity_type": "blocksouls_vehicles:kart_wreck"
+					}
+				},
+				"item": {
+					"items": "#blocksouls_vehicles:repair_scrap"
+				}
+			}
+		}
+	},
+	"requirements": [
+		[
+			"patched"
+		]
+	]
+}

@@ -1,0 +1,37 @@
+{
+	"fabric:load_conditions": [
+		{
+			"condition": "fabric:all_mods_loaded",
+			"values": [
+				"blocksouls_game"
+			]
+		}
+	],
+	"parent": "blocksouls_bosses:tutorial/field_boss",
+	"display": {
+		"icon": {
+			"id": "minecraft:dragon_head"
+		},
+		"title": {
+			"translate": "advancements.blocksouls.tutorial.final_raid.title"
+		},
+		"description": {
+			"translate": "advancements.blocksouls.tutorial.final_raid.description"
+		},
+		"frame": "challenge"
+	},
+	"criteria": {
+		"sovereign": {
+			"trigger": "blocksouls_common:milestone",
+			"conditions": {
+				"milestone": "boss_killed",
+				"id": "blocksouls_bosses:final_dragon"
+			}
+		}
+	},
+	"requirements": [
+		[
+			"sovereign"
+		]
+	]
+}
