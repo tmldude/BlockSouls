@@ -351,3 +351,26 @@ v0.10.0 is released; Stage 6A starts. Briefs: `docs/sessions/v2-builds.md`, `v2-
   behavior-neutral for the live pack (`runShape: "classic"` default). Spine follow-ups after v1's #41/#42
   land: RELOADED wiring for SiegeClock, migrate pattern for the new game-run.json fields. **v2-director
   launches** once v0.11's `drops-and-pacing` is also in main (it edits the same `game/run` files).
+
+## Stage 6A common-contract reconciliation (2026-10-12, orchestrator)
+
+The three 6A sessions opened their `common` contract PRs in parallel (#46 builds, #47 guns-abilities,
+#48 players) and independently invented overlapping event classes. Canonical picks, to minimize rework:
+- **`PlayerMoveEvents`** (#48: `ROLLED`, `GLIDE_STARTED`) is the one movement-event class; #46's and #47's
+  `MovementEvents` are dropped.
+- **`CombatEvents`** (#46: `HIT(shooter, target, damage, precision, killed)`, `RELOADED(player, rounds)`) is
+  the one combat-event class; #47's `PRECISION_HIT` is `HIT` with `precision == true`.
+- `Origins` provider (#47) is the origin-id lookup; the game module installs it when origins land.
+- `PlayerStatus.canShoot` (#48) is what guns gate firing on (downed players may keep a pistol in v2).
+- `Capabilities` default set becomes **the v1 verbs** (climb, swing, multi-jump), not "everything": GLIDE
+  never existed in v1, so all-granted players must not start gliding. `grant()` must materialize that set
+  when adding to a default player (bug found in review, fixed in #48).
+- Merge order: #48 → #46 → #47 (#47 depends on #46's `CombatEvents`).
+- **Lesson for Stage 6B briefs:** when several parallel sessions each add `common` contracts, the
+  orchestrator pre-declares shared event/provider names in the briefs, or one session owns all contract
+  additions for the stage.
+
+Operational note: all four v2 workers stalled at the same account usage limit (five-hour window) within
+~20 minutes of launch, with uncommitted work staged. Workers are now told to commit WIP before long
+operations; the orchestrator re-arms a roster check-in just after each reset.
+
