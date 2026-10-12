@@ -14,7 +14,8 @@
 			"io.github.tmldude.blocksouls.game.test.DownedGameTests",
 			"io.github.tmldude.blocksouls.game.test.BoonGameTests",
 			"io.github.tmldude.blocksouls.game.test.ClassGameTests",
-			"io.github.tmldude.blocksouls.game.test.LastStandGameTests"
+			"io.github.tmldude.blocksouls.game.test.LastStandGameTests",
+			"io.github.tmldude.blocksouls.game.test.RuneGameTests"
 		]
 	},
 	"depends": {

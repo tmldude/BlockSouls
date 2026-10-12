@@ -17,10 +17,16 @@ import io.github.tmldude.blocksouls.common.CommonIds;
 public class RunTestMod implements ModInitializer {
 	@Override
 	public void onInitialize() {
-		if (BuiltInRegistries.ITEM.containsKey(CommonIds.STARTER_PISTOL)) {
+		placeholder(CommonIds.STARTER_PISTOL, 1);
+		// Souls (builds) for the rune payout test.
+		placeholder(CommonIds.SOUL, 64);
+	}
+
+	private static void placeholder(net.minecraft.resources.Identifier id, int stackSize) {
+		if (BuiltInRegistries.ITEM.containsKey(id)) {
 			return;
 		}
-		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, CommonIds.STARTER_PISTOL);
-		Registry.register(BuiltInRegistries.ITEM, key, new Item(new Item.Properties().setId(key).stacksTo(1)));
+		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, id);
+		Registry.register(BuiltInRegistries.ITEM, key, new Item(new Item.Properties().setId(key).stacksTo(stackSize)));
 	}
 }

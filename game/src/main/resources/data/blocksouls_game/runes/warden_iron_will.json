@@ -1,0 +1,13 @@
+{
+  "class": "blocksouls_game:warden",
+  "cost": 20,
+  "requires": [],
+  "effects": [
+    {
+      "type": "attribute",
+      "attribute": "minecraft:max_health",
+      "amount": 4,
+      "operation": "add_value"
+    }
+  ]
+}

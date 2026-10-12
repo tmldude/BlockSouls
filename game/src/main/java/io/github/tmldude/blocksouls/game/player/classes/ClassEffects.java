@@ -1,6 +1,7 @@
 package io.github.tmldude.blocksouls.game.player.classes;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,18 +24,69 @@ import io.github.tmldude.blocksouls.game.player.boon.BoonEffect;
 import io.github.tmldude.blocksouls.game.player.boon.PlayerBoons;
 
 /**
- * Applies and removes what a class does to a player. Classes are a maintained layer: boons clear and rebuild
- * traits on their own refresh, going down clears infinite effects, milk clears everything, so {@link #apply} is
- * idempotent and runs again after each of those (and on a timer) to put the class's share back.
+ * Applies and removes what a class (or a rune) does to a player. Classes and runes are a maintained layer: boons
+ * clear and rebuild traits on their own refresh, going down clears infinite effects, milk clears everything, so
+ * {@link #applyEffects} is idempotent and runs again after each of those (and on a timer) to put the layer back.
+ * Every owner (a class, a rune) keys its attribute modifiers by its own id, so they never clobber each other.
  */
-final class ClassEffects {
+public final class ClassEffects {
 	static final Identifier BOSS_HEARTS = Identifier.fromNamespaceAndPath(BlockSoulsGame.MOD_ID, "class/boss_hearts");
+
+	/** What every other active owner (class, runes) wants for a trait; installed by {@link PlayerClasses}. */
+	private static TraitContributions otherOwners = (player, excludingOwner, trait) -> 0;
 
 	private ClassEffects() {
 	}
 
+	@FunctionalInterface
+	public interface TraitContributions {
+		int level(ServerPlayer player, String excludingOwner, Identifier trait);
+	}
+
+	public static void setOtherOwners(TraitContributions contributions) {
+		otherOwners = contributions;
+	}
+
 	static void apply(ServerPlayer player, PlayerClass playerClass, ClassState state, ClassesConfig config) {
-		var effects = playerClass.effects();
+		applyEffects(player, owner(playerClass), playerClass.effects(), config);
+
+		// Striker: +hearts per boss kill (capped).
+		AttributeInstance health = player.getAttribute(Attributes.MAX_HEALTH);
+		if (health != null) {
+			int hearts = playerClass.rules().heartsPerBossKill() * Math.min(state.bossKills(), Math.max(0, config.bossKillHeartsCap));
+			if (hearts > 0) {
+				health.addOrReplacePermanentModifier(new AttributeModifier(BOSS_HEARTS, hearts * 2.0, AttributeModifier.Operation.ADD_VALUE));
+			} else {
+				health.removeModifier(BOSS_HEARTS);
+			}
+		}
+		clampHealth(player);
+	}
+
+	static void remove(ServerPlayer player, PlayerClass playerClass) {
+		removeEffects(player, owner(playerClass), playerClass.effects());
+		AttributeInstance health = player.getAttribute(Attributes.MAX_HEALTH);
+		if (health != null) {
+			health.removeModifier(BOSS_HEARTS);
+		}
+		clampHealth(player);
+	}
+
+	static String owner(PlayerClass playerClass) {
+		return classOwner(playerClass);
+	}
+
+	/** The owner key the class's modifiers are filed under. */
+	public static String classOwner(PlayerClass playerClass) {
+		return "class/" + key(playerClass.id());
+	}
+
+	/**
+	 * Applies a list of effects owned by {@code owner}: permanent effects are held, conditional ones ticked while
+	 * their condition holds, attribute modifiers keyed {@code <owner>/<index>}, traits set to the boons' level plus
+	 * every active owner's share. Idempotent.
+	 */
+	public static void applyEffects(ServerPlayer player, String owner, List<ClassEffect> effects, ClassesConfig config) {
 		Map<Holder<MobEffect>, Integer> permanent = new HashMap<>();
 		Map<Holder<MobEffect>, Integer> conditional = new HashMap<>();
 		Map<Identifier, Integer> traits = new HashMap<>();
@@ -52,7 +104,7 @@ final class ClassEffects {
 					AttributeInstance attribute = attribute(player, a.attribute());
 					AttributeModifier.Operation operation = operation(a.operation());
 					if (attribute != null && operation != null) {
-						attribute.addOrReplacePermanentModifier(new AttributeModifier(modifierId(playerClass, i), a.amount(), operation));
+						attribute.addOrReplacePermanentModifier(new AttributeModifier(modifierId(owner, i), a.amount(), operation));
 					}
 				}
 				case ClassEffect.Trait t -> traits.merge(Identifier.parse(t.trait()), t.level(), Integer::sum);
@@ -73,34 +125,20 @@ final class ClassEffects {
 			}
 		});
 
-		// Traits: the class's levels sit on top of the boons' (which rebuild the whole map on their refresh).
 		if (!traits.isEmpty()) {
-			Map<Identifier, Integer> boonLevels = boonTraitLevels(player);
+			Map<Identifier, Integer> base = boonTraitLevels(player);
 			traits.forEach((trait, level) -> {
-				int wanted = boonLevels.getOrDefault(trait, 0) + level;
+				int wanted = base.getOrDefault(trait, 0) + otherOwners.level(player, owner, trait) + level;
 				if (PlayerTraits.level(player, trait) != wanted) {
 					PlayerTraits.set(player, trait, wanted);
 				}
 			});
 		}
-
-		// Bloodbound: +hearts per boss kill (capped).
-		AttributeInstance health = player.getAttribute(Attributes.MAX_HEALTH);
-		if (health != null) {
-			int hearts = playerClass.rules().heartsPerBossKill() * Math.min(state.bossKills(), Math.max(0, config.bossKillHeartsCap));
-			if (hearts > 0) {
-				health.addOrReplacePermanentModifier(new AttributeModifier(BOSS_HEARTS, hearts * 2.0, AttributeModifier.Operation.ADD_VALUE));
-			} else {
-				health.removeModifier(BOSS_HEARTS);
-			}
-		}
-		if (player.getHealth() > player.getMaxHealth()) {
-			player.setHealth(player.getMaxHealth());
-		}
+		clampHealth(player);
 	}
 
-	static void remove(ServerPlayer player, PlayerClass playerClass) {
-		var effects = playerClass.effects();
+	/** Removes what {@link #applyEffects} applied for this owner. */
+	public static void removeEffects(ServerPlayer player, String owner, List<ClassEffect> effects) {
 		for (int i = 0; i < effects.size(); i++) {
 			switch (effects.get(i)) {
 				case ClassEffect.Effect e -> effect(e.effect()).ifPresent(holder -> {
@@ -112,19 +150,19 @@ final class ClassEffects {
 				case ClassEffect.Attribute a -> {
 					AttributeInstance attribute = attribute(player, a.attribute());
 					if (attribute != null) {
-						attribute.removeModifier(modifierId(playerClass, i));
+						attribute.removeModifier(modifierId(owner, i));
 					}
 				}
 				case ClassEffect.Trait t -> {
 					Identifier trait = Identifier.parse(t.trait());
-					PlayerTraits.set(player, trait, boonTraitLevels(player).getOrDefault(trait, 0));
+					PlayerTraits.set(player, trait, boonTraitLevels(player).getOrDefault(trait, 0) + otherOwners.level(player, owner, trait));
 				}
 			}
 		}
-		AttributeInstance health = player.getAttribute(Attributes.MAX_HEALTH);
-		if (health != null) {
-			health.removeModifier(BOSS_HEARTS);
-		}
+		clampHealth(player);
+	}
+
+	private static void clampHealth(ServerPlayer player) {
 		if (player.getHealth() > player.getMaxHealth()) {
 			player.setHealth(player.getMaxHealth());
 		}
@@ -141,7 +179,7 @@ final class ClassEffects {
 	}
 
 	/** Trait levels the player's boons grant (the boons module's own rule: trait level × boon level, summed). */
-	static Map<Identifier, Integer> boonTraitLevels(ServerPlayer player) {
+	public static Map<Identifier, Integer> boonTraitLevels(ServerPlayer player) {
 		Map<Identifier, Integer> levels = new HashMap<>();
 		PlayerBoons.owned(player).forEach((id, level) -> {
 			Boon boon = BoonCatalog.get(id);
@@ -157,9 +195,24 @@ final class ClassEffects {
 		return levels;
 	}
 
-	static Identifier modifierId(PlayerClass playerClass, int index) {
-		Identifier id = Identifier.parse(playerClass.id());
-		return Identifier.fromNamespaceAndPath(BlockSoulsGame.MOD_ID, "class/" + id.getNamespace() + "/" + id.getPath() + "/" + index);
+	/** The trait levels a list of effects asks for. */
+	public static int traitLevel(List<ClassEffect> effects, Identifier trait) {
+		int level = 0;
+		for (ClassEffect effect : effects) {
+			if (effect instanceof ClassEffect.Trait t && Identifier.parse(t.trait()).equals(trait)) {
+				level += t.level();
+			}
+		}
+		return level;
+	}
+
+	static String key(String id) {
+		Identifier parsed = Identifier.parse(id);
+		return parsed.getNamespace() + "/" + parsed.getPath();
+	}
+
+	static Identifier modifierId(String owner, int index) {
+		return Identifier.fromNamespaceAndPath(BlockSoulsGame.MOD_ID, owner + "/" + index);
 	}
 
 	private static Optional<Holder.Reference<MobEffect>> effect(String id) {

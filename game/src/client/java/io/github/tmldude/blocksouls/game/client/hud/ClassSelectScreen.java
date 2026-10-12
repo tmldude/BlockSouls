@@ -17,6 +17,7 @@ import net.minecraft.util.FormattedCharSequence;
 
 import io.github.tmldude.blocksouls.common.client.ClientNetworking;
 import io.github.tmldude.blocksouls.game.player.classes.ClassPayloads;
+import io.github.tmldude.blocksouls.game.player.rune.RunePayloads;
 import io.github.tmldude.blocksouls.game.player.classes.ClassPayloads.ClassView;
 
 /**
@@ -66,6 +67,8 @@ public class ClassSelectScreen extends Screen {
 	protected void init() {
 		choose = addRenderableWidget(Button.builder(Component.translatable("screen.blocksouls_game.class.choose"), button -> pick())
 				.bounds(panelX() + PANEL_WIDTH - 70, top() + panelHeight() - 24, 60, 20).build());
+		addRenderableWidget(Button.builder(Component.translatable("screen.blocksouls_game.class.runes"), button -> runes())
+				.bounds(panelX() + PANEL_WIDTH - 136, top() + panelHeight() - 24, 60, 20).build());
 	}
 
 	@Override
@@ -162,6 +165,13 @@ public class ClassSelectScreen extends Screen {
 			return true;
 		}
 		return super.keyPressed(event);
+	}
+
+	/** Opens the selected class's rune tree (the server sends it; the sigil stays). */
+	private void runes() {
+		if (!offer.classes().isEmpty()) {
+			ClientNetworking.sendToServer(new RunePayloads.Request(offer.classes().get(Math.clamp(selected, 0, offer.classes().size() - 1)).id()));
+		}
 	}
 
 	private void pick() {

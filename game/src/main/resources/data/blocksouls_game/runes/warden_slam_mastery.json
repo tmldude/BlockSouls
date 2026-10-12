@@ -1,0 +1,11 @@
+{
+  "class": "blocksouls_game:warden",
+  "cost": 60,
+  "requires": [
+    "blocksouls_game:warden_heavy_hands",
+    "blocksouls_game:warden_sure_stride"
+  ],
+  "ability_mods": [
+    "blocksouls_abilities:warden_slam_mastery"
+  ]
+}

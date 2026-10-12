@@ -1,0 +1,14 @@
+{
+  "class": "blocksouls_game:warden",
+  "cost": 40,
+  "requires": [
+    "blocksouls_game:warden_iron_will"
+  ],
+  "effects": [
+    {
+      "type": "trait",
+      "trait": "blocksouls:free_roll_on_kill",
+      "level": 1
+    }
+  ]
+}

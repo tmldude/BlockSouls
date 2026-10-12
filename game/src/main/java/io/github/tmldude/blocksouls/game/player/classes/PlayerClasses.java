@@ -40,6 +40,7 @@ import io.github.tmldude.blocksouls.common.player.Capabilities;
 import io.github.tmldude.blocksouls.common.run.Runs;
 import io.github.tmldude.blocksouls.common.synergy.SynergyTags;
 import io.github.tmldude.blocksouls.game.BlockSoulsGame;
+import io.github.tmldude.blocksouls.game.player.rune.PlayerRunes;
 
 /**
  * The class a player plays this run (PLAN2 §2/§3f: Warden, Striker, Arcanist, Ranger): picked with the Class Sigil
@@ -137,6 +138,7 @@ public final class PlayerClasses {
 		ClassState old = state(player);
 		PlayerClass previous = get(player);
 		if (previous != null) {
+			PlayerRunes.removeAll(player);
 			ClassEffects.remove(player, previous);
 		}
 		ClassState state = old == null ? new ClassState(playerClass.id(), Set.of(), 0) : old.withClass(playerClass.id());
@@ -160,6 +162,7 @@ public final class PlayerClasses {
 	public static void clear(ServerPlayer player) {
 		PlayerClass playerClass = get(player);
 		if (playerClass != null) {
+			PlayerRunes.removeAll(player);
 			ClassEffects.remove(player, playerClass);
 		}
 		((AttachmentTarget) player).removeAttached(TYPE);
@@ -178,6 +181,7 @@ public final class PlayerClasses {
 		}
 		grantSignature(player, playerClass);
 		ClassEffects.apply(player, playerClass, state, config);
+		PlayerRunes.apply(player, config);
 	}
 
 	/** The class's signature verbs, added on top of whatever the player already holds (the v1 kit at least). */

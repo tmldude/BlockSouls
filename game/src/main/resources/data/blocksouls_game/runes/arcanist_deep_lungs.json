@@ -1,0 +1,12 @@
+{
+  "class": "blocksouls_game:arcanist",
+  "cost": 20,
+  "requires": [],
+  "effects": [
+    {
+      "type": "trait",
+      "trait": "blocksouls:stamina_regen",
+      "level": 1
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "class": "blocksouls_game:warden",
+  "cost": 40,
+  "requires": [
+    "blocksouls_game:warden_iron_will"
+  ],
+  "effects": [
+    {
+      "type": "attribute",
+      "attribute": "minecraft:movement_speed",
+      "amount": 0.05,
+      "operation": "add_multiplied_total"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "class": "blocksouls_game:ranger",
+  "cost": 60,
+  "requires": [
+    "blocksouls_game:ranger_wings",
+    "blocksouls_game:ranger_long_thread"
+  ],
+  "ability_mods": [
+    "blocksouls_abilities:ranger_volley_mastery"
+  ]
+}

@@ -12,6 +12,8 @@ import io.github.tmldude.blocksouls.game.player.ping.Pings;
 import io.github.tmldude.blocksouls.game.player.downed.Revive;
 import io.github.tmldude.blocksouls.game.player.classes.ClassCommands;
 import io.github.tmldude.blocksouls.game.player.classes.ClassMovement;
+import io.github.tmldude.blocksouls.game.player.rune.PlayerRunes;
+import io.github.tmldude.blocksouls.game.player.rune.RuneCommands;
 import io.github.tmldude.blocksouls.game.player.classes.PlayerClasses;
 import io.github.tmldude.blocksouls.game.player.relic.RelicItems;
 import io.github.tmldude.blocksouls.game.player.relic.RelicOffers;
@@ -49,6 +51,8 @@ public final class PlayerSystem {
 		PlayerClasses.register(CONFIG.classes);
 		ClassCommands.register();
 		ClassMovement.register();
+		PlayerRunes.register(CONFIG.runes);
+		RuneCommands.register();
 		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> PlayerBoons.refreshAll(server));
 		PlayerCommands.register();
 	}

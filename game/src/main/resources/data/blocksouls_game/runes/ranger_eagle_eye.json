@@ -1,0 +1,12 @@
+{
+  "class": "blocksouls_game:ranger",
+  "cost": 20,
+  "requires": [],
+  "effects": [
+    {
+      "type": "trait",
+      "trait": "blocksouls:reload_speed",
+      "level": 1
+    }
+  ]
+}

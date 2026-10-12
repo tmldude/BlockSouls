@@ -1,0 +1,14 @@
+{
+  "class": "blocksouls_game:ranger",
+  "cost": 40,
+  "requires": [
+    "blocksouls_game:ranger_eagle_eye"
+  ],
+  "effects": [
+    {
+      "type": "trait",
+      "trait": "blocksouls:web_reach",
+      "level": 1
+    }
+  ]
+}
