@@ -51,7 +51,13 @@ python3 tools/assets/check_mob_assets.py  # fails if MobGeometry.java is stale o
 - **`mob_sounds.py`** builds voices from a glottal pulse train shaped by moving vowel formants, plus filtered noise,
   clicks, bubbles and impacts. Seeded, so re-running gives byte-identical files.
 
-## Sound effects and music (`guns`, `bosses`, `vehicles`)
+## Ability icons (`abilities` module)
+
+`ability_icons.py` draws one 16×16 GUI sprite per ability (slot-coloured frame + glyph) into
+`textures/gui/sprites/ability/`, like `boon_icons.py` does for boons. Add a glyph row for a new ability and re-run
+(`--sheet docs/art/ability-icons-sheet.png` for a contact sheet).
+
+## Sound effects and music (`guns`, `bosses`, `vehicles`, `abilities`)
 
 All original and synthesized, no samples. The helpers (voices, formants, noise, impacts, metal, bells, fire,
 thunder, wings, reverb, the Vorbis encoder) live in `synth.py`; every generator imports them.
@@ -61,6 +67,7 @@ python3 tools/assets/gun_sounds.py      # guns: shots, reload, empty, ricochet, 
 python3 tools/assets/boss_sounds.py     # bosses: every boss event + the fog wall and lock-on; writes sounds.json
 python3 tools/assets/music.py           # bosses: one looping stereo track per boss -> sounds/music/<track>.ogg
 python3 tools/assets/vehicle_sounds.py  # vehicles: kart engine loop, skid, crash, repair, part fitted
+python3 tools/assets/ability_sounds.py  # abilities: cast cues, denied/ready, every ability's effect
 python3 tools/assets/check_sounds.py    # fails if a registered event has no entry, a file is missing, an entry
                                         # points at a vanilla sound, or a subtitle has no lang line (runs in CI)
 ```

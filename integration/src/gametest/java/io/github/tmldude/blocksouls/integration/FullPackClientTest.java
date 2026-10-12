@@ -58,6 +58,12 @@ public class FullPackClientTest implements FabricClientGameTest {
 			context.waitTicks(10);
 			context.takeScreenshot("04b-boon-row");
 
+			// The abilities HUD bottom-left: three slot icons, one mid-cooldown, and a full ultimate bar.
+			server.runCommand("execute as @a run bs ability ready @s");
+			server.runCommand("execute as @a run bs ability cast @s tactical");
+			context.waitTicks(15);
+			context.takeScreenshot("04c-abilities");
+
 			// A wave in progress (mobs come from 24-40 blocks out).
 			server.runCommand("kill @e[type=blocksouls_mobs:shambler,nbt={NoAI:1b}]");
 			context.waitTicks(200);
