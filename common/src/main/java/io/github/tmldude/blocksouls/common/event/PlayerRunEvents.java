@@ -26,6 +26,13 @@ public final class PlayerRunEvents {
 				}
 			});
 
+	/** A curse was put on the player (greed objects, debug). */
+	public static final Event<Granted> CURSE_APPLIED = granted();
+	/** A curse was purged from the player (shopkeeper, altar cleanse). Not fired when going down wipes them. */
+	public static final Event<Granted> CURSE_PURGED = granted();
+	/** The player took a trinket from an offer. */
+	public static final Event<Granted> TRINKET_GRANTED = granted();
+
 	private PlayerRunEvents() {
 	}
 
@@ -43,6 +50,19 @@ public final class PlayerRunEvents {
 	@FunctionalInterface
 	public interface BoonGranted {
 		void onBoonGranted(ServerPlayer player, Identifier boon);
+	}
+
+	@FunctionalInterface
+	public interface Granted {
+		void onGranted(ServerPlayer player, Identifier id);
+	}
+
+	private static Event<Granted> granted() {
+		return EventFactory.createArrayBacked(Granted.class, callbacks -> (player, id) -> {
+			for (Granted callback : callbacks) {
+				callback.onGranted(player, id);
+			}
+		});
 	}
 
 	private static Event<Player> player() {
