@@ -122,5 +122,11 @@
 	"origin.blocksouls_game.gambler": "Gambler",
 	"origin.blocksouls_game.gambler.movement": "Roll and hold-jump only",
 	"origin.blocksouls_game.gambler.passive": "+1 Luck; relics offer 4 cards, one always a Wildcard",
-	"origin.blocksouls_game.gambler.drawback": "Relic cards are hidden until taken"
+	"origin.blocksouls_game.gambler.drawback": "Relic cards are hidden until taken",
+	"key.blocksouls.ping": "Ping",
+	"title.blocksouls_game.last_stand": "Last Stand",
+	"title.blocksouls_game.last_stand.sub": "%s kills in %s s to get up",
+	"hud.blocksouls_game.last_stand": "Last Stand: %s/%s kills, %s s",
+	"hud.blocksouls_game.downed_shooting": "Keep firing: your pistol still works",
+	"message.blocksouls_game.party.vote_how": "Vote with /bs party vote %s true|false (%s yes votes open it)"
 }

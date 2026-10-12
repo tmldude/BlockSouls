@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentTarget;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 
 import io.github.tmldude.blocksouls.common.CommonTags;
+import io.github.tmldude.blocksouls.common.event.ConfigEvents;
 import io.github.tmldude.blocksouls.common.event.PlayerRunEvents;
 import io.github.tmldude.blocksouls.common.event.RunEvents;
 import io.github.tmldude.blocksouls.common.player.PlayerStatus;
@@ -39,6 +40,8 @@ public final class DownedPlay {
 	public static void register(PlayersConfig.Downed downedConfig) {
 		config = downedConfig;
 		PlayerStatus.setDownedShooting(config.keepShooting);
+		// The flag is a cached config value: refresh it when game-players.json is reloaded.
+		ConfigEvents.RELOADED.register((name, reloaded) -> PlayerStatus.setDownedShooting(config.keepShooting));
 
 		PlayerRunEvents.DOWNED.register(DownedPlay::lendPistol);
 		PlayerRunEvents.REVIVED.register((player, reviver) -> reclaimPistol(player));
