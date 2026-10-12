@@ -1,0 +1,50 @@
+{
+	"fabric:load_conditions": [
+		{
+			"condition": "fabric:all_mods_loaded",
+			"values": [
+				"blocksouls_world"
+			]
+		}
+	],
+	"criteria": {
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipes": "blocksouls_guns:gun_receiver"
+			}
+		},
+		"has_gunmetal_ingot": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:gunmetal_ingot"
+					}
+				]
+			}
+		},
+		"has_scrap": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:scrap"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_gunmetal_ingot",
+			"has_scrap"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"blocksouls_guns:gun_receiver"
+		]
+	}
+}

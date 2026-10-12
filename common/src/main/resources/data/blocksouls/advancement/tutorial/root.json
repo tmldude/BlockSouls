@@ -1,0 +1,26 @@
+{
+	"display": {
+		"icon": {
+			"id": "minecraft:crafting_table"
+		},
+		"title": {
+			"translate": "advancements.blocksouls.tutorial.root.title"
+		},
+		"description": {
+			"translate": "advancements.blocksouls.tutorial.root.description"
+		},
+		"background": "minecraft:block/deepslate_tiles",
+		"show_toast": false,
+		"announce_to_chat": false
+	},
+	"criteria": {
+		"joined": {
+			"trigger": "minecraft:tick"
+		}
+	},
+	"requirements": [
+		[
+			"joined"
+		]
+	]
+}

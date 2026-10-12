@@ -6,7 +6,8 @@
 	"environment": "*",
 	"entrypoints": {
 		"fabric-gametest": [
-			"io.github.tmldude.blocksouls.integration.FullPackGameTests"
+			"io.github.tmldude.blocksouls.integration.FullPackGameTests",
+			"io.github.tmldude.blocksouls.integration.OnboardingGameTests"
 		],
 		"fabric-client-gametest": [
 			"io.github.tmldude.blocksouls.integration.FullPackClientTest"
