@@ -20,6 +20,7 @@ public class MovementConfig {
 	public Climb climb = new Climb();
 	public Stamina stamina = new Stamina();
 	public Web web = new Web();
+	public Glide glide = new Glide();
 	public Traits traits = new Traits();
 
 	public String toJson() {
@@ -150,8 +151,28 @@ public class MovementConfig {
 		public int fallbackRays = 3;
 	}
 
+	/**
+	 * Stamina-drain glide wings ({@code Capabilities.GLIDE}, the Zephyr origin): vanilla gliding physics without an
+	 * elytra, started like one (jump in mid-air), ended when stamina runs out. Updrafts add lift while gliding
+	 * through them; until the Skyrift lands the only source is the dusk thermal over open ground.
+	 */
+	public static class Glide {
+		public boolean enabled = true;
+		public double staminaPerSecond = 8;
+		/** Upward velocity added per tick while gliding in an updraft. */
+		public double updraftLift = 0.05;
+		/** Dusk thermals: day times (mod 24000) between which open ground gives lift. */
+		public int thermalStartTime = 11000;
+		public int thermalEndTime = 13500;
+		/** A thermal reaches this far above the ground below the player (blocks); only under open sky. */
+		public int thermalHeight = 48;
+	}
+
 	/** How {@code PlayerTraits} levels scale movement. Every level stacks. */
 	public static class Traits {
+		/** Max stamina lost per {@code STAMINA_MAX_PENALTY} level (an origin drawback), never below {@link #staminaMaxFloor}. */
+		public double staminaMaxPenaltyPerLevel = 25;
+		public double staminaMaxFloor = 25;
 		/** Extra mid-air jumps per {@code DOUBLE_JUMP} level. */
 		public int airJumpsPerLevel = 1;
 		/** Ticks added to the end of the roll's i-frame window per {@code ROLL_IFRAMES} level. */

@@ -5,11 +5,16 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.Set;
+
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 
+import io.github.tmldude.blocksouls.common.player.Capabilities;
 import io.github.tmldude.blocksouls.common.player.PlayerStatus;
 import io.github.tmldude.blocksouls.common.player.PlayerTraits;
 import io.github.tmldude.blocksouls.movement.BlockSoulsMovement;
+import io.github.tmldude.blocksouls.movement.climb.ClimbWorld;
+import io.github.tmldude.blocksouls.movement.glide.GlideServer;
 import io.github.tmldude.blocksouls.movement.roll.RollServer;
 import io.github.tmldude.blocksouls.movement.stamina.StaminaAttachment;
 import io.github.tmldude.blocksouls.movement.stamina.StaminaState;
@@ -136,5 +141,75 @@ public class MovementGameTests {
 			helper.assertTrue(Math.abs(stamina - expected) < 3, "expected ~" + expected + " stamina after 2s, got " + stamina);
 			helper.succeed();
 		});
+	}
+
+	// ---------------------------------------------------------------- the origin capability gate
+
+	@GameTest
+	public void defaultPlayersKeepEveryV1Verb(GameTestHelper helper) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		PlayerTraits.set(player, PlayerTraits.DOUBLE_JUMP, 1);
+		helper.assertTrue(Capabilities.allGranted(player), "no set attached");
+		helper.assertTrue(MovementTraits.canClimb(player) && MovementTraits.canSwing(player) && MovementTraits.canMultiJump(player), "v1 verbs");
+		helper.assertTrue(ClimbWorld.isEligible(player), "climb eligible as in v1");
+		helper.assertTrue(WebServer.canSwing(player), "may swing as in v1");
+		helper.assertTrue(MovementTraits.airJumps(player) == 1, "the double-jump trait counts as in v1");
+		helper.assertTrue(!MovementTraits.canGlide(player) && !GlideServer.canGlide(player), "no glide without an origin (v1 had none)");
+		helper.assertTrue(RollServer.tryStart(stand(player)), "the roll is universal");
+		helper.succeed();
+	}
+
+	@GameTest
+	public void restrictedPlayersLoseTheVerbsTheyDontHold(GameTestHelper helper) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		PlayerTraits.set(player, PlayerTraits.DOUBLE_JUMP, 1);
+		Capabilities.restrictTo(player, Set.of(Capabilities.GLIDE));
+		helper.assertTrue(!ClimbWorld.isEligible(player), "no climb");
+		helper.assertTrue(!WebServer.canSwing(player), "no swing");
+		helper.assertTrue(MovementTraits.airJumps(player) == 0, "no air jumps without MULTI_JUMP, trait or not");
+		helper.assertTrue(GlideServer.canGlide(player), "glides");
+		helper.assertTrue(RollServer.tryStart(stand(player)), "the roll is never gated");
+
+		Capabilities.grant(player, Capabilities.CLIMB);
+		helper.assertTrue(ClimbWorld.isEligible(player), "cross-training grants climb");
+		Capabilities.grantAll(player);
+		helper.assertTrue(WebServer.canSwing(player) && !GlideServer.canGlide(player), "back to v1");
+		helper.succeed();
+	}
+
+	@GameTest
+	public void staminaPenaltyTraitLowersTheMax(GameTestHelper helper) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		double full = BlockSoulsMovement.CONFIG.stamina.max;
+		helper.assertTrue(MovementTraits.staminaMax(player) == full, "full max by default");
+		PlayerTraits.set(player, PlayerTraits.STAMINA_MAX_PENALTY, 1);
+		helper.assertTrue(MovementTraits.staminaMax(player) == full - BlockSoulsMovement.CONFIG.traits.staminaMaxPenaltyPerLevel, "one level off");
+		helper.succeed();
+	}
+
+	@GameTest(maxTicks = 100)
+	public void wingsStartAGlideAndDrainStamina(GameTestHelper helper) {
+		ServerPlayer gliderless = helper.makeMockServerPlayerInLevel();
+		ServerPlayer zephyr = helper.makeMockServerPlayerInLevel();
+		Capabilities.restrictTo(zephyr, Set.of(Capabilities.GLIDE));
+		gliderless.setOnGround(false);
+		zephyr.setOnGround(false);
+
+		helper.assertTrue(!gliderless.tryToStartFallFlying(), "nothing to glide on without the verb or an elytra");
+		helper.assertTrue(zephyr.tryToStartFallFlying(), "the wings are a custom elytra");
+		helper.assertTrue(zephyr.isFallFlying(), "gliding");
+
+		float before = StaminaAttachment.get(zephyr).value();
+		GlideServer.tickGlide(zephyr);
+		helper.assertTrue(StaminaAttachment.get(zephyr).value() < before, "gliding costs stamina");
+
+		StaminaAttachment.set(zephyr, new StaminaState(0, 0));
+		helper.assertTrue(!GlideServer.canGlide(zephyr), "the wings fold at zero stamina");
+		helper.succeed();
+	}
+
+	private static ServerPlayer stand(ServerPlayer player) {
+		player.setOnGround(true);
+		return player;
 	}
 }

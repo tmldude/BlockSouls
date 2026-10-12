@@ -1,6 +1,9 @@
 package io.github.tmldude.blocksouls.movement;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -17,10 +20,12 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 
 import io.github.tmldude.blocksouls.common.debug.DebugCommands;
+import io.github.tmldude.blocksouls.common.player.Capabilities;
 import io.github.tmldude.blocksouls.common.player.PlayerTraits;
 import io.github.tmldude.blocksouls.movement.stamina.StaminaAttachment;
 import io.github.tmldude.blocksouls.movement.stamina.StaminaState;
 import io.github.tmldude.blocksouls.movement.sync.ConfigSync;
+import io.github.tmldude.blocksouls.movement.trait.MovementTraits;
 
 /** {@code /bs move trait|stamina|config}: test movement traits and tuning without playing a run. */
 public final class MovementCommands {
@@ -33,7 +38,46 @@ public final class MovementCommands {
 			"stamina_regen", PlayerTraits.STAMINA_REGEN,
 			"flight", PlayerTraits.FLIGHT);
 
+	private static final Map<String, Identifier> CAPABILITIES = Map.of(
+			"climb", Capabilities.CLIMB,
+			"swing", Capabilities.SWING,
+			"multi_jump", Capabilities.MULTI_JUMP,
+			"glide", Capabilities.GLIDE);
+
 	private MovementCommands() {
+	}
+
+	private static int showCaps(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+		ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
+		Set<Identifier> set = Capabilities.granted(player);
+		String text = set == null ? "all v1 verbs (no set attached)" : set.isEmpty() ? "none" : set.stream().map(Identifier::toString).sorted().collect(Collectors.joining(", "));
+		ctx.getSource().sendSuccess(() -> Component.literal("Capabilities of ").append(player.getDisplayName()).append(": " + text), false);
+		return 1;
+	}
+
+	/** {@code /bs move caps <player> all|none|<verb verb ...>}: restrict a player's movement verbs without an origin. */
+	private static int setCaps(CommandContext<CommandSourceStack> ctx, String verbs) throws CommandSyntaxException {
+		ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
+		if (verbs == null) {
+			Capabilities.grantAll(player);
+			ctx.getSource().sendSuccess(() -> Component.literal("Restored the default (v1) verbs for ").append(player.getDisplayName()), true);
+			return 1;
+		}
+		Set<Identifier> set = new HashSet<>();
+		for (String verb : verbs.trim().split("\\s+")) {
+			if (verb.isEmpty()) {
+				continue;
+			}
+			Identifier id = CAPABILITIES.get(verb);
+			if (id == null) {
+				ctx.getSource().sendFailure(Component.literal("Unknown verb: " + verb + " (" + String.join(", ", CAPABILITIES.keySet()) + ")"));
+				return 0;
+			}
+			set.add(id);
+		}
+		Capabilities.restrictTo(player, set);
+		ctx.getSource().sendSuccess(() -> Component.literal("Restricted ").append(player.getDisplayName()).append(" to " + (set.isEmpty() ? "no verbs" : verbs.trim())), true);
+		return 1;
 	}
 
 	public static void register() {
@@ -48,6 +92,14 @@ public final class MovementCommands {
 						.then(Commands.argument("player", EntityArgument.player())
 								.then(Commands.argument("value", FloatArgumentType.floatArg(0))
 										.executes(MovementCommands::setStamina))))
+				.then(Commands.literal("caps")
+						.then(Commands.argument("player", EntityArgument.player())
+								.executes(MovementCommands::showCaps)
+								.then(Commands.literal("all").executes(ctx -> setCaps(ctx, null)))
+								.then(Commands.literal("none").executes(ctx -> setCaps(ctx, "")))
+								.then(Commands.argument("verbs", StringArgumentType.greedyString())
+										.suggests((ctx, builder) -> SharedSuggestionProvider.suggest(CAPABILITIES.keySet(), builder))
+										.executes(ctx -> setCaps(ctx, StringArgumentType.getString(ctx, "verbs"))))))
 				.then(Commands.literal("config")
 						.then(Commands.literal("reload").executes(ctx -> {
 							ConfigSync.reload(ctx.getSource().getServer());
@@ -73,7 +125,7 @@ public final class MovementCommands {
 
 	private static int setStamina(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
 		ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
-		float value = (float) Math.min(FloatArgumentType.getFloat(ctx, "value"), BlockSoulsMovement.CONFIG.stamina.max);
+		float value = (float) Math.min(FloatArgumentType.getFloat(ctx, "value"), MovementTraits.staminaMax(player));
 		StaminaAttachment.set(player, new StaminaState(value, 0));
 		ctx.getSource().sendSuccess(() -> Component.literal("Set stamina to " + value + " for ").append(player.getDisplayName()), true);
 		return 1;
