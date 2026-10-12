@@ -16,7 +16,7 @@ import net.minecraft.server.MinecraftServer;
 import io.github.tmldude.blocksouls.common.debug.DebugCommands;
 
 /**
- * {@code /bs run start|new|state|over|endless}, {@code /bs wave start|end|clear|skip}, {@code /bs time dusk|dawn|night|day},
+ * {@code /bs run start|new|state|over|endless|pity}, {@code /bs wave start|end|clear|skip|reward}, {@code /bs time dusk|dawn|night|day},
  * {@code /bs night modifier <id|none>}.
  */
 final class RunCommands {
@@ -47,6 +47,11 @@ final class RunCommands {
 					.then(Commands.literal("endless").executes(c -> {
 						RunSystem.startEndless(c.getSource().getServer());
 						return feedback(c, "Endless: " + RunData.get(c.getSource().getServer()).endless);
+					}))
+					.then(Commands.literal("pity").executes(c -> {
+						MinecraftServer server = c.getSource().getServer();
+						boolean given = RunDebug.forceGunPity(server);
+						return feedback(c, given ? "Pity gun dropped" : "No pity gun (party already armed, nobody here, or no guns mod)");
 					})));
 
 			root.then(Commands.literal("wave")
@@ -70,6 +75,10 @@ final class RunCommands {
 						StarterKit.onWaveEnded(server, data, data.wave);
 						RunSync.markDirty();
 						return feedback(c, "Wave counter: " + data.wave);
+					}))
+					.then(Commands.literal("reward").executes(c -> {
+						var spot = RunDebug.placeReward(c.getSource().getServer(), null);
+						return feedback(c, spot == null ? "No free spot for a reward chest" : "Reward chest at " + spot.toShortString());
 					})));
 
 			root.then(Commands.literal("time")
@@ -120,6 +129,7 @@ final class RunCommands {
 				+ " difficulty=" + data.difficulty.id() + " tonight=" + data.wavesThisNight + "/" + data.nightBudget
 				+ " mobsLeft=" + sync.mobsLeft() + " next=" + sync.secondsToNext() + "s modifiers=" + data.nightModifiers
 				+ " bosses=" + data.bossesKilled + " elitesHunting=" + data.hunters.size() + " pistolsBroken=" + data.pistolsBroken
+				+ " gunPityGiven=" + data.gunPityGiven
 				+ " dayTime=" + WaveMath.timeOfDay(server.overworld().getOverworldClockTime()) + " rate=" + RunSystem.clockRate(server);
 		return feedback(c, text);
 	}

@@ -71,6 +71,38 @@ public final class RunDebug {
 		return Set.copyOf(RunData.get(server).gotKit);
 	}
 
+	/**
+	 * {@code /bs wave reward}: places the wave-clear reward chest for the current wave number, near {@code at} (or the
+	 * first player). Pity gun included if owed. Returns where, or null.
+	 */
+	public static net.minecraft.core.BlockPos placeReward(MinecraftServer server, net.minecraft.core.BlockPos at) {
+		RunData data = RunData.get(server);
+		return WaveRewards.placeRewardChest(server, data, Math.max(1, data.wave), null, at);
+	}
+
+	/** {@code /bs run pity}: forgets the pity was given and drops it at the party's feet now (whatever the night). */
+	public static boolean forceGunPity(MinecraftServer server) {
+		RunData data = RunData.get(server);
+		int night = data.night;
+		data.gunPityGiven = false;
+		data.night = Math.max(night, RunSystem.config().gunPityNight);
+		WaveRewards.onDawn(server, data);
+		data.night = night;
+		data.setDirty();
+		return data.gunPityGiven;
+	}
+
+	public static boolean gunPityGiven(MinecraftServer server) {
+		return RunData.get(server).gunPityGiven;
+	}
+
+	/** Sets the night counter (tests: the pity gun is owed from {@code gunPityNight}). */
+	public static void setNight(MinecraftServer server, int night) {
+		RunData data = RunData.get(server);
+		data.night = night;
+		data.setDirty();
+	}
+
 	// ---------------------------------------------------------------- v2 expedition spine
 
 	/** Reparses the act list after a test swapped {@code RunSystem.config()} fields. */

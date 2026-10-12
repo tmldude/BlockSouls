@@ -122,12 +122,13 @@ public final class WaveManager {
 		}
 		int wave = data.wave;
 		UUID killer = data.lastKiller;
+		BlockPos killPos = data.hasLastKillPos ? BlockPos.of(data.lastKillPos) : null;
 		data.clearWave();
 		data.phase = RunSystem.activeClock(server).isNight(config()) ? RunPhase.NIGHT_QUIET : RunPhase.DAY;
 		data.setDirty();
 		RunEvents.WAVE_ENDED.invoker().onWaveEnded(server, wave, cleared);
 		if (cleared) {
-			placeRewardChest(server, killer);
+			WaveRewards.placeRewardChest(server, data, wave, killer, killPos);
 		}
 		StarterKit.onWaveEnded(server, data, wave);
 		RunSync.markDirty();
@@ -577,21 +578,31 @@ public final class WaveManager {
 		data.setDirty();
 		RunSync.markDirty();
 
+		if (inWave) {
+			// The reward chest lands where the wave ends, whoever (or whatever) got the kill.
+			data.lastKillPos = mob.blockPosition().asLong();
+			data.hasLastKillPos = true;
+		}
 		ServerPlayer killer = source.getEntity() instanceof ServerPlayer player ? player
 				: mob.getLastHurtByPlayer() instanceof ServerPlayer player ? player : null;
-		if (killer == null) {
+		boolean elite = isElite(mob);
+		if (killer == null && !elite) {
 			return;
 		}
-		if (inWave) {
+		if (inWave && killer != null) {
 			data.lastKiller = killer.getUUID();
 		}
-		boolean elite = isElite(mob);
 		RandomSource random = level.getRandom();
 		if (!elite && random.nextDouble() >= config().dropChance) {
 			return;
 		}
 		int tier = WaveMath.pickTier(data.wave, random.nextDouble(), NightModifiers.tierShift(data.nightModifiers), elite, config());
-		mob.dropFromLootTable(level, source, true, dropTable(tier));
+		if (elite) {
+			// Elites always drop something worth walking to, even when a trap or a teammate's pet got the kill.
+			WaveRewards.dropElite(level, mob, source, dropTable(tier), killer != null);
+		} else {
+			mob.dropFromLootTable(level, source, true, dropTable(tier));
+		}
 	}
 
 	static ResourceKey<LootTable> dropTable(int tier) {
@@ -600,57 +611,6 @@ public final class WaveManager {
 			case WaveMath.RARE -> CommonIds.WAVE_DROPS_RARE;
 			default -> CommonIds.WAVE_DROPS_COMMON;
 		};
-	}
-
-	/** A reward chest on a free spot near the player who got the last kill (never replaces blocks). */
-	static @Nullable BlockPos placeRewardChest(MinecraftServer server, @Nullable UUID killerId) {
-		List<ServerPlayer> players = activePlayers(server);
-		ServerLevel level = level(server);
-		ServerPlayer near = killerId == null ? null : server.getPlayerList().getPlayer(killerId);
-		if (near == null || near.level() != level) {
-			near = players.isEmpty() ? null : players.getFirst();
-		}
-		if (near == null) {
-			return null;
-		}
-		BlockPos origin = near.blockPosition();
-		BlockPos spot = null;
-		search:
-		for (int r = 1; r <= 4; r++) {
-			for (int dy = 0; dy <= 2; dy++) {
-				for (int dx = -r; dx <= r; dx++) {
-					for (int dz = -r; dz <= r; dz++) {
-						for (int sign : new int[] {0, -1, 1}) {
-							BlockPos pos = origin.offset(dx, sign * dy, dz);
-							if ((Math.abs(dx) == r || Math.abs(dz) == r) && isFreeChestSpot(level, pos)) {
-								spot = pos;
-								break search;
-							}
-						}
-					}
-				}
-			}
-		}
-		if (spot == null) {
-			return null;
-		}
-		level.setBlockAndUpdate(spot, Blocks.CHEST.defaultBlockState());
-		if (level.getBlockEntity(spot) instanceof ChestBlockEntity chest) {
-			chest.setLootTable(CommonIds.WAVE_CLEAR_REWARD);
-			chest.setLootTableSeed(level.getRandom().nextLong());
-		}
-		level.playSound(null, spot, SoundEvents.PLAYER_LEVELUP, SoundSource.BLOCKS, 1.0F, 0.8F);
-		level.sendParticles(ParticleTypes.HAPPY_VILLAGER, spot.getX() + 0.5, spot.getY() + 1, spot.getZ() + 0.5, 20, 0.5, 0.5, 0.5, 0.1);
-		level.sendParticles(ParticleTypes.END_ROD, spot.getX() + 0.5, spot.getY() + 1.2, spot.getZ() + 0.5, 12, 0.2, 0.6, 0.2, 0.05);
-		return spot;
-	}
-
-	private static boolean isFreeChestSpot(ServerLevel level, BlockPos pos) {
-		if (!level.isInsideBuildHeight(pos.getY()) || !level.getBlockState(pos).isAir()) {
-			return false;
-		}
-		BlockPos below = pos.below();
-		return level.getBlockState(below).isFaceSturdy(level, below, Direction.UP);
 	}
 
 	// ---------------------------------------------------------------- helpers

@@ -74,6 +74,13 @@ public final class CommonIds {
 	public static final ResourceKey<LootTable> WAVE_DROPS_LEGENDARY = lootTable(GAME, "wave_drops/legendary");
 	/** Reward chest for clearing a wave. */
 	public static final ResourceKey<LootTable> WAVE_CLEAR_REWARD = lootTable(GAME, "wave_clear_reward");
+	/** Rolled once more (on top of the tier table) for every elite a player kills. Guns adds a gun and ammo. */
+	public static final ResourceKey<LootTable> WAVE_DROPS_ELITE = lootTable(GAME, "wave_drops/elite");
+	/**
+	 * The night-2 pity gun: rolled when a party still has nothing but Starter Pistols. Empty in game; guns fills it with
+	 * one guaranteed rolled gun.
+	 */
+	public static final ResourceKey<LootTable> GUN_PITY = lootTable(GAME, "gun_pity");
 
 	private CommonIds() {
 	}

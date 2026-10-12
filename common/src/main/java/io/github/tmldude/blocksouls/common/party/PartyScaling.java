@@ -62,6 +62,11 @@ public final class PartyScaling {
 		return curve(players, config.raidCrystals);
 	}
 
+	/** Party-shared loot (reward bundles, pity guns). */
+	public static double rewards(int players) {
+		return curve(players, config.rewards);
+	}
+
 	public static int raidPlates(int players) {
 		int perPlate = Math.max(1, config.playersPerRaidPlate);
 		int plates = (partySize(players) + perPlate - 1) / perPlate;

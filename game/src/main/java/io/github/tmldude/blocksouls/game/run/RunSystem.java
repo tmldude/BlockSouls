@@ -309,6 +309,7 @@ public final class RunSystem {
 		if (data.phase == RunPhase.WAVE) {
 			WaveManager.endWave(server, data, false);
 		}
+		WaveRewards.onDawn(server, data);
 		data.phase = RunPhase.DAY;
 		data.nightModifiers.clear();
 		data.wavesThisNight = 0;

@@ -6,15 +6,19 @@ import java.util.Set;
 import java.util.UUID;
 
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -68,6 +72,7 @@ public class RunGameTests {
 		config.minPlayerDistance = defaults.minPlayerDistance;
 		config.waveBreakSeconds = defaults.waveBreakSeconds;
 		config.wavesPerNight = defaults.wavesPerNight;
+		config.dropChance = defaults.dropChance;
 	}
 
 	private static boolean holds(ServerPlayer player, Item item) {
@@ -198,5 +203,65 @@ public class RunGameTests {
 			helper.assertTrue(server.reloadableRegistries().getLootTable(key) != LootTable.EMPTY, "loot table " + key.identifier() + " loads");
 		}
 		helper.succeed();
+	}
+
+	@GameTest(environment = "blocksouls_game_test:run_reward", maxTicks = 300, skyAccess = true)
+	public void clearingAWaveSpawnsTheReward(GameTestHelper helper) {
+		ServerPlayer player = setUp(helper);
+		MinecraftServer server = helper.getLevel().getServer();
+		ServerLevel level = helper.getLevel();
+		RunDebug.skipTo(server, 14000);
+		boolean[] cleared = {false};
+		helper.onEachTick(() -> {
+			if (!cleared[0] && Runs.get(server).phase() == RunPhase.WAVE && !RunDebug.waveMobs(server).isEmpty()) {
+				cleared[0] = true;
+				RunDebug.clearWave(server);
+			}
+		});
+		helper.succeedWhen(() -> {
+			helper.assertTrue(EVENTS.contains("ended:1:true"), "wave 1 cleared, events " + EVENTS);
+			ChestBlockEntity chest = null;
+			for (BlockPos pos : BlockPos.betweenClosed(player.blockPosition().offset(-12, -4, -12), player.blockPosition().offset(12, 4, 12))) {
+				if (level.getBlockEntity(pos) instanceof ChestBlockEntity found) {
+					chest = found;
+					break;
+				}
+			}
+			helper.assertTrue(chest != null, "a reward chest was placed near the last kill");
+			helper.assertFalse(chest.isEmpty(), "the reward chest is filled");
+			tearDown(helper);
+		});
+	}
+
+	@GameTest(environment = "blocksouls_game_test:run_elite", maxTicks = 200, skyAccess = true)
+	public void anEliteAlwaysDrops(GameTestHelper helper) {
+		setUp(helper);
+		MinecraftServer server = helper.getLevel().getServer();
+		ServerLevel level = helper.getLevel();
+		// Ordinary kills would never drop: whatever lands came from the elite guarantee.
+		RunSystem.config().dropChance = 0;
+		RunDebug.skipTo(server, 18000);
+		RunDebug.startWave(server, 1);
+		Vec3[] diedAt = {null};
+		helper.onEachTick(() -> {
+			if (diedAt[0] != null) {
+				return;
+			}
+			for (UUID id : RunDebug.waveMobs(server)) {
+				if (level.getEntity(id) instanceof Mob mob) {
+					mob.addTag(RunIds.ELITE_TAG);
+					diedAt[0] = mob.position();
+					// No player kill: elites drop even when something else finished them.
+					mob.kill(level);
+					return;
+				}
+			}
+		});
+		helper.succeedWhen(() -> {
+			helper.assertTrue(diedAt[0] != null, "an elite spawned and died");
+			List<ItemEntity> drops = level.getEntitiesOfClass(ItemEntity.class, new AABB(diedAt[0], diedAt[0]).inflate(4), ItemEntity::isCurrentlyGlowing);
+			helper.assertTrue(!drops.isEmpty(), "the elite dropped glowing loot");
+			tearDown(helper);
+		});
 	}
 }
