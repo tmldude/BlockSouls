@@ -1,4 +1,4 @@
-# Session: v2-director (Stage 6A — starts after PR #40, the spine, is merged)
+# Session: v2-director (Stage 6A — starts after PR #40, the spine, **and** v0.11's `drops-and-pacing` are merged; expect `RunConfig.CURRENT_DEFAULTS` = 2 and the new wave-clear reward code in `game/run`)
 
 **Modules:** `game` (run side) + `world` (economy structures) + `common` (additions only).
 **Branch:** `claude/v2-director`. **PR title:** `game: AI Director + economy objects (pacing budget)`.

@@ -37,9 +37,13 @@ Contracts you build on: `SynergyTags`, `Capabilities` (#37).
 - **Exotics** (one per archetype, PLAN2 §3j seeds): item components + a behavior class each; drop
   sources: field-boss trinket-style offer hook (coordinate with `v2-builds`'s offer API — if not merged
   yet, drop via boss loot tables with `roll_perks` tier `exotic`), challenge pylons later.
-- **Feel pass**: muzzle/impact VFX, hit markers (precision variant), kill-confirm sound, rarity glow on
-  dropped guns, **reload-cancel on roll** (roll finishes the reload at ≥80% — read roll state through
-  `common`'s `PlayerStatus`/`PlayerTraits`; if no roll query exists, add a `common` event, additive).
+- **Feel pass**: muzzle/impact VFX, hit markers (precision variant), kill-confirm sound,
+  **reload-cancel on roll** (roll finishes the reload at ≥80% — read roll state through `common`'s
+  `PlayerStatus`/`PlayerTraits`; if no roll query exists, add a `common` event, additive).
+  **Not yours:** rarity glow/beam + sting on dropped gun item entities — v0.11's `drops-and-pacing`
+  session (v1 side) owns it, together with a cheaper first-gun recipe and gun-part tooltips. **Do not
+  restructure existing gun item classes or gun-part lang keys**; add exotics alongside. `modpack/
+  add-mods.sh` and `en_us.json` files may conflict textually with v0.11 sessions — union-resolve.
 - Register a `SynergyTags.Source` for equipped guns' perks.
 
 ## Constraints
