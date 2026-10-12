@@ -1,0 +1,72 @@
+{
+	"fabric:load_conditions": [
+		{
+			"condition": "fabric:all_mods_loaded",
+			"values": [
+				"blocksouls_bosses"
+			]
+		}
+	],
+	"criteria": {
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipes": "blocksouls_guns:ember_shotgun"
+			}
+		},
+		"has_ember_barrel": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_bosses:ember_barrel"
+					}
+				]
+			}
+		},
+		"has_gun_receiver": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_guns:gun_receiver"
+					}
+				]
+			}
+		},
+		"has_gun_stock": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_guns:gun_stock"
+					}
+				]
+			}
+		},
+		"has_ashwyrm_scale": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_bosses:ashwyrm_scale"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_ember_barrel",
+			"has_gun_receiver",
+			"has_gun_stock",
+			"has_ashwyrm_scale"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"blocksouls_guns:ember_shotgun"
+		]
+	}
+}
