@@ -16,16 +16,19 @@ public class AbilitiesConfig {
 	public Ultimate ultimate = new Ultimate();
 	public Hud hud = new Hud();
 
-	/** What a player gets when a slot is empty, and which signature each origin grants. */
+	/** What a player gets when a slot is empty, and which signature each class grants. */
 	public static class Kit {
 		/** Ability ids without the {@code blocksouls_abilities:} namespace. */
 		public String defaultTactical = "frag";
-		/** Used while the player has no origin (classic runs, or before v2 origins ship). */
+		/** Used while the player has no class (classic runs, or before v2 classes ship). */
 		public String defaultSignature = "fan_the_hammer";
 		public String defaultUltimate = "storm_barrage";
-		/** Origin id → signature ability id. Origins come from {@code Origins.of(player)}. */
-		public Map<String, String> signatureByOrigin = defaultSignatures();
-		/** Re-check the origin's signature every time the player joins (so an origin pick mid-run lands). */
+		/**
+		 * Class id → signature ability id. The class comes from {@code Origins.of(player)} (v2-players' provider). The
+		 * four shipped classes get one each; the other four signatures are rune-unlockable alternates.
+		 */
+		public Map<String, String> signatureByClass = defaultSignatures();
+		/** Re-check the class's signature every time the player joins (so a class pick mid-run lands). */
 		public boolean refreshSignatureOnJoin = true;
 	}
 
@@ -209,16 +212,10 @@ public class AbilitiesConfig {
 
 	private static Map<String, String> defaultSignatures() {
 		Map<String, String> map = new LinkedHashMap<>();
-		map.put("blocksouls_game:drifter", "ground_pound");
-		map.put("blocksouls_game:webslinger", "web_pull");
-		map.put("blocksouls_game:ashborn", "ember_wave");
-		map.put("blocksouls_game:tidecaller", "geyser");
-		map.put("blocksouls_game:juggernaut", "taunt_slam");
-		map.put("blocksouls_game:gunslinger", "fan_the_hammer");
-		map.put("blocksouls_game:tinkerer", "overclock");
-		map.put("blocksouls_game:bloodbound", "transfusion");
-		map.put("blocksouls_game:zephyr", "geyser");
-		map.put("blocksouls_game:gambler", "fan_the_hammer");
+		map.put("blocksouls_game:warden", "taunt_slam");
+		map.put("blocksouls_game:striker", "ground_pound");
+		map.put("blocksouls_game:arcanist", "ember_wave");
+		map.put("blocksouls_game:ranger", "fan_the_hammer");
 		return map;
 	}
 

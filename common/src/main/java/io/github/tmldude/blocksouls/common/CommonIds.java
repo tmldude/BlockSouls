@@ -20,6 +20,17 @@ public final class CommonIds {
 	/** Item (guns): handed out by the game at run start, broken by the game after wave 3. */
 	public static final Identifier STARTER_PISTOL = id(GUNS, "starter_pistol");
 
+	/**
+	 * Item (game): the Soul, the run's currency. Skipping a relic pays souls, bosses drop them, the shopkeeper
+	 * takes them. Recipes may use it (soul-infused crafting); it must stay an ingredient in 2+ recipes.
+	 */
+	public static final Identifier SOUL = id(GAME, "soul");
+	/**
+	 * Item (game): a Trinket Case; using it shows a pick-1-of-3 trinket offer. Field bosses hand one to every
+	 * participant; loot tables (challenge pylons, rare cursed chests) may drop it directly.
+	 */
+	public static final Identifier TRINKET_CASE = id(GAME, "trinket_case");
+
 	/** Boss id (bosses) whose {@code BossEvents.BOSS_KILLED} switches the run to endless mode. */
 	public static final Identifier FINAL_BOSS = id(BOSSES, "final_dragon");
 	public static final Identifier FURNACE_KNIGHT = id(BOSSES, "furnace_knight");

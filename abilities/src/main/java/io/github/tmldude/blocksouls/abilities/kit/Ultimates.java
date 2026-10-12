@@ -4,14 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.Vec3;
 
 import io.github.tmldude.blocksouls.abilities.AbilitiesConfig;
+import io.github.tmldude.blocksouls.abilities.AbilityIds;
 import io.github.tmldude.blocksouls.abilities.AbilityServer;
 import io.github.tmldude.blocksouls.abilities.effect.AbilityDamage;
 import io.github.tmldude.blocksouls.abilities.effect.Effects;
@@ -20,6 +25,8 @@ import io.github.tmldude.blocksouls.abilities.sound.AbilitySounds;
 
 /** The ultimate slot: three run-defining buttons. */
 public final class Ultimates {
+	private static final Identifier OVERSHIELD_MODIFIER = AbilityIds.id("party_overshield");
+
 	private Ultimates() {
 	}
 
@@ -91,12 +98,22 @@ public final class Ultimates {
 		float amount = (float) (cfg.absorption * ctx.power() * ctx.healScale());
 		List<ServerPlayer> shielded = new ArrayList<>(Targets.allies(level, player.position(), cfg.radius));
 		for (ServerPlayer ally : shielded) {
+			// Absorption is capped by the max_absorption attribute (0 by default), so the shield raises it for its duration.
+			AttributeInstance max = ally.getAttribute(Attributes.MAX_ABSORPTION);
+			if (max != null) {
+				max.removeModifier(OVERSHIELD_MODIFIER);
+				max.addTransientModifier(new AttributeModifier(OVERSHIELD_MODIFIER, amount, AttributeModifier.Operation.ADD_VALUE));
+			}
 			ally.setAbsorptionAmount(Math.max(ally.getAbsorptionAmount(), amount));
 			level.sendParticles(ParticleTypes.END_ROD, ally.getX(), ally.getY() + 1, ally.getZ(), 12, 0.4, 0.6, 0.4, 0.02);
 			ctx.sound(ally.position(), AbilitySounds.SHIELD, 1.0F, 1.0F);
 		}
 		Effects.after(cfg.durationTicks, () -> {
 			for (ServerPlayer ally : shielded) {
+				AttributeInstance max = ally.getAttribute(Attributes.MAX_ABSORPTION);
+				if (max != null) {
+					max.removeModifier(OVERSHIELD_MODIFIER);
+				}
 				if (ally.isAlive()) {
 					ally.setAbsorptionAmount(Math.max(0, ally.getAbsorptionAmount() - amount));
 				}

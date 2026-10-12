@@ -64,9 +64,11 @@ feel pass) where `PLAN2.md` §3j or the brief was silent. Same rules as `DECISIO
   stacks with nothing and never shows a status icon).
 - **Cooldowns read config at cast time** (`AbilityServer.cooldownTicks`), so `/bs config reload abilities` applies
   at once; definitions are re-registered on `ConfigEvents.RELOADED` for anything that reads them.
-- **Signature by origin** is a config map (`kit.signatureByOrigin`, origin id → ability) refreshed on join and
-  run start through `Origins.of`; with no origin (classic, pre-v2-players) everyone gets `defaultSignature`
-  (fan the hammer). Zephyr maps to geyser and Gambler to fan the hammer until they get their own.
+- **Signature by class** (owner's Floor Loop revision, 2026-10-12: four classes replace origins): a config map
+  `kit.signatureByClass` keyed by the id `Origins.of` returns — Warden → taunt slam, Striker → ground pound,
+  Arcanist → ember wave, Ranger → fan the hammer. The other four (web pull, geyser, overclock, transfusion) stay
+  registered as rune-unlockable alternates (`/bs ability equip` today). Refreshed on join and run start; with no
+  class (classic, pre-v2-players) everyone gets `defaultSignature` (fan the hammer).
 - **A fizzled cast costs nothing** (web pull with nothing in the line): the behavior returns false and no cooldown
   starts.
 - **HUD** bottom-left (margins in config): 20px slots, cooldown sweep draining from the top plus a seconds label,
