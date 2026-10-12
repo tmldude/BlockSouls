@@ -44,9 +44,20 @@ public class ActGameTests {
 		RunEvents.WAVE_STARTED.register((server, wave) -> EVENTS.add("wave:" + wave));
 	}
 
+	/**
+	 * Earlier tests' mock players are never disconnected and would all count toward the party (an
+	 * overworld majority outvotes the one player these tests place), so the act tests start player-clean.
+	 */
+	private static void removeAllPlayers(MinecraftServer server) {
+		for (ServerPlayer player : List.copyOf(server.getPlayerList().getPlayers())) {
+			server.getPlayerList().remove(player);
+		}
+	}
+
 	/** Expedition config with a 2-second charge and the given act dimensions ("minecraft:..." ids). */
 	private static ServerPlayer setUpExpedition(GameTestHelper helper, List<String> actDimensions) {
 		MinecraftServer server = helper.getLevel().getServer();
+		removeAllPlayers(server);
 		RunDebug.reset(server);
 		EVENTS.clear();
 		RunConfig config = RunSystem.config();
@@ -75,6 +86,7 @@ public class ActGameTests {
 
 	private static void tearDown(GameTestHelper helper) {
 		MinecraftServer server = helper.getLevel().getServer();
+		removeAllPlayers(server);
 		RunDebug.reset(server);
 		RunConfig defaults = new RunConfig();
 		RunConfig config = RunSystem.config();
