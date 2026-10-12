@@ -34,6 +34,16 @@ public class PartyConfig {
 
 	/** Loot shared by the whole party (wave-clear reward bundles, pity guns). 2 players ×1.5, 4 ×2.2, 8 ×3.4. */
 	public Curve rewards = new Curve(0.5, 0.8);
+
+	/**
+	 * Abilities: ultimate charge gained per kill and per precision hit. Wave sizes grow slower than the party, so each
+	 * player's share of kills shrinks; this keeps ultimates on a similar clock. 2 players ×1.25, 4 ×1.67, 8 ×2.4.
+	 */
+	public Curve ultimateCharge = new Curve(0.25, 0.9);
+
+	/** Abilities: healing amounts (healing dart, party overshield). 4 players ×1.27, 8 ×1.58. */
+	public Curve abilityHeal = new Curve(0.1, 0.9);
+
 	/** v2 floors: island radius (× the template's solo radius). 4 players ×1.2, 8 ×1.4 (area ×2). */
 	public Curve floorSize = new Curve(0.07, 0.9);
 	/** v2 floors: resource nodes per floor (× the template's solo count). 4 players ×1.7, 8 ×2.3. */

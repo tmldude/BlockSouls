@@ -2,6 +2,7 @@ package io.github.tmldude.blocksouls.common;
 
 import net.fabricmc.api.ModInitializer;
 
+import io.github.tmldude.blocksouls.common.ability.Abilities;
 import io.github.tmldude.blocksouls.common.advancement.Milestones;
 import io.github.tmldude.blocksouls.common.debug.ConfigCommands;
 import io.github.tmldude.blocksouls.common.debug.DebugCommands;
@@ -20,6 +21,7 @@ public class BlockSoulsCommon implements ModInitializer {
 		PlayerTraits.init();
 		PlayerStatus.init();
 		Capabilities.init();
+		Abilities.init();
 		DebugCommands.init();
 		ConfigCommands.init();
 		VersionCheck.init();
