@@ -8,6 +8,12 @@
   ],
   "effects": [
     {
+      "type": "attribute",
+      "attribute": "minecraft:max_absorption",
+      "amount": 20,
+      "operation": "add_value"
+    },
+    {
       "type": "rule",
       "rule": "red_ledger"
     }

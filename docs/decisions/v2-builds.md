@@ -61,7 +61,8 @@ Five seeds plus three of ours; numbers in `boons.json` `rules.*`:
   summed damage to hostiles within 3.5 blocks.
 - *Ricochet Doctrine* (rare, ricochet + kinetic): the `ricochet_inherit` trait; guns applies it.
 - *Red Ledger* (legendary, on_kill + heal): natural (food) regen off via a `FoodData.tick` redirect; kills grant
-  +2 absorption up to 20 (ten hearts).
+  +2 absorption up to 20 (ten hearts). The JSON also raises `minecraft:max_absorption` by 20, because vanilla
+  clamps absorption to that attribute (default 0; CI caught it).
 - *Ember Step* (rare, on_roll + fire): 10 ticks of trail after a roll: hostiles within 1.5 blocks burn (60 ticks)
   and take 2 damage each tick; short-lived fire blocks are placed and removed again after 60 ticks.
 - *Deadeye Wind* (rare, on_precision + kinetic): +25 stamina per precision hit (× level) through `Stamina`.

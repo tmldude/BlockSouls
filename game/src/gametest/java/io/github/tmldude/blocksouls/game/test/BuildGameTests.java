@@ -228,6 +228,7 @@ public class BuildGameTests {
 		helper.assertTrue(player.getHealth() == PlayerSystem.BUILD.rules.lastShell.health, "left at " + player.getHealth());
 
 		player.removeEffect(MobEffects.RESISTANCE);
+		player.setInvulnerableTime(0); // vanilla ignores a second hit of equal damage inside the hurt cooldown
 		player.hurtServer(helper.getLevel(), player.damageSources().generic(), 100.0F);
 		helper.assertTrue(PlayerStatus.isDowned(player), "the second lethal hit this siege downs");
 		helper.succeed();
@@ -239,6 +240,8 @@ public class BuildGameTests {
 		LivingEntity zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(2, 1, 1));
 		PlayerBoons.grant(player, def(helper, "red_ledger"));
 		helper.assertTrue(BoonRules.blocksNaturalRegen(player), "Red Ledger switches natural regen off");
+		helper.assertTrue(player.getAttributeValue(Attributes.MAX_ABSORPTION) >= PlayerSystem.BUILD.rules.redLedger.overhealMax,
+				"Red Ledger raises max absorption so overheal can stick: " + player.getAttributeValue(Attributes.MAX_ABSORPTION));
 		CombatEvents.HIT.invoker().onHit(player, zombie, 4.0F, false, true);
 		helper.assertTrue(player.getAbsorptionAmount() == (float) PlayerSystem.BUILD.rules.redLedger.absorptionPerKill,
 				"a kill overheals: " + player.getAbsorptionAmount());
