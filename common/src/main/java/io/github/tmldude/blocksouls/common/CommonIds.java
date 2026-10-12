@@ -20,6 +20,17 @@ public final class CommonIds {
 	/** Item (guns): handed out by the game at run start, broken by the game after wave 3. */
 	public static final Identifier STARTER_PISTOL = id(GUNS, "starter_pistol");
 
+	/**
+	 * Item (game): the Soul, the run's currency. Skipping a relic pays souls, bosses drop them, the shopkeeper
+	 * takes them. Recipes may use it (soul-infused crafting); it must stay an ingredient in 2+ recipes.
+	 */
+	public static final Identifier SOUL = id(GAME, "soul");
+	/**
+	 * Item (game): a Trinket Case; using it shows a pick-1-of-3 trinket offer. Field bosses hand one to every
+	 * participant; loot tables (challenge pylons, rare cursed chests) may drop it directly.
+	 */
+	public static final Identifier TRINKET_CASE = id(GAME, "trinket_case");
+
 	/** Boss id (bosses) whose {@code BossEvents.BOSS_KILLED} switches the run to endless mode. */
 	public static final Identifier FINAL_BOSS = id(BOSSES, "final_dragon");
 	public static final Identifier FURNACE_KNIGHT = id(BOSSES, "furnace_knight");
@@ -64,6 +75,17 @@ public final class CommonIds {
 
 	/** Entity type (vehicles) placed by world structures as a repairable wreck. */
 	public static final Identifier KART_WRECK = id(VEHICLES, "kart_wreck");
+
+	/** The v2 floor dimension (world): every floor of a floors-shape run is an island in it. */
+	public static final Identifier FLOORS_DIMENSION = id(WORLD, "floors");
+	/** Resource node blocks (world): pop in a few hits with a burst. Their ids are the {@code NODE} slot tags. */
+	public static final Identifier SCRAP_NODE = id(WORLD, "scrap_node");
+	public static final Identifier GUNMETAL_NODE = id(WORLD, "gunmetal_node");
+	public static final Identifier RESIN_NODE = id(WORLD, "resin_node");
+	/** The Surface floor's rare material (world), from resin nodes. */
+	public static final Identifier AMBER_RESIN = id(WORLD, "amber_resin");
+	/** The camp's exit portal block (world); using it starts the act's portal charge, lit it leads on. */
+	public static final Identifier FLOOR_PORTAL = id(WORLD, "floor_portal");
 
 	/**
 	 * Loot tables (owned by game) rolled for wave kills, by tier. Guns, world etc. add their entries with

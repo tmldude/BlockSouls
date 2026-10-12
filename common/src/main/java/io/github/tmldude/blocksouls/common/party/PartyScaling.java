@@ -70,6 +70,20 @@ public final class PartyScaling {
 	/** Abilities: multiplier on healing dart and party overshield amounts. */
 	public static double abilityHeal(int players) {
 		return curve(players, config.abilityHeal);
+
+	/** v2 floors: island radius multiplier. */
+	public static double floorSize(int players) {
+		return curve(players, config.floorSize);
+	}
+
+	/** v2 floors: resource node count multiplier. */
+	public static double floorNodes(int players) {
+		return curve(players, config.floorNodes);
+	}
+
+	/** v2 floors: crate count multiplier. */
+	public static double floorCrates(int players) {
+		return curve(players, config.floorCrates);
 	}
 
 	public static int raidPlates(int players) {

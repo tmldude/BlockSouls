@@ -37,6 +37,23 @@ class PartyScalingTest {
 	}
 
 	@Test
+	void floorCurvesAreOneSoloAndGrowToEight() {
+		assertEquals(1.0, PartyScaling.floorSize(1), 1e-9);
+		assertEquals(1.0, PartyScaling.floorNodes(1), 1e-9);
+		assertEquals(1.0, PartyScaling.floorCrates(1), 1e-9);
+		// Eight players: about twice the island area, more than twice the nodes, nearly twice the crates.
+		assertEquals(1.40, PartyScaling.floorSize(8), 0.02);
+		assertEquals(2.31, PartyScaling.floorNodes(8), 0.02);
+		assertEquals(1.86, PartyScaling.floorCrates(8), 0.02);
+		assertEquals(PartyScaling.floorNodes(8), PartyScaling.floorNodes(16), 1e-9);
+		for (int n = 2; n <= 8; n++) {
+			assertTrue(PartyScaling.floorSize(n) > PartyScaling.floorSize(n - 1), "floor size grows at " + n);
+			assertTrue(PartyScaling.floorNodes(n) > PartyScaling.floorNodes(n - 1), "nodes grow at " + n);
+			assertTrue(PartyScaling.floorCrates(n) > PartyScaling.floorCrates(n - 1), "crates grow at " + n);
+		}
+	}
+
+	@Test
 	void partiesAboveTheMaxCountAsTheMax() {
 		assertEquals(PartyScaling.waveSize(8), PartyScaling.waveSize(12), 1e-9);
 		assertEquals(PartyScaling.aliveCap(8), PartyScaling.aliveCap(20));
