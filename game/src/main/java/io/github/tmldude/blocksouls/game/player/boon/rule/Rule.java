@@ -22,7 +22,7 @@ public interface Rule {
 	default void onReloaded(ServerPlayer owner, int level, int roundsLoaded) {
 	}
 
-	/** The owner started a dodge roll ({@code MovementEvents.ROLLED}). */
+	/** The owner started a dodge roll ({@code PlayerMoveEvents.ROLLED}). */
 	default void onRolled(ServerPlayer owner, int level) {
 	}
 

@@ -16,7 +16,7 @@ import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
 import io.github.tmldude.blocksouls.common.event.CombatEvents;
-import io.github.tmldude.blocksouls.common.event.MovementEvents;
+import io.github.tmldude.blocksouls.common.event.PlayerMoveEvents;
 import io.github.tmldude.blocksouls.common.event.PlayerRunEvents;
 import io.github.tmldude.blocksouls.common.event.RunEvents;
 import io.github.tmldude.blocksouls.common.player.PlayerStatus;
@@ -73,7 +73,7 @@ public final class BoonRules {
 		CombatEvents.HIT.register((shooter, target, damage, precision, killed) ->
 				forEach(shooter, (rule, level) -> rule.onHit(shooter, level, target, damage, precision, killed)));
 		CombatEvents.RELOADED.register((player, rounds) -> forEach(player, (rule, level) -> rule.onReloaded(player, level, rounds)));
-		MovementEvents.ROLLED.register(player -> forEach(player, (rule, level) -> rule.onRolled(player, level)));
+		PlayerMoveEvents.ROLLED.register(player -> forEach(player, (rule, level) -> rule.onRolled(player, level)));
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 				if (!PlayerStatus.isDowned(player)) {
