@@ -310,3 +310,19 @@ end items exempt with a reason). Binding once #35 merges. v2 resolutions, logged
 - **Trinkets** are end items → `recipe_web_exempt.json` with reasons, like gear.
 - **Release coordination** accepted: v1 orchestrator cuts v0.10.x; v2 versions are cut by us only after
   telling them, never both from main at once.
+
+## Playtest verdict + next-build focus (2026-10-12, from the owner)
+
+The owner playtested the v0.9-era build. Feedback triaged in `docs/playtest/2026-10-12-owner-feedback.md`
+(discoverability, drops, resources, movement feel → mostly v1-polish lane, routed to the v1 orchestrator).
+
+Direction for the next build:
+- **Focus: cooler guns, abilities and boons** — the build/fun content leads. PLAN2 §3j adds **exotics**
+  (one rule-breaking gun per archetype), a **gun feel pass**, and a brand-new **`abilities` module**
+  (Destiny-style tactical / origin signature / kill-charged ultimate kit, synergy-tagged, contracts via
+  `common`). Stage 6 is split 6A (builds & boons, guns & abilities, Director & economy, origins &
+  players) / 6B (bosses v2, new bosses, mobs v2, dimensions); 6A launches first, all of 6B still ships.
+- **Pacing is now a design goal** ("remarkably terribly slow"): PLAN2 §0 sets the budget — no stretch
+  over ~90 s without a decision or threat, core loop (gun in hand, shooting at something that matters)
+  within 10 minutes of a fresh run. The Director owns the budget in v2; immediate v1 tuning is in the
+  polish batch with the v1 orchestrator.

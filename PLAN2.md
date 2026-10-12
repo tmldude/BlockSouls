@@ -24,6 +24,17 @@ every run ends in a shareable run summary.
 
 Run length: **player-paced**; tune curves to a ~2.5-hour median. All pacing numbers in config.
 
+**Pacing is a design goal, not a tuning afterthought** (owner, 2026-10-12: the v0.9 playtest felt
+"remarkably terribly slow"). The budget every system is held to: **no stretch longer than ~90 seconds
+without a meaningful decision or threat**, and the core loop must be running — gun in hand, shooting at
+something that matters — **within the first 10 minutes** of a fresh run. The Director's lull ceiling,
+siege intermissions, day-phase length, first-gun cost and drop guarantees all serve this budget and are
+measured against it in playtests.
+
+**Focus order for the next build** (owner, 2026-10-12): 1) cooler guns, **abilities** and boons — the
+build/fun content (§3a, §3j, §3f); 2) pacing (above); then the rest. Stage 6 starts its sessions in that
+order (§5).
+
 ## 1. The act structure
 
 | Act | Dimension | Entry | Resource tier | Field bosses | Camp |
@@ -242,7 +253,39 @@ emissive crack textures intensifying per phase; damage-state texture swaps at th
 Fairness invariants (config-locked, not tunable per boss): telegraphs never lie; reaction floors;
 adaptation caps.
 
-### 3i. Mob & boss AI (the "JEV" track) — `mobs` + `bosses` + `game`
+### 3j. Guns & abilities v2 — `guns` + new module `abilities`
+
+**Cooler guns** (`guns`):
+- **Exotics, one per archetype**, each a rule-breaker with its own behavior class and synergy tags —
+  seed list: a hand cannon whose **last round in the mag always ricochets** to a second target
+  (`ricochet`); a sniper whose precision kills **mark** nearby enemies, and marked enemies take bonus
+  damage from the whole party (`on_precision`, co-op); a shotgun whose blast **launches the shooter
+  backward** — damage and movement tech in one trigger pull (`kinetic`, pairs with swing/glide); an auto
+  rifle that **ramps fire rate while on-target** and overheats dramatically (`fire`); a rocket launcher
+  that fires a **web-tether rocket** pinning two mobs together (`pull`). Exotic drops come from field
+  bosses, challenge pylons and the legendary relic tier.
+- **Gun feel pass**: punchier muzzle/impact VFX, hit markers with precision variant, kill confirmation
+  sound, reload-cancel on roll (rolling finishes the reload at 80% — binds movement to gunplay), rarity
+  glow on dropped guns.
+- Every gun keeps its JSON definition; exotic behavior classes are the only code-per-gun.
+
+**Abilities — a new axis** (new module `abilities`, Destiny-style): every player gets an active kit on
+cooldowns, bound through `common`'s `Keybinds`, all data-tunable:
+- **Tactical** (~25 s cooldown, pick one at run start or from drops): frag (arc, `explosion`), web bomb
+  (AoE slow/anchor, `pull`), fire wall (`fire`), healing dart (`heal`, co-op).
+- **Signature** (~45 s, set by the origin): Drifter ground-pound (jump-cancel slam, knockup); Webhead
+  web-pull (yank a mob to you, or you to a wall); Ashborn ember wave; Tidecaller geyser (launches allies
+  — a movement assist); Juggernaut taunt slam; Gunslinger fan-the-hammer (6 instant shots); Tinkerer
+  overclock (turret frenzy); Bloodbound transfusion (steal health to revive faster).
+- **Ultimate**, charged by kills and precision hits (minutes-scale): one big, loud, run-defining button —
+  e.g. a storm barrage, a time of invulnerable melee, a party-wide overshield. Charge bar on the HUD.
+- Abilities carry **synergy tags** and scale with boons (`on_kill` keystones feed ultimate charge, etc.);
+  cooldowns/charges are config; everything through `PartyScaling` where party-dependent.
+- Module rules: `abilities` is its own Fabric mod (`blocksouls_abilities`), talks only through `common`
+  (new contract: ability registry, cooldown/charge attachment, cast payloads + events); `movement` and
+  `guns` never import it.
+
+### 3k. Mob & boss AI (the "JEV" track) — `mobs` + `bosses` + `game`
 
 Tier 1 (ship in v2): utility scoring in `AttackPicker` (distance, angle, target stamina, just-rolled,
 airborne, per-attack cooldown/repeat penalty); the Director (§3b); influence-map horde flanking.
@@ -260,7 +303,8 @@ a learned Director trained on real run summaries. Not scheduled.
 | `world` | **both new dimensions** (worldgen, portals, camps, act ores/gear materials), altar/chest/pylon structures |
 | `mobs` | act 3/4 rosters (blight + sky mobs), influence-map pathing, affix system on elites |
 | `bosses` | attack archetypes, posture, part breaks, 2 new bosses, boss relocations per act, affixes on field bosses, name-splash |
-| `guns` | perk tags, forge ritual hooks, act-tier recipes |
+| `guns` | perk tags, forge ritual hooks, act-tier recipes, **exotics + gun feel pass** (§3j) |
+| `abilities` (new) | tactical/signature/ultimate ability kit (§3j); contracts (registry, cooldown/charge, cast events) land in `common` |
 | `movement` | gate each mechanic behind the origin capability set (Classic mode = all granted); Zephyr glide + updrafts; boon cross-training hooks |
 | `vehicles` | act-aware spawning (wrecks in all acts; the speeder's radioactive core moves to the Blightheart) |
 
@@ -298,16 +342,19 @@ orchestrator — neither merges the other's.
   live pack; migration of the v1 scheduler under it; gametest: a scripted 4-act run skeleton with empty
   acts, advanced by portal charges. `integration/FullPackClientTest`'s dusk step (advance_time +
   `time set 12700` + 400 ticks to wave 1) must stay green or be updated in the same PR.
-- **Stage 6 — features (parallel, one worktree each; after v0.10.0):**
-  | Session | Builds |
-  |---|---|
-  | Dimensions | Blightheart + Skyrift worldgen, portals, camps, act ores |
-  | Director & economy | §3b + §3c + §3e |
-  | Builds & origins | §3a (incl. levels, curses, trinkets) + §3f (incl. `movement` capability gating + glide) + forge ritual + shopkeeper trades |
-  | Bosses v2 | §3h archetypes + posture + part breaks + affixes |
-  | New bosses | Blightheart boss + Skyrift boss (design sub-sessions for models, per v1 practice) |
-  | Mobs v2 | act rosters, influence map, elite affixes |
-  | Players v2 | solo/co-op (§3g), run summary v2, HUD build line |
+- **Stage 6 — features (parallel, one worktree each; after v0.10.0).** Sessions start in priority
+  order (owner, 2026-10-12: fun content and pacing first). **6A launches immediately; 6B as 6A
+  sessions free up** (all of 6B still ships in v2):
+  | Priority | Session | Builds |
+  |---|---|---|
+  | 6A | Builds & boons | §3a in full (tags, keystones, levels, curses, trinkets) + forge ritual + shopkeeper trades |
+  | 6A | Guns & abilities | §3j: exotics, gun feel pass, the `abilities` module (tactical/signature/ultimate) |
+  | 6A | Director & economy | §3b + §3c + §3e — the Director owns the **pacing budget** (§0): lull ceiling ~90 s, intermission tightening |
+  | 6A | Origins & players | §3f (incl. `movement` capability gating + glide) + §3g solo/co-op + run summary v2 + HUD build line |
+  | 6B | Bosses v2 | §3h archetypes + posture + part breaks + affixes |
+  | 6B | New bosses | Blightheart boss + Skyrift boss (design sub-sessions for models, per v1 practice) |
+  | 6B | Mobs v2 | act rosters, influence map, elite affixes |
+  | 6B | Dimensions | Blightheart + Skyrift worldgen, portals, camps, act ores |
 - **Stage 7 — intersections (sequential):** acts wired to rosters/drops/recipes; Director tuned;
   balance to a ~2.5 h median; perf with 8 players in act 3; full-run gametest across all four acts;
   Expedition becomes the default run shape; `v2.0.0`.
