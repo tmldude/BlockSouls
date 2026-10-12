@@ -12,6 +12,7 @@ public class PlayersConfig {
 	public Downed downed = new Downed();
 	public Boons boons = new Boons();
 	public Hud hud = new Hud();
+	public Ping ping = new Ping();
 	public OriginsConfig origins = new OriginsConfig();
 
 	public static class Downed {
@@ -28,6 +29,29 @@ public class PlayersConfig {
 		public int reviveResistanceAmplifier = 1;
 		/** How often (ticks) the server re-checks for a team wipe, e.g. after a standing player disconnects. */
 		public int wipeCheckIntervalTicks = 20;
+
+		// v2 downed gameplay (PLAN2 §3g)
+		/** Downed players keep firing guns ({@code PlayerStatus.canShoot}); off = the v1 rule, no shooting while down. */
+		public boolean keepShooting = true;
+		/** Damage dealt by a downed player is multiplied by this. */
+		public double downedDamageMultiplier = 0.5;
+		/** A downed player with no gun is lent a Starter Pistol for the crawl (taken back on standing up). */
+		public boolean lendPistol = true;
+		/** Last Stand (solo only): going down starts a crawl of this many seconds; this many kills while down self-revive. */
+		public boolean lastStandEnabled = true;
+		public int lastStandSeconds = 20;
+		public int lastStandKills = 3;
+		/** One Last Stand per siege (the flag resets at dusk); off = every solo down is a Last Stand. */
+		public boolean lastStandOncePerSiege = true;
+	}
+
+	/** Pings: a keybind marks a spot for the party. */
+	public static class Ping {
+		public int cooldownTicks = 20;
+		/** How long a ping stays on teammates' screens. */
+		public int seconds = 6;
+		/** How far ahead a standing player's ping lands (blocks). */
+		public double range = 64;
 	}
 
 	public static class Boons {
