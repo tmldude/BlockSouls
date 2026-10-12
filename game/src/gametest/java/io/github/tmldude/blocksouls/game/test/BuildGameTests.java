@@ -228,8 +228,8 @@ public class BuildGameTests {
 		helper.assertTrue(player.getHealth() == PlayerSystem.BUILD.rules.lastShell.health, "left at " + player.getHealth());
 
 		player.removeEffect(MobEffects.RESISTANCE);
-		player.setInvulnerableTime(0); // vanilla ignores a second hit of equal damage inside the hurt cooldown
-		player.hurtServer(helper.getLevel(), player.damageSources().generic(), 100.0F);
+		// Inside the hurt cooldown vanilla only applies the damage above the last hit, so hit harder than the first.
+		player.hurtServer(helper.getLevel(), player.damageSources().generic(), 500.0F);
 		helper.assertTrue(PlayerStatus.isDowned(player), "the second lethal hit this siege downs");
 		helper.succeed();
 	}
