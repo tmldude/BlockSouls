@@ -43,7 +43,7 @@ import io.github.tmldude.blocksouls.common.player.PlayerStatus;
 import io.github.tmldude.blocksouls.common.synergy.SynergyTags;
 
 /**
- * Server side of the kit: fills empty slots with the defaults (signature from the origin), turns cast requests into
+ * Server side of the kit: fills empty slots with the defaults (signature from the class), turns cast requests into
  * casts (readiness, cooldown or charge, synergy scaling), and charges ultimates from kills and precision hits.
  */
 public final class AbilityServer {
@@ -64,7 +64,11 @@ public final class AbilityServer {
 				onKill(player, killed);
 			}
 		});
-		CombatEvents.PRECISION_HIT.register((player, target, killed) -> onPrecisionHit(player));
+		CombatEvents.HIT.register((shooter, target, damage, precision, killed) -> {
+			if (precision) {
+				onPrecisionHit(shooter);
+			}
+		});
 		ServerLivingEntityEvents.ALLOW_DAMAGE.register((entity, source, amount) ->
 				!(entity instanceof ServerPlayer player) || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || !isInvulnerable(player));
 		ConfigEvents.RELOADED.register((name, config) -> {
@@ -94,11 +98,11 @@ public final class AbilityServer {
 		}
 	}
 
-	/** The signature the player's origin grants (config map), or the default without an origin. */
+	/** The signature the player's class grants (config map, keyed by the id {@code Origins.of} returns), or the default without one. */
 	public static @Nullable Identifier signatureFor(ServerPlayer player) {
 		AbilitiesConfig.Kit kit = config().kit;
-		Identifier origin = Origins.of(player);
-		Identifier signature = origin == null ? null : AbilityIds.parse(kit.signatureByOrigin.get(origin.toString()));
+		Identifier playerClass = Origins.of(player);
+		Identifier signature = playerClass == null ? null : AbilityIds.parse(kit.signatureByClass.get(playerClass.toString()));
 		return signature != null ? signature : AbilityIds.parse(kit.defaultSignature);
 	}
 

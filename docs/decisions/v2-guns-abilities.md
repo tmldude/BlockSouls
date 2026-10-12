@@ -23,11 +23,12 @@ feel pass) where `PLAN2.md` §3j or the brief was silent. Same rules as `DECISIO
 - **Origin hook is an origin lookup, not a signature lookup**: `Origins.of(player)` returns the origin id (provider
   installed by whoever owns origins, v2-players); the abilities module maps origin → signature in its own config. One
   provider, no default origin: `null` means "no origins yet / classic", and the module falls back to its config.
-- **Combat events:** `CombatEvents.PRECISION_HIT` (guns fires it; ultimate charge and keystones listen). Kills come
-  from Fabric's `AFTER_KILLED_OTHER_ENTITY`, so ability and melee kills count too — no `GUN_KILL` event.
-- **Roll query:** movement's roll state is a private attachment, so there is no roll query in `common`. Added
-  `MovementEvents.ROLL_STARTED` (additive); guns' reload-cancel listens to it. **Movement must fire it** from
-  `RollServer.tryStart`/`forceStart` (one line; reported to the orchestrator). Until then reload-cancel is inert.
+- **Combat and roll events are not ours** (orchestrator reconciliation, 2026-10-12): `CombatEvents.HIT(shooter,
+  target, damage, precision, killed)` / `RELOADED(player, rounds)` come from v2-builds (#46) and are **fired by guns**
+  (PR 3); `PlayerMoveEvents.ROLLED` comes from v2-players (#48) and is fired by movement. Ultimate charge listens to
+  `HIT` with `precision == true`; kills come from Fabric's `AFTER_KILLED_OTHER_ENTITY` so ability and melee kills
+  count too. Guns' reload-cancel listens to `ROLLED`, and guns gate firing on `PlayerStatus.canShoot` (#48), not
+  `!isDowned`. The earlier `CombatEvents.PRECISION_HIT` / `MovementEvents.ROLL_STARTED` drafts were dropped.
 - **Party curves** added to `party.json` (additive fields on `PartyConfig`): `ultimateCharge` (0.25, 0.9: 8 players
   ×2.4 charge per kill — each player's share of kills shrinks as wave size grows slower than the party) and
   `abilityHeal` (0.1, 0.9: 8 players ×1.58 on healing dart / overshield amounts). Tested at 1 and 8.
@@ -51,7 +52,7 @@ feel pass) where `PLAN2.md` §3j or the brief was silent. Same rules as `DECISIO
 - **Ultimate charge:** 4.5% per kill, 2% per precision hit, elites ×2, bosses ×6, all × `PartyScaling.ultimateCharge`;
   solo that is 23 kills, eight players about 10 kills each. `on_kill` / `on_precision` boon stacks add 5% per stack
   (cap 50%). Kills come from Fabric's `AFTER_KILLED_OTHER_ENTITY` (any source), precision hits from
-  `CombatEvents.PRECISION_HIT` (guns, PR 3).
+  `CombatEvents.HIT` with `precision == true` (fired by guns, PR 3).
 - **Synergy scaling** is one number: damage and healing × `1 + 0.08 × shared tag stacks` (cap +60%), where shared
   = the build's stacks of tags the ability also carries. Cooldowns don't scale (legibility: a slot is ready when its
   sweep is done, always).
@@ -63,9 +64,11 @@ feel pass) where `PLAN2.md` §3j or the brief was silent. Same rules as `DECISIO
   stacks with nothing and never shows a status icon).
 - **Cooldowns read config at cast time** (`AbilityServer.cooldownTicks`), so `/bs config reload abilities` applies
   at once; definitions are re-registered on `ConfigEvents.RELOADED` for anything that reads them.
-- **Signature by origin** is a config map (`kit.signatureByOrigin`, origin id → ability) refreshed on join and
-  run start through `Origins.of`; with no origin (classic, pre-v2-players) everyone gets `defaultSignature`
-  (fan the hammer). Zephyr maps to geyser and Gambler to fan the hammer until they get their own.
+- **Signature by class** (owner's Floor Loop revision, 2026-10-12: four classes replace origins): a config map
+  `kit.signatureByClass` keyed by the id `Origins.of` returns — Warden → taunt slam, Striker → ground pound,
+  Arcanist → ember wave, Ranger → fan the hammer. The other four (web pull, geyser, overclock, transfusion) stay
+  registered as rune-unlockable alternates (`/bs ability equip` today). Refreshed on join and run start; with no
+  class (classic, pre-v2-players) everyone gets `defaultSignature` (fan the hammer).
 - **A fizzled cast costs nothing** (web pull with nothing in the line): the behavior returns false and no cooldown
   starts.
 - **HUD** bottom-left (margins in config): 20px slots, cooldown sweep draining from the top plus a seconds label,

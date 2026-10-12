@@ -38,6 +38,10 @@ public final class PlayerTraits {
 	public static final Identifier FLIGHT = trait("flight");
 	/** +25% reload speed per level. */
 	public static final Identifier RELOAD_SPEED = trait("reload_speed");
+	/** −25 max stamina per level (an origin drawback; movement clamps the max at a floor). */
+	public static final Identifier STAMINA_MAX_PENALTY = trait("stamina_max_penalty");
+	/** Ricocheting bullets keep the gun's enchantments (the Ricochet Doctrine keystone; guns reads it). */
+	public static final Identifier RICOCHET_INHERIT = trait("ricochet_inherit");
 
 	private static final Codec<Map<Identifier, Integer>> CODEC = Codec.unboundedMap(Identifier.CODEC, Codec.INT);
 	private static final AttachmentType<Map<Identifier, Integer>> TYPE = AttachmentRegistry.create(

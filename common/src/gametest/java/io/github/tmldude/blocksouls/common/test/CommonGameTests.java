@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
@@ -14,11 +15,15 @@ import net.minecraft.server.level.ServerPlayer;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 
+import io.github.tmldude.blocksouls.common.synergy.BuildHooks;
 import io.github.tmldude.blocksouls.common.Config;
 import io.github.tmldude.blocksouls.common.event.ConfigEvents;
 import io.github.tmldude.blocksouls.common.party.PartyConfig;
 import io.github.tmldude.blocksouls.common.party.PartyScaling;
+import io.github.tmldude.blocksouls.common.player.Capabilities;
 import io.github.tmldude.blocksouls.common.player.PlayerStatus;
+import io.github.tmldude.blocksouls.common.player.Stamina;
+import io.github.tmldude.blocksouls.common.player.WeaponHooks;
 import io.github.tmldude.blocksouls.common.player.PlayerTraits;
 import io.github.tmldude.blocksouls.common.run.RunState;
 import io.github.tmldude.blocksouls.common.run.Runs;
@@ -56,6 +61,19 @@ public class CommonGameTests {
 		helper.succeed();
 	}
 
+	@GameTest
+	public void buildHooksDefaultToNoOps(GameTestHelper helper) {
+		// Only common is loaded in this test run: no game module installs a build provider, no guns or movement
+		// install weapon/stamina providers. Everything must report "nothing happened" instead of failing.
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		helper.assertTrue(BuildHooks.applyRandomCurse(player) == null, "no curse without a provider");
+		helper.assertTrue(!BuildHooks.purgeCurse(player), "nothing to purge without a provider");
+		helper.assertTrue(BuildHooks.curses(player).isEmpty() && BuildHooks.trinkets(player).isEmpty(), "nothing owned");
+		helper.assertTrue(!BuildHooks.offerTrinkets(player), "no offer without a provider");
+		helper.assertTrue(!Stamina.add(player, 25), "stamina is a no-op without the movement module");
+		helper.assertTrue(!WeaponHooks.reload(player), "reload is a no-op without the guns module");
+		helper.succeed();
+	}
 	private static final List<String> RELOADED = new ArrayList<>();
 
 	static {
@@ -129,5 +147,24 @@ public class CommonGameTests {
 			}
 		});
 		helper.getLevel().getServer().getCommands().performPrefixedCommand(source, command);
+	}
+
+	@GameTest
+	public void capabilitiesDefaultToTheV1VerbsOnly(GameTestHelper helper) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		helper.assertTrue(Capabilities.allGranted(player), "no set attached by default");
+		helper.assertTrue(Capabilities.has(player, Capabilities.CLIMB) && Capabilities.has(player, Capabilities.SWING)
+				&& Capabilities.has(player, Capabilities.MULTI_JUMP), "every v1 verb by default");
+		helper.assertTrue(!Capabilities.has(player, Capabilities.GLIDE), "glide is opt-in: never granted by default");
+		Capabilities.grant(player, Capabilities.GLIDE);
+		helper.assertTrue(Capabilities.allGranted(player) && !Capabilities.has(player, Capabilities.GLIDE), "grant is a no-op on the default set");
+
+		Capabilities.restrictTo(player, Set.of(Capabilities.GLIDE));
+		helper.assertTrue(Capabilities.has(player, Capabilities.GLIDE) && !Capabilities.has(player, Capabilities.CLIMB), "an explicit set is exact");
+		Capabilities.grant(player, Capabilities.CLIMB);
+		helper.assertTrue(Capabilities.has(player, Capabilities.CLIMB), "cross-training grants onto an explicit set");
+		Capabilities.grantAll(player);
+		helper.assertTrue(Capabilities.allGranted(player) && !Capabilities.has(player, Capabilities.GLIDE), "back to v1");
+		helper.succeed();
 	}
 }

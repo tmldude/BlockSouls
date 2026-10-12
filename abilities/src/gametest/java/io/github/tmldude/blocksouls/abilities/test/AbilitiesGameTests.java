@@ -16,6 +16,7 @@ import io.github.tmldude.blocksouls.abilities.BlockSoulsAbilities;
 import io.github.tmldude.blocksouls.abilities.effect.AbilityDamage;
 import io.github.tmldude.blocksouls.common.ability.Abilities;
 import io.github.tmldude.blocksouls.common.ability.AbilitySlot;
+import io.github.tmldude.blocksouls.common.event.CombatEvents;
 import io.github.tmldude.blocksouls.common.party.PartyScaling;
 import io.github.tmldude.blocksouls.common.player.PlayerStatus;
 
@@ -103,8 +104,27 @@ public class AbilitiesGameTests {
 	public void webPullFizzlesWithNothingToGrab(GameTestHelper helper) {
 		ServerPlayer player = caster(helper, new Vec3(2.5, 1, 2.5), helper.absoluteVec(new Vec3(2.5, 60, 2.5)));
 		Abilities.equip(player, AbilitySlot.SIGNATURE, AbilityIds.WEB_PULL);
-		helper.assertTrue(!AbilityServer.tryCast(player, AbilitySlot.SIGNATURE), "nothing in the line: no cast");
-		helper.assertTrue(Abilities.isReady(player, AbilitySlot.SIGNATURE), "a fizzle costs no cooldown");
+		// Nothing can sit within half a block of the eye: the line finds neither a mob nor a wall.
+		double range = BlockSoulsAbilities.CONFIG.signature.webPull.range;
+		BlockSoulsAbilities.CONFIG.signature.webPull.range = 0.5;
+		try {
+			helper.assertTrue(!AbilityServer.tryCast(player, AbilitySlot.SIGNATURE), "nothing in the line: no cast");
+			helper.assertTrue(Abilities.isReady(player, AbilitySlot.SIGNATURE), "a fizzle costs no cooldown");
+		} finally {
+			BlockSoulsAbilities.CONFIG.signature.webPull.range = range;
+		}
+		helper.succeed();
+	}
+
+	@GameTest
+	public void precisionHitsChargeTheUltimate(GameTestHelper helper) {
+		Zombie zombie = zombie(helper, 2.5, 5.5);
+		ServerPlayer player = caster(helper, new Vec3(2.5, 1, 1.5), body(zombie));
+		CombatEvents.HIT.invoker().onHit(player, zombie, 5, false, false);
+		helper.assertTrue(Abilities.ultimateCharge(player) == 0, "a body hit gives no charge");
+		CombatEvents.HIT.invoker().onHit(player, zombie, 5, true, false);
+		double expected = BlockSoulsAbilities.CONFIG.charge.perPrecisionHit * PartyScaling.ultimateCharge(player.level().players().size());
+		helper.assertTrue(Math.abs(Abilities.ultimateCharge(player) - expected) < 1e-6, "one precision hit: expected " + expected);
 		helper.succeed();
 	}
 
