@@ -3,9 +3,11 @@ package io.github.tmldude.blocksouls.game.test;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -58,6 +60,13 @@ public class ActGameTests {
 			config.acts.add(new RunConfig.ActSpec("blocksouls_game:test_act" + (i + 1), actDimensions.get(i), "Act " + (i + 1)));
 		}
 		RunDebug.reloadActs(server);
+		// The empty test structure is all air and the flat Nether has no terrain at the test site (the
+		// mock player would fall out of the world): lay a floor. Harmless over overworld terrain.
+		for (int x = 0; x < 8; x++) {
+			for (int z = 0; z < 8; z++) {
+				helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
+			}
+		}
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		player.snapTo(helper.absoluteVec(new Vec3(4, 1, 4)));
 		return player;
@@ -169,7 +178,8 @@ public class ActGameTests {
 	@GameTest(environment = "blocksouls_game_test:act_classic", maxTicks = 40)
 	public void classicShapeIgnoresTheActMachine(GameTestHelper helper) {
 		MinecraftServer server = helper.getLevel().getServer();
-		RunDebug.reset(server);
+		// A failed expedition test leaks its config (tearDown lives in succeedWhen): restore defaults first.
+		tearDown(helper);
 		EVENTS.clear();
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		player.snapTo(helper.absoluteVec(new Vec3(4, 1, 4)));
