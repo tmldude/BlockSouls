@@ -23,11 +23,12 @@ feel pass) where `PLAN2.md` §3j or the brief was silent. Same rules as `DECISIO
 - **Origin hook is an origin lookup, not a signature lookup**: `Origins.of(player)` returns the origin id (provider
   installed by whoever owns origins, v2-players); the abilities module maps origin → signature in its own config. One
   provider, no default origin: `null` means "no origins yet / classic", and the module falls back to its config.
-- **Combat events:** `CombatEvents.PRECISION_HIT` (guns fires it; ultimate charge and keystones listen). Kills come
-  from Fabric's `AFTER_KILLED_OTHER_ENTITY`, so ability and melee kills count too — no `GUN_KILL` event.
-- **Roll query:** movement's roll state is a private attachment, so there is no roll query in `common`. Added
-  `MovementEvents.ROLL_STARTED` (additive); guns' reload-cancel listens to it. **Movement must fire it** from
-  `RollServer.tryStart`/`forceStart` (one line; reported to the orchestrator). Until then reload-cancel is inert.
+- **Combat and roll events are not ours** (orchestrator reconciliation, 2026-10-12): `CombatEvents.HIT(shooter,
+  target, damage, precision, killed)` / `RELOADED(player, rounds)` come from v2-builds (#46) and are **fired by guns**
+  (PR 3); `PlayerMoveEvents.ROLLED` comes from v2-players (#48) and is fired by movement. Ultimate charge listens to
+  `HIT` with `precision == true`; kills come from Fabric's `AFTER_KILLED_OTHER_ENTITY` so ability and melee kills
+  count too. Guns' reload-cancel listens to `ROLLED`, and guns gate firing on `PlayerStatus.canShoot` (#48), not
+  `!isDowned`. The earlier `CombatEvents.PRECISION_HIT` / `MovementEvents.ROLL_STARTED` drafts were dropped.
 - **Party curves** added to `party.json` (additive fields on `PartyConfig`): `ultimateCharge` (0.25, 0.9: 8 players
   ×2.4 charge per kill — each player's share of kills shrinks as wave size grows slower than the party) and
   `abilityHeal` (0.1, 0.9: 8 players ×1.58 on healing dart / overshield amounts). Tested at 1 and 8.
