@@ -1,0 +1,69 @@
+{
+	"fabric:load_conditions": [
+		{
+			"condition": "fabric:all_mods_loaded",
+			"values": [
+				"blocksouls_game",
+				"blocksouls_world"
+			]
+		},
+		{
+			"condition": "fabric:registry_contains",
+			"registry": "minecraft:item",
+			"values": [
+				"blocksouls_game:soul"
+			]
+		}
+	],
+	"criteria": {
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipes": "blocksouls_guns:exotic_catalyst"
+			}
+		},
+		"has_soul": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_game:soul"
+					}
+				]
+			}
+		},
+		"has_gunmetal_ingot": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:gunmetal_ingot"
+					}
+				]
+			}
+		},
+		"has_gun_receiver": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_guns:gun_receiver"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_soul",
+			"has_gunmetal_ingot",
+			"has_gun_receiver"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"blocksouls_guns:exotic_catalyst"
+		]
+	}
+}
