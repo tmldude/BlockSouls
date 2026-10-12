@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import io.github.tmldude.blocksouls.common.player.Capabilities;
 import io.github.tmldude.blocksouls.common.player.PlayerStatus;
 import io.github.tmldude.blocksouls.common.player.PlayerTraits;
+import io.github.tmldude.blocksouls.common.player.Stamina;
 import io.github.tmldude.blocksouls.movement.BlockSoulsMovement;
 import io.github.tmldude.blocksouls.movement.climb.ClimbWorld;
 import io.github.tmldude.blocksouls.movement.glide.GlideServer;
@@ -205,6 +206,19 @@ public class MovementGameTests {
 
 		StaminaAttachment.set(zephyr, new StaminaState(0, 0));
 		helper.assertTrue(!GlideServer.canGlide(zephyr), "the wings fold at zero stamina");
+		helper.succeed();
+	}
+
+	@GameTest
+	public void staminaProviderAddsAndDrainsWithinThePlayersRange(GameTestHelper helper) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		StaminaAttachment.set(player, new StaminaState(50, 0));
+		helper.assertTrue(Stamina.add(player, -30), "a drain changes stamina");
+		helper.assertTrue(StaminaAttachment.get(player).value() == 20, "50 - 30 = 20, got " + StaminaAttachment.get(player).value());
+		helper.assertTrue(StaminaAttachment.get(player).regenDelay() > 0, "a drain restarts the regen delay");
+		helper.assertTrue(Stamina.add(player, 1000), "a refund fills up");
+		helper.assertTrue(StaminaAttachment.get(player).value() == MovementTraits.staminaMax(player), "clamped at the player's max");
+		helper.assertTrue(!Stamina.add(player, 5), "already full: nothing changes");
 		helper.succeed();
 	}
 

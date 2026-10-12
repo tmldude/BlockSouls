@@ -1,0 +1,42 @@
+{
+	"criteria": {
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipes": "blocksouls_guns:primary_ammo"
+			}
+		},
+		"has_copper_ingot": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "minecraft:copper_ingot"
+					}
+				]
+			}
+		},
+		"has_gunpowder": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "minecraft:gunpowder"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_copper_ingot",
+			"has_gunpowder"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"blocksouls_guns:primary_ammo"
+		]
+	}
+}

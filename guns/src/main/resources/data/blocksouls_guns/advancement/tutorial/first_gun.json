@@ -1,0 +1,73 @@
+{
+	"fabric:load_conditions": [
+		{
+			"condition": "fabric:all_mods_loaded",
+			"values": [
+				"blocksouls_world"
+			]
+		}
+	],
+	"parent": "blocksouls_guns:tutorial/gun_part",
+	"display": {
+		"icon": {
+			"id": "blocksouls_guns:hand_cannon"
+		},
+		"title": {
+			"translate": "advancements.blocksouls.tutorial.first_gun.title"
+		},
+		"description": {
+			"translate": "advancements.blocksouls.tutorial.first_gun.description"
+		},
+		"frame": "goal"
+	},
+	"criteria": {
+		"has_hand_cannon": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_guns:hand_cannon"
+					}
+				]
+			}
+		},
+		"has_auto_rifle": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_guns:auto_rifle"
+					}
+				]
+			}
+		},
+		"has_shotgun": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_guns:shotgun"
+					}
+				]
+			}
+		},
+		"has_sniper_rifle": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_guns:sniper_rifle"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_hand_cannon",
+			"has_auto_rifle",
+			"has_shotgun",
+			"has_sniper_rifle"
+		]
+	]
+}

@@ -19,5 +19,14 @@
 	"key.blocksouls.kart_horn": "Kart Horn",
 	"subtitles.blocksouls_vehicles.kart.refuel": "Kart refuelled",
 	"subtitles.blocksouls_vehicles.kart.sputter": "Kart engine sputters",
-	"subtitles.blocksouls_vehicles.kart.horn": "Kart honks"
+	"subtitles.blocksouls_vehicles.kart.horn": "Kart honks",
+	"message.blocksouls_vehicles.wreck_needs": "Needs: %s",
+	"message.blocksouls_vehicles.need.wheel": "Wheel",
+	"message.blocksouls_vehicles.need.wheels": "%s Wheels",
+	"message.blocksouls_vehicles.need.engine": "Engine",
+	"message.blocksouls_vehicles.need.engines": "%s Engines",
+	"message.blocksouls_vehicles.need.scrap": "%s Scrap",
+	"tooltip.blocksouls_vehicles.wheel": "Right-click a Kart Wreck to fit it (a wreck takes %s)",
+	"tooltip.blocksouls_vehicles.engine": "Right-click a Kart Wreck to fit it (a wreck takes %s)",
+	"tooltip.blocksouls_vehicles.fuel_can": "Right-click a Kart to refuel %s%% of a tank"
 }

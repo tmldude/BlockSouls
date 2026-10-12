@@ -1,0 +1,36 @@
+{
+	"parent": "blocksouls_vehicles:tutorial/patch_up",
+	"display": {
+		"icon": {
+			"id": "minecraft:minecart"
+		},
+		"title": {
+			"translate": "advancements.blocksouls.tutorial.drive.title"
+		},
+		"description": {
+			"translate": "advancements.blocksouls.tutorial.drive.description"
+		},
+		"frame": "goal"
+	},
+	"criteria": {
+		"drove": {
+			"trigger": "minecraft:started_riding",
+			"conditions": {
+				"player": {
+					"type": "minecraft:entity_properties",
+					"entity": "this",
+					"predicate": {
+						"vehicle": {
+							"entity_type": "blocksouls_vehicles:kart"
+						}
+					}
+				}
+			}
+		}
+	},
+	"requirements": [
+		[
+			"drove"
+		]
+	]
+}

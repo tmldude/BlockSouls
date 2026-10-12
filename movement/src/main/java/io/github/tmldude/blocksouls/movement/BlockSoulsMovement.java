@@ -26,6 +26,7 @@ public class BlockSoulsMovement implements ModInitializer {
 	public void onInitialize() {
 		CONFIG.copyFrom(Config.load(ConfigSync.FILE, MovementConfig.class, MovementConfig::new));
 		StaminaAttachment.register(CONFIG.stamina);
+		StaminaAttachment.installProvider();
 		RollServer.register(CONFIG);
 		ClimbServer.register(CONFIG);
 		WebServer.register(CONFIG);

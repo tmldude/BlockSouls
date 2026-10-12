@@ -1,0 +1,27 @@
+{
+	"parent": "blocksouls:tutorial/root",
+	"display": {
+		"icon": {
+			"id": "minecraft:clock"
+		},
+		"title": {
+			"translate": "advancements.blocksouls.tutorial.first_night.title"
+		},
+		"description": {
+			"translate": "advancements.blocksouls.tutorial.first_night.description"
+		}
+	},
+	"criteria": {
+		"survived": {
+			"trigger": "blocksouls_common:milestone",
+			"conditions": {
+				"milestone": "night_survived"
+			}
+		}
+	},
+	"requirements": [
+		[
+			"survived"
+		]
+	]
+}
