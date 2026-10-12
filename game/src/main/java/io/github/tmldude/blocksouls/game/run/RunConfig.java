@@ -20,6 +20,22 @@ public class RunConfig {
 	 */
 	public int defaultsVersion;
 
+	/**
+	 * The run's shape: {@code "classic"} is the v1 open-world 7-night overworld run (the default until v2
+	 * ships), {@code "expedition"} the v2 act run (acts advance by portal charge; sieges follow the party
+	 * through every dimension on one day/night rhythm).
+	 */
+	public String runShape = "classic";
+
+	/**
+	 * The expedition's acts, in order. A dimension that isn't registered (yet) is legal: the act exists,
+	 * travel to it just isn't possible until the dimension does (Stage 6 registers acts 3–4).
+	 */
+	public List<ActSpec> acts = defaultActs();
+
+	/** Seconds the player-triggered portal charge takes while its defense siege runs. */
+	public int portalChargeSeconds = 180;
+
 	/** Start the run with {@link #defaultDifficulty} the first time a player joins a fresh world. */
 	public boolean autoStart = true;
 	public String defaultDifficulty = "normal";
@@ -124,6 +140,21 @@ public class RunConfig {
 		return true;
 	}
 
+	public static class ActSpec {
+		public String id = "";
+		public String dimension = "";
+		public String name = "";
+
+		public ActSpec() {
+		}
+
+		public ActSpec(String id, String dimension, String name) {
+			this.id = id;
+			this.dimension = dimension;
+			this.name = name;
+		}
+	}
+
 	public static class DifficultyPreset {
 		public double waveSize = 1;
 		public double mobHealth = 1;
@@ -154,6 +185,14 @@ public class RunConfig {
 			this.rare = rare;
 			this.legendary = legendary;
 		}
+	}
+
+	private static List<ActSpec> defaultActs() {
+		return new ArrayList<>(List.of(
+				new ActSpec(RunIds.NAMESPACE + ":overworld", "minecraft:overworld", "Overworld"),
+				new ActSpec(RunIds.NAMESPACE + ":infected_nether", "minecraft:the_nether", "Infected Nether"),
+				new ActSpec(RunIds.NAMESPACE + ":blightheart", "blocksouls_world:blightheart", "The Blightheart"),
+				new ActSpec(RunIds.NAMESPACE + ":skyrift", "blocksouls_world:skyrift", "The Skyrift")));
 	}
 
 	private static Map<String, DifficultyPreset> defaultDifficulties() {

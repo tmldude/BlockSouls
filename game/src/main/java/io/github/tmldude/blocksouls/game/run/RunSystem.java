@@ -39,6 +39,9 @@ import io.github.tmldude.blocksouls.common.run.RunPhase;
 import io.github.tmldude.blocksouls.common.run.RunState;
 import io.github.tmldude.blocksouls.common.run.Runs;
 import io.github.tmldude.blocksouls.game.BlockSoulsGame;
+import io.github.tmldude.blocksouls.game.run.clock.SiegeClock;
+import io.github.tmldude.blocksouls.game.run.clock.SunClock;
+import io.github.tmldude.blocksouls.game.run.clock.SyntheticClock;
 
 /**
  * Owned by the "game-loop" session (docs/sessions/game-loop.md): run lifecycle, day/night, waves, wave drops,
@@ -63,6 +66,8 @@ public final class RunSystem {
 			Config.save(RunConfig.FILE, config);
 		}
 		Runs.setProvider(server -> RunData.get(server).state());
+		ActMachine.load(config);
+		ActMachine.installProvider();
 		Networking.registerClientbound(RunSyncPayload.TYPE, RunSyncPayload.CODEC);
 
 		ServerLifecycleEvents.SERVER_STARTED.register(RunSystem::onServerStarted);
@@ -73,11 +78,8 @@ public final class RunSystem {
 				WaveManager.onDeath(entity, source, RunData.get(level.getServer()));
 			}
 		});
-		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
-			if (level == level.getServer().overworld()) {
-				WaveManager.onEntityLoad(entity, level, RunData.get(level.getServer()));
-			}
-		});
+		// Wave mobs can exist in any act's dimension (classic only ever tags them in the overworld).
+		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> WaveManager.onEntityLoad(entity, level, RunData.get(level.getServer())));
 		BossEvents.KILLED.register((level, bossId, boss, players) -> onBossKilled(level.getServer(), bossId.toString()));
 		EntitySleepEvents.ALLOW_SLEEPING.register((player, pos) -> {
 			if (player.level() instanceof ServerLevel level && !canSleep(RunData.get(level.getServer()).phase)) {
@@ -86,6 +88,7 @@ public final class RunSystem {
 			return null;
 		});
 		RunCommands.register();
+		ActCommands.register();
 	}
 
 	/** No sleeping while a wave runs or during a break; fine once the night's waves are over. */
@@ -126,6 +129,7 @@ public final class RunSystem {
 		}
 		BlockSoulsGame.LOGGER.info("Run started ({})", data.difficulty.id());
 		RunEvents.RUN_STARTED.invoker().onChange(server, data.state());
+		ActMachine.onRunStarted(server, data);
 		RunSync.markDirty();
 	}
 
@@ -142,6 +146,9 @@ public final class RunSystem {
 		WaveManager.discardAll(server, data);
 		data.phase = RunPhase.OVER;
 		data.endGameTime = server.overworld().getGameTime();
+		// A portal charge dies with the run.
+		data.chargingAct = 0;
+		data.chargeEndsAt = 0;
 		data.setDirty();
 		int survived = RunSummary.wavesSurvived(data, midWave);
 		RunEvents.RUN_OVER.invoker().onChange(server, data.state());
@@ -230,8 +237,20 @@ public final class RunSystem {
 		if (server.overworld().getGameTime() % 100 == 0) {
 			applyClockRate(server, data);
 		}
+		if (isExpedition()) {
+			// The run's one synthetic cycle keeps the sun's rhythm and pauses with it on an empty server.
+			// A run switched to expedition mid-way (config toggle) starts its cycle here instead of at run start.
+			if (anyoneOnline) {
+				data.synthetic.start(server.overworld().getOverworldClockTime());
+				data.synthetic.advance(WaveMath.clockRate(config.dayLengthMinutes));
+				data.setDirty();
+			}
+			if (server.overworld().getGameTime() % 20 == 0) {
+				ActMachine.tick(server, data);
+			}
+		}
 
-		long dayTime = server.overworld().getOverworldClockTime();
+		long dayTime = activeClock(server).cycleTime();
 		boolean night = WaveMath.isNight(dayTime, config);
 		int timeOfDay = WaveMath.timeOfDay(dayTime);
 		if (!night && !data.duskCuePlayed && timeOfDay >= config.duskCueTime && timeOfDay < config.duskTime) {
@@ -270,8 +289,8 @@ public final class RunSystem {
 		data.setDirty();
 		RunEvents.DUSK.invoker().onNight(server, data.night);
 
-		if (WaveManager.overworldPlayers(server).isEmpty()) {
-			// Hiding in another dimension isn't an escape: the counter advances anyway (no mobs, no loot).
+		if (WaveManager.activePlayers(server).isEmpty()) {
+			// Hiding outside the party's act isn't an escape: the counter advances anyway (no mobs, no loot).
 			for (int i = 0; i < data.nightBudget; i++) {
 				data.wave++;
 				data.wavesThisNight++;
@@ -300,6 +319,36 @@ public final class RunSystem {
 			RunEvents.DAWN.invoker().onNight(server, data.night);
 		}
 		RunSync.markDirty();
+	}
+
+	// ---------------------------------------------------------------- run shape (v2 spine)
+
+	/** Whether the v2 expedition shape is on ({@code game-run.json}; classic — the v1 run — is the default). */
+	public static boolean isExpedition() {
+		return ActMachine.expedition();
+	}
+
+	/**
+	 * The dimension the run plays in right now: always the overworld in classic; the party's act in the
+	 * expedition. The siege scheduler, wave spawning and the clock all follow it.
+	 */
+	public static ServerLevel activeLevel(MinecraftServer server) {
+		if (!isExpedition()) {
+			return server.overworld();
+		}
+		return ActMachine.currentLevel(server);
+	}
+
+	/**
+	 * The {@link SiegeClock} driving the scheduler: the overworld sun when the active dimension is the
+	 * overworld (exactly the v1 behavior), the run's synthetic cycle everywhere else.
+	 */
+	public static SiegeClock activeClock(MinecraftServer server) {
+		RunData data = RunData.get(server);
+		if (!isExpedition() || activeLevel(server) == server.overworld() || !data.synthetic.started()) {
+			return new SunClock(server);
+		}
+		return new SyntheticClock(data.synthetic, () -> WaveMath.clockRate(config.dayLengthMinutes), data::setDirty);
 	}
 
 	// ---------------------------------------------------------------- the clock
@@ -350,7 +399,7 @@ public final class RunSystem {
 	}
 
 	/** Moves the overworld clock forward to the next {@code timeOfDay}. */
-	static void skipTo(MinecraftServer server, int timeOfDay) {
+	public static void skipTo(MinecraftServer server, int timeOfDay) {
 		overworldClock(server).ifPresent(clock -> {
 			long total = server.clockManager().getInstance(clock).totalTicks();
 			server.clockManager().setTotalTicks(clock, total + WaveMath.ticksUntil(total, timeOfDay));

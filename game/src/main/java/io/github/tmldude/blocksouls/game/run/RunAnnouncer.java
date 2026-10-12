@@ -13,10 +13,10 @@ final class RunAnnouncer {
 	private RunAnnouncer() {
 	}
 
-	/** Shortly before dusk: a distant, pitched-down rumble for everyone in the overworld (the client tints the sky). */
+	/** Shortly before dusk: a distant, pitched-down rumble for everyone in the active dimension (the client tints the sky). */
 	static void duskCue(MinecraftServer server) {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-			if (player.level() == server.overworld()) {
+			if (player.level() == RunSystem.activeLevel(server)) {
 				RunSystem.playTo(player, RunSystem.duskSound(), 1.0F, 0.5F);
 			}
 		}
