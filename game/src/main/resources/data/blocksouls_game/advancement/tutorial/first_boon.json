@@ -1,0 +1,27 @@
+{
+	"parent": "blocksouls_game:tutorial/first_night",
+	"display": {
+		"icon": {
+			"id": "blocksouls_game:relic_common"
+		},
+		"title": {
+			"translate": "advancements.blocksouls.tutorial.first_boon.title"
+		},
+		"description": {
+			"translate": "advancements.blocksouls.tutorial.first_boon.description"
+		}
+	},
+	"criteria": {
+		"boon": {
+			"trigger": "blocksouls_common:milestone",
+			"conditions": {
+				"milestone": "boon"
+			}
+		}
+	},
+	"requirements": [
+		[
+			"boon"
+		]
+	]
+}

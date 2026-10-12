@@ -1,0 +1,54 @@
+{
+	"parent": "blocksouls_vehicles:tutorial/find_wreck",
+	"display": {
+		"icon": {
+			"id": "blocksouls_vehicles:engine"
+		},
+		"title": {
+			"translate": "advancements.blocksouls.tutorial.fit_parts.title"
+		},
+		"description": {
+			"translate": "advancements.blocksouls.tutorial.fit_parts.description"
+		}
+	},
+	"criteria": {
+		"fitted_wheel": {
+			"trigger": "minecraft:player_interacted_with_entity",
+			"conditions": {
+				"entity": {
+					"type": "minecraft:entity_properties",
+					"entity": "this",
+					"predicate": {
+						"entity_type": "blocksouls_vehicles:kart_wreck"
+					}
+				},
+				"item": {
+					"items": "blocksouls_vehicles:wheel"
+				}
+			}
+		},
+		"fitted_engine": {
+			"trigger": "minecraft:player_interacted_with_entity",
+			"conditions": {
+				"entity": {
+					"type": "minecraft:entity_properties",
+					"entity": "this",
+					"predicate": {
+						"entity_type": "blocksouls_vehicles:kart_wreck"
+					}
+				},
+				"item": {
+					"items": "blocksouls_vehicles:engine"
+				}
+			}
+		}
+	},
+	"requirements": [
+		[
+			"fitted_wheel"
+		],
+		[
+			"fitted_engine"
+		]
+	]
+}

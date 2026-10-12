@@ -1,0 +1,31 @@
+{
+	"criteria": {
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipes": "blocksouls_world:scrap_plate_boots"
+			}
+		},
+		"has_scrap": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:scrap"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_scrap"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"blocksouls_world:scrap_plate_boots"
+		]
+	}
+}
