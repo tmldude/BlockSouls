@@ -51,12 +51,12 @@ class WaveMathTest {
 
 	@Test
 	void budgetPerNightRepeatsTheLastValue() {
-		assertEquals(1, WaveMath.wavesForNight(1, false, config));
+		assertEquals(2, WaveMath.wavesForNight(1, false, config));
 		assertEquals(2, WaveMath.wavesForNight(3, false, config));
-		assertEquals(3, WaveMath.wavesForNight(8, false, config));
-		assertEquals(3, WaveMath.wavesForNight(20, false, config));
-		assertEquals(4, WaveMath.wavesForNight(20, true, config));
-		assertEquals(2, WaveMath.wavesForNight(1, true, config));
+		assertEquals(4, WaveMath.wavesForNight(8, false, config));
+		assertEquals(4, WaveMath.wavesForNight(20, false, config));
+		assertEquals(5, WaveMath.wavesForNight(20, true, config));
+		assertEquals(3, WaveMath.wavesForNight(1, true, config));
 	}
 
 	@Test

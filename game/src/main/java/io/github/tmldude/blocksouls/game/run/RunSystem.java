@@ -62,6 +62,9 @@ public final class RunSystem {
 
 	public static void init() {
 		config = Config.load(RunConfig.FILE, RunConfig.class, RunConfig::new);
+		if (RunConfig.migrate(config)) {
+			Config.save(RunConfig.FILE, config);
+		}
 		Runs.setProvider(server -> RunData.get(server).state());
 		ActMachine.load(config);
 		ActMachine.installProvider();
