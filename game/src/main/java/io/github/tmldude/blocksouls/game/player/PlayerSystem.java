@@ -5,6 +5,8 @@ import io.github.tmldude.blocksouls.game.player.boon.BoonCatalog;
 import io.github.tmldude.blocksouls.game.player.boon.PlayerBoons;
 import io.github.tmldude.blocksouls.game.player.downed.Downed;
 import io.github.tmldude.blocksouls.game.player.downed.Revive;
+import io.github.tmldude.blocksouls.game.player.origin.OriginCommands;
+import io.github.tmldude.blocksouls.game.player.origin.PlayerOrigins;
 import io.github.tmldude.blocksouls.game.player.relic.RelicItems;
 import io.github.tmldude.blocksouls.game.player.relic.RelicOffers;
 
@@ -31,6 +33,9 @@ public final class PlayerSystem {
 		RelicItems.register();
 		RelicOffers.register(CONFIG.boons);
 		BoonCatalog.register();
+		PlayerOrigins.init();
+		PlayerOrigins.register(CONFIG.origins);
+		OriginCommands.register();
 		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> PlayerBoons.refreshAll(server));
 		PlayerCommands.register();
 	}

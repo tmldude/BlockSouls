@@ -4,6 +4,7 @@ import net.fabricmc.api.ClientModInitializer;
 
 import io.github.tmldude.blocksouls.game.client.hud.GameHud;
 import io.github.tmldude.blocksouls.game.client.player.PlayerClient;
+import io.github.tmldude.blocksouls.game.client.player.PlayersV2Client;
 import io.github.tmldude.blocksouls.game.client.run.ClientRunSync;
 
 public class BlockSoulsGameClient implements ClientModInitializer {
@@ -12,5 +13,6 @@ public class BlockSoulsGameClient implements ClientModInitializer {
 		ClientRunSync.init();
 		GameHud.init();
 		PlayerClient.init();
+		PlayersV2Client.init();
 	}
 }

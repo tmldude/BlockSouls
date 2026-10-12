@@ -1,0 +1,26 @@
+{
+  "icon": "blocksouls_game:origin/zephyr",
+  "capabilities": [
+    "glide"
+  ],
+  "passives": [
+    {
+      "type": "attribute",
+      "attribute": "minecraft:fall_damage_multiplier",
+      "amount": -1.0,
+      "operation": "add_multiplied_total"
+    }
+  ],
+  "drawbacks": [
+    {
+      "type": "attribute",
+      "attribute": "minecraft:max_health",
+      "amount": -4,
+      "operation": "add_value"
+    }
+  ],
+  "signature_ability": "blocksouls_abilities:zephyr_signature",
+  "synergy_tags": {
+    "storm": 1
+  }
+}

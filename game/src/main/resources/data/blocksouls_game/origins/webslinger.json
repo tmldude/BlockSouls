@@ -1,0 +1,19 @@
+{
+  "icon": "blocksouls_game:origin/webslinger",
+  "capabilities": [
+    "climb",
+    "swing"
+  ],
+  "passives": [],
+  "drawbacks": [
+    {
+      "type": "trait",
+      "trait": "blocksouls:stamina_max_penalty",
+      "level": 1
+    }
+  ],
+  "signature_ability": "blocksouls_abilities:webslinger_signature",
+  "synergy_tags": {
+    "pull": 1
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "icon": "blocksouls_game:origin/bloodbound",
+  "capabilities": [],
+  "passives": [],
+  "drawbacks": [],
+  "rules": {
+    "roll_mist": true,
+    "hearts_per_boss_kill": 1,
+    "heal_multiplier": 0.5,
+    "altar_cost_multiplier": 0.5
+  },
+  "signature_ability": "blocksouls_abilities:bloodbound_signature",
+  "synergy_tags": {
+    "on_roll": 1,
+    "heal": 1
+  }
+}
