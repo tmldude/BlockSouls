@@ -326,3 +326,9 @@ Direction for the next build:
   over ~90 s without a decision or threat, core loop (gun in hand, shooting at something that matters)
   within 10 minutes of a fresh run. The Director owns the budget in v2; immediate v1 tuning is in the
   polish batch with the v1 orchestrator.
+- **v0.10.1 (v1 orchestrator's PR #42) is a pacing-only patch**: 12-min days, waves/night
+  2,2,2,3,3,3,3,4, 8 s breaks, drop chance 0.5, starter pistol to wave 4. It introduces
+  **`defaultsVersion` + `RunConfig.migrate` in game-run.json**: shipped-default changes migrate on live
+  servers while hand-tuned values stay. **Rule for all v2 work**: any change to a shipped config default
+  (game-run.json above all — SiegeClock lives there) uses the same migrate pattern, and the
+  `defaultsVersion` field is never dropped.
