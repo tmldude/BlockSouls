@@ -638,6 +638,77 @@ def relics():
         emit(f"{GAME}/item/relic_{tier}.png", A.sprite(rows, mats, {"w": glint, "s": A.GOLD[5]}, f"relic_{tier}"))
 
 
+def item_soul():
+    """A pale blue wisp with a bright core: the run's currency."""
+    rows = [
+        "................",
+        "................",
+        "......ss........",
+        ".....sSSs.......",
+        "....sSWWSs......",
+        "....sSWWSSs.....",
+        "....sSSSSSs.....",
+        ".....sSSSSs.....",
+        "......sSSSs.....",
+        ".......sSs......",
+        "........ss......",
+        ".........s......",
+        "..........s.....",
+        "................",
+        "................",
+        "................",
+    ]
+    soul = A.ramp("#1d3a5c", "#2f6fa8", "#5fb0e8", "#b9e6ff")
+    return A.sprite(rows, {"s": M(soul, 1), "S": M(soul, 2)}, {"W": A.rgb("#eaf8ff")}, "soul")
+
+
+def item_reroll_charm():
+    """A gunmetal ring threaded with souls."""
+    rows = [
+        "................",
+        ".....gggggg.....",
+        "....gg....gg....",
+        "...gg..ss..gg...",
+        "...g..sSSs..g...",
+        "..gg..sSSs..gg..",
+        "..g....ss....g..",
+        "..g..........g..",
+        "..gg........gg..",
+        "...g..ss.ss.g...",
+        "...gg.SS.SSgg...",
+        "....gg....gg....",
+        ".....gggggg.....",
+        "................",
+        "................",
+        "................",
+    ]
+    soul = A.ramp("#1d3a5c", "#2f6fa8", "#5fb0e8", "#b9e6ff")
+    return A.sprite(rows, {"g": M(A.GUNMETAL, 5), "s": M(soul, 1), "S": M(soul, 3)}, {}, "reroll_charm")
+
+
+def item_trinket_case():
+    """A bone-and-brass case with a gold clasp: a pick-1-of-3 trinket offer."""
+    rows = [
+        "................",
+        "................",
+        "...bbbbbbbbbb...",
+        "..bBBBBBBBBBBb..",
+        "..bBkkkkkkkkBb..",
+        "..bBkkkkkkkkBb..",
+        "..bbbbbggbbbbb..",
+        "..bBBBBggBBBBb..",
+        "..bBBBBBBBBBBb..",
+        "..bBBBBBBBBBBb..",
+        "..bBBBBBBBBBBb..",
+        "...bbbbbbbbbb...",
+        "................",
+        "................",
+        "................",
+        "................",
+    ]
+    return A.sprite(rows, {"b": M(A.BRASS, 2), "B": M(A.BONE, 4), "k": M(A.BONE, 2), "g": M(A.GOLD, 4)}, {}, "trinket_case")
+
+
 # ========================================================================================================= blocks
 
 
@@ -1015,6 +1086,9 @@ def items():
     emit(f"{VEH}/item/wheel.png", item_wheel())
     emit(f"{VEH}/item/engine.png", item_engine())
     relics()
+    emit(f"{GAME}/item/soul.png", item_soul())
+    emit(f"{GAME}/item/reroll_charm.png", item_reroll_charm())
+    emit(f"{GAME}/item/trinket_case.png", item_trinket_case())
 
 
 def main():
