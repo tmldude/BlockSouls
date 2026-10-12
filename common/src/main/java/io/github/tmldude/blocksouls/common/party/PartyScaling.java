@@ -62,6 +62,16 @@ public final class PartyScaling {
 		return curve(players, config.raidCrystals);
 	}
 
+	/** Abilities: multiplier on ultimate charge per kill / precision hit. */
+	public static double ultimateCharge(int players) {
+		return curve(players, config.ultimateCharge);
+	}
+
+	/** Abilities: multiplier on healing dart and party overshield amounts. */
+	public static double abilityHeal(int players) {
+		return curve(players, config.abilityHeal);
+	}
+
 	/** v2 floors: island radius multiplier. */
 	public static double floorSize(int players) {
 		return curve(players, config.floorSize);
