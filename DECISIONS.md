@@ -224,6 +224,187 @@ My defaults, to confirm:
   arena now has 5 spots); crystals 3 × a `raidCrystals` curve (0.3, 0.9): 3 / 4 / 5 / 8 at 1 / 2 / 4 / 8 (was +1 per
   player); wave 7 × the wave curve (29 at 8; was 4 + 3 per player). `maxScaledPlayers` is gone: party.json's `maxParty`.
 
+## v2 direction — "Expedition" (2026-10-11, from the owner)
+
+Ideation pass for the next version, planned in `PLAN2.md`. v1 ships first.
+
+**Owner decisions:**
+- v2 adds: a tag-based synergy engine with keystone boons; an AI Director for sieges; risk-reward world
+  objects (altars, cursed chests, pylons, wagers); the day phase as a shop/prep phase with camp
+  shopkeepers; optional objectives inside sieges; Origins (run-start classes — scope generous);
+  solo Last Stand + co-op cross-player boons and downed gameplay; a major boss expansion (posture/stagger,
+  part breaks, new attack/movement archetypes, elite affixes); Tier 1–2 AI (utility attack picking,
+  Director, influence maps, habit reads). Learned-model AI (ONNX policies, JEPA-style) is explicitly
+  deferred past v2.
+- **The run becomes act-structured**: Overworld → Nether → a new dimension → a sky dimension → final raid,
+  each act ~3 sieges with prep time, portal-gated, strongholds/Ender-Eye hunt removed, shopkeepers at a
+  camp per act.
+
+**Confirmed by the owner (same day):** acts are **open dimensions, not closed maps** (Risk of Rain-style:
+explicit stage gate, the party chooses when to leave). Rules in PLAN2.md §2: the portal never pulls;
+two-way portals with the siege front following the party; camps as landmarks not walls; portal-charge
+defense to leave an act; **Classic mode config flag** keeps the v1 run shape for A/B playtesting.
+
+Owner refinements over the first draft:
+- **No fixed siege count per act** ("3 waves is worthless"). An act lasts as long as the party stays;
+  the portal charge can be started at any time. Greed vs. safety is the core rule: the threat counter
+  (the v1 wave counter, promoted) climbs every night forever, and **every boss ahead — final raid
+  included — scales with it at engage time** (`threat.json`, multiplied with `PartyScaling`). Staying =
+  stronger build vs. harder bosses; rushing = the reverse; both legitimate.
+- **Day/night rhythm in every dimension**, not horn-timer sieges: dimensions without a sun get a
+  synthetic cycle — a "vibe switch" (ambient light/fog lerp, soundscape, aggression) on the same
+  ~17-minute clock, so v1's dusk-siege/dawn-pause rules apply unchanged everywhere. `SiegeClock` has a
+  sun-bound and a synthetic implementation.
+
+Orchestrator notes:
+- 26.3's "new biome" is the Dappled Forest (an overworld forest biome, not a dimension), and vanilla has
+  no aether — so acts 3–4 are **our own custom dimensions** with original names (no "Aether" per the
+  asset-name rule).
+
+**Round 3 (same day, from the owner):**
+- **Dimension names confirmed: the Blightheart and the Skyrift.**
+- **Movement becomes class identity** (origins): you pick where you start — Mario kit, web/climb,
+  aquatic, fire/lava-immune, or glide-flight — instead of everyone having everything. Orchestrator
+  guardrail (to confirm by playtest, logged in PLAN2.md §3f): the Souls core (roll + i-frames, stamina,
+  downed/revive) and the hold-jump feel stay universal; capability set contract in `common`, gating in
+  `movement`; Classic mode grants all (v1 behavior); every origin solo-completable.
+- **Boons/relics deepened, "Slay the Spire × Hades"**: boon levels (duplicate pick upgrades), skip-for-
+  souls, **curses** priced into greed objects (purgeable at the shopkeeper / a free altar cleanse), and
+  **trinkets** — a 3-slot StS-relic-style collection that survives going down (field bosses offer a
+  pick-1-of-3). The dawn drop keeps the name "relic"; the carried items are "trinkets".
+- **Coordination:** before v2 spine work starts, confirm with the v1 detailing/sound session that its PRs
+  are merged or don't overlap `game`/`movement`/`common` (message sent 2026-10-11; awaiting reply).
+
+## v2 Stage 5 kickoff + coordination outcome (2026-10-11, orchestrator)
+
+From the v1 orchestrator session (relayed, not owner-direct): v0.9.0 is released (tag = d37702b; the
+friends trial build); Stage 4 / v0.10.0 is in flight (claude/audio, boon-icons, kart-fuel-horn,
+arena-seal, world-structures). Agreed split:
+- **v2's batches are Stages 5–7** (renamed from PLAN2's "Waves 4–6" — v0.10's batch already uses
+  "Stage 4" per docs/sessions/README.md).
+- **Stage 5 (spine) starts now from current main**: nothing in Stage 4 touches `game/run`, the wave
+  scheduler, or existing `common` contracts. v2 sessions keep off `game/player/boon/**`, the game client
+  HUD, `bosses/`, `world/`, `vehicles/`, `mobs/` and `sounds.json` until v0.10.0 merges. **Stage 6 waits
+  for v0.10.0** (real collisions). `common` additions go in their own small PR first, as ever.
+- **PR ownership:** per the v1 orchestrator, the owner wants v2 PRs opened and merged by the v2 side,
+  v0.10's by the v1 side, neither merging the other's. Owner to confirm (relayed second-hand).
+- **Classic-by-default rule (orchestrator):** the Stage 5 spine merges with `runShape: "classic"` as the
+  default and must be behavior-neutral for the live pack; Expedition becomes the default at `v2.0.0`
+  (Stage 7). `integration/FullPackClientTest`'s dusk step is the regression gate.
+- Stage 5 brief: `docs/sessions/v2-spine.md` (branch `claude/v2-spine`, two PRs: common contracts, then
+  the game spine).
+
+## Content standards adopted for v2 (2026-10-11, orchestrator)
+
+The owner (via the v1 orchestrator; verified against branch `claude/content-standards`, PR #35) set
+content standards for both tracks: `docs/CONTENT.md` + a CI-enforced crafting web
+(`tools/content/check_recipe_web.py`: R1 every drop feeds 2+ recipes, R2 every crafted item connects,
+end items exempt with a reason). Binding once #35 merges. v2 resolutions, logged here as the tie-breaker:
+- **Expedition vs. "vanilla-shaped progression":** CONTENT.md's crafting-web goal line says
+  "overworld → Nether → stronghold → End". That describes the Classic run shape; in Expedition the act
+  portal chain replaces the stronghold step. The crafting rules themselves (R1/R2) apply unchanged to
+  all v2 content. Nit reported to the v1 orchestrator for a wording tweak in #35.
+- **Ender Eyes:** field bosses keep dropping them (Classic needs them); in Expedition they're crafting
+  material only (must keep satisfying R1 — they already feed boss-tier recipes).
+- **Souls** (boss currency) will satisfy R1 with 2+ soul-infused recipes rather than an exemption.
+- **Trinkets** are end items → `recipe_web_exempt.json` with reasons, like gear.
+- **Release coordination** accepted: v1 orchestrator cuts v0.10.x; v2 versions are cut by us only after
+  telling them, never both from main at once.
+
+## Playtest verdict + next-build focus (2026-10-12, from the owner)
+
+The owner playtested the v0.9-era build. Feedback triaged in `docs/playtest/2026-10-12-owner-feedback.md`
+(discoverability, drops, resources, movement feel → mostly v1-polish lane, routed to the v1 orchestrator).
+
+Direction for the next build:
+- **Focus: cooler guns, abilities and boons** — the build/fun content leads. PLAN2 §3j adds **exotics**
+  (one rule-breaking gun per archetype), a **gun feel pass**, and a brand-new **`abilities` module**
+  (Destiny-style tactical / origin signature / kill-charged ultimate kit, synergy-tagged, contracts via
+  `common`). Stage 6 is split 6A (builds & boons, guns & abilities, Director & economy, origins &
+  players) / 6B (bosses v2, new bosses, mobs v2, dimensions); 6A launches first, all of 6B still ships.
+- **Pacing is now a design goal** ("remarkably terribly slow"): PLAN2 §0 sets the budget — no stretch
+  over ~90 s without a decision or threat, core loop (gun in hand, shooting at something that matters)
+  within 10 minutes of a fresh run. The Director owns the budget in v2; immediate v1 tuning is in the
+  polish batch with the v1 orchestrator.
+- **v0.10.1 (v1 orchestrator's PR #42) is a pacing-only patch**: 12-min days, waves/night
+  2,2,2,3,3,3,3,4, 8 s breaks, drop chance 0.5, starter pistol to wave 4. It introduces
+  **`defaultsVersion` + `RunConfig.migrate` in game-run.json**: shipped-default changes migrate on live
+  servers while hand-tuned values stay. **Rule for all v2 work**: any change to a shipped config default
+  (game-run.json above all — SiegeClock lives there) uses the same migrate pattern, and the
+  `defaultsVersion` field is never dropped.
+
+## Stage 6A launch (2026-10-12, orchestrator)
+
+v0.10.0 is released; Stage 6A starts. Briefs: `docs/sessions/v2-builds.md`, `v2-guns-abilities.md`,
+`v2-players.md`, `v2-director.md`.
+- **Three sessions launch before the spine PR (#40) merges**: builds, guns-abilities and players depend
+  only on the merged #37 contracts (SynergyTags, Capabilities, Threat) and never touch `game/run/**`.
+  **v2-director waits for #40**, since it edits the spine's scheduler files. This bends the "previous
+  stage merged first" rule only where there is no code dependency; #40's remaining fix is a test-only
+  change already in CI.
+- Lane split inside 6A: `game/client/hud` is shared file-by-file (builds: build line + trinket row;
+  players: origin/summary screens, downed indicator); `common` additions each in their own first PR;
+  Souls' two recipe-web recipes split between builds and guns.
+- Launch order honors the owner's focus: fun content (builds, guns & abilities) and origins first;
+  the Director (pacing) the moment its dependency merges.
+- **Stage 5 complete (2026-10-12):** #37 (common contracts) and #40 (spine) merged, both
+  behavior-neutral for the live pack (`runShape: "classic"` default). Spine follow-ups after v1's #41/#42
+  land: RELOADED wiring for SiegeClock, migrate pattern for the new game-run.json fields. **v2-director
+  launches** once v0.11's `drops-and-pacing` is also in main (it edits the same `game/run` files).
+
+## Stage 6A common-contract reconciliation (2026-10-12, orchestrator)
+
+The three 6A sessions opened their `common` contract PRs in parallel (#46 builds, #47 guns-abilities,
+#48 players) and independently invented overlapping event classes. Canonical picks, to minimize rework:
+- **`PlayerMoveEvents`** (#48: `ROLLED`, `GLIDE_STARTED`) is the one movement-event class; #46's and #47's
+  `MovementEvents` are dropped.
+- **`CombatEvents`** (#46: `HIT(shooter, target, damage, precision, killed)`, `RELOADED(player, rounds)`) is
+  the one combat-event class; #47's `PRECISION_HIT` is `HIT` with `precision == true`.
+- `Origins` provider (#47) is the origin-id lookup; the game module installs it when origins land.
+- `PlayerStatus.canShoot` (#48) is what guns gate firing on (downed players may keep a pistol in v2).
+- `Capabilities` default set becomes **the v1 verbs** (climb, swing, multi-jump), not "everything": GLIDE
+  never existed in v1, so all-granted players must not start gliding. `grant()` must materialize that set
+  when adding to a default player (bug found in review, fixed in #48).
+- Merge order: #48 → #46 → #47 (#47 depends on #46's `CombatEvents`).
+- **Lesson for Stage 6B briefs:** when several parallel sessions each add `common` contracts, the
+  orchestrator pre-declares shared event/provider names in the briefs, or one session owns all contract
+  additions for the stage.
+
+Operational note: all four v2 workers stalled at the same account usage limit (five-hour window) within
+~20 minutes of launch, with uncommitted work staged. Workers are now told to commit WIP before long
+operations; the orchestrator re-arms a roster check-in just after each reset.
+
+## The Floor Loop — v2 pivots from open-world acts to floors (2026-10-12, from the owner)
+
+After the v0.9 playtest the owner weighed a custom engine (Slay the Spire 2-style). Orchestrator's
+recommendation, accepted: **stay on Minecraft as the engine, delete the survival loop** — validate the
+roguelike design with friends in weeks; a cost-boxed engine spike (Godot 4) runs alongside only if asked.
+
+Owner's design, now PLAN2 §0–§2: six small island floors in a void dimension (glass edge), each a
+5–10-minute day of optional things to do around a **central shopkeeper** (resources as surface nodes and
+one shallow cave, a structure, a rotating mini-boss, one secret per floor (Gungeon), one random event
+per floor (StS "?"), a cave dungeon, a wreck repaired with scrap lying around it, day mobs), then the
+siege, then the exit portal. **No recipe learning**: the trade board shows prices as icons of where
+ingredients come from. **The horn** ends the day early for a buff (core risk-reward). Floors escalate
+subtly with floor number. **Four classes** (Warden / Striker / Arcanist / Ranger, Destiny mold) with
+permanent **rune trees** (meta-progression) replace the ten origins; the universal v1 movement kit stays
+on for everyone with a class signature on top. Getting strong is easy and fast; threat makes it matter.
+
+Orchestrator defaults: the open-dimension "expedition" act model is superseded (its spine is reused: act
+= floor, portal charge = exit portal, synthetic clock = floor timer); the Dimensions session becomes
+**Floors** (6A); the Director takes the day timer, horn, events, mini-boss rotation and loot cadence;
+classic mode stays the live default until v2 ships. Per-floor designs (2–6) are discussed with the owner
+before their template pools are built; Floor 1 (Surface) and the template system go first.
+
+## Worker sessions run on Opus, not Fable (2026-10-12, from the owner)
+
+Fable sub-sessions consumed the account's five-hour and weekly usage limits within hours of launch. **Rule:
+every new worker session is created with the Opus model (`claude-opus-5-5`); Fable is not used for
+sub-sessions/sub-agents.** Existing Fable workers finish only the PR they already have open, then stand
+down; remaining work in their briefs moves to Opus sessions that pick up from the branch, the brief and the
+session's decisions file. Slower per session; the orchestrator keeps the parallel count modest (owner:
+"chug on slow opus"). The v1 orchestrator was told the same rule for its v0.11 sessions.
+
 ## Pacing patch, v0.10.1 (2026-10-12, from the owner's playtest)
 
 - The owner found the run "remarkably terribly slow". Defaults: day/night 17 → **12 min**, waves per night
