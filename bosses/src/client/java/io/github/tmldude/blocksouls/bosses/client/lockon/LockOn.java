@@ -9,6 +9,7 @@ import org.jspecify.annotations.Nullable;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.LivingEntity;
@@ -17,6 +18,7 @@ import net.minecraft.world.phys.Vec3;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 
+import io.github.tmldude.blocksouls.bosses.registry.BossSounds;
 import io.github.tmldude.blocksouls.common.CommonTags;
 import io.github.tmldude.blocksouls.common.client.Keybinds;
 
@@ -66,6 +68,9 @@ public final class LockOn {
 		while (key.consumeClick()) {
 			if (target == null) {
 				target = nearest(minecraft, player);
+				if (target != null) {
+					minecraft.getSoundManager().play(SimpleSoundInstance.forUI(BossSounds.LOCK_ON, 1.0f, 0.6f));
+				}
 			} else if (player.isShiftKeyDown()) {
 				target = null;
 			} else {

@@ -1,6 +1,6 @@
 {
   "tier": "common",
-  "icon": "minecraft:emerald",
+  "icon": "blocksouls_game:boon/four_leaf",
   "stackable": 3,
   "effects": [
     {

@@ -18,6 +18,7 @@ import net.minecraft.server.packs.resources.Resource;
 
 import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.fabric.api.resource.v1.reloader.SimpleReloadListener;
+import net.fabricmc.loader.api.FabricLoader;
 
 import io.github.tmldude.blocksouls.game.BlockSoulsGame;
 
@@ -40,7 +41,7 @@ public final class BoonCatalog {
 						for (Map.Entry<Identifier, Resource> entry : FILES.listMatchingResources(state.resourceManager()).entrySet()) {
 							String id = FILES.fileToId(entry.getKey()).toString();
 							try (Reader reader = entry.getValue().openAsReader()) {
-								loaded.put(id, BoonParser.parse(id, JsonParser.parseReader(reader)));
+								loaded.put(id, BoonParser.parse(id, JsonParser.parseReader(reader), BoonCatalog::spriteExists));
 							} catch (IOException | RuntimeException e) {
 								BlockSoulsGame.LOGGER.error("Skipping boon {}: {}", id, e.getMessage());
 							}
@@ -74,9 +75,25 @@ public final class BoonCatalog {
 		boons = Collections.unmodifiableMap(new LinkedHashMap<>(newBoons));
 	}
 
+	/**
+	 * Whether some mod ships the sprite icon's PNG. The server can't see client resource packs, so a datapack boon
+	 * with its own sprite needs a mod (or an item icon).
+	 */
+	public static boolean spriteExists(String icon) {
+		String path = BoonIcons.texturePath(icon);
+		return FabricLoader.getInstance().getAllMods().stream().anyMatch(mod -> mod.findPath(path).isPresent());
+	}
+
+	/** Whether the boon's icon draws as something real: an existing sprite or a registered item. */
+	public static boolean iconResolves(Boon boon) {
+		return BoonIcons.isSprite(boon.icon())
+				? spriteExists(boon.icon())
+				: BuiltInRegistries.ITEM.containsKey(Identifier.parse(boon.icon()));
+	}
+
 	/** Ids other modules haven't registered are only a warning: the pack ships every module, isolated runs don't. */
 	private static void warnUnknownIds(Boon boon) {
-		check(boon, "icon", BuiltInRegistries.ITEM.containsKey(Identifier.parse(boon.icon())), boon.icon());
+		check(boon, "icon", iconResolves(boon), boon.icon());
 		for (BoonEffect effect : boon.effects()) {
 			switch (effect) {
 				case BoonEffect.Effect e -> check(boon, "effect", BuiltInRegistries.MOB_EFFECT.containsKey(Identifier.parse(e.effect())), e.effect());

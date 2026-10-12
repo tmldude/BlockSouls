@@ -3,6 +3,7 @@ package io.github.tmldude.blocksouls.game.player.boon;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import com.google.gson.JsonArray;
@@ -19,17 +20,30 @@ public final class BoonParser {
 	private BoonParser() {
 	}
 
+	/** Parses without checking that a sprite icon's PNG exists (see {@link #parse(String, JsonElement, Predicate)}). */
 	public static Boon parse(String id, String json) {
+		return parse(id, json, sprite -> true);
+	}
+
+	public static Boon parse(String id, String json, Predicate<String> spriteExists) {
 		JsonElement element;
 		try {
 			element = JsonParser.parseString(json);
 		} catch (RuntimeException e) {
 			throw new JsonParseException("invalid JSON: " + e.getMessage(), e);
 		}
-		return parse(id, element);
+		return parse(id, element, spriteExists);
 	}
 
 	public static Boon parse(String id, JsonElement element) {
+		return parse(id, element, sprite -> true);
+	}
+
+	/**
+	 * @param spriteExists whether a sprite icon id ({@link BoonIcons#isSprite}) has a texture; a sprite icon without one
+	 *                     is rejected. Item icons aren't checked here (the item registry isn't known yet).
+	 */
+	public static Boon parse(String id, JsonElement element, Predicate<String> spriteExists) {
 		if (!ID.matcher(id).matches()) {
 			throw new JsonParseException("invalid boon id '" + id + "'");
 		}
@@ -42,6 +56,9 @@ public final class BoonParser {
 		}
 
 		String icon = identifier(json, "icon");
+		if (BoonIcons.isSprite(icon) && !spriteExists.test(icon)) {
+			throw new JsonParseException("no sprite for icon '" + icon + "' (expected " + BoonIcons.texturePath(icon) + ")");
+		}
 		int maxLevel = json.has("stackable") ? integer(json, "stackable") : 1;
 		if (maxLevel < 1) {
 			throw new JsonParseException("'stackable' must be at least 1");

@@ -4,7 +4,7 @@ import net.minecraft.sounds.SoundEvent;
 
 import io.github.tmldude.blocksouls.bosses.registry.BossSounds;
 
-/** The final raid's sounds ({@code sounds.json} maps them to re-pitched vanilla events for now). */
+/** The final raid's sounds: the Hollow Sovereign's voice, its crystals and plates (original, see {@code boss_sounds.py}). */
 public final class FinalRaidSounds {
 	public static final SoundEvent MUSIC = BossSounds.register("music.final_dragon");
 	public static final SoundEvent AMBIENT = BossSounds.register("entity.final_dragon.ambient");
@@ -24,6 +24,8 @@ public final class FinalRaidSounds {
 	/** A hit that the shield (or the height) mostly turned away. */
 	public static final SoundEvent DEFLECT = BossSounds.register("entity.final_dragon.deflect");
 	public static final SoundEvent ENRAGE = BossSounds.register("entity.final_dragon.enrage");
+	/** Sovereign's End building: replayed every 2 s, higher as the cast nears completion. */
+	public static final SoundEvent CAST = BossSounds.register("entity.final_dragon.cast");
 	/** One note of the obelisk's sequence (pitch rises with the position in the order). */
 	public static final SoundEvent CRYSTAL_CHIME = BossSounds.register("entity.raid_crystal.chime");
 	public static final SoundEvent CRYSTAL_SHATTER = BossSounds.register("entity.raid_crystal.shatter");

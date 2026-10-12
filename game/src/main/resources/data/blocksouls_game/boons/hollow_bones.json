@@ -1,6 +1,6 @@
 {
   "tier": "rare",
-  "icon": "minecraft:bone",
+  "icon": "blocksouls_game:boon/hollow_bones",
   "effects": [
     {
       "type": "trait",

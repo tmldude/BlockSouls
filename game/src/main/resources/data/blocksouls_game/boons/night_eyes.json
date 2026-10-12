@@ -1,6 +1,6 @@
 {
   "tier": "common",
-  "icon": "minecraft:golden_carrot",
+  "icon": "blocksouls_game:boon/night_eyes",
   "effects": [
     {
       "type": "effect",

@@ -17,16 +17,20 @@ public final class ClientRunSync {
 	}
 
 	public static void init() {
+		ClientCycle.init();
 		ClientNetworking.receive(RunSyncPayload.TYPE, (payload, context) -> {
 			Set<Identifier> modifiers = payload.nightModifiers().stream()
 					.map(Identifier::tryParse)
 					.filter(Objects::nonNull)
 					.collect(Collectors.toUnmodifiableSet());
-			ClientRun.set(new ClientRun.View(payload.state(), payload.secondsToNext(), payload.mobsLeft(), modifiers));
+			ClientRun.set(new ClientRun.View(payload.state(), payload.secondsToNext(), payload.mobsLeft(), modifiers,
+					payload.actOrdinal(), payload.actName(), payload.actCount(), payload.highestOpenAct(), payload.chargeSecondsLeft()));
+			ClientCycle.update(payload.syntheticTimeOfDay(), payload.syntheticRate());
 			RunSkyEffects.update(payload);
 		});
 		ClientPlayConnectionEvents.DISCONNECT.register((listener, client) -> {
 			ClientRun.set(ClientRun.View.EMPTY);
+			ClientCycle.reset();
 			RunSkyEffects.reset();
 		});
 	}

@@ -5,238 +5,23 @@
 
 No samples: voices are a glottal pulse train (with jitter, roughness and a growling subharmonic) shaped by vowel
 formants that move over time (STFT filtering), mixed with filtered noise for breath, hiss and splatter, and
-decaying resonances for impacts. A little reverb places them in the world. Same script, same samples (the
-random generators are seeded per sound). Output: mobs/src/main/resources/assets/blocksouls_mobs/sounds/mob/...
+decaying resonances for impacts (the helpers live in synth.py). A little reverb places them in the world. Same
+script, same samples (the random generators are seeded per sound).
+Output: mobs/src/main/resources/assets/blocksouls_mobs/sounds/mob/...
 """
 
-import hashlib
 import json
 import os
-import subprocess
-import tempfile
-import wave
+import sys
 
 import numpy as np
 
-SR = 44100
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from synth import (SR, Gen, band, bubbles, clicks, curve, drive, env, finish, groan, growl, mix,  # noqa: E402
+                   resonances, reverb, shriek, stft_filter, sweep_band, t_axis, thump, voice, vowel_path, write_ogg)
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ASSETS = os.path.join(HERE, "..", "..", "mobs", "src", "main", "resources", "assets", "blocksouls_mobs")
-
-# Formants (Hz) of a human-sized vocal tract; monsters scale them down (bigger) or up (smaller).
-VOWELS = {
-    "a": (730, 1090, 2440), "e": (530, 1840, 2480), "i": (270, 2290, 3010), "o": (570, 840, 2410),
-    "u": (300, 870, 2240), "uh": (520, 1190, 2390), "ae": (660, 1720, 2410),
-}
-
-
-class Gen:
-    def __init__(self, name):
-        self.rng = np.random.default_rng(int(hashlib.sha256(name.encode()).hexdigest()[:12], 16))
-
-    def smooth_noise(self, n, rate):
-        """Band-limited random wiggle in [-1, 1], about `rate` changes per second."""
-        pts = max(2, int(n / SR * rate) + 2)
-        g = self.rng.uniform(-1, 1, pts)
-        return np.interp(np.linspace(0, pts - 1, n), np.arange(pts), g)
-
-    def noise(self, n):
-        return self.rng.uniform(-1, 1, n)
-
-
-def t_axis(dur):
-    return np.arange(int(dur * SR)) / SR
-
-
-def curve(points, n):
-    """Piecewise-linear curve through (fraction, value) points, sampled n times."""
-    xs, ys = zip(*points)
-    return np.interp(np.linspace(0, 1, n), xs, ys)
-
-
-def env(n, attack=0.02, release=0.2, shape=None):
-    """Attack/release envelope, or a custom piecewise shape [(fraction, level), ...]."""
-    if shape is not None:
-        return curve(shape, n)
-    e = np.ones(n)
-    a, r = max(1, int(attack * SR)), max(1, int(release * SR))
-    e[:a] = np.linspace(0, 1, a)
-    e[-r:] *= np.linspace(1, 0, r) ** 1.5
-    return e
-
-
-def voice(g, f0, rough=0.2, sub=0.0, jitter=0.01, breath=0.08):
-    """Glottal source following the f0 array (Hz)."""
-    n = len(f0)
-    f = f0 * (1 + jitter * g.smooth_noise(n, 30))
-    phase = np.cumsum(f / SR)
-    # A sawtooth softened at the edges: buzzy like a throat, not a synth.
-    src = 2 * (phase % 1) - 1
-    src = src - 0.5 * (2 * ((phase + 0.5) % 1) - 1) * 0.3
-    if sub:
-        src += sub * (2 * ((phase / 2) % 1) - 1)
-    src *= 1 + rough * g.smooth_noise(n, 70)
-    return src + breath * g.noise(n)
-
-
-def formant_env(freqs, vowel, scale=1.0, bw=(90, 110, 160), gains=(1.0, 0.6, 0.35), tilt=0.0):
-    f = np.array(VOWELS[vowel]) * scale if isinstance(vowel, str) else np.array(vowel)
-    out = np.full_like(freqs, 0.02)
-    for fi, b, a in zip(f, bw, gains):
-        out += a * np.exp(-0.5 * ((freqs - fi) / (b * max(scale, 0.6))) ** 2)
-    if tilt:
-        out *= (1 + freqs / 1000) ** -tilt
-    return out
-
-
-def stft_filter(x, gain_at, n=1024, hop=256):
-    """Filter x with a time-varying magnitude response gain_at(t_seconds, freqs) -> gains."""
-    win = np.hanning(n)
-    pad = np.concatenate([np.zeros(n), x, np.zeros(n)])
-    out = np.zeros_like(pad)
-    norm = np.zeros_like(pad)
-    freqs = np.fft.rfftfreq(n, 1 / SR)
-    for start in range(0, len(pad) - n, hop):
-        frame = pad[start:start + n] * win
-        spec = np.fft.rfft(frame)
-        t = max(0.0, (start + n / 2 - n) / SR)
-        spec *= gain_at(t, freqs)
-        out[start:start + n] += np.fft.irfft(spec, n) * win
-        norm[start:start + n] += win ** 2
-    out /= np.maximum(norm, 1e-6)
-    return out[n:n + len(x)]
-
-
-def vowel_path(path, scale=1.0, tilt=0.5, dur=1.0):
-    """gain_at() morphing through [(fraction, vowel), ...] over dur seconds."""
-    def gain_at(t, freqs):
-        x = min(1.0, t / dur)
-        for (x0, v0), (x1, v1) in zip(path, path[1:]):
-            if x0 <= x <= x1:
-                k = (x - x0) / max(1e-6, x1 - x0)
-                f = (1 - k) * np.array(VOWELS[v0]) + k * np.array(VOWELS[v1])
-                return formant_env(freqs, tuple(f * scale), scale=scale, tilt=tilt)
-        return formant_env(freqs, path[-1][1], scale=scale, tilt=tilt)
-    return gain_at
-
-
-def band(x, lo, hi, soft=1.0):
-    spec = np.fft.rfft(x)
-    f = np.fft.rfftfreq(len(x), 1 / SR)
-    gain = 1 / (1 + (lo / np.maximum(f, 1)) ** (4 * soft)) / (1 + (f / hi) ** (4 * soft))
-    return np.fft.irfft(spec * gain, len(x))
-
-
-def sweep_band(x, lo_path, hi_path, dur):
-    def gain_at(t, f):
-        k = min(1.0, t / dur)
-        lo = np.interp(k, *zip(*lo_path))
-        hi = np.interp(k, *zip(*hi_path))
-        return 1 / (1 + (lo / np.maximum(f, 1)) ** 4) / (1 + (f / hi) ** 4)
-    return stft_filter(x, gain_at)
-
-
-def reverb(g, x, size=0.6, wet=0.25, damp=3000):
-    n = int(size * SR)
-    ir = g.noise(n) * np.exp(-np.linspace(0, 6, n))
-    ir = band(ir, 80, damp)
-    ir[0] = 0
-    y = np.fft.irfft(np.fft.rfft(np.concatenate([x, np.zeros(n)])) * np.fft.rfft(np.concatenate([ir, np.zeros(len(x))])),
-                     len(x) + n)
-    y /= np.max(np.abs(y)) + 1e-9
-    dry = np.concatenate([x / (np.max(np.abs(x)) + 1e-9), np.zeros(n)])
-    return dry * (1 - wet) + y * wet
-
-
-def drive(x, amount):
-    return np.tanh(x * amount) / np.tanh(amount)
-
-
-def clicks(g, dur, rate, lo=1500, hi=5000, decay=0.004, jitter=1.0):
-    n = int(dur * SR)
-    out = np.zeros(n)
-    t = 0.0
-    while t < dur:
-        i = int(t * SR)
-        m = int(decay * 6 * SR)
-        burst = g.noise(m) * np.exp(-np.arange(m) / (decay * SR))
-        out[i:i + m] += burst[:max(0, min(m, n - i))] * (0.5 + 0.5 * g.rng.random())
-        t += (1 / rate) * (1 + jitter * (g.rng.random() - 0.5))
-    return band(out, lo, hi)
-
-
-def thump(dur, f_start, f_end, decay):
-    t = t_axis(dur)
-    f = f_end + (f_start - f_end) * np.exp(-t * 18)
-    return np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t / decay)
-
-
-def resonances(g, dur, modes, decay):
-    t = t_axis(dur)
-    out = np.zeros(len(t))
-    for f, a in modes:
-        out += a * np.sin(2 * np.pi * f * (1 + 0.002 * g.rng.random()) * t + g.rng.random() * 6) * np.exp(-t / (decay * (300 / f) ** 0.3))
-    return out
-
-
-def bubbles(g, dur, rate, f_lo, f_hi):
-    n = int(dur * SR)
-    out = np.zeros(n)
-    t = 0.0
-    while t < dur - 0.05:
-        f = g.rng.uniform(f_lo, f_hi)
-        m = int(SR * g.rng.uniform(0.03, 0.08))
-        tt = np.arange(m) / SR
-        # A bubble: a short sine whose pitch rises as it pops.
-        blip = np.sin(2 * np.pi * np.cumsum(f * (1 + tt * 8)) / SR) * np.exp(-tt * 45)
-        i = int(t * SR)
-        out[i:i + m] += blip[:max(0, min(m, n - i))] * g.rng.uniform(0.4, 1)
-        t += g.rng.exponential(1 / rate)
-    return out
-
-
-def mix(*parts):
-    n = max(len(p) for p, _ in parts)
-    out = np.zeros(n)
-    for p, gain in parts:
-        out[:len(p)] += p / (np.max(np.abs(p)) + 1e-9) * gain
-    return out
-
-
-def finish(x, peak=0.9):
-    x = x - np.mean(x)
-    fade = int(0.006 * SR)
-    x[:fade] *= np.linspace(0, 1, fade)
-    x[-fade:] *= np.linspace(1, 0, fade)
-    return x / (np.max(np.abs(x)) + 1e-9) * peak
-
-
-# --- Recipes ------------------------------------------------------------------------------------------------------
-
-def groan(g, dur, f0_path, vowels, scale=0.85, rough=0.35, sub=0.3, breath=0.12, tilt=0.6, shape=None, gurgle=0.0):
-    n = int(dur * SR)
-    f0 = curve(f0_path, n) * (1 + 0.03 * g.smooth_noise(n, 3))
-    src = voice(g, f0, rough=rough, sub=sub, breath=breath)
-    if gurgle:
-        src *= 1 + gurgle * np.maximum(0, g.smooth_noise(n, 18))
-    y = stft_filter(src, vowel_path(vowels, scale=scale, tilt=tilt, dur=dur))
-    return y * env(n, 0.06, 0.25, shape)
-
-
-def shriek(g, dur, f0_path, vowels, scale=1.15, rough=0.25, detune=1.012, dist=2.5, shape=None):
-    n = int(dur * SR)
-    f0 = curve(f0_path, n) * (1 + 0.04 * g.smooth_noise(n, 9))
-    src = voice(g, f0, rough=rough, breath=0.25) + 0.7 * voice(g, f0 * detune, rough=rough, breath=0.1)
-    y = stft_filter(src, vowel_path(vowels, scale=scale, tilt=0.2, dur=dur))
-    return drive(y / (np.max(np.abs(y)) + 1e-9), dist) * env(n, 0.02, 0.15, shape)
-
-
-def growl(g, dur, f0, scale=0.6, rough=0.6, sub=0.6, am=22, shape=None, vowels=(( 0, "o"), (1, "uh"))):
-    n = int(dur * SR)
-    f = curve(f0, n)
-    src = voice(g, f, rough=rough, sub=sub, breath=0.15)
-    src *= 1 + 0.6 * np.sin(2 * np.pi * am * t_axis(dur)[:n] + 3 * g.smooth_noise(n, 4))
-    y = stft_filter(src, vowel_path(list(vowels), scale=scale, tilt=0.9, dur=dur))
-    return y * env(n, 0.08, 0.3, shape)
 
 
 def sounds():
@@ -454,24 +239,6 @@ PEAK = {"ambient": 0.6, "hurt": 0.75, "death": 0.8, "scream": 0.95, "slam": 0.95
 
 # Telegraphs and far-off cues carry further than the vanilla 16 blocks, so a horde's tells read from a distance.
 RANGE = {"scream": 32, "roar": 32, "slam": 24, "windup": 24, "burst": 24, "howl": 32}
-
-
-def write_ogg(samples, path):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    pcm = (np.clip(samples, -1, 1) * 32767).astype("<i2")
-    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
-        wav = tmp.name
-    try:
-        with wave.open(wav, "wb") as w:
-            w.setnchannels(1)
-            w.setsampwidth(2)
-            w.setframerate(SR)
-            w.writeframes(pcm.tobytes())
-        # Mono, so the game positions it in the world; -bitexact keeps the output identical run to run.
-        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", wav, "-c:a", "libvorbis", "-q:a", "4", "-ac", "1",
-                        "-map_metadata", "-1", "-fflags", "+bitexact", "-flags:a", "+bitexact", path], check=True)
-    finally:
-        os.unlink(wav)
 
 
 def main():

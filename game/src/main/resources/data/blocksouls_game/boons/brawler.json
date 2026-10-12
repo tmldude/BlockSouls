@@ -1,6 +1,6 @@
 {
   "tier": "rare",
-  "icon": "minecraft:blaze_powder",
+  "icon": "blocksouls_game:boon/brawler",
   "effects": [
     {
       "type": "effect",

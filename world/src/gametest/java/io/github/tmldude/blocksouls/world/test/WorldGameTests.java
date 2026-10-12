@@ -4,11 +4,15 @@ import java.util.List;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.InteractionHand;
@@ -19,54 +23,174 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterLists;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
-import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
+import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.RandomState;
+import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
+import net.minecraft.world.phys.AABB;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 
 import io.github.tmldude.blocksouls.common.CommonIds;
+import io.github.tmldude.blocksouls.world.BlockSoulsWorld;
 import io.github.tmldude.blocksouls.world.armor.SetBonuses;
 import io.github.tmldude.blocksouls.world.content.WorldBlocks;
 import io.github.tmldude.blocksouls.world.content.WorldItems;
 import io.github.tmldude.blocksouls.world.enchant.WackyEnchantments;
 import io.github.tmldude.blocksouls.world.gen.Blight;
+import io.github.tmldude.blocksouls.world.gen.RuinPiece;
+import io.github.tmldude.blocksouls.world.gen.RuinStructure;
 import io.github.tmldude.blocksouls.world.gen.StructurePlacer;
+import io.github.tmldude.blocksouls.world.gen.WorldGen;
 import io.github.tmldude.blocksouls.world.gen.layout.CheckpointLayout;
-import io.github.tmldude.blocksouls.world.gen.layout.Layout;
+import io.github.tmldude.blocksouls.world.gen.layout.ScrapScatter;
 import io.github.tmldude.blocksouls.world.gen.layout.WreckLayout;
 
 public class WorldGameTests {
 	private static final String FLOOR = "blocksouls_world_test:floor16";
 
-	@GameTest(structure = FLOOR, skyAccess = true)
-	public void wreckPlacesALootChestAndKart(GameTestHelper helper) {
-		placeAndCheck(helper, WreckLayout.generate(7), StructurePlacer.WRECK_LOOT, true);
+	/** World seed for the structure search; any seed works, this one is just fixed so failures reproduce. */
+	private static final long SEARCH_SEED = 0L;
+	/** Grid cells searched around 0,0 in each direction (wreck spacing 12 → ±96 chunks). */
+	private static final int SEARCH_CELLS = 8;
+
+	@GameTest(structure = FLOOR, skyAccess = true, maxTicks = 400)
+	public void wreckStructureGeneratesWithLootAndKart(GameTestHelper helper) {
+		generateAndCheck(helper, WorldGen.WRECK, true);
 	}
 
-	@GameTest(structure = FLOOR, skyAccess = true)
-	public void checkpointPlacesLootChests(GameTestHelper helper) {
-		placeAndCheck(helper, CheckpointLayout.generate(7), StructurePlacer.CHECKPOINT_LOOT, false);
+	@GameTest(structure = FLOOR, skyAccess = true, maxTicks = 400)
+	public void checkpointStructureGeneratesWithLoot(GameTestHelper helper) {
+		generateAndCheck(helper, WorldGen.CHECKPOINT, false);
 	}
 
-	private static void placeAndCheck(GameTestHelper helper, Layout layout, ResourceKey<LootTable> loot, boolean kart) {
+	/**
+	 * The test level is flat with structures off, so this builds a vanilla overworld generator and does what {@code
+	 * /locate} ({@code ChunkGenerator.findNearestMapStructure}) does: ask the structure state for the structure's
+	 * placement, walk its spread grid and run the structure's own generation on each candidate chunk until one is
+	 * valid. That start's piece is then moved into the test area and built chunk by chunk like world generation does.
+	 */
+	private static void generateAndCheck(GameTestHelper helper, ResourceKey<Structure> key, boolean kart) {
 		ServerLevel level = helper.getLevel();
-		StructurePlacer.Placed placed = StructurePlacer.place(level, level.getRandom(), helper.absolutePos(new BlockPos(8, 1, 8)), layout, loot);
-		helper.assertTrue(!placed.chests().isEmpty(), "no chest placed");
-		for (BlockPos pos : placed.chests()) {
-			ChestBlockEntity chest = (ChestBlockEntity) level.getBlockEntity(pos);
-			helper.assertTrue(chest != null, "chest block entity missing at " + pos);
-			chest.unpackLootTable(null);
-			helper.assertTrue(!chest.isEmpty(), "chest at " + pos + " rolled no loot from " + loot.identifier());
+		RegistryAccess access = level.registryAccess();
+		Holder<NoiseGeneratorSettings> settings = access.lookupOrThrow(Registries.NOISE_SETTINGS).getOrThrow(NoiseGeneratorSettings.OVERWORLD);
+		MultiNoiseBiomeSource biomes = MultiNoiseBiomeSource.createFromPreset(
+				access.lookupOrThrow(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST).getOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD));
+		NoiseBasedChunkGenerator generator = new NoiseBasedChunkGenerator(biomes, settings);
+		RandomState randomState = RandomState.create(access.lookupOrThrow(Registries.NOISE), SEARCH_SEED, settings.value());
+		Climate.Sampler climate = randomState.createClimateSampler(SamplerContext.builder().build());
+		Holder<Structure> structure = access.lookupOrThrow(Registries.STRUCTURE).getOrThrow(key);
+
+		ChunkGeneratorStructureState state = ChunkGeneratorStructureState.createForNormal(randomState, SEARCH_SEED, ChunkPos.ZERO, biomes,
+				access.lookupOrThrow(Registries.STRUCTURE_SET));
+		List<StructurePlacement> placements = state.getPlacementsForStructure(structure);
+		helper.assertTrue(placements.size() == 1 && placements.getFirst() instanceof RandomSpreadStructurePlacement,
+				key.identifier() + " should have one random-spread placement, has " + placements);
+		RandomSpreadStructurePlacement placement = (RandomSpreadStructurePlacement) placements.getFirst();
+
+		StructureStart found = null;
+		search:
+		for (int ring = 0; ring <= SEARCH_CELLS; ring++) {
+			for (int gx = -ring; gx <= ring; gx++) {
+				for (int gz = -ring; gz <= ring; gz++) {
+					if (Math.max(Math.abs(gx), Math.abs(gz)) != ring) {
+						continue;
+					}
+					ChunkPos chunk = placement.getPotentialStructureChunk(SEARCH_SEED, gx * placement.spacing(), gz * placement.spacing());
+					if (!placement.isStructureChunk(state, chunk.x(), chunk.z())) {
+						continue;
+					}
+					StructureStart start = structure.value().generate(structure, Level.OVERWORLD, access, generator, biomes, climate, randomState,
+							level.getServer().getStructureTemplateManager(), SEARCH_SEED, chunk, 0, level, structure.value().biomes()::contains);
+					if (start.isValid()) {
+						found = start;
+						break search;
+					}
+				}
+			}
 		}
-		helper.assertTrue(!placed.scrapPiles().isEmpty(), "no scrap piles");
-		for (BlockPos pos : placed.scrapPiles()) {
-			helper.assertTrue(level.getBlockState(pos).is(WorldBlocks.SCRAP_PILE), "scrap pile missing at " + pos);
+		helper.assertTrue(found != null, "no " + key.identifier() + " within " + SEARCH_CELLS + " grid cells of 0,0");
+		helper.assertTrue(found.getPieces().size() == 1 && found.getPieces().getFirst() instanceof RuinPiece, "one ruin piece");
+
+		RuinPiece piece = (RuinPiece) found.getPieces().getFirst();
+		BlockPos target = helper.absolutePos(new BlockPos(8, 1, 8));
+		piece.move(target.getX() - piece.origin().getX(), target.getY() - piece.origin().getY(), target.getZ() - piece.origin().getZ());
+		BoundingBox box = piece.getBoundingBox();
+		for (int cx = SectionPos.blockToSectionCoord(box.minX()); cx <= SectionPos.blockToSectionCoord(box.maxX()); cx++) {
+			for (int cz = SectionPos.blockToSectionCoord(box.minZ()); cz <= SectionPos.blockToSectionCoord(box.maxZ()); cz++) {
+				ChunkPos chunk = new ChunkPos(cx, cz);
+				BoundingBox chunkBB = new BoundingBox(chunk.getMinBlockX(), level.getMinY(), chunk.getMinBlockZ(),
+						chunk.getMaxBlockX(), level.getMaxY(), chunk.getMaxBlockZ());
+				found.placeInChunk(level, level.structureManager(), generator, level.getRandom(), chunkBB, chunk);
+			}
 		}
+
+		int chests = 0;
+		int piles = 0;
+		for (BlockPos pos : BlockPos.betweenClosed(box.minX(), box.minY(), box.minZ(), box.maxX(), box.maxY(), box.maxZ())) {
+			if (level.getBlockEntity(pos) instanceof ChestBlockEntity chest) {
+				chest.unpackLootTable(null);
+				helper.assertTrue(!chest.isEmpty(), "chest at " + pos + " rolled no loot from " + piece.kind().loot.identifier());
+				chests++;
+			} else if (level.getBlockState(pos).is(WorldBlocks.SCRAP_PILE)) {
+				piles++;
+			}
+		}
+		helper.assertTrue(chests > 0, "no loot chest");
+		helper.assertTrue(piles > 0, "no scrap piles");
 		if (kart) {
 			boolean typeExists = BuiltInRegistries.ENTITY_TYPE.containsKey(CommonIds.KART_WRECK);
-			helper.assertTrue(typeExists == (placed.kart() != null), "kart wreck placed iff its type exists (type exists: " + typeExists + ")");
+			int karts = level.getEntities((Entity) null, AABB.of(box).inflate(2),
+					e -> BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()).equals(CommonIds.KART_WRECK)).size();
+			helper.assertTrue(karts == (typeExists ? 1 : 0), "kart wreck placed iff its type exists (type exists: " + typeExists + ", karts: " + karts + ")");
 		}
+		helper.succeed();
+	}
+
+	@GameTest(structure = FLOOR, skyAccess = true, maxTicks = 40)
+	public void wreckIsRingedWithExtraScrap(GameTestHelper helper) {
+		countScrapAround(helper, RuinStructure.Kind.WRECK, BlockSoulsWorld.CONFIG.gen.wreckExtraScrapPiles);
+	}
+
+	@GameTest(structure = FLOOR, skyAccess = true, maxTicks = 40)
+	public void checkpointIsRingedWithExtraScrap(GameTestHelper helper) {
+		countScrapAround(helper, RuinStructure.Kind.CHECKPOINT, BlockSoulsWorld.CONFIG.gen.checkpointExtraScrapPiles);
+	}
+
+	/**
+	 * Places a ruin on the flat floor and counts the scrap pile blocks within {@link ScrapScatter#MAX_RADIUS} of it: the
+	 * layout's own debris plus the configured extras, all of which land on flat open ground.
+	 */
+	private static void countScrapAround(GameTestHelper helper, RuinStructure.Kind kind, int extra) {
+		ServerLevel level = helper.getLevel();
+		long seed = 7L;
+		int base = kind == RuinStructure.Kind.WRECK ? WreckLayout.generate(seed).scrapPiles().size() : CheckpointLayout.generate(seed).scrapPiles().size();
+		helper.assertTrue(extra > 0, kind.getSerializedName() + "ExtraScrapPiles should default above 0, is " + extra);
+		BlockPos origin = helper.absolutePos(new BlockPos(8, 1, 8));
+		StructurePlacer.place(level, level.getRandom(), origin, kind.layout(seed), kind.loot);
+
+		int r = ScrapScatter.MAX_RADIUS;
+		int piles = 0;
+		for (BlockPos pos : BlockPos.betweenClosed(origin.offset(-r, -3, -r), origin.offset(r, 3, r))) {
+			if (level.getBlockState(pos).is(WorldBlocks.SCRAP_PILE)) {
+				piles++;
+			}
+		}
+		helper.assertTrue(piles >= base + extra, kind.getSerializedName() + ": " + piles + " scrap piles within " + r
+				+ " blocks, expected at least " + base + " from the layout + " + extra + " extra");
 		helper.succeed();
 	}
 

@@ -8,8 +8,8 @@ import net.minecraft.sounds.SoundEvent;
 import io.github.tmldude.blocksouls.common.CommonIds;
 
 /**
- * Our own sound event ids. For now {@code sounds.json} points them at re-pitched vanilla events; real sounds
- * drop in later at the same ids.
+ * Our own sound event ids. {@code sounds.json} points them at original synthesized sounds
+ * ({@code tools/assets/mob_sounds.py}).
  */
 public final class MobSounds {
 	public static final SoundEvent SHAMBLER_AMBIENT = register("entity.shambler.ambient");

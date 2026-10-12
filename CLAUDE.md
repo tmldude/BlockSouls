@@ -67,6 +67,13 @@ mobs alive at once, elites, boss health, mechanics that need several players, ev
 goes through `common`'s `PartyScaling` (curves in `config/blocksouls/party.json`), never a module's own per-player
 formula. Solo must stay completable, and anything that scales needs a test at 1 and at 8 players.
 
+## Content standards
+
+How every item, mob, boss, structure, dimension, sound and icon is made and checked: `docs/CONTENT.md`. Two rules
+CI enforces (`tools/content/check_recipe_web.py`): **every BlockSouls item that drops is an ingredient in 2+
+recipes**, and **every crafted item connects to other BlockSouls items** (no isolated dead ends). Gear, consumables,
+unique boss items and trophies are exempt, each with a reason in `tools/content/recipe_web_exempt.json`.
+
 ## Conventions
 
 - Conventional commits, small PRs per task.

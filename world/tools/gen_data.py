@@ -53,17 +53,44 @@ write(f"{DATA}/worldgen/placed_feature/ore_gunmetal.json", {
     ],
 })
 
-for name, key in (("wreck", "wreck"), ("checkpoint", "checkpoint"), ("scrap_piles", "scrap_pile")):
-    write(f"{DATA}/worldgen/feature/{name}.json", {"type": f"{NS}:{name}"})
-    write(f"{DATA}/worldgen/placed_feature/{name}.json", {
-        "feature": f"{NS}:{name}",
-        "placement": [
-            {"type": f"{NS}:config_rarity", "key": key},
-            {"type": "minecraft:in_square"},
-            {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING_NO_LEAVES"},
-            {"type": "minecraft:biome"},
-        ],
+write(f"{DATA}/worldgen/feature/scrap_piles.json", {"type": f"{NS}:scrap_piles"})
+write(f"{DATA}/worldgen/placed_feature/scrap_piles.json", {
+    "feature": f"{NS}:scrap_piles",
+    "placement": [
+        {"type": f"{NS}:config_rarity", "key": "scrap_pile"},
+        {"type": "minecraft:in_square"},
+        {"type": "minecraft:heightmap", "heightmap": "MOTION_BLOCKING_NO_LEAVES"},
+        {"type": "minecraft:biome"},
+    ],
+})
+
+# Wrecks and checkpoints are registered structures (RuinStructure), so /locate finds them. Spacing lives in
+# world.json (config_spread); the salts just keep the two grids apart.
+WRECK_BIOMES = ["plains", "sunflower_plains", "savanna", "savanna_plateau", "windswept_savanna", "desert", "taiga",
+                "snowy_taiga", "old_growth_pine_taiga", "old_growth_spruce_taiga", "meadow"]
+# Every overworld surface biome except oceans, rivers and beaches.
+CHECKPOINT_BIOMES = ["plains", "sunflower_plains", "snowy_plains", "ice_spikes", "desert", "swamp", "mangrove_swamp",
+                     "forest", "flower_forest", "birch_forest", "dappled_forest", "dark_forest", "pale_garden",
+                     "old_growth_birch_forest", "old_growth_pine_taiga", "old_growth_spruce_taiga", "taiga",
+                     "snowy_taiga", "savanna", "savanna_plateau", "windswept_hills", "windswept_gravelly_hills",
+                     "windswept_forest", "windswept_savanna", "jungle", "sparse_jungle", "bamboo_jungle", "badlands",
+                     "eroded_badlands", "wooded_badlands", "meadow", "cherry_grove", "grove", "snowy_slopes",
+                     "frozen_peaks", "jagged_peaks", "stony_peaks", "stony_shore", "mushroom_fields"]
+for name, biomes, salt in (("wreck", WRECK_BIOMES, 1730429161), ("checkpoint", CHECKPOINT_BIOMES, 905125277)):
+    write(f"{DATA}/tags/worldgen/biome/has_structure/{name}.json", {"values": [f"minecraft:{b}" for b in biomes]})
+    write(f"{DATA}/worldgen/structure/{name}.json", {
+        "type": f"{NS}:ruin",
+        "kind": name,
+        "biomes": f"#{NS}:has_structure/{name}",
+        "spawn_overrides": {},
+        "step": "surface_structures",
     })
+    write(f"{DATA}/worldgen/structure_set/{name}.json", {
+        "structures": [{"structure": f"{NS}:{name}", "weight": 1}],
+        "placement": {"type": f"{NS}:config_spread", "key": name, "salt": salt},
+    })
+write(os.path.join(ROOT, "data", "blocksouls", "tags", "worldgen", "structure", "ruins.json"),
+      {"values": [f"{NS}:wreck", f"{NS}:checkpoint"]})
 
 write(f"{DATA}/worldgen/feature/blight_patch.json", {"type": f"{NS}:blight_patch", "radius": 4})
 for density in ("dense", "sparse"):

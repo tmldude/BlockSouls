@@ -5,21 +5,74 @@ import java.util.List;
 
 /** {@code config/blocksouls/world.json}. Distances are blocks, times are ticks, chances are 0..1. */
 public class WorldConfig {
+	/** Defaults revision {@link #migrate} brings older files up to. */
+	public static final int CURRENT_DEFAULTS = 1;
+
+	/**
+	 * Which defaults revision this file was written against. Missing in files from before the field existed (reads as
+	 * 0), so {@link #migrate} can update values that were never changed by hand.
+	 */
+	public int defaultsVersion;
 	public Gen gen = new Gen();
 	public Loot loot = new Loot();
 	public Enchants enchants = new Enchants();
 	public Armor armor = new Armor();
 	public AshFog ashFog = new AshFog();
 
+	/**
+	 * Brings a config written against older defaults up to date: every value still at its old default takes the new one,
+	 * anything changed by hand is kept. Returns whether anything changed (so the caller saves the file).
+	 */
+	public static boolean migrate(WorldConfig config) {
+		if (config.defaultsVersion >= CURRENT_DEFAULTS) {
+			return false;
+		}
+		// 1: the playtest resources pass (v0.11): about twice the ore, scrap and material drops.
+		if (config.defaultsVersion < 1) {
+			Gen gen = config.gen;
+			if (gen.gunmetalVeinsPerChunk == 7) {
+				gen.gunmetalVeinsPerChunk = 14;
+			}
+			if (gen.scrapPileRarityChunks == 24) {
+				gen.scrapPileRarityChunks = 12;
+			}
+			Loot loot = config.loot;
+			if (loot.waveCommonChance == 0.25) {
+				loot.waveCommonChance = 0.5;
+			}
+			if (loot.waveRareChance == 0.4) {
+				loot.waveRareChance = 0.8;
+			}
+			if (loot.waveLegendaryChance == 0.6) {
+				loot.waveLegendaryChance = 1.0;
+			}
+			for (String chest : List.of("blocksouls_world:chests/wreck", "blocksouls_world:chests/checkpoint")) {
+				if (!loot.materialChests.contains(chest)) {
+					loot.materialChests.add(chest);
+				}
+			}
+		}
+		config.defaultsVersion = CURRENT_DEFAULTS;
+		return true;
+	}
+
 	public static class Gen {
-		/** Gunmetal veins per chunk (iron's middle band has 10; this is a little rarer). */
-		public int gunmetalVeinsPerChunk = 7;
-		/** Wrecks: on average one per this many chunks (12×12). 0 disables them. */
-		public int wreckRarityChunks = 144;
-		/** Checkpoints: on average one per this many chunks (24×24). 0 disables them. */
-		public int checkpointRarityChunks = 576;
+		/** Gunmetal veins per chunk (iron's middle band has 10; gunmetal is the gun economy, so it's more common). */
+		public int gunmetalVeinsPerChunk = 14;
+		/**
+		 * Wrecks: one attempt per this many chunks square (12 = one per 12×12 chunks), at least the separation apart.
+		 * Read at world load / {@code /reload}. 0 disables them.
+		 */
+		public int wreckSpacingChunks = 12;
+		public int wreckSeparationChunks = 4;
+		/** Checkpoints: one attempt per 24×24 chunks. 0 disables them. */
+		public int checkpointSpacingChunks = 24;
+		public int checkpointSeparationChunks = 8;
 		/** Loose scrap piles: on average one per this many overworld chunks. 0 disables them. */
-		public int scrapPileRarityChunks = 24;
+		public int scrapPileRarityChunks = 12;
+		/** Extra scrap piles strewn around each wreck / checkpoint, on top of the debris in its layout. 0 for none. */
+		public int wreckExtraScrapPiles = 3;
+		public int checkpointExtraScrapPiles = 4;
 		/** Blight patches per Nether chunk in crimson forests and nether wastes. */
 		public int blightPatchesDense = 3;
 		/** Blight patches per chunk in the other Nether biomes. */
@@ -38,8 +91,11 @@ public class WorldConfig {
 				"minecraft:chests/village/village_taiga_house", "minecraft:chests/village/village_snowy_house",
 				"minecraft:chests/desert_pyramid", "minecraft:chests/jungle_temple", "minecraft:chests/shipwreck_supply",
 				"minecraft:chests/pillager_outpost", "minecraft:chests/ruined_portal", "minecraft:chests/igloo_chest",
-				"minecraft:chests/bastion_other", "minecraft:chests/nether_bridge"));
+				"minecraft:chests/bastion_other", "minecraft:chests/nether_bridge",
+				"blocksouls_world:chests/wreck", "blocksouls_world:chests/checkpoint"));
+		/** Chance per roll that a material chest gets a scrap/gunmetal stack; rolled {@link #materialRolls} times. */
 		public double materialChance = 0.6;
+		public int materialRolls = 2;
 		/** Vanilla chests that can hold a wacky enchanted book. */
 		public List<String> bookChests = new ArrayList<>(List.of(
 				"minecraft:chests/simple_dungeon", "minecraft:chests/abandoned_mineshaft",
@@ -52,9 +108,9 @@ public class WorldConfig {
 		public double wreckGunChance = 0.2;
 		public double checkpointGunChance = 0.5;
 		/** Chance per wave kill of an extra materials roll, by tier. */
-		public double waveCommonChance = 0.25;
-		public double waveRareChance = 0.4;
-		public double waveLegendaryChance = 0.6;
+		public double waveCommonChance = 0.5;
+		public double waveRareChance = 0.8;
+		public double waveLegendaryChance = 1.0;
 		/** Endermen drop this many extra pearls (Looting still adds on top via the vanilla pool). */
 		public int endermanExtraPearls = 1;
 		public double endermanEyeChance = 0.15;

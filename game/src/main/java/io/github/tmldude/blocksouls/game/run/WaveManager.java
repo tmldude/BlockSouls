@@ -79,6 +79,11 @@ public final class WaveManager {
 		return RunSystem.config();
 	}
 
+	/** The dimension waves play in: the overworld in classic, the party's act in the expedition. */
+	private static ServerLevel level(MinecraftServer server) {
+		return RunSystem.activeLevel(server);
+	}
+
 	// ---------------------------------------------------------------- wave lifecycle
 
 	/** Starts the next wave right now (phase WAVE). */
@@ -89,7 +94,7 @@ public final class WaveManager {
 		data.clearWave();
 		STRAY_TICKS.clear();
 		fewLeftTicks = 0;
-		int players = overworldPlayers(server).size();
+		int players = activePlayers(server).size();
 		data.waveTotal = WaveMath.waveCount(data.wave, players, data.difficulty.waveSize(),
 				NightModifiers.countFactor(data.nightModifiers, config()), config());
 		data.phase = RunPhase.WAVE;
@@ -104,7 +109,7 @@ public final class WaveManager {
 		if (data.phase != RunPhase.WAVE) {
 			return;
 		}
-		ServerLevel level = server.overworld();
+		ServerLevel level = level(server);
 		if (!cleared) {
 			for (UUID id : List.copyOf(data.waveMobs)) {
 				Entity entity = level.getEntity(id);
@@ -118,7 +123,7 @@ public final class WaveManager {
 		int wave = data.wave;
 		UUID killer = data.lastKiller;
 		data.clearWave();
-		data.phase = WaveMath.isNight(level.getOverworldClockTime(), config()) ? RunPhase.NIGHT_QUIET : RunPhase.DAY;
+		data.phase = RunSystem.activeClock(server).isNight(config()) ? RunPhase.NIGHT_QUIET : RunPhase.DAY;
 		data.setDirty();
 		RunEvents.WAVE_ENDED.invoker().onWaveEnded(server, wave, cleared);
 		if (cleared) {
@@ -146,14 +151,13 @@ public final class WaveManager {
 		if (data.wavesThisNight >= data.nightBudget) {
 			return false;
 		}
-		double nightLeft = WaveMath.secondsUntil(server.overworld().getOverworldClockTime(), config().dawnTime, RunSystem.clockRate(server));
+		double nightLeft = RunSystem.activeClock(server).secondsUntil(config().dawnTime);
 		return nightLeft - delaySeconds >= config().minNightLeftSeconds;
 	}
 
 	/** Per-tick work while a run is active. */
 	static void tick(MinecraftServer server, RunData data) {
-		ServerLevel level = server.overworld();
-		long now = level.getGameTime();
+		long now = server.overworld().getGameTime();
 
 		if (data.phase == RunPhase.WAVE_BREAK && now >= data.breakEndsAt) {
 			if (canStartAnotherWave(server, data, 0)) {
@@ -178,13 +182,13 @@ public final class WaveManager {
 		if (now % 20 == 0) {
 			tickHunters(server, data);
 		}
-		tickBurning(level, now);
+		tickBurning(server, now);
 	}
 
 	// ---------------------------------------------------------------- spawning
 
 	private static void spawnTrickle(MinecraftServer server, RunData data) {
-		List<ServerPlayer> players = overworldPlayers(server);
+		List<ServerPlayer> players = activePlayers(server);
 		if (players.isEmpty()) {
 			return;
 		}
@@ -196,9 +200,9 @@ public final class WaveManager {
 		}
 	}
 
-	/** Spawns one wave mob near a random overworld player. False if no spot was found this tick. */
+	/** Spawns one wave mob near a random player in the active dimension. False if no spot was found this tick. */
 	static boolean spawnOne(MinecraftServer server, RunData data, List<ServerPlayer> players) {
-		ServerLevel level = server.overworld();
+		ServerLevel level = level(server);
 		RandomSource random = level.getRandom();
 		ServerPlayer anchor = players.get(random.nextInt(players.size()));
 		BlockPos pos = findSpawnPos(level, anchor, players, random);
@@ -391,8 +395,8 @@ public final class WaveManager {
 
 	/** Once a second: drop dead mobs, retarget, respawn stragglers, light up the last few. */
 	private static void checkWaveMobs(MinecraftServer server, RunData data) {
-		ServerLevel level = server.overworld();
-		List<ServerPlayer> players = overworldPlayers(server);
+		ServerLevel level = level(server);
+		List<ServerPlayer> players = activePlayers(server);
 		RunConfig config = config();
 		double strayDistance = config.strayDistance * config.strayDistance;
 		List<Mob> alive = new ArrayList<>();
@@ -446,8 +450,8 @@ public final class WaveManager {
 		if (data.hunters.isEmpty()) {
 			return;
 		}
-		ServerLevel level = server.overworld();
-		List<ServerPlayer> players = overworldPlayers(server);
+		ServerLevel level = level(server);
+		List<ServerPlayer> players = activePlayers(server);
 		for (Iterator<UUID> it = data.hunters.iterator(); it.hasNext(); ) {
 			Entity entity = level.getEntity(it.next());
 			if (entity != null && !entity.isAlive()) {
@@ -475,7 +479,7 @@ public final class WaveManager {
 		BURNING.put(entity.getUUID(), level.getGameTime() + config().dawnBurnSeconds * 20L);
 	}
 
-	private static void tickBurning(ServerLevel level, long now) {
+	private static void tickBurning(MinecraftServer server, long now) {
 		if (BURNING.isEmpty()) {
 			return;
 		}
@@ -484,26 +488,29 @@ public final class WaveManager {
 			if (now < entry.getValue()) {
 				continue;
 			}
-			Entity entity = level.getEntity(entry.getKey());
-			if (entity != null) {
-				level.sendParticles(ParticleTypes.LARGE_SMOKE, entity.getX(), entity.getY() + 1, entity.getZ(), 8, 0.3, 0.5, 0.3, 0.02);
-				entity.discard();
+			// The mob burns away in whichever dimension it was left behind in.
+			for (ServerLevel level : server.getAllLevels()) {
+				Entity entity = level.getEntity(entry.getKey());
+				if (entity != null) {
+					level.sendParticles(ParticleTypes.LARGE_SMOKE, entity.getX(), entity.getY() + 1, entity.getZ(), 8, 0.3, 0.5, 0.3, 0.02);
+					entity.discard();
+					break;
+				}
 			}
 			it.remove();
 		}
 	}
 
-	/** Removes every wave mob (current wave, burning ones and hunting elites). */
+	/** Removes every wave mob (current wave, burning ones and hunting elites), in whatever dimension it's in. */
 	static void discardAll(MinecraftServer server, RunData data) {
-		ServerLevel level = server.overworld();
 		for (UUID id : List.copyOf(data.waveMobs)) {
-			discard(level, id);
+			discard(server, id);
 		}
 		for (UUID id : List.copyOf(data.hunters)) {
-			discard(level, id);
+			discard(server, id);
 		}
 		for (UUID id : List.copyOf(BURNING.keySet())) {
-			discard(level, id);
+			discard(server, id);
 		}
 		data.hunters.clear();
 		BURNING.clear();
@@ -511,16 +518,19 @@ public final class WaveManager {
 		data.clearWave();
 	}
 
-	private static void discard(ServerLevel level, UUID id) {
-		Entity entity = level.getEntity(id);
-		if (entity != null) {
-			entity.discard();
+	private static void discard(MinecraftServer server, UUID id) {
+		for (ServerLevel level : server.getAllLevels()) {
+			Entity entity = level.getEntity(id);
+			if (entity != null) {
+				entity.discard();
+				return;
+			}
 		}
 	}
 
 	/** Kills the current wave's mobs (counted as cleared once all are dead). */
 	static int killWave(MinecraftServer server, RunData data) {
-		ServerLevel level = server.overworld();
+		ServerLevel level = level(server);
 		int killed = 0;
 		for (UUID id : List.copyOf(data.waveMobs)) {
 			if (level.getEntity(id) instanceof LivingEntity living && living.isAlive()) {
@@ -594,15 +604,15 @@ public final class WaveManager {
 
 	/** A reward chest on a free spot near the player who got the last kill (never replaces blocks). */
 	static @Nullable BlockPos placeRewardChest(MinecraftServer server, @Nullable UUID killerId) {
-		List<ServerPlayer> players = overworldPlayers(server);
+		List<ServerPlayer> players = activePlayers(server);
+		ServerLevel level = level(server);
 		ServerPlayer near = killerId == null ? null : server.getPlayerList().getPlayer(killerId);
-		if (near == null || near.level() != server.overworld()) {
+		if (near == null || near.level() != level) {
 			near = players.isEmpty() ? null : players.getFirst();
 		}
 		if (near == null) {
 			return null;
 		}
-		ServerLevel level = server.overworld();
 		BlockPos origin = near.blockPosition();
 		BlockPos spot = null;
 		search:
@@ -649,11 +659,11 @@ public final class WaveManager {
 		return mob.entityTags().contains(RunIds.ELITE_TAG) || mob.getType().builtInRegistryHolder().is(CommonTags.ELITES);
 	}
 
-	/** Non-spectator players in the overworld (creative counts: they're present, mobs just ignore them). */
-	static List<ServerPlayer> overworldPlayers(MinecraftServer server) {
-		ServerLevel overworld = server.overworld();
+	/** Non-spectator players in the active dimension (creative counts: they're present, mobs just ignore them). */
+	static List<ServerPlayer> activePlayers(MinecraftServer server) {
+		ServerLevel active = level(server);
 		return server.getPlayerList().getPlayers().stream()
-				.filter(p -> p.level() == overworld && !p.isSpectator() && p.isAlive())
+				.filter(p -> p.level() == active && !p.isSpectator() && p.isAlive())
 				.toList();
 	}
 
@@ -670,7 +680,7 @@ public final class WaveManager {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			player.connection.send(new ClientboundSetTitlesAnimationPacket(5, 30, 10));
 			player.connection.send(new ClientboundSetTitleTextPacket(Component.literal(Integer.toString(wave))));
-			if (player.level() == server.overworld()) {
+			if (player.level() == level(server)) {
 				Holder<net.minecraft.sounds.SoundEvent> horn = SoundEvents.RAID_HORN;
 				player.connection.send(new ClientboundSoundPacket(horn, SoundSource.HOSTILE, player.getX(), player.getY(), player.getZ(), 0.7F, 0.9F,
 						player.getRandom().nextLong()));

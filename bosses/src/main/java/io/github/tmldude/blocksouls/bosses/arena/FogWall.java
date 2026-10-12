@@ -8,10 +8,12 @@ import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 import io.github.tmldude.blocksouls.bosses.registry.BossBlocks;
+import io.github.tmldude.blocksouls.bosses.registry.BossSounds;
 
 /**
  * A ring of {@link FogWallBlock}s around an arena center. Only replaces air and replaceable plants (never terrain or
@@ -51,6 +53,17 @@ public final class FogWall {
 
 	/** Removes the blocks this wall placed (anything replaced since is left alone). */
 	public void lower(ServerLevel level) {
+		if (!placed.isEmpty()) {
+			// The wall dissolving, heard from its middle (the arena center) across the whole arena.
+			double x = 0, y = 0, z = 0;
+			for (BlockPos pos : placed) {
+				x += pos.getX() + 0.5;
+				y += pos.getY() + 0.5;
+				z += pos.getZ() + 0.5;
+			}
+			int count = placed.size();
+			level.playSound(null, x / count, y / count, z / count, BossSounds.FOG_WALL_OPEN, SoundSource.HOSTILE, 3.0f, 1.0f);
+		}
 		for (BlockPos pos : placed) {
 			if (level.getBlockState(pos).is(BossBlocks.FOG_WALL)) {
 				level.setBlock(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);

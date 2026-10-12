@@ -9,8 +9,6 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
 import io.github.tmldude.blocksouls.common.client.ClientNetworking;
 import io.github.tmldude.blocksouls.game.client.hud.BoonStyle;
@@ -79,12 +77,7 @@ public class RelicScreen extends Screen {
 		graphics.text(font, String.valueOf(index + 1), x + 4, y + 4, TEXT_DIM);
 
 		int center = x + CARD_WIDTH / 2;
-		ItemStack icon = card.wildcard() ? new ItemStack(Items.NETHER_STAR) : BoonStyle.icon(card.boon().orElseThrow());
-		graphics.pose().pushMatrix();
-		graphics.pose().translate(center - 16, y + 12);
-		graphics.pose().scale(2.0F, 2.0F);
-		graphics.fakeItem(icon, 0, 0);
-		graphics.pose().popMatrix();
+		BoonStyle.drawIcon(graphics, card.wildcard() ? BoonStyle.WILDCARD_ICON : card.boon().orElseThrow().icon(), center - 16, y + 12, 32);
 
 		int textY = y + 52;
 		if (card.wildcard()) {
@@ -112,7 +105,7 @@ public class RelicScreen extends Screen {
 		boolean hover = inside(mouseX, mouseY, x, y, ROW_WIDTH, ROW_HEIGHT - 2);
 		graphics.fill(x, y, x + ROW_WIDTH, y + ROW_HEIGHT - 2, hover ? CARD_FILL_HOVER : CARD_FILL);
 		graphics.outline(x, y, ROW_WIDTH, ROW_HEIGHT - 2, BoonStyle.color(boon));
-		graphics.fakeItem(BoonStyle.icon(boon), x + 2, y + 2);
+		BoonStyle.drawIcon(graphics, boon.icon(), x + 2, y + 2, 16);
 		graphics.text(font, BoonStyle.name(boon.id()), x + 22, y + 6, TEXT);
 		if (hover) {
 			graphics.setTooltipForNextFrame(font, BoonStyle.description(boon.id()), mouseX, mouseY);

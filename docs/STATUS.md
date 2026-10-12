@@ -1,6 +1,6 @@
 # Status (handoff)
 
-Last updated 2026-10-11 (after #24). Read this after `CLAUDE.md` to know where the work stands.
+Last updated 2026-10-11 (v0.10.0). Read this after `CLAUDE.md` to know where the work stands.
 
 ## Done (on `main`, CI green)
 - Build: Gradle multi-project, Minecraft 26.3 / Fabric API 0.162.0+26.3 / Java 25, CI (`build.yml`), release
@@ -28,16 +28,21 @@ dedicated server, screenshots published to `ci-screenshots/<branch>`), 26.3 loot
 Built for parties of 1–8. Everything player-dependent goes through `common`'s `PartyScaling`
 (`config/blocksouls/party.json`); see `CLAUDE.md` "Party size".
 
-## Now: Stage 2b
-`boss-pale-rider`, `boss-ashwyrm`, `boss-stormplate` are ready; `final-raid` (#21) is finishing (raid restructured:
-vanilla phase → on-foot phase with a wave and a herald field boss → sealed crystals + plates). They merge together
-through `claude/stage2b-integration` (#23). Then route the raid's plate and crystal counts through `PartyScaling`
-with tests at 1 and 8 players.
+## Stage 2b: done
+Pale Rider, Ashwyrm, Stormplate Knight and the three-phase final raid (#23), the raid on `PartyScaling` (#26), the
+End handoff checked by the client test (#27). A client crash when a boss with hitbox parts spawned was fixed in #23.
 
-## Next: v0.9.0 (first trial run with friends)
-Tag `v0.9.0` → `release.yml` publishes the GHCR image, jars, `.mrpack` and server pack (and Modrinth, if its
-secrets are set). The trial run doubles as the first human balance pass. After it: balance to a ~2-hour run,
-performance with a full party at late waves, real art and sounds, then the PLAN.md §0c "Growth" column → v1.0.
+## v0.9.0: released (first trial run)
+Release workflow can be started by hand on `main` (#28; this sandbox can't push tags). Modrinth publish is on.
+
+## Stage 4 (v0.10.0): done
+Original sounds and music for guns, bosses and the kart (#36), custom boon icons (#31), kart fuel and horn (#33),
+fog-wall arenas that hold in 3D (#34), wrecks/checkpoints as `/locate`-able structures (#32), content standards +
+CI crafting check (#35) and every drop in 2+ recipes (#38). Releases set the Modrinth environment (#30).
+
+## Next
+- v1 track (this orchestrator): trial-run feedback → balance pass → v1.0.0.
+- v2 "Expedition" (`PLAN2.md`, its own orchestrator and PRs): Stage 5 spine in progress; Stage 6 starts after v0.10.0.
 
 ## Decisions that changed late (see DECISIONS.md for all)
 - Downed players stay down until revived (no bleed-out); everyone down at once ends the run; going down costs
@@ -45,10 +50,10 @@ performance with a full party at late waves, real art and sounds, then the PLAN.
 - All 4 field bosses are in the MVP, with custom models (no vanilla bodies).
 - Orchestrator: this repo's lead session (Opus); workers per `docs/sessions/`.
 
-## Owner to-dos (needed by the first release, not before)
-- Create a Modrinth account + BlockSouls project; add repo secrets `MODRINTH_TOKEN` (a personal access token that
-  can create versions) and `MODRINTH_PROJECT_ID`.
-- Rent the Hetzner VPS when ready to play; run the install script from `docker/HOSTING.md`.
+## Owner to-dos
+- Done: Modrinth project + `MODRINTH_TOKEN` / `MODRINTH_PROJECT_ID` secrets.
+- Submit the Modrinth project for review (description, MIT license, icon) so friends can see the unlisted pack.
+- Host: Modrinth Servers (8 GB for 6–8 players) or the Hetzner VPS + `docker/HOSTING.md` install script.
 
 ## Known gotchas
 - Client source sets of feature mods see `common`'s client classes through the `clientImplementation files(...)`

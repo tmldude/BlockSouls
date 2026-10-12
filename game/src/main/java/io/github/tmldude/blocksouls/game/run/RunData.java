@@ -20,6 +20,7 @@ import io.github.tmldude.blocksouls.common.CommonIds;
 import io.github.tmldude.blocksouls.common.run.Difficulty;
 import io.github.tmldude.blocksouls.common.run.RunPhase;
 import io.github.tmldude.blocksouls.common.run.RunState;
+import io.github.tmldude.blocksouls.game.run.clock.SyntheticCycle;
 
 /** Everything about the run that must survive a restart (world-level saved data). */
 public final class RunData extends SavedData {
@@ -67,6 +68,21 @@ public final class RunData extends SavedData {
 	/** The run paused the overworld clock because the server is empty. */
 	boolean clockPausedByRun;
 
+	// ---------------------------------------------------------------- v2 expedition spine
+
+	/** The act the party is in (1-based; expedition shape). */
+	int actOrdinal = 1;
+	/** The highest act whose entry portal is lit (acts up to here can be traveled to). */
+	int highestOpenAct = 1;
+	/** Act ids the party has entered at least once this run (ACT_ENTERED fires once per act). */
+	final Set<String> actsEntered = new LinkedHashSet<>();
+	/** The act whose exit portal is charging (0 = no charge running). */
+	int chargingAct;
+	/** Game time (overworld) when the running portal charge completes. */
+	long chargeEndsAt;
+	/** The run's synthetic day/night cycle for dimensions without a sun. */
+	final SyntheticCycle synthetic = new SyntheticCycle();
+
 	public RunState state() {
 		return new RunState(phase, wave, night, endless, difficulty);
 	}
@@ -101,6 +117,12 @@ public final class RunData extends SavedData {
 		clearWave();
 		hunters.clear();
 		breakEndsAt = 0;
+		actOrdinal = 1;
+		highestOpenAct = 1;
+		actsEntered.clear();
+		chargingAct = 0;
+		chargeEndsAt = 0;
+		synthetic.reset();
 		setDirty();
 	}
 
@@ -147,6 +169,13 @@ public final class RunData extends SavedData {
 		String killer = tag.getStringOr("lastKiller", "");
 		data.lastKiller = killer.isEmpty() ? null : parseUuid(killer);
 		data.clockPausedByRun = tag.getBooleanOr("clockPausedByRun", false);
+		data.actOrdinal = Math.max(1, tag.getIntOr("actOrdinal", 1));
+		data.highestOpenAct = Math.max(data.actOrdinal, tag.getIntOr("highestOpenAct", 1));
+		readStrings(tag.getListOrEmpty("actsEntered"), data.actsEntered);
+		data.chargingAct = tag.getIntOr("chargingAct", 0);
+		data.chargeEndsAt = tag.getLongOr("chargeEndsAt", 0);
+		data.synthetic.load(tag.getLongOr("synthTicks", 0), tag.getFloatOr("synthRemainder", 0),
+				tag.getBooleanOr("synthStarted", false));
 		return data;
 	}
 
@@ -185,6 +214,14 @@ public final class RunData extends SavedData {
 		tag.putLong("breakEndsAt", breakEndsAt);
 		tag.putString("lastKiller", lastKiller == null ? "" : lastKiller.toString());
 		tag.putBoolean("clockPausedByRun", clockPausedByRun);
+		tag.putInt("actOrdinal", actOrdinal);
+		tag.putInt("highestOpenAct", highestOpenAct);
+		tag.put("actsEntered", writeStrings(actsEntered));
+		tag.putInt("chargingAct", chargingAct);
+		tag.putLong("chargeEndsAt", chargeEndsAt);
+		tag.putLong("synthTicks", synthetic.saveTotalTicks());
+		tag.putFloat("synthRemainder", synthetic.saveRemainder());
+		tag.putBoolean("synthStarted", synthetic.started());
 		return tag;
 	}
 

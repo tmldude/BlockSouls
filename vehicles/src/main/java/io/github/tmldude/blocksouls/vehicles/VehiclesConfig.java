@@ -1,9 +1,16 @@
 package io.github.tmldude.blocksouls.vehicles;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /** {@code config/blocksouls/vehicles.json}. Speeds are blocks/tick, rates are per tick, times are ticks. */
 public class VehiclesConfig {
 	public Kart kart = new Kart();
 	public Wreck wreck = new Wreck();
+	public Fuel fuel = new Fuel();
+	public Horn horn = new Horn();
+	public Hud hud = new Hud();
+	public Hints hints = new Hints();
 
 	public static class Kart {
 		public float maxHealth = 40;
@@ -69,6 +76,60 @@ public class VehiclesConfig {
 		/** When a kart breaks down into a wreck, the wreck keeps this many wheels and (if true) its engine. */
 		public int wheelsKeptOnBreak = 2;
 		public boolean engineKeptOnBreak = true;
+	}
+
+	/** Fuel is measured in ticks of throttle. */
+	public static class Fuel {
+		/** A full tank: this many ticks of throttle (6000 = 5 minutes). */
+		public int fuelCapacity = 6000;
+		/** Fuel burned per tick while holding forward or reverse (idling burns nothing). */
+		public int burnPerTick = 1;
+		/** A kart repaired from a wreck that never had a tank (world wrecks) starts with this share of a full tank. */
+		public double repairedShare = 0.25;
+		/** Below this share the gauge flashes and the engine sputters. */
+		public double lowShare = 0.15;
+		/** Ticks between sputters while low on fuel and on the throttle. */
+		public int sputterIntervalTicks = 30;
+		/** Fuel added per item when refuelling, by item id. */
+		public Map<String, Integer> items = new LinkedHashMap<>();
+
+		{
+			items.put("minecraft:coal", 600);
+			items.put("minecraft:charcoal", 600);
+			items.put("minecraft:coal_block", 5400);
+			items.put("minecraft:blaze_rod", 1200);
+			items.put("blocksouls_vehicles:fuel_can", 3000);
+		}
+	}
+
+	public static class Horn {
+		/** Ticks between honks (server-checked). */
+		public int cooldownTicks = 20;
+		/** Blocks away the horn can be heard. */
+		public float hearingRange = 48;
+		/** Wave mobs this close to the kart flinch away from it. */
+		public double flinchRadius = 6;
+		/** Knockback strength of the flinch (a zombie hit by a bare hand gets 0.4). */
+		public double flinchStrength = 0.8;
+		/** Ticks between flinches; honks in between only make noise. */
+		public int flinchCooldownTicks = 200;
+	}
+
+	/** Client-side display options. */
+	public static class Hud {
+		/** Fuel gauge next to the hotbar while driving. */
+		public boolean showFuelGauge = true;
+	}
+
+	/** A player holding a wheel, engine or scrap near a wreck sees what it still needs. */
+	public static class Hints {
+		public boolean enabled = true;
+		/** Wrecks this close (blocks) to the player get a particle cue; the nearest also names its missing parts. */
+		public double radius = 12;
+		/** Ticks between checks (and particle puffs). */
+		public int intervalTicks = 10;
+		/** Particles per wreck per puff. */
+		public int particles = 4;
 	}
 
 	public static class Wreck {

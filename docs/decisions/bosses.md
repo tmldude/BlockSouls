@@ -39,8 +39,8 @@ How to build on the framework: `bosses/README.md`.
   particles, light level 4, unbreakable, no item, no drops.
 - **Placement:** only air and replaceable non-fluid blocks become wall (never terrain or builds), 4 below to 10 above
   the boss's home. It remembers exactly what it placed and only removes blocks that are still fog wall.
-- **Known limit:** the wall is 15 blocks tall, not a dome; wall-climbing or web-swinging over it is possible. Not
-  worth a ceiling for now.
+- **Known limit (closed in v0.10):** the wall is 15 blocks tall, not a dome. Going over it no longer works: the
+  server-side arena seal holds the line at any height (see `docs/decisions/arena-seal.md`).
 
 ## Boss bar
 - **No vanilla `ServerBossEvent` at all** (it would draw vanilla's bar too). The server sends our own payload to

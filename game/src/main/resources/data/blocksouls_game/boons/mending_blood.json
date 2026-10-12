@@ -1,6 +1,6 @@
 {
   "tier": "legendary",
-  "icon": "minecraft:ghast_tear",
+  "icon": "blocksouls_game:boon/mending_blood",
   "effects": [
     {
       "type": "effect",

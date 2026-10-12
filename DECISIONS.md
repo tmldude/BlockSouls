@@ -405,3 +405,12 @@ down; remaining work in their briefs moves to Opus sessions that pick up from th
 session's decisions file. Slower per session; the orchestrator keeps the parallel count modest (owner:
 "chug on slow opus"). The v1 orchestrator was told the same rule for its v0.11 sessions.
 
+## Pacing patch, v0.10.1 (2026-10-12, from the owner's playtest)
+
+- The owner found the run "remarkably terribly slow". Defaults: day/night 17 → **12 min**, waves per night
+  1,1,2,2,2,2,2,3 → **2,2,2,3,3,3,3,4**, wave breaks 20 → **8 s**, wave-kill drop chance 0.35 → **0.5**, Starter
+  Pistol lasts to wave 3 → **4** (more waves per night).
+- **Existing servers get it too:** `game-run.json` gains `defaultsVersion`; on load, values still at the old default
+  move to the new one and hand-tuned values are kept (`RunConfig.migrate`). Use this pattern whenever a default
+  changes after release.
+- Drop guarantees, a cheaper first gun and resource density follow in v0.11 (`drops-and-pacing`, `resources`).

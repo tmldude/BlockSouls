@@ -1,0 +1,61 @@
+{
+	"fabric:load_conditions": [
+		{
+			"condition": "fabric:all_mods_loaded",
+			"values": [
+				"blocksouls_game"
+			]
+		}
+	],
+	"parent": "blocksouls_game:tutorial/first_boon",
+	"display": {
+		"icon": {
+			"id": "minecraft:wither_skeleton_skull"
+		},
+		"title": {
+			"translate": "advancements.blocksouls.tutorial.field_boss.title"
+		},
+		"description": {
+			"translate": "advancements.blocksouls.tutorial.field_boss.description"
+		},
+		"frame": "goal"
+	},
+	"criteria": {
+		"furnace_knight": {
+			"trigger": "blocksouls_common:milestone",
+			"conditions": {
+				"milestone": "boss_killed",
+				"id": "blocksouls_bosses:furnace_knight"
+			}
+		},
+		"pale_rider": {
+			"trigger": "blocksouls_common:milestone",
+			"conditions": {
+				"milestone": "boss_killed",
+				"id": "blocksouls_bosses:pale_rider"
+			}
+		},
+		"ashwyrm": {
+			"trigger": "blocksouls_common:milestone",
+			"conditions": {
+				"milestone": "boss_killed",
+				"id": "blocksouls_bosses:ashwyrm"
+			}
+		},
+		"stormplate_knight": {
+			"trigger": "blocksouls_common:milestone",
+			"conditions": {
+				"milestone": "boss_killed",
+				"id": "blocksouls_bosses:stormplate_knight"
+			}
+		}
+	},
+	"requirements": [
+		[
+			"furnace_knight",
+			"pale_rider",
+			"ashwyrm",
+			"stormplate_knight"
+		]
+	]
+}

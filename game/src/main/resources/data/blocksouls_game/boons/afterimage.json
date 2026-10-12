@@ -1,6 +1,6 @@
 {
   "tier": "legendary",
-  "icon": "minecraft:echo_shard",
+  "icon": "blocksouls_game:boon/afterimage",
   "requires": [
     "blocksouls_game:swift_feet",
     "blocksouls_game:second_wind"

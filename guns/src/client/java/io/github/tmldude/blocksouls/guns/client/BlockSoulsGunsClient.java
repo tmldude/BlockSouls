@@ -9,6 +9,8 @@ import com.google.gson.reflect.TypeToken;
 import org.lwjgl.sdl.SDLScancode;
 
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -21,6 +23,7 @@ import io.github.tmldude.blocksouls.guns.net.HitMarkerPayload;
 import io.github.tmldude.blocksouls.guns.net.ReloadStatePayload;
 import io.github.tmldude.blocksouls.guns.net.ShotFxPayload;
 import io.github.tmldude.blocksouls.guns.net.StatsSyncPayload;
+import io.github.tmldude.blocksouls.guns.sound.GunSounds;
 import io.github.tmldude.blocksouls.guns.weapon.GunStats;
 import io.github.tmldude.blocksouls.guns.weapon.Weapons;
 
@@ -34,7 +37,12 @@ public class BlockSoulsGunsClient implements ClientModInitializer {
 		GunClient.register(reload);
 		GunHud.register();
 
-		ClientNetworking.receive(HitMarkerPayload.TYPE, (payload, context) -> GunHud.onHitMarker(payload.kind()));
+		ClientNetworking.receive(HitMarkerPayload.TYPE, (payload, context) -> {
+			GunHud.onHitMarker(payload.kind());
+			if (payload.kind() == HitMarkerPayload.PRECISION) {
+				Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(GunSounds.HEADSHOT, 1.0F, 0.5F));
+			}
+		});
 		ClientNetworking.receive(ReloadStatePayload.TYPE, (payload, context) -> GunClient.onReloadState(payload.ticks()));
 		ClientNetworking.receive(ShotFxPayload.TYPE, (payload, context) -> GunFx.onShot(payload));
 		ClientNetworking.receive(StatsSyncPayload.TYPE, (payload, context) -> {
