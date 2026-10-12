@@ -1,14 +1,28 @@
 package io.github.tmldude.blocksouls.common.test;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
+import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 
+import io.github.tmldude.blocksouls.common.Config;
+import io.github.tmldude.blocksouls.common.event.ConfigEvents;
+import io.github.tmldude.blocksouls.common.party.PartyConfig;
+import io.github.tmldude.blocksouls.common.party.PartyScaling;
 import io.github.tmldude.blocksouls.common.player.PlayerStatus;
 import io.github.tmldude.blocksouls.common.player.PlayerTraits;
 import io.github.tmldude.blocksouls.common.run.RunState;
 import io.github.tmldude.blocksouls.common.run.Runs;
+import io.github.tmldude.blocksouls.common.run.Threat;
 
 public class CommonGameTests {
 	@GameTest
@@ -40,5 +54,80 @@ public class CommonGameTests {
 		// Only common is loaded in this test run, so no game module installs a provider.
 		helper.assertTrue(Runs.get(helper.getLevel().getServer()) == RunState.NOT_STARTED, "no run without the game module");
 		helper.succeed();
+	}
+
+	private static final List<String> RELOADED = new ArrayList<>();
+
+	static {
+		ConfigEvents.RELOADED.register((name, config) -> RELOADED.add(name));
+	}
+
+	@GameTest
+	public void configReloadChangesTheLiveValue(GameTestHelper helper) throws IOException {
+		Path file = Config.directory().resolve("party.json");
+		String original = Files.readString(file);
+		PartyConfig live = PartyScaling.config();
+		int before = live.aliveCapBase;
+		RELOADED.clear();
+		try {
+			Files.writeString(file, original.replace("\"aliveCapBase\": " + before, "\"aliveCapBase\": " + (before + 7)));
+			List<String> chat = new ArrayList<>();
+			run(helper, chat, "bs config reload party");
+
+			helper.assertTrue(live.aliveCapBase == before + 7, "aliveCapBase reloaded into the live config: " + live.aliveCapBase);
+			helper.assertTrue(PartyScaling.config() == live, "the same instance stays live");
+			helper.assertTrue(RELOADED.equals(List.of("party")), "RELOADED fired with the file name: " + RELOADED);
+		} finally {
+			Files.writeString(file, original);
+			ConfigEvents.reload("party");
+		}
+		helper.assertTrue(live.aliveCapBase == before, "restored");
+		helper.succeed();
+	}
+
+	@GameTest
+	public void configReloadKeepsValuesOnBadJson(GameTestHelper helper) throws IOException {
+		Path file = Config.directory().resolve("threat.json");
+		String original = Files.readString(file);
+		double before = Threat.config().bossHealth.perThreat;
+		RELOADED.clear();
+		try {
+			Files.writeString(file, "{\"bossHealth\": {\"perThreat\": 9.0,");
+			List<String> chat = new ArrayList<>();
+			run(helper, chat, "bs config reload threat");
+
+			helper.assertTrue(Threat.config().bossHealth.perThreat == before, "old values kept");
+			helper.assertTrue(RELOADED.isEmpty(), "no RELOADED for a file that didn't parse");
+			helper.assertTrue(chat.stream().anyMatch(line -> line.contains("Kept the current threat config")),
+					"error reported in chat: " + chat);
+		} finally {
+			Files.writeString(file, original);
+		}
+		helper.succeed();
+	}
+
+	private static void run(GameTestHelper helper, List<String> chat, String command) {
+		CommandSourceStack source = helper.getLevel().getServer().createCommandSourceStack().withSource(new CommandSource() {
+			@Override
+			public void sendSystemMessage(Component message) {
+				chat.add(message.getString());
+			}
+
+			@Override
+			public boolean acceptsSuccess() {
+				return true;
+			}
+
+			@Override
+			public boolean acceptsFailure() {
+				return true;
+			}
+
+			@Override
+			public boolean shouldInformAdmins() {
+				return false;
+			}
+		});
+		helper.getLevel().getServer().getCommands().performPrefixedCommand(source, command);
 	}
 }
