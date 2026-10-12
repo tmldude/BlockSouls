@@ -1,7 +1,10 @@
 {
   "tier": "rare",
   "icon": "blocksouls_game:boon/long_thread",
-  "stackable": 2,
+  "levels": 3,
+  "tags": [
+    "pull"
+  ],
   "effects": [
     {
       "type": "trait",

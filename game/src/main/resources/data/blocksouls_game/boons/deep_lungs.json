@@ -1,7 +1,10 @@
 {
   "tier": "common",
   "icon": "blocksouls_game:boon/deep_lungs",
-  "stackable": 2,
+  "levels": 3,
+  "tags": [
+    "on_roll"
+  ],
   "effects": [
     {
       "type": "trait",

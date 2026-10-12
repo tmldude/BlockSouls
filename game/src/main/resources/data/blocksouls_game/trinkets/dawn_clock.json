@@ -1,0 +1,13 @@
+{
+  "icon": "blocksouls_game:boon/dawn_clock",
+  "tier": "rare",
+  "tags": [
+    "heal"
+  ],
+  "effects": [
+    {
+      "type": "rule",
+      "rule": "dawn_clock"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "icon": "blocksouls_game:boon/soul_jar",
+  "tier": "rare",
+  "tags": [
+    "pull"
+  ],
+  "effects": [
+    {
+      "type": "rule",
+      "rule": "soul_jar"
+    }
+  ]
+}

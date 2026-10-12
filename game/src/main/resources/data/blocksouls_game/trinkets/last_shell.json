@@ -1,0 +1,13 @@
+{
+  "icon": "blocksouls_game:boon/last_shell",
+  "tier": "legendary",
+  "tags": [
+    "heal"
+  ],
+  "effects": [
+    {
+      "type": "rule",
+      "rule": "last_shell"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "icon": "blocksouls_game:boon/red_ledger",
+  "tier": "legendary",
+  "keystone": true,
+  "tags": [
+    "on_kill",
+    "heal"
+  ],
+  "effects": [
+    {
+      "type": "rule",
+      "rule": "red_ledger"
+    }
+  ]
+}

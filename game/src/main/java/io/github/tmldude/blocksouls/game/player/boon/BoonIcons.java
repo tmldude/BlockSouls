@@ -9,6 +9,8 @@ public final class BoonIcons {
 	public static final String SPRITE_PREFIX = "boon/";
 	/** The Wildcard card back. */
 	public static final String WILDCARD = "blocksouls_game:boon/wildcard";
+	/** The "upgrade a random owned boon" card back. */
+	public static final String UPGRADE = "blocksouls_game:boon/upgrade";
 
 	private BoonIcons() {
 	}

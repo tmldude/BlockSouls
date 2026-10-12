@@ -138,7 +138,7 @@ public final class BoonCatalog {
 			check(boon, "synergy tag", SynergyTags.isKnown(Identifier.parse(tag)), tag);
 		}
 		if (boon.keystone() && boon.tags().stream().noneMatch(tag -> SynergyTags.category(Identifier.parse(tag)) == SynergyTags.Category.TRIGGER)) {
-			BlockSoulsGame.LOGGER.warn("Keystone {} has no trigger tag, so nothing excludes it", boon.id());
+			BlockSoulsGame.LOGGER.debug("Keystone {} has no trigger tag, so nothing excludes it", boon.id());
 		}
 		for (BoonEffect effect : boon.effects()) {
 			switch (effect) {

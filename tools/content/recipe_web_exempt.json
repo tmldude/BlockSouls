@@ -14,7 +14,9 @@
 		"blocksouls_bosses:final_dragon_trophy": "trophy",
 		"blocksouls_game:relic_common": "consumable (boon relic, dropped by game code, spent on a card pick)",
 		"blocksouls_game:relic_rare": "consumable (boon relic, dropped by game code, spent on a card pick)",
-		"blocksouls_game:relic_legendary": "consumable (boon relic, dropped by game code, spent on a card pick)"
+		"blocksouls_game:relic_legendary": "consumable (boon relic, dropped by game code, spent on a card pick)",
+		"blocksouls_game:trinket_case": "consumable (trinket offer, handed out by game code on boss kills, spent on a pick)",
+		"blocksouls_game:reroll_charm": "consumable (soul-infused; rerolls a pending offer). Crafted from souls + gunmetal, so souls feed it (R1 for souls)"
 	},
 	"debt": {}
 }
