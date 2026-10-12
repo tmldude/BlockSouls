@@ -81,14 +81,18 @@ Same style as `DECISIONS.md`: where this conflicts with a plan file, this logs w
   and synthetic cycle never tick, and `/bs act charge` fails with a pointer at `runShape`. The classic
   gametests are untouched; `act_classic` asserts the contracts read classic values.
 
-## Follow-ups after the spine merges (from the v2 orchestrator, 2026-10-12)
+## Spine follow-ups (done in the follow-up PR, 2026-10-12)
 
-- **v1 PR #42** adds `defaultsVersion` + `RunConfig.migrate` to `game-run.json` (new pacing defaults). If
-  the spine PR needs a base merge over it: keep the `defaultsVersion` field and the `migrate` call, slot
-  `runShape`/`acts`/`portalChargeSeconds` in beside them. From here on, no config-default change in v2
-  work without that migrate pattern (DECISIONS.md rule). The spine's gametests use scripted time (skips,
-  2-second charges), so the new pacing defaults don't affect them.
-- **v1 PR #41** adds `ConfigEvents.RELOADED` (`/bs config reload`). Once #40 and #41 are both in main:
-  a small v2 PR wiring the spine's config reads to it. The synthetic clock already reads
-  `dayLengthMinutes` live through a supplier, so the main candidates are `ActMachine.load` (the parsed
-  act list) and anything else cached from `game-run.json` at init.
+- **Reload wiring (`ConfigEvents.RELOADED` from #44):** audited every spine read of `game-run.json` —
+  `runShape` (`ActMachine.expedition()`), `portalChargeSeconds` (read at charge start),
+  `dayLengthMinutes` (clock-rate supplier and the 100-tick `applyClockRate` loop) and all sync values
+  are read at use time, and `Config.reload` copies into the live instance, so they follow a reload with
+  no listener. The one cached value is the parsed act list (`ActMachine.load` at init): the game now
+  listens to `RELOADED` for its own instance, re-runs the defaults migration (an old file reloaded onto
+  a live server migrates like it would at boot), re-parses the acts and marks the sync dirty.
+- **Defaults migration (#42):** `migrate` only rewrites specific old default values, so the spine fields
+  pass through untouched; no `CURRENT_DEFAULTS` bump (no shipped default changed). Proven by tests: an
+  actual v0.9/v0.10-era `game-run.json` (old pacing values, no `defaultsVersion`, none of the spine
+  keys) loads through `Config.load` + `migrate` with the spine fields at their defaults, and hand-edited
+  spine fields survive migration. Rule going forward: no v2 config-default change without the migrate
+  pattern.
