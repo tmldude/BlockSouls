@@ -10,6 +10,7 @@ public class VehiclesConfig {
 	public Fuel fuel = new Fuel();
 	public Horn horn = new Horn();
 	public Hud hud = new Hud();
+	public Hints hints = new Hints();
 
 	public static class Kart {
 		public float maxHealth = 40;
@@ -118,6 +119,17 @@ public class VehiclesConfig {
 	public static class Hud {
 		/** Fuel gauge next to the hotbar while driving. */
 		public boolean showFuelGauge = true;
+	}
+
+	/** A player holding a wheel, engine or scrap near a wreck sees what it still needs. */
+	public static class Hints {
+		public boolean enabled = true;
+		/** Wrecks this close (blocks) to the player get a particle cue; the nearest also names its missing parts. */
+		public double radius = 12;
+		/** Ticks between checks (and particle puffs). */
+		public int intervalTicks = 10;
+		/** Particles per wreck per puff. */
+		public int particles = 4;
 	}
 
 	public static class Wreck {

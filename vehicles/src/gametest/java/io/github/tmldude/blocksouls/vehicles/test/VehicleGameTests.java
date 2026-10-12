@@ -1,9 +1,12 @@
 package io.github.tmldude.blocksouls.vehicles.test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -28,6 +31,8 @@ import io.github.tmldude.blocksouls.vehicles.kart.KartEntity;
 import io.github.tmldude.blocksouls.vehicles.kart.KartFuel;
 import io.github.tmldude.blocksouls.vehicles.kart.KartHorn;
 import io.github.tmldude.blocksouls.vehicles.kart.KartWreckEntity;
+import io.github.tmldude.blocksouls.vehicles.kart.RepairProgress;
+import io.github.tmldude.blocksouls.vehicles.kart.WreckHints;
 
 /**
  * The test mod adds iron nuggets to {@code blocksouls_vehicles:repair_scrap}, since world's scrap isn't loaded here,
@@ -325,5 +330,51 @@ public class VehicleGameTests {
 			helper.assertTrue(near.getDeltaMovement().horizontalDistance() < 1e-6, "but the flinch has a longer cooldown");
 			helper.succeed();
 		});
+	}
+
+	@GameTest(maxTicks = 20)
+	public void wreckHintNamesWhatItStillNeeds(GameTestHelper helper) {
+		floor(helper);
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		KartWreckEntity wreck = helper.spawn(VehicleRegistry.KART_WRECK, new BlockPos(4, 1, 4));
+		KartWreckEntity far = helper.spawn(VehicleRegistry.KART_WRECK, new BlockPos(4, 1, 7));
+		var cfg = BlockSoulsVehicles.CONFIG.wreck;
+		use(helper, wreck, player, VehicleRegistry.WHEEL, 2);
+		Vec3 beside = helper.absoluteVec(new Vec3(2.5, 1, 4.5));
+		player.snapTo(beside.x, beside.y, beside.z, 0, 0);
+
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.DIRT));
+		helper.assertTrue(WreckHints.hint(player) == null, "no hint without a repair part in hand");
+
+		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(VehicleRegistry.ENGINE));
+		helper.assertTrue(WreckHints.hint(player) == wreck, "the nearest wreck gets the hint, not the farther one " + far.getId());
+		RepairProgress missing = wreck.getProgress().remaining(cfg);
+		helper.assertTrue(missing.equals(new RepairProgress(cfg.wheels - 2, cfg.engines, cfg.scrap)), "missing parts " + missing);
+
+		Component message = WreckHints.needsMessage(missing);
+		helper.assertTrue(message.getContents() instanceof TranslatableContents t && t.getKey().equals("message.blocksouls_vehicles.wreck_needs"),
+				"a Needs: line, got " + message);
+		String parts = String.join(",", keys(message, new ArrayList<>()));
+		helper.assertTrue(parts.contains("need.wheels") && parts.contains("need.engine") && parts.contains("need.scrap"),
+				"it names wheels, the engine and scrap: " + parts);
+		helper.assertFalse(keys(WreckHints.needsMessage(new RepairProgress(0, 1, 0)), new ArrayList<>()).stream().anyMatch(k -> k.contains("need.wheel")),
+				"parts already fitted aren't listed");
+		helper.succeed();
+	}
+
+	/** Every translation key in a component tree (its own, its arguments' and its siblings'). */
+	private static List<String> keys(Component component, List<String> out) {
+		if (component.getContents() instanceof TranslatableContents t) {
+			out.add(t.getKey());
+			for (Object arg : t.getArgs()) {
+				if (arg instanceof Component c) {
+					keys(c, out);
+				}
+			}
+		}
+		for (Component sibling : component.getSiblings()) {
+			keys(sibling, out);
+		}
+		return out;
 	}
 }

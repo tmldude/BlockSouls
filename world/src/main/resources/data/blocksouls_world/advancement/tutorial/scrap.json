@@ -1,0 +1,31 @@
+{
+	"parent": "blocksouls:tutorial/root",
+	"display": {
+		"icon": {
+			"id": "blocksouls_world:scrap"
+		},
+		"title": {
+			"translate": "advancements.blocksouls.tutorial.scrap.title"
+		},
+		"description": {
+			"translate": "advancements.blocksouls.tutorial.scrap.description"
+		}
+	},
+	"criteria": {
+		"has_scrap": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:scrap"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_scrap"
+		]
+	]
+}

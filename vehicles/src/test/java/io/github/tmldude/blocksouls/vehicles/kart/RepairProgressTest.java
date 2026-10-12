@@ -52,4 +52,12 @@ class RepairProgressTest {
 		assertEquals(new RepairProgress(2, 1, 0), broken);
 		assertFalse(broken.complete(cfg));
 	}
+
+	@Test
+	void remainingCountsWhatsMissing() {
+		RepairProgress progress = add(RepairProgress.EMPTY, RepairProgress.Part.WHEEL, 2);
+		progress = add(progress, RepairProgress.Part.SCRAP, 3);
+		assertEquals(new RepairProgress(2, 1, 5), progress.remaining(cfg));
+		assertEquals(new RepairProgress(0, 0, 0), new RepairProgress(9, 9, 9).remaining(cfg));
+	}
 }

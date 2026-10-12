@@ -9,6 +9,11 @@
 
 To update, download the new `.mrpack` and import it the same way.
 
+**How do I craft X?** The pack ships a recipe viewer (EMI, or REI if EMI has no build for this Minecraft version):
+hover an item and press `R` for its recipes, `U` for its uses. Without it, the vanilla recipe book (the green book in
+the crafting table) shows every BlockSouls recipe once you've held one of its ingredients, and the **BlockSouls**
+advancement tab (`L`) walks you through guns, the kart and the run step by step.
+
 ## Maintaining (packwiz)
 
 This folder is a [packwiz](https://packwiz.infra.link/) pack pinned to Minecraft 26.3 / Fabric Loader 0.19.5.
