@@ -136,6 +136,10 @@ public class MovementConfig {
 		public double swingBoost = 0.04;
 		/** Velocity multiplier per tick while swinging (replaces vanilla's air drag). */
 		public double drag = 0.99;
+		/** Gravity multiplier while swinging (1.0 = the player's normal gravity): lower floats, higher snaps. */
+		public double gravityMult = 1.0;
+		/** The rope counts as taut (pulls and pumps) within this many blocks of its full length. */
+		public double ropeSlack = 0.05;
 		/** Upward velocity added on release. */
 		public double releaseBoost = 0.15;
 		/** Swing speed cap in blocks/tick (vanilla only kicks above ~10). */

@@ -102,7 +102,11 @@ public final class MovementCommands {
 										.executes(ctx -> setCaps(ctx, StringArgumentType.getString(ctx, "verbs"))))))
 				.then(Commands.literal("config")
 						.then(Commands.literal("reload").executes(ctx -> {
-							ConfigSync.reload(ctx.getSource().getServer());
+							String error = ConfigSync.reload();
+							if (error != null) {
+								ctx.getSource().sendFailure(Component.literal("Kept the current movement config: " + error));
+								return 0;
+							}
 							ctx.getSource().sendSuccess(() -> Component.literal("Reloaded movement.json and sent it to all players"), true);
 							return 1;
 						})))));

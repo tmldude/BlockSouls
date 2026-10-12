@@ -249,8 +249,10 @@ public final class Downed {
 	}
 
 	private static void addModifier(@Nullable AttributeInstance attribute, Identifier id, double amount) {
-		if (attribute != null && !attribute.hasModifier(id)) {
-			attribute.addTransientModifier(new AttributeModifier(id, amount, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+		// Update a stale amount too, so a config reload applies without getting up and going down again.
+		AttributeModifier current = attribute != null ? attribute.getModifier(id) : null;
+		if (attribute != null && (current == null || current.amount() != amount)) {
+			attribute.addOrUpdateTransientModifier(new AttributeModifier(id, amount, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 		}
 	}
 

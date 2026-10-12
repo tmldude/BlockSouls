@@ -10,6 +10,7 @@
 		],
 		"fabric-gametest": [
 			"io.github.tmldude.blocksouls.game.test.RunGameTests",
+			"io.github.tmldude.blocksouls.game.test.ActGameTests",
 			"io.github.tmldude.blocksouls.game.test.DownedGameTests",
 			"io.github.tmldude.blocksouls.game.test.BoonGameTests",
 			"io.github.tmldude.blocksouls.game.test.OriginGameTests"
