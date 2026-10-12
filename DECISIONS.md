@@ -332,3 +332,18 @@ Direction for the next build:
   servers while hand-tuned values stay. **Rule for all v2 work**: any change to a shipped config default
   (game-run.json above all — SiegeClock lives there) uses the same migrate pattern, and the
   `defaultsVersion` field is never dropped.
+
+## Stage 6A launch (2026-10-12, orchestrator)
+
+v0.10.0 is released; Stage 6A starts. Briefs: `docs/sessions/v2-builds.md`, `v2-guns-abilities.md`,
+`v2-players.md`, `v2-director.md`.
+- **Three sessions launch before the spine PR (#40) merges**: builds, guns-abilities and players depend
+  only on the merged #37 contracts (SynergyTags, Capabilities, Threat) and never touch `game/run/**`.
+  **v2-director waits for #40**, since it edits the spine's scheduler files. This bends the "previous
+  stage merged first" rule only where there is no code dependency; #40's remaining fix is a test-only
+  change already in CI.
+- Lane split inside 6A: `game/client/hud` is shared file-by-file (builds: build line + trinket row;
+  players: origin/summary screens, downed indicator); `common` additions each in their own first PR;
+  Souls' two recipe-web recipes split between builds and guns.
+- Launch order honors the owner's focus: fun content (builds, guns & abilities) and origins first;
+  the Director (pacing) the moment its dependency merges.
