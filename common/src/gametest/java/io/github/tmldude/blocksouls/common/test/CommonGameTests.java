@@ -21,6 +21,9 @@ import io.github.tmldude.blocksouls.common.party.PartyConfig;
 import io.github.tmldude.blocksouls.common.party.PartyScaling;
 import io.github.tmldude.blocksouls.common.player.Capabilities;
 import io.github.tmldude.blocksouls.common.player.PlayerStatus;
+import io.github.tmldude.blocksouls.common.player.Stamina;
+import io.github.tmldude.blocksouls.common.player.WeaponHooks;
+import io.github.tmldude.blocksouls.common.synergy.BuildHooks;
 import io.github.tmldude.blocksouls.common.player.PlayerTraits;
 import io.github.tmldude.blocksouls.common.run.RunState;
 import io.github.tmldude.blocksouls.common.run.Runs;
@@ -170,6 +173,20 @@ public class CommonGameTests {
 			PlayerStatus.setDownedShooting(before);
 			PlayerStatus.setDowned(player, false);
 		}
+		helper.succeed();
+	}
+
+	@GameTest
+	public void buildHooksDefaultToNoOps(GameTestHelper helper) {
+		// Only common is loaded in this test run: no game module installs a build provider, no guns or movement
+		// install weapon/stamina providers. Everything must report "nothing happened" instead of failing.
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		helper.assertTrue(BuildHooks.applyRandomCurse(player) == null, "no curse without a provider");
+		helper.assertTrue(!BuildHooks.purgeCurse(player), "nothing to purge without a provider");
+		helper.assertTrue(BuildHooks.curses(player).isEmpty() && BuildHooks.trinkets(player).isEmpty(), "nothing owned");
+		helper.assertTrue(!BuildHooks.offerTrinkets(player), "no offer without a provider");
+		helper.assertTrue(!Stamina.add(player, 25), "stamina is a no-op without the movement module");
+		helper.assertTrue(!WeaponHooks.reload(player), "reload is a no-op without the guns module");
 		helper.succeed();
 	}
 }
