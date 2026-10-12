@@ -347,3 +347,7 @@ v0.10.0 is released; Stage 6A starts. Briefs: `docs/sessions/v2-builds.md`, `v2-
   Souls' two recipe-web recipes split between builds and guns.
 - Launch order honors the owner's focus: fun content (builds, guns & abilities) and origins first;
   the Director (pacing) the moment its dependency merges.
+- **Stage 5 complete (2026-10-12):** #37 (common contracts) and #40 (spine) merged, both
+  behavior-neutral for the live pack (`runShape: "classic"` default). Spine follow-ups after v1's #41/#42
+  land: RELOADED wiring for SiegeClock, migrate pattern for the new game-run.json fields. **v2-director
+  launches** once v0.11's `drops-and-pacing` is also in main (it edits the same `game/run` files).
