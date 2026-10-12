@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
@@ -18,6 +19,7 @@ import io.github.tmldude.blocksouls.common.Config;
 import io.github.tmldude.blocksouls.common.event.ConfigEvents;
 import io.github.tmldude.blocksouls.common.party.PartyConfig;
 import io.github.tmldude.blocksouls.common.party.PartyScaling;
+import io.github.tmldude.blocksouls.common.player.Capabilities;
 import io.github.tmldude.blocksouls.common.player.PlayerStatus;
 import io.github.tmldude.blocksouls.common.player.PlayerTraits;
 import io.github.tmldude.blocksouls.common.run.RunState;
@@ -129,5 +131,24 @@ public class CommonGameTests {
 			}
 		});
 		helper.getLevel().getServer().getCommands().performPrefixedCommand(source, command);
+	}
+
+	@GameTest
+	public void capabilitiesDefaultToTheV1VerbsOnly(GameTestHelper helper) {
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		helper.assertTrue(Capabilities.allGranted(player), "no set attached by default");
+		helper.assertTrue(Capabilities.has(player, Capabilities.CLIMB) && Capabilities.has(player, Capabilities.SWING)
+				&& Capabilities.has(player, Capabilities.MULTI_JUMP), "every v1 verb by default");
+		helper.assertTrue(!Capabilities.has(player, Capabilities.GLIDE), "glide is opt-in: never granted by default");
+		Capabilities.grant(player, Capabilities.GLIDE);
+		helper.assertTrue(Capabilities.allGranted(player) && !Capabilities.has(player, Capabilities.GLIDE), "grant is a no-op on the default set");
+
+		Capabilities.restrictTo(player, Set.of(Capabilities.GLIDE));
+		helper.assertTrue(Capabilities.has(player, Capabilities.GLIDE) && !Capabilities.has(player, Capabilities.CLIMB), "an explicit set is exact");
+		Capabilities.grant(player, Capabilities.CLIMB);
+		helper.assertTrue(Capabilities.has(player, Capabilities.CLIMB), "cross-training grants onto an explicit set");
+		Capabilities.grantAll(player);
+		helper.assertTrue(Capabilities.allGranted(player) && !Capabilities.has(player, Capabilities.GLIDE), "back to v1");
+		helper.succeed();
 	}
 }
