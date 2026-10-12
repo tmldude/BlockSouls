@@ -56,8 +56,10 @@ public class VehicleGameTests {
 		}
 	}
 
+	/** This test's own structure plus a 2-block margin: tests sit 5-6 blocks apart, so a wider box finds a
+	 * neighbouring test's kart. */
 	private static AABB area(GameTestHelper helper) {
-		return new AABB(helper.absolutePos(BlockPos.ZERO)).inflate(10);
+		return helper.getBounds().inflate(2);
 	}
 
 	private static <T extends Entity> List<T> find(GameTestHelper helper, EntityType<T> type) {

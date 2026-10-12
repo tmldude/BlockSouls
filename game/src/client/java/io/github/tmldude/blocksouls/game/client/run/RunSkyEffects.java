@@ -24,6 +24,8 @@ public final class RunSkyEffects {
 	private static final Vector3fc BLOOD_TINT = new Vector3f(0.55F, 0.04F, 0.03F);
 	private static final float DUSK_STRENGTH = 0.18F;
 	private static final float BLOOD_STRENGTH = 0.6F;
+	/** How far block light dims at full synthetic night (modest; the Graphics stage polishes the look). */
+	private static final float AMBIENT_DIM = 0.35F;
 
 	private static RunSyncPayload sync;
 
@@ -38,14 +40,26 @@ public final class RunSkyEffects {
 		sync = null;
 	}
 
-	/** 0..1: how far into the dusk-to-dawn window the overworld is (0 outside it or without an active run). */
+	/**
+	 * 0..1: how far into the dusk-to-dawn window the player's dimension is (0 outside it or without an
+	 * active run). The overworld reads its sun; any other dimension reads the run's synthetic cycle — the
+	 * "vibe switch": no fake sun, the same fog/light lerp on the same clock.
+	 */
 	public static float nightAmount() {
 		RunSyncPayload s = sync;
 		ClientLevel level = Minecraft.getInstance().level;
-		if (s == null || level == null || !s.state().isActive() || level.dimension() != Level.OVERWORLD) {
+		if (s == null || level == null || !s.state().isActive()) {
 			return 0;
 		}
-		int t = WaveMath.timeOfDay(level.getOverworldClockTime());
+		int t;
+		if (level.dimension() == Level.OVERWORLD) {
+			t = WaveMath.timeOfDay(level.getOverworldClockTime());
+		} else {
+			t = ClientCycle.timeOfDay();
+			if (t < 0) {
+				return 0;
+			}
+		}
 		int cue = s.duskCueTime();
 		int dusk = s.duskTime();
 		int dawn = s.dawnTime();
@@ -58,6 +72,27 @@ public final class RunSkyEffects {
 		}
 		int untilDawn = WaveMath.ticksUntil(t, dawn);
 		return untilDawn < DAWN_FADE ? untilDawn / (float) DAWN_FADE : 1;
+	}
+
+	/** 0..1 of the synthetic vibe switch alone: 0 in the overworld (its sun already darkens the world). */
+	private static float syntheticNightAmount() {
+		ClientLevel level = Minecraft.getInstance().level;
+		if (level == null || level.dimension() == Level.OVERWORLD || ClientCycle.timeOfDay() < 0) {
+			return 0;
+		}
+		return nightAmount();
+	}
+
+	/**
+	 * Block-light tint during synthetic nights: a sun-less dimension has no sky light to lose, so its
+	 * ember/torch glow dims instead (ash-glow down to ember-dark). Identity in the overworld and classic.
+	 */
+	public static Vector3fc blockLightTint(Vector3fc color) {
+		float amount = syntheticNightAmount() * AMBIENT_DIM;
+		if (amount <= 0) {
+			return color;
+		}
+		return new Vector3f(color).mul(1 - amount);
 	}
 
 	private static boolean has(String modifier) {
