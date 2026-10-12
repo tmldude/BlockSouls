@@ -139,8 +139,11 @@ public final class DragonscaleArmor {
 			return;
 		}
 		boolean full = wearsFullSet(entity);
-		if (full && !knockback.hasModifier(KNOCKBACK_ID)) {
-			knockback.addTransientModifier(new AttributeModifier(KNOCKBACK_ID, config().setKnockbackResistance, AttributeModifier.Operation.ADD_VALUE));
+		double amount = config().setKnockbackResistance;
+		AttributeModifier current = knockback.getModifier(KNOCKBACK_ID);
+		if (full && (current == null || current.amount() != amount)) {
+			// Also refreshes a stale amount after /bs config reload.
+			knockback.addOrUpdateTransientModifier(new AttributeModifier(KNOCKBACK_ID, amount, AttributeModifier.Operation.ADD_VALUE));
 		} else if (!full && knockback.hasModifier(KNOCKBACK_ID)) {
 			knockback.removeModifier(KNOCKBACK_ID);
 		}

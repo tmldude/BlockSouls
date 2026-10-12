@@ -16,14 +16,23 @@ import io.github.tmldude.blocksouls.common.run.RunState;
 /**
  * Server → client: the run state for the HUD and the sky/fog cues.
  *
- * @param secondsToNext  seconds until the next wave (break or before dusk), -1 when not counting down
- * @param mobsLeft       wave mobs still alive or still to spawn, -1 outside a wave
- * @param nightModifiers tonight's modifier ids (empty during the day)
- * @param duskCueTime    day time when the dusk cue starts (the client tints sky/fog from here to dawn)
- * @param fogDistance    fog end distance on fog nights
+ * @param secondsToNext      seconds until the next wave (break or before dusk), -1 when not counting down
+ * @param mobsLeft           wave mobs still alive or still to spawn, -1 outside a wave
+ * @param nightModifiers     tonight's modifier ids (empty during the day)
+ * @param duskCueTime        day time when the dusk cue starts (the client tints sky/fog from here to dawn)
+ * @param fogDistance        fog end distance on fog nights
+ * @param actOrdinal         the party's act (1-based; 1 with a single act in classic)
+ * @param actName            the act's display name
+ * @param actCount           acts in the run (1 in classic)
+ * @param highestOpenAct     highest act whose portal is lit
+ * @param chargeSecondsLeft  seconds left on the running portal charge, -1 when none
+ * @param syntheticTimeOfDay the run's synthetic cycle phase (mod 24000), -1 in classic / before the run
+ * @param syntheticRate      day-time ticks per game tick the synthetic cycle advances at (0 when none)
  */
 public record RunSyncPayload(RunState state, int secondsToNext, int mobsLeft, List<String> nightModifiers, int duskCueTime,
-		int duskTime, int dawnTime, float fogDistance) implements CustomPacketPayload {
+		int duskTime, int dawnTime, float fogDistance,
+		int actOrdinal, String actName, int actCount, int highestOpenAct, int chargeSecondsLeft,
+		int syntheticTimeOfDay, float syntheticRate) implements CustomPacketPayload {
 	public static final Type<RunSyncPayload> TYPE = Networking.type(RunIds.NAMESPACE, "run_sync");
 	public static final StreamCodec<RegistryFriendlyByteBuf, RunSyncPayload> CODEC = StreamCodec.ofMember(RunSyncPayload::write, RunSyncPayload::read);
 
@@ -47,6 +56,13 @@ public record RunSyncPayload(RunState state, int secondsToNext, int mobsLeft, Li
 		buf.writeVarInt(duskTime);
 		buf.writeVarInt(dawnTime);
 		buf.writeFloat(fogDistance);
+		buf.writeVarInt(actOrdinal);
+		buf.writeUtf(actName);
+		buf.writeVarInt(actCount);
+		buf.writeVarInt(highestOpenAct);
+		buf.writeVarInt(chargeSecondsLeft);
+		buf.writeVarInt(syntheticTimeOfDay);
+		buf.writeFloat(syntheticRate);
 	}
 
 	private static RunSyncPayload read(FriendlyByteBuf buf) {
@@ -65,7 +81,9 @@ public record RunSyncPayload(RunState state, int secondsToNext, int mobsLeft, Li
 			modifiers.add(buf.readUtf());
 		}
 		return new RunSyncPayload(new RunState(phase, wave, night, endless, difficulty), secondsToNext, mobsLeft, List.copyOf(modifiers),
-				buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readFloat());
+				buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readFloat(),
+				buf.readVarInt(), buf.readUtf(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(),
+				buf.readVarInt(), buf.readFloat());
 	}
 
 	@Override
