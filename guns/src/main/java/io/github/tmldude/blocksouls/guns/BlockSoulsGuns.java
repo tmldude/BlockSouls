@@ -14,6 +14,8 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 
 import io.github.tmldude.blocksouls.common.Config;
+import io.github.tmldude.blocksouls.common.synergy.SynergyTags;
+import io.github.tmldude.blocksouls.guns.item.GunSynergy;
 import io.github.tmldude.blocksouls.common.event.ConfigEvents;
 import io.github.tmldude.blocksouls.guns.command.GunCommands;
 import io.github.tmldude.blocksouls.guns.item.GunsItems;
@@ -54,6 +56,7 @@ public class BlockSoulsGuns implements ModInitializer {
 		GunLoot.register();
 		GunServer.register();
 		GunCommands.register();
+		SynergyTags.addSource(GunSynergy::collect);
 	}
 
 	private static void applyWeaponStats() {

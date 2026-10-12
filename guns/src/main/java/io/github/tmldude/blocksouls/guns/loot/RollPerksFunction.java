@@ -14,14 +14,17 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
+import io.github.tmldude.blocksouls.guns.item.GunItem;
 import io.github.tmldude.blocksouls.guns.item.GunRolls;
 
 /**
  * {@code blocksouls_guns:roll_perks}: rolls a gun's rarity and perks. Optional {@code tier}
  * ({@code common|rare|legendary}) picks the odds table; without it the crafted odds apply. Other items pass through.
+ * {@code "tier": "exotic"} turns any gun entry into a random exotic (weights in {@code loot.exoticWeights}) with its
+ * perk rolled, so a boss or chest table can drop exotics without naming them.
  */
 public class RollPerksFunction extends LootItemConditionalFunction {
-	private static final List<String> TIERS = List.of("common", "rare", "legendary");
+	private static final List<String> TIERS = List.of("common", "rare", "legendary", "exotic");
 	private static final Codec<String> TIER_CODEC = Codec.STRING.validate(tier -> TIERS.contains(tier)
 			? DataResult.success(tier)
 			: DataResult.error(() -> "Unknown roll_perks tier '" + tier + "', expected one of " + TIERS));
@@ -43,6 +46,10 @@ public class RollPerksFunction extends LootItemConditionalFunction {
 
 	@Override
 	protected ItemStack run(ItemStack stack, LootContext context) {
+		if (tier.isPresent() && "exotic".equals(tier.get()) && stack.getItem() instanceof GunItem) {
+			ItemStack base = stack;
+			stack = GunLoot.randomExotic(context.getRandom()).map(exotic -> base.transmuteCopy(exotic, base.getCount())).orElse(stack);
+		}
 		GunRolls.roll(stack, GunRolls.odds(tier.orElse(null)), context.getRandom());
 		return stack;
 	}

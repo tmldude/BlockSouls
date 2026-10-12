@@ -58,6 +58,14 @@ public class FullPackClientTest implements FabricClientGameTest {
 			context.waitTicks(10);
 			context.takeScreenshot("04b-boon-row");
 
+			// The exotics: one of each in the hotbar, the Kindling Engine in hand (heat bar), and the feel pass on a shot.
+			for (String exotic : new String[] {"stray_verdict", "lantern_eye", "backdraft", "tether_lance", "kindling_engine"}) {
+				server.runCommand("execute as @a run bs gun give " + exotic);
+			}
+			server.runCommand("execute as @a run bs gun ammo @s 64");
+			context.waitTicks(20);
+			context.takeScreenshot("04d-exotics");
+
 			// The abilities HUD bottom-left: three slot icons, one mid-cooldown, and a full ultimate bar.
 			server.runCommand("execute as @a run bs ability ready @s");
 			server.runCommand("execute as @a run bs ability cast @s tactical");

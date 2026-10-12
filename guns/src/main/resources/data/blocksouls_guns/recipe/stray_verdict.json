@@ -1,0 +1,21 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "blocksouls_world"
+      ]
+    }
+  ],
+  "type": "minecraft:smithing_transform",
+  "template": "blocksouls_guns:exotic_catalyst",
+  "base": "blocksouls_guns:hand_cannon",
+  "addition": "blocksouls_world:gunmetal_ingot",
+  "result": {
+    "id": "blocksouls_guns:stray_verdict",
+    "components": {
+      "blocksouls_guns:rarity": "exotic",
+      "minecraft:rarity": "epic"
+    }
+  }
+}

@@ -155,6 +155,32 @@ def sounds():
         gong = at(metal(g, 0.85, 180, 0.35, ratios=(1.0, 2.0, 2.98, 4.1), gains=(1, 0.5, 0.35, 0.2)), 0.15, d)
         return reverb(g, mix((pad_to(slice_, d), 0.6), (gong, 1.0)), 0.6, 0.2)
     make("perk/vorpal", 1, vorpal)
+
+    # Kill confirm: a short two-note tick only the shooter hears, lower than the headshot tick.
+    make("kill_confirm", 1, lambda g, i: mix((at(bell(g, 0.14, 1320, 0.03, bright=0.3), 0.0, 0.3), 1.0),
+                                             (at(bell(g, 0.2, 880, 0.05, bright=0.3), 0.07, 0.3), 0.9),
+                                             (noise_hit(g, 0.3, 3000, 10000, 0.002), 0.3)))
+
+    # Kindling Engine venting: a hiss of steam with a metallic ping as the receiver cools.
+    def vent(g, i):
+        d = 1.2
+        n = int(d * SR)
+        hiss = band(g.noise(n), 1500, 9000) * env(n, shape=[(0, 0), (0.03, 1), (0.6, 0.5), (1, 0)])
+        return mix((hiss, 1.0), (at(metal(g, 0.4, 2100, 0.05), 0.1, d), 0.5), (at(metal(g, 0.4, 1700, 0.05), 0.5, d), 0.4))
+    make("exotic/vent", 1, vent)
+
+    # Tether Lance: the rocket bursts (a blast) and the web snaps taut (a twang).
+    def tether(g, i):
+        d = 1.0
+        blast = drive(mix((thump(d, 150, 40, 0.1), 1.0), (noise_hit(g, d, 80, 4000, 0.1), 0.9)), 2.0)
+        n = int(d * SR)
+        twang = sine(curve([(0, 700), (0.2, 350), (1, 300)], n), n) * env(n, shape=[(0, 0), (0.1, 0), (0.12, 1), (1, 0)])
+        return reverb(g, mix((blast, 1.0), (twang, 0.5)), 0.7, 0.15)
+    make("exotic/tether", 1, tether)
+
+    # Lantern Eye: a glassy chime as targets light up.
+    make("exotic/mark", 1, lambda g, i: reverb(g, mix((bell(g, 0.6, 1760, 0.15, bright=0.6), 1.0),
+                                                       (at(bell(g, 0.5, 2640, 0.12, bright=0.6), 0.1, 0.7), 0.7)), 0.6, 0.3))
     return S
 
 
@@ -176,11 +202,16 @@ EVENTS = {
     "gun.perk.outlaw": ("perk/outlaw", SUB + "gun.perk.outlaw"),
     "gun.perk.rampage": ("perk/rampage", SUB + "gun.perk.rampage"),
     "gun.perk.vorpal": ("perk/vorpal", SUB + "gun.perk.vorpal"),
+    "gun.kill_confirm": ("kill_confirm", None),
+    "gun.exotic.vent": ("exotic/vent", SUB + "gun.exotic.vent"),
+    "gun.exotic.tether": ("exotic/tether", SUB + "gun.exotic.tether"),
+    "gun.exotic.mark": ("exotic/mark", SUB + "gun.exotic.mark"),
 }
 # Shots are the loudest thing a player makes (the heavy guns most of all); handling sounds sit well under them.
 PEAKS = {"starter_pistol/fire": 0.8, "auto_rifle/fire": 0.82, "hand_cannon/fire": 0.92, "shotgun/fire": 0.92,
          "sniper_rifle/fire": 0.92, "explosive_round": 0.85, "ricochet": 0.45, "empty": 0.6, "reload_start": 0.6, "reload_end": 0.65,
-         "ammo_pickup": 0.5, "headshot": 0.55, "outlaw": 0.7, "rampage": 0.7, "vorpal": 0.75}
+         "ammo_pickup": 0.5, "headshot": 0.55, "outlaw": 0.7, "rampage": 0.7, "vorpal": 0.75, "kill_confirm": 0.5,
+         "vent": 0.7, "tether": 0.85, "mark": 0.6}
 
 
 def main():

@@ -441,6 +441,31 @@ def item_gun_stock():
     return A.sprite(rows, {"m": M(A.GUNMETAL, 3), "w": M(A.WOOD, 3, 0.2)}, {}, "gun_stock")
 
 
+def item_exotic_catalyst():
+    """A soul-infused gun receiver: gunmetal core, a void-purple soul glow in the window, gold rivets."""
+    rows = [
+        "................",
+        "......vvvv......",
+        ".....vvvvvv.....",
+        "..rrrrrrrrrrrr..",
+        "..r.r.r.r.r.r...",
+        ".mmmmmmmmmmmmmm.",
+        ".mmmmmmmmmmmmmm.",
+        ".mmmmgggggmmmmm.",
+        ".mmmmgwwwgmmmmm.",
+        ".mmmmgggggmmmmm.",
+        ".nnnnnnnnnnnnnn.",
+        ".nnn.ddd...nnnn.",
+        "......dd........",
+        ".....vvvvvv.....",
+        "......vvvv......",
+        "................",
+    ]
+    return A.sprite(rows, {"r": M(A.GOLD, 3, edges=False), "m": M(A.GUNMETAL, 4, 0.08), "n": M(A.GUNMETAL, 2),
+                           "g": M(A.VOID, 4), "v": M(A.VOID, 3, 0.2), "d": M(A.GUNMETAL, 3)},
+                    {"w": A.VOID[6]}, "exotic_catalyst")
+
+
 # ===================================================================================================== vehicles
 
 
@@ -1012,6 +1037,7 @@ def items():
     emit(f"{GUNS}/item/gun_barrel.png", item_gun_barrel())
     emit(f"{GUNS}/item/gun_receiver.png", item_gun_receiver())
     emit(f"{GUNS}/item/gun_stock.png", item_gun_stock())
+    emit(f"{GUNS}/item/exotic_catalyst.png", item_exotic_catalyst())
     emit(f"{VEH}/item/wheel.png", item_wheel())
     emit(f"{VEH}/item/engine.png", item_engine())
     relics()

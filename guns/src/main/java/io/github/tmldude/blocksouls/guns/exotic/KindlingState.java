@@ -7,6 +7,8 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
+import io.github.tmldude.blocksouls.guns.logic.HeatMath;
+
 /**
  * Kindling Engine's heat, stored on the gun so it syncs to the HUD for free. Heat decays lazily: the stored value
  * is the heat at {@code tick} (level game time), and {@link #heatAt} applies the decay since. A venting gun can't
@@ -14,7 +16,7 @@ import net.minecraft.network.codec.StreamCodec;
  */
 public record KindlingState(double heat, long tick, long ventUntil) {
 	public static final KindlingState COLD = new KindlingState(0, 0, 0);
-	public static final double MAX = 100;
+	public static final double MAX = HeatMath.MAX;
 
 	public static final Codec<KindlingState> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Codec.DOUBLE.fieldOf("heat").forGetter(KindlingState::heat),
@@ -26,7 +28,7 @@ public record KindlingState(double heat, long tick, long ventUntil) {
 
 	/** Heat now (0..100) after decaying since the stored tick. */
 	public double heatAt(long now, double decayPerTick) {
-		return Math.clamp(heat - Math.max(0, now - tick) * decayPerTick, 0.0, MAX);
+		return HeatMath.decayed(heat, now - tick, decayPerTick);
 	}
 
 	public boolean venting(long now) {
@@ -35,15 +37,15 @@ public record KindlingState(double heat, long tick, long ventUntil) {
 
 	/** Adds heat now; at {@link #MAX} the gun starts venting for {@code ventTicks}. */
 	public KindlingState heated(long now, double amount, double decayPerTick, int ventTicks) {
-		double next = heatAt(now, decayPerTick) + amount;
-		if (next >= MAX) {
+		double current = heatAt(now, decayPerTick);
+		if (HeatMath.overheats(current, amount)) {
 			return new KindlingState(MAX, now, now + ventTicks);
 		}
-		return new KindlingState(next, now, ventUntil);
+		return new KindlingState(HeatMath.heated(current, amount), now, ventUntil);
 	}
 
 	/** Fire-rate multiplier for this heat: 1 cold, {@code maxMult} at full heat. */
 	public static double rateMult(double heat, double maxMult) {
-		return 1.0 + (Math.max(1.0, maxMult) - 1.0) * Math.clamp(heat / MAX, 0.0, 1.0);
+		return HeatMath.rateMult(heat, maxMult);
 	}
 }

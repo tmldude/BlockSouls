@@ -1,14 +1,18 @@
 package io.github.tmldude.blocksouls.guns.exotic;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.jspecify.annotations.Nullable;
 
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 
 import io.github.tmldude.blocksouls.guns.BlockSoulsGuns;
 import io.github.tmldude.blocksouls.guns.item.GunItem;
@@ -25,6 +29,11 @@ public final class Exotics {
 
 	/** Marked entities → game time the mark ends. */
 	private static final Map<UUID, Long> MARKS = new HashMap<>();
+	/** Tether Lance tethers in flight. */
+	private static final List<Tether> TETHERS = new ArrayList<>();
+
+	private record Tether(LivingEntity a, LivingEntity b, long until) {
+	}
 
 	private Exotics() {
 	}
@@ -67,12 +76,56 @@ public final class Exotics {
 		return isMarked(target, now) ? BlockSoulsGuns.CONFIG.exotics.lanternEyeMarkedDamageMult : 1.0;
 	}
 
-	/** Clears expired marks (and their glow). Called every server tick. */
+	// ---- Tether Lance tethers ---------------------------------------------------------------------------------
+
+	public static void tether(LivingEntity a, LivingEntity b, long until) {
+		TETHERS.add(new Tether(a, b, until));
+	}
+
+	public static int tethers() {
+		return TETHERS.size();
+	}
+
+	/** Pulls each tethered pair together and draws the web between them. */
+	private static void tickTethers(ServerLevel level, long now) {
+		double pull = BlockSoulsGuns.CONFIG.exotics.tetherPull;
+		TETHERS.removeIf(tether -> {
+			LivingEntity a = tether.a();
+			LivingEntity b = tether.b();
+			if (now >= tether.until() || !a.isAlive() || !b.isAlive() || a.level() != level || b.level() != level) {
+				return true;
+			}
+			Vec3 mid = a.position().add(b.position()).scale(0.5);
+			for (LivingEntity entity : List.of(a, b)) {
+				Vec3 to = mid.subtract(entity.position());
+				if (to.lengthSqr() > 1.0) {
+					Vec3 velocity = entity.getDeltaMovement().scale(0.6).add(to.normalize().scale(pull));
+					entity.setDeltaMovement(velocity.x, Math.min(velocity.y, 0.1), velocity.z);
+					entity.syncVelocity = true;
+				}
+			}
+			if (now % 4 == 0) {
+				Vec3 from = a.getBoundingBox().getCenter();
+				Vec3 step = b.getBoundingBox().getCenter().subtract(from);
+				int points = Math.max(1, (int) (step.length() / 0.6));
+				for (int i = 0; i <= points; i++) {
+					Vec3 p = from.add(step.scale(i / (double) points));
+					level.sendParticles(ParticleTypes.ITEM_COBWEB, p.x, p.y, p.z, 1, 0, 0, 0, 0);
+				}
+			}
+			return false;
+		});
+	}
+
+	/** Clears expired marks (and their glow) and runs the tethers. Called every server tick per level. */
 	public static void tick(ServerLevel level) {
+		long now = level.getGameTime();
+		if (!TETHERS.isEmpty()) {
+			tickTethers(level, now);
+		}
 		if (MARKS.isEmpty()) {
 			return;
 		}
-		long now = level.getGameTime();
 		MARKS.entrySet().removeIf(entry -> {
 			if (now < entry.getValue()) {
 				return false;
@@ -87,5 +140,6 @@ public final class Exotics {
 
 	public static void clear() {
 		MARKS.clear();
+		TETHERS.clear();
 	}
 }

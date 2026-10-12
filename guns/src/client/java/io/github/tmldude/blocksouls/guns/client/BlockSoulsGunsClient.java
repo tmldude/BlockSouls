@@ -41,6 +41,8 @@ public class BlockSoulsGunsClient implements ClientModInitializer {
 			GunHud.onHitMarker(payload.kind());
 			if (payload.kind() == HitMarkerPayload.PRECISION) {
 				Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(GunSounds.HEADSHOT, 1.0F, 0.5F));
+			} else if (payload.kind() == HitMarkerPayload.KILL) {
+				Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(GunSounds.KILL_CONFIRM, 0.7F, 1.0F));
 			}
 		});
 		ClientNetworking.receive(ReloadStatePayload.TYPE, (payload, context) -> GunClient.onReloadState(payload.ticks()));
