@@ -17,11 +17,13 @@ structure). Every number goes in config.
 - **Materials:** stay in their 2+ recipe web (`docs/CONTENT.md`).
 - The `world` session raises material drop rates. Don't edit `world/`.
 
-## Pacing (defaults only, in `RunConfig`)
-- Shorter wave breaks: 20 s → ~10 s.
-- One more early wave per night: `wavesPerNight` starts 1, 2, 2…
-- An earlier dusk cue.
-- A cheaper first real gun recipe, so the loop starts shooting sooner.
+## Pacing (top priority per the owner)
+The base pacing defaults already shipped in v0.10.1 (#42): 12-min days, 2–4 waves a night, 8 s breaks, drop chance
+0.5, plus `RunConfig.migrate`. Read #42 and use that same `defaultsVersion` pattern for any default you change.
+Your pacing work is making the early loop *pay*:
+- a cheaper first real gun recipe, so the loop starts shooting sooner;
+- the drop guarantees above;
+- if it's still slow, an earlier dusk cue and earlier first elites.
 
 Log every changed default with the old value in `docs/decisions/drops-and-pacing.md`.
 
