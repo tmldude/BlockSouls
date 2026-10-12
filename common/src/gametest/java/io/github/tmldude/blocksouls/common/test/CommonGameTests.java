@@ -14,7 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 
-import io.github.tmldude.blocksouls.common.build.BuildHooks;
+import io.github.tmldude.blocksouls.common.synergy.BuildHooks;
 import io.github.tmldude.blocksouls.common.Config;
 import io.github.tmldude.blocksouls.common.event.ConfigEvents;
 import io.github.tmldude.blocksouls.common.party.PartyConfig;
