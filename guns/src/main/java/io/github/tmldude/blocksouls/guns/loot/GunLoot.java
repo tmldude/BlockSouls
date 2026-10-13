@@ -50,16 +50,14 @@ public final class GunLoot {
 			waveDrops(table, "legendary", config.waveLegendaryPrimaryChance, config.waveLegendarySpecialChance, config.waveLegendaryGunChance);
 		} else if (key.equals(CommonIds.WAVE_CLEAR_REWARD)) {
 			table.withPool(gunPool("rare", config.waveClearGunChance));
-			table.withPool(ammoPool(GunsItems.PRIMARY_AMMO, 1.0, 16, 32));
-			table.withPool(ammoPool(GunsItems.SPECIAL_AMMO, 1.0, 4, 10));
-		}
-		Double exoticChance = config.exoticTables.get(key.identifier().toString());
-		if (exoticChance != null && exoticChance > 0) {
-			table.withPool(LootPool.lootPool().when(LootItemRandomChanceCondition.randomChance(exoticChance.floatValue()))
-					.add(LootItem.lootTableItem(GunsItems.STRAY_VERDICT).apply(RollPerksFunction.roll("exotic"))));
-		}
-		if (!key.equals(CommonIds.WAVE_DROPS_COMMON) && !key.equals(CommonIds.WAVE_DROPS_RARE) && !key.equals(CommonIds.WAVE_DROPS_LEGENDARY)
-				&& !key.equals(CommonIds.WAVE_CLEAR_REWARD)) {
+			table.withPool(ammoPool(GunsItems.PRIMARY_AMMO, 1.0, config.waveClearPrimaryMin, config.waveClearPrimaryMax));
+			table.withPool(ammoPool(GunsItems.SPECIAL_AMMO, 1.0, config.waveClearSpecialMin, config.waveClearSpecialMax));
+		} else if (key.equals(CommonIds.WAVE_DROPS_ELITE)) {
+			table.withPool(gunPool(config.eliteGunTier, config.eliteGunChance));
+			table.withPool(ammoPool(GunsItems.PRIMARY_AMMO, 1.0, config.elitePrimaryMin, config.elitePrimaryMax));
+		} else if (key.equals(CommonIds.GUN_PITY)) {
+			table.withPool(gunPool(config.pityGunTier, 1.0));
+		} else {
 			GunsConfig.ChestLoot chest = config.chests.get(key.identifier().toString());
 			if (chest != null) {
 				table.withPool(gunPool(chest.tier(), chest.gunChance()));
@@ -70,17 +68,23 @@ public final class GunLoot {
 				table.withPool(ammo);
 			}
 		}
+		Double exoticChance = config.exoticTables.get(key.identifier().toString());
+		if (exoticChance != null && exoticChance > 0) {
+			table.withPool(LootPool.lootPool().when(LootItemRandomChanceCondition.randomChance(exoticChance.floatValue()))
+					.add(LootItem.lootTableItem(GunsItems.STRAY_VERDICT).apply(RollPerksFunction.roll("exotic"))));
+		}
 	}
 
 	private static void waveDrops(LootTable.Builder table, String tier, double primary, double special, double gun) {
-		table.withPool(ammoPool(GunsItems.PRIMARY_AMMO, primary, 4, 12));
-		table.withPool(ammoPool(GunsItems.SPECIAL_AMMO, special, 2, 4));
+		GunsConfig.Loot config = BlockSoulsGuns.CONFIG.loot;
+		table.withPool(ammoPool(GunsItems.PRIMARY_AMMO, primary, config.wavePrimaryMin, config.wavePrimaryMax));
+		table.withPool(ammoPool(GunsItems.SPECIAL_AMMO, special, config.waveSpecialMin, config.waveSpecialMax));
 		table.withPool(gunPool(tier, gun));
 	}
 
 	private static LootPool.Builder ammoPool(Item ammo, double chance, int min, int max) {
 		return LootPool.lootPool()
-				.add(LootItem.lootTableItem(ammo).apply(SetItemCountFunction.setCount(ContextIntProviders.between(min, max))))
+				.add(LootItem.lootTableItem(ammo).apply(SetItemCountFunction.setCount(ContextIntProviders.between(min, Math.max(min, max)))))
 				.when(LootItemRandomChanceCondition.randomChance((float) chance));
 	}
 

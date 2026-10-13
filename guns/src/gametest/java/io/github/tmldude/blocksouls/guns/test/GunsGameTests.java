@@ -9,6 +9,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -26,6 +27,7 @@ import io.github.tmldude.blocksouls.guns.item.GunRolls;
 import io.github.tmldude.blocksouls.guns.item.GunsItems;
 import io.github.tmldude.blocksouls.guns.logic.GunRarity;
 import io.github.tmldude.blocksouls.guns.logic.Perk;
+import io.github.tmldude.blocksouls.guns.loot.RarityBeam;
 import io.github.tmldude.blocksouls.guns.loot.RollPerksFunction;
 import io.github.tmldude.blocksouls.guns.shoot.GunServer;
 import io.github.tmldude.blocksouls.guns.shoot.Hitscan;
@@ -240,6 +242,26 @@ public class GunsGameTests {
 		helper.assertTrue(source.getEntity() == player, "shooter is the attacker");
 		helper.assertTrue(source.getWeaponItem() == gun, "gun is the weapon");
 		helper.assertTrue(zombie.getLastHurtByPlayer() != null, "kill credit goes to the player");
+		helper.succeed();
+	}
+
+	private static ItemEntity drop(GameTestHelper helper, GunRarity rarity) {
+		ItemStack stack = new ItemStack(GunsItems.HAND_CANNON);
+		GunRolls.set(stack, rarity, List.of());
+		Vec3 at = helper.absoluteVec(new Vec3(1.5, 1.2, 1.5));
+		ItemEntity item = new ItemEntity(helper.getLevel(), at.x, at.y, at.z, stack);
+		helper.getLevel().addFreshEntity(item);
+		return item;
+	}
+
+	@GameTest
+	public void aRareGunDropCarriesTheBeam(GameTestHelper helper) {
+		ItemEntity rare = drop(helper, GunRarity.RARE);
+		helper.assertTrue(RarityBeam.hasBeam(rare), "rare gun item entity carries the beam marker");
+		helper.assertTrue(rare.hasGlowingTag(), "and glows");
+		helper.assertTrue(rare.isCustomNameVisible() && rare.getCustomName() != null, "and shows its name");
+		helper.assertTrue(RarityBeam.hasBeam(drop(helper, GunRarity.LEGENDARY)), "legendary too");
+		helper.assertFalse(RarityBeam.hasBeam(drop(helper, GunRarity.COMMON)), "common guns stay plain");
 		helper.succeed();
 	}
 }

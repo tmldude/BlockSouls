@@ -125,5 +125,17 @@
     "sounds": [
       "blocksouls_guns:gun/exotic/mark1"
     ]
+  },
+  "gun.drop.rare": {
+    "subtitle": "subtitles.blocksouls_guns.gun.drop",
+    "sounds": [
+      "blocksouls_guns:gun/drop/rare1"
+    ]
+  },
+  "gun.drop.legendary": {
+    "subtitle": "subtitles.blocksouls_guns.gun.drop",
+    "sounds": [
+      "blocksouls_guns:gun/drop/legendary1"
+    ]
   }
 }
