@@ -33,3 +33,6 @@ Same style as `DECISIONS.md`: where this conflicts with a plan file, this logs w
 - **Flankers are marked with an entity tag, `WaveMobs.FLANKER_TAG` (`blocksouls_flanker`).** The Director adds it
   to hunters it spawns under its `FLANKERS` composition; mobs reads it (plus its own config list of always-flanking
   mob types). A scoreboard tag needs no attachment and is saved with the entity.
+- **The two new mob ids are in `CommonIds`** (`SPITTER`, `BULWARK`) so the Director's mob lists and integration's
+  roster checks can name them without importing `mobs`. "Bulwark" is the shielded, must-be-flanked mob the brief
+  calls "Warden-type"; vanilla already has a Warden, so it gets its own name.
