@@ -29,7 +29,7 @@
           "name": "blocksouls_world:skysteel",
           "weight": 5,
           "modifier": {
-            "function": "minecraft:set_count",
+            "type": "minecraft:set_count",
             "count": {
               "type": "minecraft:uniform",
               "min": 2,
@@ -42,7 +42,7 @@
           "name": "blocksouls_world:cloudbloom",
           "weight": 4,
           "modifier": {
-            "function": "minecraft:set_count",
+            "type": "minecraft:set_count",
             "count": {
               "type": "minecraft:uniform",
               "min": 2,
@@ -55,7 +55,7 @@
           "name": "blocksouls_world:cloudbloom_tonic",
           "weight": 2,
           "modifier": {
-            "function": "minecraft:set_count",
+            "type": "minecraft:set_count",
             "count": {
               "type": "minecraft:uniform",
               "min": 1,
