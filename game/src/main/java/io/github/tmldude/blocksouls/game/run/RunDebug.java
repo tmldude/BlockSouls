@@ -1,5 +1,6 @@
 package io.github.tmldude.blocksouls.game.run;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -69,6 +70,57 @@ public final class RunDebug {
 
 	public static Set<UUID> gotKit(MinecraftServer server) {
 		return Set.copyOf(RunData.get(server).gotKit);
+	}
+
+	/**
+	 * {@code /bs wave reward}: places the wave-clear reward chest for the current wave number, near {@code at} (or the
+	 * first player). Pity gun included if owed. Returns where, or null.
+	 */
+	public static net.minecraft.core.BlockPos placeReward(MinecraftServer server, net.minecraft.core.BlockPos at) {
+		RunData data = RunData.get(server);
+		return WaveRewards.placeRewardChest(server, data, Math.max(1, data.wave), null, at);
+	}
+
+	/**
+	 * Makes {@code mob} the current wave's only mob (tests): any mobs the wave already spawned are discarded and nothing
+	 * more spawns, so killing it clears the wave at a known spot.
+	 */
+	public static void adoptWaveMob(MinecraftServer server, net.minecraft.world.entity.Mob mob) {
+		RunData data = RunData.get(server);
+		for (UUID id : List.copyOf(data.waveMobs)) {
+			net.minecraft.world.entity.Entity entity = RunSystem.activeLevel(server).getEntity(id);
+			if (entity != null) {
+				entity.discard();
+			}
+		}
+		data.waveMobs.clear();
+		data.waveMobs.add(mob.getUUID());
+		data.waveTotal = 1;
+		data.waveSpawned = 1;
+		data.setDirty();
+	}
+
+	/** {@code /bs run pity}: forgets the pity was given and drops it at the party's feet now (whatever the night). */
+	public static boolean forceGunPity(MinecraftServer server) {
+		RunData data = RunData.get(server);
+		int night = data.night;
+		data.gunPityGiven = false;
+		data.night = Math.max(night, RunSystem.config().gunPityNight);
+		WaveRewards.onDawn(server, data);
+		data.night = night;
+		data.setDirty();
+		return data.gunPityGiven;
+	}
+
+	public static boolean gunPityGiven(MinecraftServer server) {
+		return RunData.get(server).gunPityGiven;
+	}
+
+	/** Sets the night counter (tests: the pity gun is owed from {@code gunPityNight}). */
+	public static void setNight(MinecraftServer server, int night) {
+		RunData data = RunData.get(server);
+		data.night = night;
+		data.setDirty();
 	}
 
 	// ---------------------------------------------------------------- v2 expedition spine

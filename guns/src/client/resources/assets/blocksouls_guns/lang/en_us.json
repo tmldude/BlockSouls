@@ -60,5 +60,7 @@
   "tooltip.blocksouls_guns.exotic_catalyst": "Smithing template: catalyst + a gun → its exotic",
   "subtitles.blocksouls_guns.gun.exotic.vent": "Gun vents",
   "subtitles.blocksouls_guns.gun.exotic.tether": "Web rocket bursts",
-  "subtitles.blocksouls_guns.gun.exotic.mark": "Targets marked"
+  "subtitles.blocksouls_guns.gun.exotic.mark": "Targets marked",
+  "subtitles.blocksouls_guns.gun.drop": "Good gun drops",
+  "tooltip.blocksouls_guns.part_used_in": "Used in: %s"
 }

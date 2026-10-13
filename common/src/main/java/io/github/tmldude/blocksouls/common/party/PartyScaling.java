@@ -62,6 +62,11 @@ public final class PartyScaling {
 		return curve(players, config.raidCrystals);
 	}
 
+	/** Party-shared loot (reward bundles, pity guns). */
+	public static double rewards(int players) {
+		return curve(players, config.rewards);
+	}
+
 	/** Abilities: multiplier on ultimate charge per kill / precision hit. */
 	public static double ultimateCharge(int players) {
 		return curve(players, config.ultimateCharge);

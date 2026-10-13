@@ -64,6 +64,11 @@ public final class RunData extends SavedData {
 	long breakEndsAt;
 	/** The last player to kill a wave mob this wave (reward chest goes near them). */
 	UUID lastKiller;
+	/** Where the last wave mob of this wave died ({@code BlockPos.asLong}); the reward chest goes there. */
+	long lastKillPos;
+	boolean hasLastKillPos;
+	/** The night-2 pity gun was handed out this run. */
+	boolean gunPityGiven;
 
 	/** The run paused the overworld clock because the server is empty. */
 	boolean clockPausedByRun;
@@ -107,6 +112,7 @@ public final class RunData extends SavedData {
 		endGameTime = 0;
 		gotKit.clear();
 		pistolsBroken = false;
+		gunPityGiven = false;
 		bossesKilled.clear();
 		nightModifiers.clear();
 		rosterOffsets.clear();
@@ -132,6 +138,7 @@ public final class RunData extends SavedData {
 		waveElites = 0;
 		waveMobs.clear();
 		lastKiller = null;
+		hasLastKillPos = false;
 		setDirty();
 	}
 
@@ -168,6 +175,9 @@ public final class RunData extends SavedData {
 		data.breakEndsAt = tag.getLongOr("breakEndsAt", 0);
 		String killer = tag.getStringOr("lastKiller", "");
 		data.lastKiller = killer.isEmpty() ? null : parseUuid(killer);
+		data.hasLastKillPos = tag.getBooleanOr("hasLastKillPos", false);
+		data.lastKillPos = tag.getLongOr("lastKillPos", 0);
+		data.gunPityGiven = tag.getBooleanOr("gunPityGiven", false);
 		data.clockPausedByRun = tag.getBooleanOr("clockPausedByRun", false);
 		data.actOrdinal = Math.max(1, tag.getIntOr("actOrdinal", 1));
 		data.highestOpenAct = Math.max(data.actOrdinal, tag.getIntOr("highestOpenAct", 1));
@@ -213,6 +223,9 @@ public final class RunData extends SavedData {
 		tag.put("hunters", writeStrings(hunters.stream().map(UUID::toString).toList()));
 		tag.putLong("breakEndsAt", breakEndsAt);
 		tag.putString("lastKiller", lastKiller == null ? "" : lastKiller.toString());
+		tag.putBoolean("hasLastKillPos", hasLastKillPos);
+		tag.putLong("lastKillPos", lastKillPos);
+		tag.putBoolean("gunPityGiven", gunPityGiven);
 		tag.putBoolean("clockPausedByRun", clockPausedByRun);
 		tag.putInt("actOrdinal", actOrdinal);
 		tag.putInt("highestOpenAct", highestOpenAct);

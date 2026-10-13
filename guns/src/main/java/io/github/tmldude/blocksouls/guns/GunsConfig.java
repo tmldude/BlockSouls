@@ -8,6 +8,12 @@ import io.github.tmldude.blocksouls.guns.weapon.Weapons;
 
 /** {@code config/blocksouls/guns.json}. Times are ticks unless named in seconds; chances are 0..1. */
 public class GunsConfig {
+	/** Defaults revision {@link #migrate} brings older files up to. */
+	public static final int CURRENT_DEFAULTS = 1;
+
+	/** Which defaults revision this file was written against (0 = before the field existed). */
+	public int defaultsVersion;
+
 	/** Per-weapon stats. Each entry replaces that weapon's defaults whole; an invalid entry is ignored (logged). */
 	public Map<String, GunStats> weapons = new LinkedHashMap<>(Weapons.defaults());
 
@@ -16,6 +22,33 @@ public class GunsConfig {
 	public Shooting shooting = new Shooting();
 	public Loot loot = new Loot();
 	public Exotics exotics = new Exotics();
+	public Drops drops = new Drops();
+
+	/**
+	 * Brings a guns.json written against older defaults up to date: values still at an old default take the new one,
+	 * anything changed by hand is kept. Returns whether anything changed (so the caller saves the file).
+	 */
+	public static boolean migrate(GunsConfig config) {
+		if (config.defaultsVersion >= CURRENT_DEFAULTS) {
+			return false;
+		}
+		// 1: drops-and-pacing (v0.11): about twice the ammo from waves.
+		if (config.defaultsVersion < 1 && config.loot != null) {
+			Loot loot = config.loot;
+			loot.waveCommonPrimaryChance = bump(loot.waveCommonPrimaryChance, 0.12, 0.25);
+			loot.waveCommonSpecialChance = bump(loot.waveCommonSpecialChance, 0.03, 0.06);
+			loot.waveRarePrimaryChance = bump(loot.waveRarePrimaryChance, 0.15, 0.30);
+			loot.waveRareSpecialChance = bump(loot.waveRareSpecialChance, 0.06, 0.12);
+			loot.waveLegendaryPrimaryChance = bump(loot.waveLegendaryPrimaryChance, 0.18, 0.35);
+			loot.waveLegendarySpecialChance = bump(loot.waveLegendarySpecialChance, 0.10, 0.20);
+		}
+		config.defaultsVersion = CURRENT_DEFAULTS;
+		return true;
+	}
+
+	private static double bump(double value, double oldDefault, double newDefault) {
+		return value == oldDefault ? newDefault : value;
+	}
 
 	public static class Rarity {
 		public double commonDamageMult = 1.0;
@@ -65,16 +98,21 @@ public class GunsConfig {
 		public Map<String, Integer> gunWeights = defaultGunWeights();
 
 		/** Wave kill drops (game's {@code wave_drops/<tier>} tables): chance per kill. */
-		public double waveCommonPrimaryChance = 0.12;
-		public double waveCommonSpecialChance = 0.03;
+		public double waveCommonPrimaryChance = 0.25;
+		public double waveCommonSpecialChance = 0.06;
 		public double waveCommonGunChance = 0.01;
-		public double waveRarePrimaryChance = 0.15;
-		public double waveRareSpecialChance = 0.06;
+		public double waveRarePrimaryChance = 0.30;
+		public double waveRareSpecialChance = 0.12;
 		public double waveRareGunChance = 0.02;
-		public double waveLegendaryPrimaryChance = 0.18;
-		public double waveLegendarySpecialChance = 0.10;
+		public double waveLegendaryPrimaryChance = 0.35;
+		public double waveLegendarySpecialChance = 0.20;
 		public double waveLegendaryGunChance = 0.04;
-		/** Wave-clear reward chest: one gun (rare tier) at this chance, plus ammo. */
+		/** Rounds per wave-kill ammo drop. */
+		public int wavePrimaryMin = 8;
+		public int wavePrimaryMax = 20;
+		public int waveSpecialMin = 3;
+		public int waveSpecialMax = 6;
+		/** Wave-clear reward chest (per reward roll): one gun (rare tier) at this chance, plus ammo. */
 		public double waveClearGunChance = 0.5;
 
 		/** Weights of each exotic when a {@code roll_perks} entry with {@code "tier": "exotic"} picks one. */
@@ -109,6 +147,31 @@ public class GunsConfig {
 		public double tetherBlastDamage = 12;
 		public int tetherTicks = 60;
 		public double tetherPull = 0.18;
+		public int waveClearPrimaryMin = 24;
+		public int waveClearPrimaryMax = 48;
+		public int waveClearSpecialMin = 6;
+		public int waveClearSpecialMax = 12;
+		/** Elite kills (game's {@code wave_drops/elite} table, per roll): a gun at this chance and tier, plus ammo. */
+		public double eliteGunChance = 0.35;
+		public String eliteGunTier = "rare";
+		public int elitePrimaryMin = 16;
+		public int elitePrimaryMax = 32;
+		/** The night-2 pity gun's {@code roll_perks} tier. */
+		public String pityGunTier = "rare";
+		/** Max stack sizes (applied at startup). Vanilla allows up to 99. */
+		public int primaryAmmoStack = 99;
+		public int specialAmmoStack = 64;
+	}
+
+	/** Rare and legendary guns on the ground: a colored particle beam, glow outline, rarity-colored name and a sound sting. */
+	public static class Drops {
+		public boolean beam = true;
+		/** Ticks between beam particle columns, and the column's height in blocks. */
+		public int beamIntervalTicks = 8;
+		public double beamHeight = 6;
+		public boolean glow = true;
+		public boolean nameplate = true;
+		public boolean sting = true;
 	}
 
 	/**

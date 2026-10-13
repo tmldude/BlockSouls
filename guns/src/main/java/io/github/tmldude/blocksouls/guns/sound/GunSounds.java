@@ -33,6 +33,9 @@ public final class GunSounds {
 	public static final SoundEvent EXOTIC_TETHER = register("gun.exotic.tether");
 	/** Lantern Eye marking targets. */
 	public static final SoundEvent EXOTIC_MARK = register("gun.exotic.mark");
+	/** Stings when a rare / legendary gun lands on the ground. */
+	public static final SoundEvent DROP_RARE = register("gun.drop.rare");
+	public static final SoundEvent DROP_LEGENDARY = register("gun.drop.legendary");
 
 	private GunSounds() {
 	}
