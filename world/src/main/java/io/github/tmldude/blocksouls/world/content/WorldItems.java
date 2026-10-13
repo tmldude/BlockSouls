@@ -63,6 +63,9 @@ public final class WorldItems {
 			new MobEffectInstance(MobEffects.JUMP_BOOST, 900, 1), new MobEffectInstance(MobEffects.SLOW_FALLING, 300, 0)));
 	public static final Item SKYSTEEL_FEATHERBOOTS = item("skysteel_featherboots", Item::new, new Item.Properties()
 			.humanoidArmor(WorldArmor.SKYSTEEL, ArmorType.BOOTS).attributes(WorldArmor.featherboots()).rarity(Rarity.UNCOMMON));
+	/** The sky temple's seed: carry it to the camp altar without taking a hit (the pedestal's position rides along). */
+	public static final Item GLOWING_SEED = item("glowing_seed", Item::new, new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)
+			.component(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
 	// --- end floor 3 ---
 
 	public static final Item GUNMETAL_ORE = block(WorldBlocks.GUNMETAL_ORE);

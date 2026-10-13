@@ -88,6 +88,7 @@ class DayLoopTest {
 		old.events.pool = new java.util.ArrayList<>(List.of(new DirectorConfig.EventSpec("blood_altar", 3, 1)));
 		assertEquals(true, DirectorConfig.migrate(old));
 		assertEquals(true, old.events.pool.stream().anyMatch(spec -> "blocksouls_world:vault_prison".equals(spec.id)));
+		assertEquals(true, old.events.pool.stream().anyMatch(spec -> "blocksouls_world:wind_altar".equals(spec.id)));
 		assertEquals(false, old.events.pool.stream().anyMatch(spec -> "cursed_chest".equals(spec.id)), "only floor events are added");
 	}
 
@@ -138,16 +139,32 @@ class DayLoopTest {
 		assertEquals(1, old.events.pool.stream().filter(spec -> "blood_altar".equals(spec.id) && spec.floorTags.isEmpty()).count());
 	}
 
-	// v2-floor2-infernal: a file already at revision 3 or 4 still gets the Infernal's events, once.
+	// --- floor 3, Skyrift (Stage 6C) ---
+	@Test
+	void skyriftEventsAndRosterJoinAFileAlreadyAtThree() {
+		DirectorConfig old = new DirectorConfig();
+		old.defaultsVersion = 3;
+		old.events.pool = new java.util.ArrayList<>(List.of(new DirectorConfig.EventSpec("blood_altar", 3, 1)));
+		old.events.miniBossesByFloorTag = new java.util.LinkedHashMap<>(java.util.Map.of("vault", new java.util.ArrayList<>(List.of("x:y"))));
+		assertEquals(true, DirectorConfig.migrate(old));
+		assertEquals(true, old.events.pool.stream().anyMatch(spec -> "blocksouls_world:wind_altar".equals(spec.id)));
+		assertEquals(List.of("x:y"), old.events.miniBossesByFloorTag.get("vault"), "a tuned roster is kept");
+		assertEquals(true, old.events.miniBossesByFloorTag.containsKey("skyrift"));
+		assertEquals(false, DirectorConfig.migrate(old), "second run is a no-op");
+	}
+
+	// v2-floor2-infernal: a file already at revision 4 (Skyrift's) still gets the Infernal's events and roster, once.
 	@Test
 	void migrationAddsTheInfernalEventsToALaterPool() {
 		DirectorConfig old = new DirectorConfig();
 		old.defaultsVersion = 4;
+		old.events.miniBossesByFloorTag = new java.util.LinkedHashMap<>(java.util.Map.of("vault", new java.util.ArrayList<>(List.of("x:y"))));
 		old.events.pool = new java.util.ArrayList<>(List.of(new DirectorConfig.EventSpec("blood_altar", 3, 1),
 				new DirectorConfig.EventSpec("blood_altar", 3, 1, List.of("blight"), false)));
 		assertEquals(true, DirectorConfig.migrate(old));
 		assertEquals(true, old.events.pool.stream().anyMatch(spec -> "blocksouls_world:stranded_trader".equals(spec.id)));
 		assertEquals(1, old.events.pool.stream().filter(spec -> "blood_altar".equals(spec.id) && spec.floorTags.equals(List.of("blight"))).count());
+		assertEquals(List.of("blocksouls_bosses:ashwyrm", "blocksouls_bosses:furnace_knight"), old.events.miniBossesByFloorTag.get("infernal"));
 		assertEquals(false, DirectorConfig.migrate(old));
 	}
 }

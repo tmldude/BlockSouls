@@ -14,7 +14,7 @@ import java.util.Map;
 public class DirectorConfig {
 	public static final String FILE = "director";
 	/** Defaults revision {@link #migrate} brings older files up to. */
-	public static final int CURRENT_DEFAULTS = 5;
+	public static final int CURRENT_DEFAULTS = 5; // 4: floor 3, Skyrift (Stage 6C); 5: floor 2, Infernal
 
 	/** Which defaults revision this file was written against (0 = before the field existed). */
 	public int defaultsVersion;
@@ -66,8 +66,23 @@ public class DirectorConfig {
 				}
 			}
 		}
-		// 4: reserved for floor 3, Skyrift (Stage 6C).
-		// 5 (v2-floor2-infernal): the Infernal's floor events join a pool that lacks them (by id and tags).
+		// --- floor 3, Skyrift (Stage 6C) ---
+		// 4: floors whose events and rosters landed after 3 (Skyrift) join a file already at 3; ids and tags kept by hand win.
+		if (config.defaultsVersion < 4 && config.events != null) {
+			if (config.events.pool != null) {
+				for (EventSpec spec : new Events().pool) {
+					if (!spec.floorTags.isEmpty() && config.events.pool.stream().noneMatch(old -> spec.id.equals(old.id))) {
+						config.events.pool.add(spec);
+					}
+				}
+			}
+			if (config.events.miniBossesByFloorTag != null) {
+				defaultFloorMiniBosses().forEach(config.events.miniBossesByFloorTag::putIfAbsent);
+			}
+		}
+		// --- end Skyrift block
+		// 5 (v2-floor2-infernal): the Infernal's floor events join a pool that lacks them (by id and tags),
+		// and its mini-boss roster a file without one (a file Skyrift's step 4 already brought to 4).
 		if (config.defaultsVersion < 5 && config.events != null && config.events.pool != null) {
 			for (EventSpec spec : new Events().pool) {
 				if (spec.floorTags.contains("infernal") && config.events.pool.stream()
@@ -75,6 +90,9 @@ public class DirectorConfig {
 					config.events.pool.add(spec);
 				}
 			}
+		}
+		if (config.defaultsVersion < 5 && config.events != null && config.events.miniBossesByFloorTag != null) {
+			config.events.miniBossesByFloorTag.putIfAbsent("infernal", defaultFloorMiniBosses().get("infernal"));
 		}
 		// end v2-floor2-infernal
 		config.defaultsVersion = CURRENT_DEFAULTS;
@@ -208,6 +226,10 @@ public class DirectorConfig {
 				// v2-floor5-blight: the Blighted Surface's own events (the soul wager runs at every siege already)
 				new EventSpec("blood_altar", 3, 1, List.of("blight"), false),
 				new EventSpec("challenge_pylon", 3, 1, List.of("blight"), false),
+				// --- floor 3, Skyrift (Stage 6C): placed by the world module through DirectorEvents.PLACE_EVENT ---
+				new EventSpec("blocksouls_world:wind_altar", 4, 1, List.of("skyrift"), false),
+				new EventSpec("blocksouls_world:falling_shard_chest", 4, 1, List.of("skyrift"), false),
+				new EventSpec("blocksouls_world:bridge_ambush", 3, 1, List.of("skyrift"), true),
 				// --- floor 2, Infernal (v2-floor2-infernal): placed by the world module through DirectorEvents.PLACE_EVENT ---
 				new EventSpec("blocksouls_world:soulfire_altar", 4, 1, List.of("infernal"), false),
 				new EventSpec("blocksouls_world:lava_chest", 4, 1, List.of("infernal"), false),
@@ -244,6 +266,9 @@ public class DirectorConfig {
 		rosters.put("vault", new ArrayList<>(List.of("blocksouls_world:vault_listener", "blocksouls_world:vault_colossus")));
 		// v2-floor5-blight: Blightheart, the Pale Rider and one boss from an earlier floor ({@link DirectorRules#EARLIER})
 		rosters.put("blight", new ArrayList<>(List.of("blocksouls_bosses:blightheart", "blocksouls_bosses:pale_rider", DirectorRules.EARLIER)));
+		// --- floor 3, Skyrift (Stage 6C) ---
+		rosters.put("skyrift", new ArrayList<>(List.of("blocksouls_bosses:stormplate_knight", "blocksouls_world:storm_roc",
+				"blocksouls_world:glider_matriarch")));
 		// --- floor 2, Infernal (v2-floor2-infernal) ---
 		rosters.put("infernal", new ArrayList<>(List.of("blocksouls_bosses:ashwyrm", "blocksouls_bosses:furnace_knight")));
 		return rosters;

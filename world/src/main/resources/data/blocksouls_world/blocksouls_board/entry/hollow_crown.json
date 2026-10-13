@@ -1,1 +1,1 @@
-{ "recipe": "blocksouls_world:hollow_crown", "board": "forge", "minFloor": 5, "floorTags": ["blight"] }
+{ "recipe": "blocksouls_world:hollow_crown", "board": "forge", "minFloor": 5, "floorTags": ["blight"], "maxFloor": 5 }

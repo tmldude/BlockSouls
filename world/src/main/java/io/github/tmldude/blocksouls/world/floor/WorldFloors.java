@@ -92,6 +92,9 @@ public final class WorldFloors {
 		FloorBlocks.init();
 		FloorTemplateCatalog.register();
 		SkyriftFloor.init();
+		SkySecret.init(); // floor 3, Skyrift: seed secret, Director events, sky mobs
+		SkyEvents.init();
+		SkyMobs.init();
 		VaultHazards.init(); // floor 4, The Vault
 		InfernalHazard.init(); // v2-floor2-infernal
 		InfernalEvents.init(); // v2-floor2-infernal
@@ -236,6 +239,7 @@ public final class WorldFloors {
 
 	/** Falling off the island: back to the camp, minus a little health (never below one). */
 	public static void fellOff(ServerPlayer player, PlacedFloor floor) {
+		SkySecret.dim(player); // Skyrift (floor 3): the fall penalty isn't a hit, but it still costs the seed
 		sendToCamp(player, floor);
 		player.setHealth(Math.max(1.0F, player.getHealth() - Math.max(0, config.fallPenalty)));
 		player.sendOverlayMessage(Component.translatable("message.blocksouls_world.floor.fell"));

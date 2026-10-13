@@ -50,6 +50,30 @@ public class FloorsConfig {
 	public double rimWindSneakFactor = 0.25;
 	/** {@code /bs floor hazard gust}: the debug gust is this many times the full rim wind, applied once. */
 	public double gustFactor = 12.0;
+	// Skyrift slice 3: the seed, the events, the siege drop, the mini-bosses.
+	/** Wind altar: chance a relic offered comes back one tier up (else the wind throws you). */
+	public double windAltarWinChance = 0.5;
+	/** Wind altar: updraft tonics paid out with a win (the movement prize). */
+	public int windAltarTonics = 2;
+	/** Falling-shard chest: seconds before the shard (and the chest on it) drops away. */
+	public int fallingShardSeconds = 45;
+	/** Falling-shard chest: how far above the event spot the shard floats. */
+	public int fallingShardRise = 8;
+	/** Siege on Skyrift: share of wave mobs that drop in from an elevated siege point (a shard) instead. */
+	public double shardSiegeChance = 0.4;
+	/** Slow falling (ticks) a mob dropping in from a shard gets. */
+	public int shardSiegeSlowFall = 160;
+	/** Storm Roc: base health (times {@code PartyScaling.bossHealth}), phantom size, and its wing gust. */
+	public double rocHealth = 90.0;
+	public int rocSize = 6;
+	public int rocGustTicks = 140;
+	public double rocGustRadius = 9.0;
+	public double rocGustStrength = 1.3;
+	/** Glider Matriarch: base health (times {@code bossHealth}), size, and her pack (times {@code directorBurst}). */
+	public double matriarchHealth = 60.0;
+	public int matriarchSize = 3;
+	public int gliderPack = 4;
+	public double gliderHealth = 8.0;
 
 	/** Hits a resource node takes before it pops. */
 	public int nodeHits = 3;

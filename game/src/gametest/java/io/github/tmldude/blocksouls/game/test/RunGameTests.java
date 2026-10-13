@@ -26,6 +26,7 @@ import net.minecraft.world.phys.Vec3;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 
 import io.github.tmldude.blocksouls.common.CommonIds;
+import io.github.tmldude.blocksouls.common.event.BossEvents;
 import io.github.tmldude.blocksouls.common.event.RunEvents;
 import io.github.tmldude.blocksouls.common.run.RunPhase;
 import io.github.tmldude.blocksouls.common.run.Runs;
@@ -196,6 +197,21 @@ public class RunGameTests {
 			tearDown(helper);
 			helper.succeed();
 		});
+	}
+
+	/** v2-floor6-arena: the Riftwarden's kill ends a running run (souls kept, summary), like {@code endRun}. */
+	@GameTest(environment = "blocksouls_game_test:run_riftwarden", maxTicks = 40)
+	public void riftwardenKillEndsTheRun(GameTestHelper helper) {
+		ServerPlayer player = setUp(helper);
+		MinecraftServer server = helper.getLevel().getServer();
+		RunSystem.startRun(server, null);
+		helper.assertTrue(Runs.get(server).phase() != RunPhase.OVER && Runs.get(server).phase() != RunPhase.NOT_STARTED,
+				"run running, was " + Runs.get(server).phase());
+		BossEvents.KILLED.invoker().onBoss(helper.getLevel(), CommonIds.RIFTWARDEN, player, List.of(player));
+		helper.assertTrue(Runs.get(server).phase() == RunPhase.OVER, "phase OVER after the Riftwarden, was " + Runs.get(server).phase());
+		helper.assertTrue(EVENTS.contains("over:OVER"), "RUN_OVER fired, events " + EVENTS);
+		tearDown(helper);
+		helper.succeed();
 	}
 
 	@GameTest(environment = "blocksouls_game_test:run_loot", maxTicks = 20)

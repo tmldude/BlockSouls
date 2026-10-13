@@ -118,7 +118,9 @@ Defaults picked while building floor 2, Infernal (Stage 6C wave A; brief `docs/s
     drink a tonic). Permanent fire resistance, leaves after `strandedTraderMinutes` (6). On top of his vanilla offers
     he sells an Ashcap Tonic for `traderTonicCinder` (2) cinder and a Scorch Draught for `traderDraughtCinder` (3).
   - Existing director.json files get these through the migration: `CURRENT_DEFAULTS` goes to 5 (4 is Skyrift's), with
-    an additive step 5 that adds each default `infernal`-tagged event a file lacks (by id and tags).
+    an additive step 5 that adds each default `infernal`-tagged event a file lacks (by id and tags) and the `infernal`
+    mini-boss roster if the file has none. Mobs likewise: `MobsConfig.CURRENT_DEFAULTS` 3 (2 is Skyrift's) adds the
+    `infernal` affix mix to a file without one; a tag already in the file is kept as tuned.
 - **No wall-buy:** the spec's "fire-gun wall-buy" has no wall-buy system anywhere in the code to hang it on; skipped.
 - **Mini-bosses:** `miniBossesByFloorTag.infernal` = Ashwyrm, Furnace Knight. There is no Hound-pack archetype in
   bosses or mobs, so the pool is those two.

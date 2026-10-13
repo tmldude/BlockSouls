@@ -59,9 +59,36 @@ Spec: `docs/design/floors.md` "Floor 6 — Final Arena". Code: `bosses/src/*/jav
 - Arena hazards live in the bosses module (fight hazards scaled by `arenaHazards`), not in the world floor. They
   only matter during the fight.
 
-## Planned (later PRs)
-- **Rush (PR 3):** on entering P3, track the damage dealt since the rush began. Dealing `rushFraction` × max HP (or
-  killing it) wins. When the window runs out, the boss heals to `rushFailHealShare` (default = the P2 threshold) and
-  P2 resumes. Window = `rushSeconds` (60) × `rushWindow(players)` × `rushShrink`^(rush − 1). After `maxRushes`
-  failures comes a telegraphed wipe.
-- **Shop filter:** floor-6 board entry files (tonics and ammo only) land once the board reader (#70) is on main.
+## The damage rush (slice 3)
+- **P3 is the rush.** Entering it opens a window of `rushSeconds` 60 × `rushWindow(players)` (×0.86 at 8) ×
+  `rushShrink` 0.8^(rush − 1), never under `minRushSeconds` 25. It is fixed when the rush starts. Dealing
+  `rushFraction` 0.25 of max HP during the window kills the Warden on the spot (the hit's source gets the kill),
+  which fires the kill event and ends the run. P3 starts at 30%, so a landed rush always comes before the bar
+  empties. Running the bar out also wins.
+- **The clock pauses** while the Warden is staggered or shielded, since no damage can land then (this includes the
+  P3 entry stagger). Participants see the seconds and the % dealt in the action bar every half second, plus a
+  bell 5 s before the end.
+- **A timed-out rush** heals it to `rushFailHealShare` 0.59 (clamped between the P3 and P2 lines; it never lowers
+  health) and forces P2 again: the adds, beam and fissures come back. The next drop under 30% starts the next,
+  shorter rush.
+- **After `maxRushes` 3 failed rushes the Warden is *unbound*** instead of a wipe: no more timer or healing, it stays
+  in P3 and hits ×`unboundDamage` 1.5 until the bar runs out. This keeps solo completable; it just gets harder.
+  The plan's "telegraphed wipe" is dropped, because a hard fail state would make a slow solo build unwinnable.
+- **Wipes reset everything:** a reset (`onReset`) clears the rush count and the unbound state.
+- **Tests:** `RiftMathTest` covers the window, win and last-rush math at 1 and 8 players. `RiftwardenGameTests`
+  covers landing the fraction (kills it, kill event) and a timed-out rush (back to P2 at 59%).
+  `RunGameTests.riftwardenKillEndsTheRun` checks that the kill event ends a running run.
+
+## The floor-6 shop: tonics and ammo only
+- **Data, not code:** board entries only narrow, so `tools/content/gen_floor6_shop.py` writes one entry per other
+  BlockSouls recipe, capping it at floor 5. The entries go in `world/.../blocksouls_board/entry/floor6_arena/`,
+  as `{"recipe", "maxFloor": 5}`.
+- **Kept (no file):** results in `#blocksouls:ammo` or `#blocksouls:brew_board`, and ids naming a tonic, antidote,
+  draught, broth or ammo. Draughts and broths are brewed consumables, which is what the arena's "tonics" means.
+- **Recipes with their own entry elsewhere** (floor gear such as the skysteel featherboots or the cinder plate) get
+  no second file, because for two entries on one recipe the last one loaded wins, and that order depends on file
+  names. Instead, the script writes `"maxFloor": 5` into that file with a minimal text edit, unless it starts on
+  floor 6 or later. This edits other floor sessions' entry files; it is the only way to cap them that does not
+  depend on load order.
+- **New recipes show on floor 6 until the script is rerun.** `--check` reports missing or stale files and
+  uncapped entries.

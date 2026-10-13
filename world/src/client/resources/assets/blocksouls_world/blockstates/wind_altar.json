@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "active=false": {
+      "model": "blocksouls_world:block/wind_altar"
+    },
+    "active=true": {
+      "model": "blocksouls_world:block/wind_altar_active"
+    }
+  }
+}

@@ -1,5 +1,6 @@
 {
   "recipe": "blocksouls_world:combustion_book_from_cinder",
   "board": "forge",
-  "minFloor": 2
+  "minFloor": 2,
+  "maxFloor": 5
 }

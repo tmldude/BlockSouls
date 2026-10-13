@@ -14,6 +14,7 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 
 import io.github.tmldude.blocksouls.common.CommonIds;
+import io.github.tmldude.blocksouls.world.BlockSoulsWorld;
 
 /** The floors' blocks: resource nodes, herbs and the exit portal. None has an item; the floor builder places them. */
 public final class FloorBlocks {
@@ -36,6 +37,9 @@ public final class FloorBlocks {
 			BlockBehaviour.Properties.of().mapColor(MapColor.SNOW).strength(-1.0F, 3600000.0F).noLootTable().noCollision()
 					.sound(SoundType.AZALEA).offsetType(BlockBehaviour.OffsetType.XZ).pushReaction(PushReaction.IMMOVEABLE)
 					.lightLevel(state -> 9));
+	public static final Block SEED_PEDESTAL = sky("seed_pedestal", SkyriftBlock.Kind.PEDESTAL, MapColor.QUARTZ, 12);
+	public static final Block SKY_ALTAR = sky("sky_altar", SkyriftBlock.Kind.ALTAR, MapColor.QUARTZ, 14);
+	public static final Block WIND_ALTAR = sky("wind_altar", SkyriftBlock.Kind.WIND_ALTAR, MapColor.ICE, 8);
 	// --- end floor 3 ---
 	/** v2-floor2-infernal: the fortress vault's soulfire door; a water bucket puts it out. */
 	public static final Block SOULFIRE_SEAL = register(CommonIds.SOULFIRE_SEAL, SoulfireSealBlock::new,
@@ -52,6 +56,13 @@ public final class FloorBlocks {
 	private static BlockBehaviour.Properties node(MapColor color, SoundType sound) {
 		return BlockBehaviour.Properties.of().mapColor(color).strength(-1.0F, 3600000.0F).noLootTable().sound(sound)
 				.pushReaction(PushReaction.IMMOVEABLE);
+	}
+
+	/** A Skyrift block: unbreakable, immovable, lit (by {@code light}) while active. */
+	private static Block sky(String name, SkyriftBlock.Kind kind, MapColor color, int light) {
+		return register(BlockSoulsWorld.id(name), properties -> new SkyriftBlock(kind, properties), BlockBehaviour.Properties.of().mapColor(color)
+				.strength(-1.0F, 3600000.0F).noLootTable().sound(SoundType.CALCITE).pushReaction(PushReaction.IMMOVEABLE)
+				.lightLevel(state -> state.getValue(SkyriftBlock.ACTIVE) ? light : 3));
 	}
 
 	private static Block register(Identifier id, Function<BlockBehaviour.Properties, Block> factory, BlockBehaviour.Properties properties) {
