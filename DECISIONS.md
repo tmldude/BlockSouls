@@ -427,3 +427,19 @@ session's decisions file. Slower per session; the orchestrator keeps the paralle
   its number and tags to `WaveMobs.eligible(wave, floor, tags)`; outside any floor in a multi-act run the current
   act's number stands in with no tags (the same fallback the Director's affix roll uses); classic runs keep
   `eligible(wave)` untouched. Under `more_elites`, elites also skip the per-run roster shuffle's wave offset.
+
+## Floors 2–6 first draft and the shopkeeper boards (2026-10-13, owner + v2 orchestrator)
+
+- **Floor order** replaces PLAN2 §1's list: Surface → **Infernal** (nether-like) → **Skyrift** (aether-like) →
+  **The Vault** (stronghold: bounded box, breakable walls, no sky) → **Blighted Surface** (floor 1 worn down,
+  mobs everywhere by day, roaming bosses, zone problems, two sieges) → **Final Arena** (no day; boss phase 1,
+  phase 2, damage rush). Caverns folds into the cave slots and the Vault; Blightheart is floor 5's theme and
+  roaming boss, not a floor. Full brief: `docs/design/floors.md`.
+- **Two day-lanes per floor:** one ore node line (→ the shopkeeper's **forge board**: armor, gun upgrades,
+  enchantments) and one herb line (→ the **brew board**: heals, buffs, night tonics). The day is too short for
+  both; that is the point.
+- **Crafting tables are disabled** in floors runs. BlockSouls recipes stay JSON (the recipe-web check and
+  CONTENT.md rules hold) but only the shopkeeper's boards execute them: consumables on the brew board, gear on
+  the forge board. Player crafting grids never match a BlockSouls recipe. The trade board keeps the offer pool.
+- **Build:** Stage 6C. Wave A = boards + floors 2–5 in parallel (Opus workers); wave B = floor 6 after the
+  boards merge. Owner playtests floors 1–5 and the final boss before any per-floor tuning.

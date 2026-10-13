@@ -1,7 +1,8 @@
-# Floors 1–6: design brief (DRAFT for the owner, 2026-10-13)
+# Floors 1–6: design brief (accepted by the owner 2026-10-13, first draft to build)
 
-Status: **draft, awaiting owner edits.** Fill or strike anything; each floor's block is the template a worker
-session gets. Where this conflicts with PLAN2.md §1 it supersedes it once accepted (log in DECISIONS.md).
+Status: **accepted as the first draft.** Owner's call: build all of it, then playtest floors 1–5 and the final boss
+and tune from feel. Each floor's block is the template its worker session gets. Where this conflicts with
+PLAN2.md §1 it supersedes it (DECISIONS.md "Floors 2–6 first draft").
 
 Mechanics every floor shares (already built or contracted): island map in the void with a hard edge, 8-minute
 day (config per floor), camp + shopkeeper + horn at the centre, exit portal lit by surviving the siege, slots
@@ -133,17 +134,20 @@ Siege twist:           what the night does differently here
 - **Hades-style**: an NPC met in events across floors asks for a token; carry it to floor 6 unhit → an alternate
   boss (harder, better ending, a rune).
 
-## Decisions I need from the owner
-- **D1** Remove player-side crafting for BlockSouls items and make the shopkeeper's boards the converter (recipe
-  web check counts trade entries). Yes / no / keep crafting for consumables only.
-- **D2** Accept the floor order above (Caverns folds into cave slots + the Vault; Blightheart becomes floor 5's
-  theme + roaming boss; Skyrift moves to floor 3).
-- **D3** The two-lane day: one ore node line + one herb line per floor, both through the shopkeeper. Yes / no.
-- **D4** Floor 5's "two sieges" twist: keep, or a single longer siege?
-- **D5** Per-floor edits to the drafts above (anything in the template blocks).
+## Owner decisions (2026-10-13)
+- **D1** Crafting tables are **disabled** in floors runs. Consumables keep *recipes*, but every BlockSouls recipe is
+  crafted **at the shopkeeper**: the **brew board** executes consumable recipes, the **forge board** executes gear
+  recipes, the trade board stays the offer pool. Recipes stay JSON so the recipe-web check keeps working; player
+  crafting grids never match them.
+- **D2** Floor order accepted: Surface → Infernal → Skyrift → The Vault → Blighted Surface → Final Arena.
+- **D3** The two day-lanes (ore → forge, herb → brew) on every floor. Accepted.
+- **D4** Floor 5 keeps two sieges in one night.
+- **D5** No per-floor edits yet; the drafts above are the first build. Owner playtests floors 1–5 and the final
+  boss, then tunes.
 
-## What happens after sign-off
-Each floor becomes one Opus worker session owning `world` data (templates, node/herb blocks, loot tables) with
-`mobs`/`bosses`/`game` hand-offs for rosters, mini-bosses and the siege twist. Order: 2, 3, 4, 5 in parallel
-once the shopkeeper boards (D1/D3, a `game` + `common` contract) land first; floor 6 waits for bosses v2 part
-breaks and the D1 boards.
+## Build plan (Stage 6C, v2 orchestrator)
+Wave A, in parallel: `v2-boards` (the shopkeeper's forge + brew boards, crafting tables off) and one session per
+floor 2–5 (`v2-floor2-infernal`, `v2-floor3-skyrift`, `v2-floor4-vault`, `v2-floor5-blight`). Each floor session
+owns its `world` templates, blocks, items, loot and decisions file, with small lane exceptions in `mobs`,
+`bosses` and `game` listed in its brief. Wave B after the boards merge: `v2-floor6-arena`. Briefs in
+`docs/sessions/`. Then a playtest release cut by the v1 orchestrator.

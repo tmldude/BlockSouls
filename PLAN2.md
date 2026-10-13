@@ -345,6 +345,9 @@ orchestrator — neither merges the other's.
   | 6B | New bosses | Blightheart boss + Skyrift boss (design sub-sessions for models, per v1 practice) |
   | 6B | Mobs v2 | act rosters, influence map, elite affixes |
   | 6A | **Floors** (replaces Dimensions) | the void floor dimension, the template pool + variation, resource nodes, structure/cave/secret/event/wreck placement, glass-and-void edge, floor escalation |
+- **Stage 6C — floors 2–6 and the boards (parallel; after 6B; owner-accepted brief `docs/design/floors.md`):**
+  `v2-boards` (forge + brew boards, crafting tables off) + `v2-floor2-infernal`, `v2-floor3-skyrift`,
+  `v2-floor4-vault`, `v2-floor5-blight`; then `v2-floor6-arena`. Briefs in `docs/sessions/`.
 - **Stage 7 — intersections (sequential):** acts wired to rosters/drops/recipes; Director tuned;
   balance to a ~2.5 h median; perf with 8 players in act 3; full-run gametest across all four acts;
   Expedition becomes the default run shape; `v2.0.0`.
