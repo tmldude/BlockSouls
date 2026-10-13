@@ -1,0 +1,27 @@
+{
+  "pool": "blocksouls_world:arena",
+  "tags": ["arena", "timeless"],
+  "minFloor": 1,
+  "maxFloor": 99,
+  "weight": 1,
+  "radius": 48,
+  "groundY": 80,
+  "depth": 14,
+  "hills": 0,
+  "terrain": {
+    "top": "minecraft:blackstone",
+    "fill": "minecraft:deepslate",
+    "base": "minecraft:deepslate"
+  },
+  "trees": 0,
+  "nodes": 0,
+  "nodeMix": {
+    "blocksouls_world:scrap_node": 1
+  },
+  "crates": 0,
+  "slots": [
+    { "kind": "camp", "x": 0, "z": 0, "radius": 6 },
+    { "kind": "exit_portal", "x": 0, "z": 9, "radius": 2 },
+    { "kind": "structure", "tag": "final_arena", "x": 0, "z": -28, "radius": 18 }
+  ]
+}
