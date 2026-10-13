@@ -47,19 +47,84 @@
     "blocksouls_world:scrap_node": 2,
     "blocksouls_world:gunmetal_node": 3
   },
+  "rareNodes": {
+    "blocksouls_world:blight_crystal_node": 2
+  },
+  "herbs": {
+    "blocksouls_world:ghostcap": 2
+  },
   "crates": 2,
   "slots": [
-    { "kind": "camp", "x": 0, "z": 0, "radius": 6 },
-    { "kind": "exit_portal", "x": 9, "z": 0, "radius": 2 },
-    { "kind": "structure", "tag": "outpost", "x": -34, "z": -30, "radius": 7 },
-    { "kind": "mini_boss", "x": 36, "z": -30, "radius": 10 },
-    { "kind": "secret", "x": -44, "z": 22, "radius": 4 },
-    { "kind": "event", "x": 30, "z": 34, "radius": 5 },
-    { "kind": "cave", "x": -16, "z": 14, "radius": 4 },
-    { "kind": "wreck", "x": 4, "z": 46, "radius": 7 },
-    { "kind": "node", "tag": "blocksouls_world:gunmetal_node", "x": -48, "z": -6 },
-    { "kind": "node", "tag": "blocksouls_world:gunmetal_node", "x": 50, "z": 4 },
-    { "kind": "node", "x": 12, "z": -44 },
-    { "kind": "node", "x": -26, "z": 42 }
+    {
+      "kind": "camp",
+      "x": 0,
+      "z": 0,
+      "radius": 6
+    },
+    {
+      "kind": "exit_portal",
+      "x": 9,
+      "z": 0,
+      "radius": 2
+    },
+    {
+      "kind": "structure",
+      "tag": "outpost",
+      "x": -34,
+      "z": -30,
+      "radius": 7
+    },
+    {
+      "kind": "mini_boss",
+      "x": 36,
+      "z": -30,
+      "radius": 10
+    },
+    {
+      "kind": "secret",
+      "x": -44,
+      "z": 22,
+      "radius": 4
+    },
+    {
+      "kind": "event",
+      "x": 30,
+      "z": 34,
+      "radius": 5
+    },
+    {
+      "kind": "cave",
+      "x": -16,
+      "z": 14,
+      "radius": 4
+    },
+    {
+      "kind": "wreck",
+      "x": 4,
+      "z": 46,
+      "radius": 7
+    },
+    {
+      "kind": "node",
+      "tag": "blocksouls_world:gunmetal_node",
+      "x": -48,
+      "z": -6
+    },
+    {
+      "kind": "node",
+      "tag": "blocksouls_world:gunmetal_node",
+      "x": 50,
+      "z": 4
+    },
+    {
+      "kind": "node",
+      "x": 12,
+      "z": -44
+    },
+    {
+      "kind": "node",
+      "x": -26,
+      "z": 42
+    }
   ]
 }

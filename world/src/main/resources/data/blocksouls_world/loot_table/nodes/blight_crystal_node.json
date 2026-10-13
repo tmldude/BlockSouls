@@ -1,0 +1,42 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_world:blight_crystal",
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_world:gunmetal_nugget",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 3
+            }
+          },
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_world:scrap",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 2
+            }
+          },
+          "weight": 1
+        }
+      ]
+    }
+  ],
+  "random_sequence": "blocksouls_world:nodes/blight_crystal_node"
+}

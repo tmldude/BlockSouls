@@ -40,6 +40,13 @@ public final class WorldItems {
 	public static final Item GUNMETAL_NUGGET = item("gunmetal_nugget", Item::new, new Item.Properties());
 	public static final Item BLIGHT_CORE = item("blight_core", Item::new, new Item.Properties().rarity(Rarity.UNCOMMON).fireResistant());
 
+	// v2-floor5-blight: the Blighted Surface's rare (blight crystal), its herb (ghostcap) and what they make.
+	public static final Item BLIGHT_CRYSTAL = item("blight_crystal", Item::new, new Item.Properties().rarity(Rarity.RARE));
+	public static final Item GHOSTCAP = item("ghostcap", Item::new, new Item.Properties().rarity(Rarity.UNCOMMON));
+	public static final Item GHOSTCAP_DRAUGHT = item("ghostcap_draught", Item::new, WorldConsumables.draught());
+	public static final Item GHOSTCAP_BROTH = item("ghostcap_broth", Item::new, WorldConsumables.broth());
+	public static final Item HOLLOW_CROWN = item("hollow_crown", Item::new, WorldConsumables.hollowCrown());
+
 	public static final Item GUNMETAL_ORE = block(WorldBlocks.GUNMETAL_ORE);
 	public static final Item DEEPSLATE_GUNMETAL_ORE = block(WorldBlocks.DEEPSLATE_GUNMETAL_ORE);
 	public static final Item RAW_GUNMETAL_BLOCK = block(WorldBlocks.RAW_GUNMETAL_BLOCK);

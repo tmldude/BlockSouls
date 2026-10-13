@@ -128,4 +128,39 @@ class BlightTemplatesTest {
 		FloorTemplate plain = FloorPlannerTest.template("plain");
 		assertEquals(plain.terrain.top, plain.terrain.topAt(3, -7));
 	}
+
+	@Test
+	void rareNodesAndGhostcapsScaleWithTheParty() throws Exception {
+		String crystal = "blocksouls_world:blight_crystal_node";
+		String ghostcap = "blocksouls_world:ghostcap";
+		for (FloorTemplate template : blight()) {
+			int[] crystals = new int[2];
+			int[] herbs = new int[2];
+			int[] players = {1, 8};
+			for (int i = 0; i < 2; i++) {
+				FloorPlanner.FloorPlan plan = FloorPlanner.plan(template, config, 5, players[i], 77);
+				for (FloorPlanner.PlannedSlot slot : plan.slots(FloorSlotKind.NODE)) {
+					assertTrue((long) slot.x() * slot.x() + (long) slot.z() * slot.z() <= (long) plan.radius() * plan.radius(), template.id + " " + slot);
+					if (slot.tag().equals(crystal)) {
+						crystals[i]++;
+					} else if (slot.tag().equals(ghostcap)) {
+						herbs[i]++;
+					}
+				}
+			}
+			// The brief: 2-3 herbs per floor (2 solo, x floorSize -> 3 at 8); the rare node grows like the other nodes.
+			assertEquals(2, herbs[0], template.id);
+			assertEquals(3, herbs[1], template.id);
+			assertTrue(crystals[0] >= 1, template.id);
+			assertTrue(crystals[1] > crystals[0], template.id);
+		}
+	}
+
+	@Test
+	void floorsWithoutRaresPlanAsBefore() {
+		FloorTemplate plain = FloorPlannerTest.template("plain");
+		FloorPlanner.FloorPlan before = FloorPlanner.plan(plain, config, 2, 3, 11);
+		plain.rareNodes.put("blocksouls_world:blight_crystal_node", 0);
+		assertEquals(before.slots(), FloorPlanner.plan(plain, config, 2, 3, 11).slots(), "a zero count draws nothing");
+	}
 }

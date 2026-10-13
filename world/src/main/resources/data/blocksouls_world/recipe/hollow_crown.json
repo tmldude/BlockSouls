@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "CGC",
+    "C C"
+  ],
+  "key": {
+    "C": "blocksouls_world:blight_crystal",
+    "G": "blocksouls_world:gunmetal_ingot"
+  },
+  "result": {
+    "id": "blocksouls_world:hollow_crown",
+    "count": 1
+  }
+}

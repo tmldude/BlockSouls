@@ -47,6 +47,13 @@ public final class FloorTemplate {
 	public int nodes = 12;
 	/** Weighted node block ids for node slots without a tag and for scattered nodes. */
 	public Map<String, Integer> nodeMix = new LinkedHashMap<>();
+	/**
+	 * The floor's rare nodes (v2-floor5-blight): node block id → count for a solo party, × {@code floorNodes} and the
+	 * floor's node factor, scattered on top of {@code nodes}. Empty on floors whose rare sits in {@code nodeMix}.
+	 */
+	public Map<String, Integer> rareNodes = new LinkedHashMap<>();
+	/** The floor's herbs: herb block id → count for a solo party, × {@code floorSize} (2 → 3 at 8 players). */
+	public Map<String, Integer> herbs = new LinkedHashMap<>();
 	/** Loose crates for a solo party (scattered; the structure, cave, secret and wreck chests come on top). */
 	public int crates = 2;
 	public List<Slot> slots = new ArrayList<>();

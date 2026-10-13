@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "blocksouls_world:ghostcap",
+    "minecraft:brown_mushroom",
+    "minecraft:red_mushroom",
+    "minecraft:bowl"
+  ],
+  "result": {
+    "id": "blocksouls_world:ghostcap_broth",
+    "count": 1
+  }
+}

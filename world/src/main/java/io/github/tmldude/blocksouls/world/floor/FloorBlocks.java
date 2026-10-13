@@ -19,6 +19,11 @@ import io.github.tmldude.blocksouls.common.CommonIds;
 public final class FloorBlocks {
 	public static final Block SCRAP_NODE = register(CommonIds.SCRAP_NODE, NodeBlock::new, node(MapColor.COLOR_BROWN, SoundType.CHAIN));
 	public static final Block GUNMETAL_NODE = register(CommonIds.GUNMETAL_NODE, NodeBlock::new, node(MapColor.METAL, SoundType.METAL));
+	// v2-floor5-blight: the Blighted Surface's rare node and its herb (glowing, so they read through the fog).
+	public static final Block BLIGHT_CRYSTAL_NODE = register(CommonIds.BLIGHT_CRYSTAL_NODE, NodeBlock::new,
+			node(MapColor.COLOR_PURPLE, SoundType.AMETHYST).lightLevel(state -> 6).noOcclusion());
+	public static final Block GHOSTCAP = register(CommonIds.GHOSTCAP, props -> new HerbBlock(props, 1),
+			node(MapColor.TERRACOTTA_WHITE, SoundType.FUNGUS).lightLevel(state -> 9).noCollision().noOcclusion());
 	public static final Block FLOOR_PORTAL = register(CommonIds.FLOOR_PORTAL, FloorPortalBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(-1.0F, 3600000.0F).noLootTable().noOcclusion()
 					.pushReaction(PushReaction.IMMOVEABLE).sound(SoundType.GLASS)

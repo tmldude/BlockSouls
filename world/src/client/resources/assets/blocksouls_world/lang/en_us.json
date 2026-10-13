@@ -57,5 +57,12 @@
   "item.blocksouls_world.night_eye_tonic": "Night-Eye Tonic",
   "item.blocksouls_world.moss_antidote": "Moss Antidote",
   "block.blocksouls_world.deep_iron_node": "Deep Iron Node",
-  "block.blocksouls_world.cave_moss_patch": "Cave Moss"
+  "block.blocksouls_world.cave_moss_patch": "Cave Moss",
+  "block.blocksouls_world.blight_crystal_node": "Blight Crystal Node",
+  "block.blocksouls_world.ghostcap": "Ghostcap",
+  "item.blocksouls_world.blight_crystal": "Blight Crystal",
+  "item.blocksouls_world.ghostcap": "Ghostcap",
+  "item.blocksouls_world.ghostcap_draught": "Ghostcap Draught",
+  "item.blocksouls_world.ghostcap_broth": "Ghostcap Broth",
+  "item.blocksouls_world.hollow_crown": "Hollow Crown"
 }
