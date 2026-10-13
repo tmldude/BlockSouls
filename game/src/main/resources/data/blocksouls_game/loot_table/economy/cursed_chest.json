@@ -33,7 +33,7 @@
           "name": "minecraft:emerald",
           "weight": 4,
           "modifier": {
-            "function": "minecraft:set_count",
+            "type": "minecraft:set_count",
             "count": {
               "type": "minecraft:uniform",
               "min": 2,
@@ -46,7 +46,7 @@
           "name": "minecraft:gold_ingot",
           "weight": 4,
           "modifier": {
-            "function": "minecraft:set_count",
+            "type": "minecraft:set_count",
             "count": {
               "type": "minecraft:uniform",
               "min": 2,

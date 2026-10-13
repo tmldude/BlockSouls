@@ -30,7 +30,7 @@
           "name": "minecraft:experience_bottle",
           "weight": 4,
           "modifier": {
-            "function": "minecraft:set_count",
+            "type": "minecraft:set_count",
             "count": {
               "type": "minecraft:uniform",
               "min": 3,
@@ -43,7 +43,7 @@
           "name": "minecraft:diamond",
           "weight": 2,
           "modifier": {
-            "function": "minecraft:set_count",
+            "type": "minecraft:set_count",
             "count": {
               "type": "minecraft:uniform",
               "min": 1,
