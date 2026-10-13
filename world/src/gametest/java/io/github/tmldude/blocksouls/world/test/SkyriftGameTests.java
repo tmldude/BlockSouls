@@ -83,7 +83,7 @@ public class SkyriftGameTests {
 		ServerLevel level = helper.getLevel();
 		WorldFloors.useLevelForTests(level.dimension());
 		try {
-			seed(helper, level, 903);
+			seed(helper, level, 932);
 		} finally {
 			WorldFloors.useLevelForTests(null);
 		}
