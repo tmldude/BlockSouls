@@ -247,6 +247,8 @@ public class AffixGameTests {
 		Connection connection = new Connection(PacketFlow.SERVERBOUND);
 		new EmbeddedChannel(connection);
 		server.getPlayerList().placeNewPlayer(connection, player, cookie);
+		// The test server's default mode is creative; mobs won't target an invulnerable player.
+		player.getAbilities().invulnerable = false;
 		player.teleportTo(at.x, at.y, at.z);
 		return player;
 	}
@@ -274,8 +276,14 @@ public class AffixGameTests {
 	@GameTest(structure = FLOOR, environment = ENV, maxTicks = 80)
 	public void spitterGlobPoisons(GameTestHelper helper) {
 		Spitter spitter = spawn(helper, MobEntities.SPITTER, 8.5, 3.5, false);
-		Pig pig = pig(helper, 8.5, 10.5);
-		spitter.spit(pig);
+		Pig pig = pig(helper, 8.5, 8.5);
+		// Globs spread a little, so keep spitting until one lands.
+		int[] tick = {0};
+		helper.onEachTick(() -> {
+			if (tick[0]++ % 15 == 0) {
+				spitter.spit(pig);
+			}
+		});
 		helper.succeedWhen(() -> helper.assertTrue(lost(pig) > 0 || pig.hasEffect(MobEffects.POISON), "glob hasn't landed"));
 	}
 }
