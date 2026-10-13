@@ -58,5 +58,6 @@ public class BlockSoulsBosses implements ModInitializer {
 		PaleRiders.register();
 		io.github.tmldude.blocksouls.bosses.ashwyrm.Ashwyrms.register();
 		StormplateKnights.register();
+		io.github.tmldude.blocksouls.bosses.riftwarden.Riftwardens.register();
 	}
 }

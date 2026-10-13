@@ -201,6 +201,9 @@ public final class FloorTemplate {
 		public int maxGap = 9;
 		/** Share of shards over the island that hang a climbable vine strand toward the ground. */
 		public double vineChance = 0.5;
+		/** Rare nodes ({@code node}, a block id) on free shards: {@code nodes} × {@code PartyScaling.floorNodes}. */
+		public int nodes = 0;
+		public String node = "";
 	}
 
 	/** One hand-placed slot. {@code kind} is a {@link FloorSlotKind} name (any case). */

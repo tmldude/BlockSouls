@@ -1,0 +1,42 @@
+{
+	"criteria": {
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipes": "blocksouls_world:updraft_tonic"
+			}
+		},
+		"has_cloudbloom": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:cloudbloom"
+					}
+				]
+			}
+		},
+		"has_skysteel": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:skysteel"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_cloudbloom",
+			"has_skysteel"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"blocksouls_world:updraft_tonic"
+		]
+	}
+}

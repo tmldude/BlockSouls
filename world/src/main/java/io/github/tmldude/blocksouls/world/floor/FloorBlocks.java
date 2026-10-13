@@ -29,6 +29,14 @@ public final class FloorBlocks {
 			node(MapColor.FIRE, SoundType.NETHER_ORE).lightLevel(state -> 6));
 	public static final Block ASHCAP = register(CommonIds.ASHCAP, AshcapBlock::new,
 			node(MapColor.CRIMSON_NYLIUM, SoundType.FUNGUS).noCollision().noOcclusion().lightLevel(state -> 9));
+	// --- floor 3, Skyrift (Stage 6C) ---
+	public static final Block SKYSTEEL_NODE = register(CommonIds.SKYSTEEL_NODE, NodeBlock::new,
+			node(MapColor.ICE, SoundType.AMETHYST).lightLevel(state -> 6));
+	public static final Block CLOUDBLOOM_PLANT = register(CommonIds.CLOUDBLOOM_PLANT, HerbBlock::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.SNOW).strength(-1.0F, 3600000.0F).noLootTable().noCollision()
+					.sound(SoundType.AZALEA).offsetType(BlockBehaviour.OffsetType.XZ).pushReaction(PushReaction.IMMOVEABLE)
+					.lightLevel(state -> 9));
+	// --- end floor 3 ---
 	public static final Block FLOOR_PORTAL = register(CommonIds.FLOOR_PORTAL, FloorPortalBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(-1.0F, 3600000.0F).noLootTable().noOcclusion()
 					.pushReaction(PushReaction.IMMOVEABLE).sound(SoundType.GLASS)

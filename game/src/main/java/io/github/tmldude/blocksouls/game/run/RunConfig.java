@@ -267,6 +267,10 @@ public class RunConfig {
 			if (floor == 2) { // v2-floor2-infernal
 				spec.pool = "blocksouls_world:infernal";
 			}
+			if (floor == 6) { // v2-floor6-arena: the Final Arena
+				spec.pool = "blocksouls_world:arena";
+				spec.name = "Final Arena";
+			}
 			// --- end floor pools ---
 			floorActs.add(spec);
 		}

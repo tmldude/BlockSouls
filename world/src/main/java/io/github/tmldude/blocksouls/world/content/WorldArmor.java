@@ -4,10 +4,15 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.equipment.EquipmentAsset;
@@ -15,7 +20,7 @@ import net.minecraft.world.item.equipment.EquipmentAssets;
 
 import io.github.tmldude.blocksouls.world.BlockSoulsWorld;
 
-/** The two armor sets. Set bonuses live in {@code armor.SetBonuses}. */
+/** The armor sets (and Skyrift's featherboots). Set bonuses live in {@code armor.SetBonuses}. */
 public final class WorldArmor {
 	public static final TagKey<Item> REPAIRS_SCRAP_PLATE = TagKey.create(Registries.ITEM, BlockSoulsWorld.id("repairs_scrap_plate_armor"));
 	public static final TagKey<Item> REPAIRS_BLIGHT_FORGED = TagKey.create(Registries.ITEM, BlockSoulsWorld.id("repairs_blight_forged_armor"));
@@ -29,6 +34,24 @@ public final class WorldArmor {
 	/** Between diamond (33, toughness 2) and netherite (37, toughness 3, 0.1 knockback). */
 	public static final ArmorMaterial BLIGHT_FORGED = new ArmorMaterial(35, defense(3, 6, 8, 3), 14,
 			SoundEvents.ARMOR_EQUIP_NETHERITE, 2.5F, 0.05F, REPAIRS_BLIGHT_FORGED, BLIGHT_FORGED_ASSET);
+
+	// --- floor 3, Skyrift (Stage 6C) ---
+	public static final TagKey<Item> REPAIRS_SKYSTEEL = TagKey.create(Registries.ITEM, BlockSoulsWorld.id("repairs_skysteel_armor"));
+	public static final ResourceKey<EquipmentAsset> SKYSTEEL_ASSET = ResourceKey.create(EquipmentAssets.ROOT_ID, BlockSoulsWorld.id("skysteel"));
+	/** Light (chain-ish) but tough to wear out; only the featherboots use it. */
+	public static final ArmorMaterial SKYSTEEL = new ArmorMaterial(22, defense(2, 4, 5, 2), 15,
+			SoundEvents.ARMOR_EQUIP_CHAIN, 0.5F, 0.0F, REPAIRS_SKYSTEEL, SKYSTEEL_ASSET);
+	private static final Identifier FEATHER = BlockSoulsWorld.id("skysteel_featherboots");
+
+	/** The boots' armor plus the feather: +4 safe fall distance and a third less fall damage. */
+	public static ItemAttributeModifiers featherboots() {
+		EquipmentSlotGroup feet = EquipmentSlotGroup.FEET;
+		return SKYSTEEL.createAttributes(ArmorType.BOOTS)
+				.withModifierAdded(Attributes.SAFE_FALL_DISTANCE, new AttributeModifier(FEATHER, 4.0, AttributeModifier.Operation.ADD_VALUE), feet)
+				.withModifierAdded(Attributes.FALL_DAMAGE_MULTIPLIER,
+						new AttributeModifier(FEATHER, -0.33, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL), feet);
+	}
+	// --- end floor 3 ---
 
 	private WorldArmor() {
 	}

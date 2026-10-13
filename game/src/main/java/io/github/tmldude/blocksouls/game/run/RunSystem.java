@@ -200,6 +200,10 @@ public final class RunSystem {
 		if (bossId.equals(CommonIds.FINAL_BOSS.toString())) {
 			startEndless(server);
 		}
+		// Floor 6 (Stage 6C): the final arena's boss ends a floors run (souls kept, summary). Classic keeps the dragon raid.
+		if (bossId.equals(CommonIds.RIFTWARDEN.toString()) && data.phase != RunPhase.OVER) {
+			endRun(server);
+		}
 	}
 
 	/** The difficulty preset with this id; unknown or null ids use the config default (or normal). */
@@ -254,9 +258,15 @@ public final class RunSystem {
 		if (isExpedition()) {
 			// The run's one synthetic cycle keeps the sun's rhythm and pauses with it on an empty server.
 			// A run switched to expedition mid-way (config toggle) starts its cycle here instead of at run start.
+			// Floor 6 (the final arena) is timeless: the cycle holds at day, so no dusk waves interrupt the fight.
+			boolean timeless = ActMachine.timeless(server, data.actOrdinal);
 			if (anyoneOnline) {
 				data.synthetic.start(server.overworld().getOverworldClockTime());
-				data.synthetic.advance(WaveMath.clockRate(config.dayLengthMinutes));
+				if (!timeless) {
+					data.synthetic.advance(WaveMath.clockRate(config.dayLengthMinutes));
+				} else if (WaveMath.isNight(data.synthetic.cycleTime(), config)) {
+					data.synthetic.skipTo(config.dawnTime);
+				}
 				data.setDirty();
 			}
 			if (server.overworld().getGameTime() % 20 == 0) {

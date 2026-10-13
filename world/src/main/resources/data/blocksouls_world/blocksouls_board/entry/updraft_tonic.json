@@ -1,0 +1,9 @@
+{
+  "recipe": "blocksouls_world:updraft_tonic",
+  "board": "brew",
+  "minFloor": 3,
+  "maxFloor": 99,
+  "floorTags": [
+    "skyrift"
+  ]
+}

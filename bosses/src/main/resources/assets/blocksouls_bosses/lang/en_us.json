@@ -104,5 +104,8 @@
 	"subtitles.blocksouls_bosses.entity.stormplate_knight.thunder": "Thunder strikes",
 	"subtitles.blocksouls_bosses.entity.stormplate_knight.throw": "Spear flies",
 	"subtitles.blocksouls_bosses.entity.stormplate_knight.slam": "Stormplate Knight lands",
-	"subtitles.blocksouls_bosses.entity.stormplate_knight.puddle": "Static crackles"
+	"subtitles.blocksouls_bosses.entity.stormplate_knight.puddle": "Static crackles",
+	"entity.blocksouls_bosses.riftwarden": "Riftwarden",
+	"item.blocksouls_bosses.riftwarden_spawn_egg": "Riftwarden Spawn Egg",
+	"boss.blocksouls_bosses.riftwarden.rises": "The Riftwarden rises from the plate"
 }

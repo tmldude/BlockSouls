@@ -37,6 +37,19 @@ public final class CommonIds {
 	public static final Identifier PALE_RIDER = id(BOSSES, "pale_rider");
 	public static final Identifier ASHWYRM = id(BOSSES, "ashwyrm");
 	public static final Identifier STORMPLATE_KNIGHT = id(BOSSES, "stormplate_knight");
+	// --- floor 6 (Stage 6C, v2-floor6-arena) ---
+	/** Entity type (bosses): floor 6's final boss. Its death ends a floors run (game listens on BossEvents.KILLED). */
+	public static final Identifier RIFTWARDEN = id(BOSSES, "riftwarden");
+	/** Floor template pool (world): floor 6, the final arena. */
+	public static final Identifier ARENA_POOL = id(WORLD, "arena");
+	/** Floor tag: the floor has no day timer, no siege and no night (the final arena). Game's day loop skips it. */
+	public static final String TIMELESS_TAG = "timeless";
+	/**
+	 * Structure slot tag on the final arena floor: the slot's position is the arena's centre (its trigger plate) and
+	 * its radius the fighting ring's. World builds it; bosses spawns the final boss when the party steps on the plate.
+	 */
+	public static final String FINAL_ARENA_SLOT = "final_arena";
+	// --- end floor 6 ---
 
 	/** Wave mob entity types (mobs). Their loot tables can be extended by other modules. */
 	public static final Identifier SHAMBLER = id(MOBS, "shambler");
@@ -97,6 +110,16 @@ public final class CommonIds {
 	/** The herb (world): the block pops in one hit into the item of the same id. */
 	public static final Identifier ASHCAP = id(WORLD, "ashcap");
 	// end v2-floor2-infernal
+	// --- floor 3, Skyrift (Stage 6C) ---
+	/** Skyrift's rare node block (world), mostly on the floating shards; pops into skysteel. */
+	public static final Identifier SKYSTEEL_NODE = id(WORLD, "skysteel_node");
+	/** Skyrift's rare metal (world), from skysteel nodes: feather armor, gun barrels, the updraft tonic. */
+	public static final Identifier SKYSTEEL = id(WORLD, "skysteel");
+	/** Skyrift's herb block (world): pops in one hit into cloudbloom. */
+	public static final Identifier CLOUDBLOOM_PLANT = id(WORLD, "cloudbloom_plant");
+	/** Skyrift's herb (world): brewed into slow-fall and updraft tonics. */
+	public static final Identifier CLOUDBLOOM = id(WORLD, "cloudbloom");
+	// --- end floor 3 ---
 	/** The camp's exit portal block (world); using it starts the act's portal charge, lit it leads on. */
 	public static final Identifier FLOOR_PORTAL = id(WORLD, "floor_portal");
 	// --- floor 4, The Vault (Stage 6C) ---
