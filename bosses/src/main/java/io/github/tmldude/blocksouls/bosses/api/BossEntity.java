@@ -118,6 +118,14 @@ public abstract class BossEntity extends Monster {
 	private int sidestepCooldown;
 	private int sidesteps;
 	private int[] lastUsedTick = new int[0];
+	private @Nullable Attack queued;
+	private final Set<UUID> shieldAdds = new LinkedHashSet<>();
+	private int shieldTicks;
+	private boolean burrowed;
+	private boolean surfaceOnLoad;
+	private int lastTelegraphTick = -1;
+	private int lastFirstHitTick = -1;
+	private @Nullable String lastRunAttack;
 
 	protected BossEntity(EntityType<? extends BossEntity> type, Level level) {
 		super(type, level);
@@ -417,6 +425,10 @@ public abstract class BossEntity extends Monster {
 		if (partDamage.length != definition().breaks().size()) {
 			partDamage = new double[definition().breaks().size()];
 		}
+		if (surfaceOnLoad) {
+			surfaceOnLoad = false;
+			setBurrowed(false, Vec3.atBottomCenterOf(home()));
+		}
 		if (hitStop > 0) {
 			// Hit-stop: everything holds for a beat (the bar still updates).
 			hitStop--;
@@ -539,6 +551,7 @@ public abstract class BossEntity extends Monster {
 			return;
 		}
 
+		shieldTick(level);
 		postureTick();
 		if (visceral > 0) {
 			visceralTick(level);
@@ -688,8 +701,100 @@ public abstract class BossEntity extends Monster {
 		gap = framework().attackGapTicks;
 		attacksFinished++;
 		run = null;
+		recordRun(finished);
 		attack.end(finished);
 		syncStage(Stage.NONE, null);
+		Attack next = queued;
+		queued = null;
+		if (next != null && level() instanceof ServerLevel level && isEngaged() && !attackLost(next)) {
+			startAttack(level, next, finished.target());
+		}
+	}
+
+	private void recordRun(AttackRun finished) {
+		lastRunAttack = finished.attack().name();
+		lastTelegraphTick = finished.firstTelegraphTick();
+		lastFirstHitTick = finished.firstHitTick();
+	}
+
+	/** Name of the last attack that ran to its end (tests). */
+	public @Nullable String lastRunAttack() {
+		return lastRunAttack;
+	}
+
+	/** Run tick of the last finished attack's first telegraph, or -1 (tests: telegraph before hit). */
+	public int lastTelegraphTick() {
+		return lastTelegraphTick;
+	}
+
+	/** Run tick of the last finished attack's first landed hit, or -1. */
+	public int lastFirstHitTick() {
+		return lastFirstHitTick;
+	}
+
+	/** Starts {@code attack} as soon as the current one ends (feints hand over to their real move this way). */
+	public void queueAttack(@Nullable Attack attack) {
+		queued = attack;
+	}
+
+	// --- Shield (summon-and-shield) ---
+
+	/** Shields the boss until every one of {@code adds} is dead (or {@code maxTicks} pass). */
+	public void shieldUntilDead(Collection<? extends Entity> adds, int maxTicks) {
+		shieldAdds.clear();
+		for (Entity add : adds) {
+			shieldAdds.add(add.getUUID());
+		}
+		shieldTicks = shieldAdds.isEmpty() ? 0 : maxTicks;
+	}
+
+	public boolean isShielded() {
+		return shieldTicks > 0 && !shieldAdds.isEmpty();
+	}
+
+	/** Shield adds still alive. */
+	public int shieldAddsAlive() {
+		return shieldAdds.size();
+	}
+
+	private void shieldTick(ServerLevel level) {
+		if (shieldTicks <= 0) {
+			return;
+		}
+		shieldAdds.removeIf(id -> !(level.getEntity(id) instanceof LivingEntity add) || !add.isAlive());
+		shieldTicks--;
+		if (shieldAdds.isEmpty() || shieldTicks <= 0) {
+			shieldTicks = 0;
+			shieldAdds.clear();
+			level.sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + getBbHeight() / 2, getZ(), 1, 0, 0, 0, 0);
+			playSound(SoundEvents.SHIELD_BREAK.value(), 2.0f, 0.6f);
+			return;
+		}
+		if (tickCount % 4 == 0) {
+			double r = getBbWidth() * 0.9 + 0.5;
+			for (int i = 0; i < 10; i++) {
+				double a = random.nextDouble() * Math.PI * 2;
+				double y = random.nextDouble() * getBbHeight();
+				level.sendParticles(ParticleTypes.END_ROD, getX() + Math.cos(a) * r, getY() + y, getZ() + Math.sin(a) * r, 1, 0, 0, 0, 0);
+			}
+		}
+	}
+
+	// --- Burrow ---
+
+	/** Underground (burrow attacks): invisible, untouchable, no physics. */
+	public boolean isBurrowed() {
+		return burrowed;
+	}
+
+	/** Hides the boss underground at {@code at}, or brings it back up there. */
+	public void setBurrowed(boolean value, Vec3 at) {
+		burrowed = value;
+		setInvisible(value);
+		noPhysics = value;
+		setNoGravity(value);
+		setDeltaMovement(Vec3.ZERO);
+		setPos(at.x, value ? at.y - getBbHeight() - 1.5 : at.y, at.z);
 	}
 
 	/** Stops the current attack (calls its {@link Attack#end}). */
@@ -1170,6 +1275,12 @@ public abstract class BossEntity extends Monster {
 		setTarget(null);
 		stagger = 0;
 		resetPosture();
+		queued = null;
+		shieldAdds.clear();
+		shieldTicks = 0;
+		if (burrowed) {
+			setBurrowed(false, Vec3.atBottomCenterOf(home()));
+		}
 		restoreParts();
 		phase = 0;
 		entityData.set(DATA_PHASE, (byte) 0);
@@ -1213,7 +1324,13 @@ public abstract class BossEntity extends Monster {
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
 		boolean bypass = source.is(DamageTypeTags.BYPASSES_INVULNERABILITY);
-		if (!bypass && (stagger > 0 || returning)) {
+		if (!bypass && (stagger > 0 || returning || burrowed)) {
+			return false;
+		}
+		if (!bypass && isShielded()) {
+			level.sendParticles(ParticleTypes.ENCHANT, true, true, getX(), getY() + getBbHeight() / 2, getZ(), 12, getBbWidth() / 2,
+					getBbHeight() / 3, getBbWidth() / 2, 0.4);
+			playSound(SoundEvents.SHIELD_BLOCK.value(), 1.5f, 0.7f);
 			return false;
 		}
 		Entity attacker = source.getEntity();
@@ -1342,6 +1459,7 @@ public abstract class BossEntity extends Monster {
 		output.putBoolean("BossField", fieldBoss);
 		output.putInt("BossLeaveAfter", leaveAfterTicks);
 		output.putInt("BossUnattended", unattendedTicks);
+		output.putBoolean("BossBurrowed", burrowed);
 		if (wall.isUp()) {
 			output.store("BossWall", BlockPos.CODEC.listOf(), List.copyOf(wall.positions()));
 		}
@@ -1355,6 +1473,11 @@ public abstract class BossEntity extends Monster {
 		fieldBoss = input.getBooleanOr("BossField", false);
 		leaveAfterTicks = input.getIntOr("BossLeaveAfter", 0);
 		unattendedTicks = input.getIntOr("BossUnattended", 0);
+		if (input.getBooleanOr("BossBurrowed", false)) {
+			// Saved mid-burrow: surface at home on load (the attack itself isn't saved).
+			burrowed = true;
+			surfaceOnLoad = true;
+		}
 		input.read("BossWall", BlockPos.CODEC.listOf()).ifPresent(list -> {
 			wall.load(list);
 			wallNeedsClearing = true;

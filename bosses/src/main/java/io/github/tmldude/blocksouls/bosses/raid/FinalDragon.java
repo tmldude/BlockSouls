@@ -152,6 +152,9 @@ public class FinalDragon extends BossEntity {
 		var dive = new FinalDragonAttacks.Dive();
 		var meteors = new FinalDragonAttacks.MeteorShower();
 		var sweep = new FinalDragonAttacks.BreathLine("breath_sweep", c.breathSweep, () -> c.breathSweepLength, () -> c.breathSweepHalfWidth);
+		var beam = new io.github.tmldude.blocksouls.bosses.archetype.RotatingBeam("void_beam", c.beam, FinalDragonAttacks.THEME, "ground_breath");
+		var spiral = new io.github.tmldude.blocksouls.bosses.archetype.Spiral("void_spiral", c.spiral, FinalDragonAttacks.THEME, "void_orbs");
+		var wisps = new io.github.tmldude.blocksouls.bosses.archetype.HomingOrbs("wisps", c.wisps, FinalDragonAttacks.THEME, "void_orbs");
 		definition = BossDefinition.builder(CommonIds.FINAL_BOSS)
 				.health(c.health)
 				.arenaRadius(c.arenaRadius)
@@ -159,9 +162,9 @@ public class FinalDragon extends BossEntity {
 				// Two legendary guns + ammo (guns), only when that module is installed.
 				.extraLoot(CommonIds.id(CommonIds.BOSSES, "boss_drops/final_dragon_guns"))
 				// Grounded: the ground moveset, plus a few airborne moves for while it hovers over the interludes.
-				.phase(BossPhase.first().attacks(bite, tail, gust, groundBreath, charge, stomp, orbs, breathLine, dive))
+				.phase(BossPhase.first().attacks(bite, tail, gust, groundBreath, charge, stomp, orbs, breathLine, dive, beam))
 				.phase(BossPhase.below(c.finalStandThreshold)
-						.attacks(orbs, breathLine, dive, meteors, sweep)
+						.attacks(orbs, breathLine, dive, meteors, sweep, spiral, wisps)
 						.damage(c.finalStandDamage)
 						.cooldowns(c.finalStandCooldowns)
 						.recovery(c.finalStandRecovery))

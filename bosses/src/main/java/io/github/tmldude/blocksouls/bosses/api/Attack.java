@@ -32,6 +32,11 @@ public abstract class Attack {
 		return stats;
 	}
 
+	/** Animation key the client plays for this move (defaults to {@link #name()}; feints borrow their bait's). */
+	public String animation() {
+		return name;
+	}
+
 	/** Extra conditions on top of range and cooldown (e.g. needs line of sight, or only while on the ground). */
 	public boolean canUse(BossEntity boss, LivingEntity target) {
 		return true;

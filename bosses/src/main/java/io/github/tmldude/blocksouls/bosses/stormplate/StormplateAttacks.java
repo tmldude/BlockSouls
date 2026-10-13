@@ -29,6 +29,9 @@ final class StormplateAttacks {
 	static final ParticleOptions FILL = new DustParticleOptions(0xFFF1B0, 1.2f);
 	/** The spear's gold, for the thrown spear and its trail. */
 	static final ParticleOptions GOLD = new DustParticleOptions(0xD9B44A, 1.0f);
+	/** Theme for the shared archetypes: blue-white sparks. */
+	static final io.github.tmldude.blocksouls.bosses.archetype.Theme THEME = new io.github.tmldude.blocksouls.bosses.archetype.Theme(OUTLINE, FILL,
+			ParticleTypes.ELECTRIC_SPARK, StormplateSounds.WINDUP, StormplateSounds.THUNDER);
 
 	private StormplateAttacks() {
 	}

@@ -146,7 +146,7 @@ public class BossRenderer<T extends BossEntity, M extends BossModel> extends Mob
 		super.extractRenderState(entity, state, partialTicks);
 		state.stage = entity.stage();
 		Attack attack = entity.currentAttack();
-		state.attack = attack == null ? null : attack.name();
+		state.attack = attack == null ? null : attack.animation();
 		state.stageSeconds = (entity.ticksInStage() + partialTicks) / 20f;
 		state.phase = entity.phase();
 		state.engaged = entity.isEngaged();

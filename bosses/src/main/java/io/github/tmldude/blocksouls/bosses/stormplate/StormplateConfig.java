@@ -1,6 +1,7 @@
 package io.github.tmldude.blocksouls.bosses.stormplate;
 
 import io.github.tmldude.blocksouls.bosses.api.AttackStats;
+import io.github.tmldude.blocksouls.bosses.archetype.ArchetypeParams;
 import io.github.tmldude.blocksouls.bosses.field.FieldBossSettings;
 
 /** {@code config/blocksouls/boss-stormplate_knight.json}. Ticks are 1/20 s; damage is at normal difficulty, phase 1. */
@@ -52,6 +53,20 @@ public class StormplateConfig {
 	public int puddleMax = 8;
 	/** Puddles scattered around the arena when phase 2 starts. */
 	public int puddlesOnPhase2 = 4;
+
+	/** v2 archetypes. Storm cross: lightning lines in a cross under the target. */
+	public ArchetypeParams.Cross cross = new ArchetypeParams.Cross(new AttackStats(22, 4, 18, 120, 0, 20, 2, 10)).arms(4, 9);
+	/** Spear beam: the spear held out crackling, sweeping around the knight. */
+	public ArchetypeParams.Beam beam = new ArchetypeParams.Beam(new AttackStats(26, 50, 26, 220, 0, 10, 1.5, 5)).beam(10, 4);
+	/** Shoulder charge: stuck for 2 s if it hits a pillar. */
+	public ArchetypeParams.Charge charge = new ArchetypeParams.Charge(new AttackStats(22, 14, 20, 150, 6, 18, 1.5, 12)).distance(14);
+	/** Storm guard (phase 2): calls three adds; a shield holds until they die. */
+	public ArchetypeParams.Summon summon = new ArchetypeParams.Summon(new AttackStats(30, 1, 20, 20 * 50, 0, 30, 1.2, 0)).adds(3, 1);
+	/** Feint (phase 2): starts a thrust, then throws the spear instead. */
+	public ArchetypeParams.Feint feint = new ArchetypeParams.Feint(new AttackStats(9, 1, 0, 240, 5, 6.5, 1.5, 0));
+	/** Left pauldron: breaks after this share of max health dealt to it; the spear throw is lost, the knight speeds up. */
+	public double pauldronBreakShare = 0.08;
+	public double pauldronSpeedBonus = 0.12;
 
 	/** Phase 2 starts below this share of health: the storm intensifies. */
 	public double phase2Threshold = 0.5;

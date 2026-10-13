@@ -3,6 +3,7 @@ package io.github.tmldude.blocksouls.bosses.raid;
 import java.util.List;
 
 import io.github.tmldude.blocksouls.bosses.api.AttackStats;
+import io.github.tmldude.blocksouls.bosses.archetype.ArchetypeParams;
 
 /**
  * {@code config/blocksouls/boss-final_dragon.json}: the final raid. Ticks are 1/20 s; damage is at normal difficulty
@@ -67,6 +68,15 @@ public class FinalRaidConfig {
 	// Phase 3: Final Stand
 	/** Final Stand starts below this share of health. */
 	public double finalStandThreshold = 0.35;
+	/** v2 archetypes. Void beam (grounded): a beam from the jaws sweeps around the dragon. */
+	public ArchetypeParams.Beam beam = new ArchetypeParams.Beam(
+			new AttackStats(28, 60, 26, 260, 0, 20, 1.5, 6)).beam(18, 3.5);
+	/** Void spiral (final stand): bolts stream along rotating arms across the island. */
+	public ArchetypeParams.Spiral spiral = new ArchetypeParams.Spiral(
+			new AttackStats(26, 100, 20, 260, 0, 80, 2, 6)).arms(4, 2.5);
+	/** Hunting wisps (final stand): void orbs that hang, then home. */
+	public ArchetypeParams.Orbs wisps = new ArchetypeParams.Orbs(
+			new AttackStats(22, 100, 16, 240, 0, 40, 1.5, 7)).orbs(4, 0.42);
 	public double finalStandDamage = 1.25;
 	public double finalStandCooldowns = 0.75;
 	public double finalStandRecovery = 0.8;

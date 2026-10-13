@@ -29,6 +29,9 @@ import io.github.tmldude.blocksouls.bosses.api.Telegraphs;
 final class FinalDragonAttacks {
 	static final ParticleOptions OUTLINE = new DustParticleOptions(0x9B4DFF, 1.8f);
 	static final ParticleOptions FILL = new DustParticleOptions(0xF2ECFF, 1.4f);
+	/** Theme for the shared archetypes: void sparks. */
+	static final io.github.tmldude.blocksouls.bosses.archetype.Theme THEME = new io.github.tmldude.blocksouls.bosses.archetype.Theme(OUTLINE, FILL,
+			ParticleTypes.REVERSE_PORTAL, FinalRaidSounds.CAST, FinalRaidSounds.ORB_POP);
 	static final ParticleOptions SHADOW = new DustParticleOptions(0x16081F, 2.6f);
 	static final ParticleOptions VOID = new DustParticleOptions(0x6A2BC4, 2.0f);
 
