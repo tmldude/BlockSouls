@@ -18,6 +18,14 @@ public final class WeaponHooks {
 	public interface Provider {
 		/** Instantly refills the magazine of the gun in the player's main hand. Returns false if there was none to fill. */
 		boolean reload(ServerPlayer player);
+
+		/**
+		 * Rerolls the perks of the gun in the player's main hand, keeping its rarity (the shopkeeper's perk reroll).
+		 * Returns false if there was no gun or rerolling isn't supported; the caller refunds the price.
+		 */
+		default boolean rerollPerks(ServerPlayer player) {
+			return false;
+		}
 	}
 
 	/** Called once by the guns module. */
@@ -27,5 +35,9 @@ public final class WeaponHooks {
 
 	public static boolean reload(ServerPlayer player) {
 		return provider.reload(player);
+	}
+
+	public static boolean rerollPerks(ServerPlayer player) {
+		return provider.rerollPerks(player);
 	}
 }
