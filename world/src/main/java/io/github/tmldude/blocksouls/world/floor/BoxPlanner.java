@@ -20,6 +20,10 @@ public final class BoxPlanner {
 	/** Default tags for a box's empty structure and secret slots. */
 	public static final String VAULT_STRUCTURE = "vault";
 	public static final String HOLLOW_WALL = "hollow_wall";
+	/** The tag of a crate holding a vault key (the builder fills it from {@code chests/vault_key}). */
+	public static final String VAULT_KEY = "vault_key";
+	/** Columns from the structure slot the vault room's strongroom takes (nothing else is planned there). */
+	public static final int STRONGROOM_REACH = 3;
 
 	private BoxPlanner() {
 	}
@@ -78,8 +82,8 @@ public final class BoxPlanner {
 			}
 			int[] at = FloorPlanner.transform(slot.x, slot.z, scale, rotation, mirrored);
 			String tag = slot.tag.isEmpty() ? FloorPlanner.weighted(template.nodeMix, random) : slot.tag;
-			if (!layout.open(at[0], at[1])) {
-				continue; // the layout put rock there: a generated spot takes its place
+			if (!layout.open(at[0], at[1]) || inStrongroom(at[0], at[1], slots)) {
+				continue; // the layout put rock (or the vault room's strongroom) there: a generated spot takes its place
 			}
 			nodes.add(new FloorPlanner.PlannedSlot(FloorSlotKind.NODE, tag, at[0], at[1], 0));
 		}
@@ -155,6 +159,8 @@ public final class BoxPlanner {
 			}
 		}
 
+		slots.addAll(keys(template, layout, slots, taken, config, seed));
+
 		int index = 0;
 		for (int[] point : siegePoints(layout, config.siegeRingPoints)) {
 			slots.add(new FloorPlanner.PlannedSlot(FloorSlotKind.SIEGE_RING, Integer.toString(index++), point[0], point[1], 0));
@@ -163,6 +169,69 @@ public final class BoxPlanner {
 		Set<String> tags = new LinkedHashSet<>(template.tags);
 		tags.addAll(FloorPlanner.escalationTags(config, floorNumber));
 		return new FloorPlanner.FloorPlan(template.id, radius, template.groundY, rotation, mirrored, tags, List.copyOf(slots));
+	}
+
+	/**
+	 * The vault keys (floor 4): {@code box.keys} crates tagged {@link #VAULT_KEY}, one per room, on their own random
+	 * (so nothing else moves). Filler rooms first, then the event and mini-boss rooms (the guarded ones); never the camp,
+	 * the exit, the secret or the vault room itself. Not party-scaled: the lock takes three keys at any party size.
+	 */
+	static List<FloorPlanner.PlannedSlot> keys(FloorTemplate template, BoxLayout layout, List<FloorPlanner.PlannedSlot> slots, Set<Long> taken,
+			FloorsConfig config, long seed) {
+		List<FloorPlanner.PlannedSlot> keys = new ArrayList<>();
+		if (template.box.keys <= 0) {
+			return keys;
+		}
+		Random random = new Random(seed ^ 0x4B455953L);
+		List<BoxLayout.Room> rooms = new ArrayList<>(layout.rooms("filler"));
+		Collections.shuffle(rooms, random);
+		List<BoxLayout.Room> guarded = new ArrayList<>(layout.rooms("event"));
+		guarded.addAll(layout.rooms("mini_boss"));
+		Collections.shuffle(guarded, random);
+		rooms.addAll(guarded);
+		for (BoxLayout.Room room : rooms) {
+			if (keys.size() >= template.box.keys) {
+				break;
+			}
+			List<int[]> spots = new ArrayList<>();
+			for (int x = room.x0() + 1; x <= room.x1() - 1; x++) {
+				for (int z = room.z0() + 1; z <= room.z1() - 1; z++) {
+					if (layout.open(x, z) && awayFromRoomSlots(x, z, slots)) {
+						spots.add(new int[] {x, z});
+					}
+				}
+			}
+			Collections.shuffle(spots, random);
+			for (int[] spot : spots) {
+				if (spaced(spot, taken, Math.min(config.nodeSpacing, 2))) {
+					keys.add(new FloorPlanner.PlannedSlot(FloorSlotKind.CRATE, VAULT_KEY, spot[0], spot[1], 0));
+					taken.add(BoxLayout.key(spot[0], spot[1]));
+					break;
+				}
+			}
+		}
+		return keys;
+	}
+
+	/** At least three columns from every room slot (the event object, the mini-boss, the strongroom stay clear). */
+	private static boolean awayFromRoomSlots(int x, int z, List<FloorPlanner.PlannedSlot> slots) {
+		for (FloorPlanner.PlannedSlot slot : slots) {
+			if (BoxLayout.roomKind(slot.kind()) && Math.max(Math.abs(x - slot.x()), Math.abs(z - slot.z())) <= STRONGROOM_REACH) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** Whether a column is inside the vault room's strongroom (within {@link #STRONGROOM_REACH} of a vault structure slot). */
+	static boolean inStrongroom(int x, int z, List<FloorPlanner.PlannedSlot> slots) {
+		for (FloorPlanner.PlannedSlot slot : slots) {
+			if (slot.kind() == FloorSlotKind.STRUCTURE && VAULT_STRUCTURE.equals(slot.tag())
+					&& Math.max(Math.abs(x - slot.x()), Math.abs(z - slot.z())) <= STRONGROOM_REACH) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Herbs for a party: the template's {@code herbs} × {@code PartyScaling.floorNodes}, clamped to its min..max. */

@@ -102,6 +102,11 @@ public final class CommonIds {
 	public static final Identifier CAVE_MOSS_PATCH = id(WORLD, "cave_moss_patch");
 	/** The Vault's herb (world): brewed into the night-eye tonic and the moss antidote. */
 	public static final Identifier CAVE_MOSS = id(WORLD, "cave_moss");
+	/** A key to the Vault's locked vault room (world): three open it. Found in chests in other rooms. */
+	public static final Identifier VAULT_KEY = id(WORLD, "vault_key");
+	/** The Vault's mini-bosses (world entity types, in the Director's {@code vault} mini-boss roster). */
+	public static final Identifier VAULT_LISTENER = id(WORLD, "vault_listener");
+	public static final Identifier VAULT_COLOSSUS = id(WORLD, "vault_colossus");
 	// --- end floor 4 ---
 
 	/** Ammo items (guns). The Director reads a party's ammo from them; the shopkeeper sells them. */

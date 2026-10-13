@@ -39,7 +39,8 @@
     "herb": "blocksouls_world:cave_moss_patch",
     "herbs": 2,
     "herbsMin": 2,
-    "herbsMax": 3
+    "herbsMax": 3,
+    "keys": 3
   },
   "slots": [
     {

@@ -17,14 +17,19 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 import io.github.tmldude.blocksouls.common.Config;
+import io.github.tmldude.blocksouls.common.floor.FloorSlot;
+import io.github.tmldude.blocksouls.common.floor.FloorSlotKind;
+import io.github.tmldude.blocksouls.common.floor.Floors;
+import io.github.tmldude.blocksouls.common.floor.PlacedFloor;
 import io.github.tmldude.blocksouls.common.party.PartyScaling;
 
 /**
  * Floor 4's (The Vault) hazard: walls burst after a few hits, and a plug collapses whole. A closet door releases a
- * swarm (scaled for the party nearby) plus a brute; a hollow wall opens the way to the secret.
+ * swarm (scaled for the party nearby) plus a brute; a hollow wall opens the way to the secret and wakes its mini-boss.
  */
 public final class VaultHazards {
 	private static VaultConfig config = new VaultConfig();
@@ -39,6 +44,8 @@ public final class VaultHazards {
 	public static void init() {
 		config = Config.load(VaultConfig.FILE, VaultConfig.class, VaultConfig::new);
 		VaultBlocks.init();
+		VaultMobs.init();
+		VaultEvents.init();
 		for (VaultWallBlock.Content content : VaultWallBlock.Content.values()) {
 			if (content != VaultWallBlock.Content.NONE) {
 				FloorHazards.register(content.getSerializedName(), (player, floor) -> trigger(player, content));
@@ -83,7 +90,10 @@ public final class VaultHazards {
 		BlockPos floor = collapse(level, pos, content, player);
 		switch (content) {
 			case CLOSET -> releaseCloset(level, floor, player);
-			case HOLLOW -> level.playSound(null, pos, SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.BLOCKS, 0.5F, 0.6F);
+			case HOLLOW -> {
+				level.playSound(null, pos, SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.BLOCKS, 0.5F, 0.6F);
+				wakeSecret(level, pos);
+			}
 			case SHORTCUT -> level.playSound(null, pos, SoundEvents.GRINDSTONE_USE, SoundSource.BLOCKS, 0.7F, 0.6F);
 			default -> {
 			}
@@ -117,6 +127,50 @@ public final class VaultHazards {
 		}
 		return lowest;
 	}
+
+	// --- PR 3: the secret's mini-boss ---
+	/**
+	 * The hollow wall burst: the mini-boss in the chamber over the secret room wakes on its seal (the Listener on an even
+	 * floor seed, the Colossus on an odd one); it carries {@link VaultBoss#SECRET}, so its death offers trinkets. Null
+	 * when this floor has no sealed chamber (or it already woke).
+	 */
+	static Mob wakeSecret(ServerLevel level, BlockPos burst) {
+		Optional<PlacedFloor> placed = Floors.at(level.getServer(), level.dimension().identifier(), burst);
+		if (placed.isEmpty()) {
+			return null;
+		}
+		PlacedFloor floor = placed.get();
+		for (FloorSlot slot : floor.slots(FloorSlotKind.SECRET)) {
+			BlockPos seal = findSeal(level, slot.pos());
+			if (seal == null) {
+				continue;
+			}
+			BlockState tile = level.getBlockState(seal.north());
+			level.setBlock(seal, tile.isAir() || tile.is(VaultBuilder.SEAL) ? VaultBlocks.VAULT_BRICKS.defaultBlockState() : tile, Block.UPDATE_ALL);
+			EntityType<? extends Mob> type = (floor.seed() & 1L) == 0 ? VaultMobs.VAULT_LISTENER : VaultMobs.VAULT_COLOSSUS;
+			Mob boss = type.spawn(level, seal.above(), EntitySpawnReason.EVENT);
+			if (boss != null) {
+				boss.addTag(VaultBoss.SECRET);
+				level.playSound(null, seal.above(), SoundEvents.WARDEN_EMERGE, SoundSource.HOSTILE, 2.0F, 0.8F);
+			}
+			return boss;
+		}
+		return null;
+	}
+
+	/** The seal in the chamber over a secret room (searched over the room's span, up to the lid), or null. */
+	static BlockPos findSeal(ServerLevel level, BlockPos secret) {
+		for (BlockPos pos : BlockPos.betweenClosed(secret.offset(-SEAL_REACH, 0, -SEAL_REACH), secret.offset(SEAL_REACH, SEAL_HEIGHT, SEAL_REACH))) {
+			if (level.getBlockState(pos).is(VaultBuilder.SEAL)) {
+				return pos.immutable();
+			}
+		}
+		return null;
+	}
+
+	private static final int SEAL_REACH = 12;
+	private static final int SEAL_HEIGHT = 32;
+	// --- end PR 3 ---
 
 	/** Releases a closet's swarm (scaled for the players near it) and its brutes at a position, angry at {@code target}. */
 	public static int releaseCloset(ServerLevel level, BlockPos at, ServerPlayer target) {

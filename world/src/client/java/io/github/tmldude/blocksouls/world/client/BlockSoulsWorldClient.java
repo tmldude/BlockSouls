@@ -2,7 +2,9 @@ package io.github.tmldude.blocksouls.world.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.entity.IronGolemRenderer;
 import net.minecraft.client.renderer.entity.WanderingTraderRenderer;
+import net.minecraft.client.renderer.entity.WardenRenderer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.RandomSource;
@@ -15,6 +17,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import io.github.tmldude.blocksouls.world.BlockSoulsWorld;
 import io.github.tmldude.blocksouls.world.WorldConfig;
 import io.github.tmldude.blocksouls.world.economy.WorldEconomy;
+import io.github.tmldude.blocksouls.world.floor.VaultMobs;
 
 public class BlockSoulsWorldClient implements ClientModInitializer {
 	@Override
@@ -22,6 +25,9 @@ public class BlockSoulsWorldClient implements ClientModInitializer {
 		ClientTickEvents.END_CLIENT_TICK.register(BlockSoulsWorldClient::driftAsh);
 		WorldTooltips.init();
 		EntityRendererRegistry.register(WorldEconomy.SHOPKEEPER, WanderingTraderRenderer::new);
+		// floor 4, The Vault: its mini-bosses wear the vanilla warden and golem
+		EntityRendererRegistry.register(VaultMobs.VAULT_LISTENER, WardenRenderer::new);
+		EntityRendererRegistry.register(VaultMobs.VAULT_COLOSSUS, IronGolemRenderer::new);
 	}
 
 	/** Ash drifting around the player in the Nether (the fog itself is {@code FogRendererMixin}). */

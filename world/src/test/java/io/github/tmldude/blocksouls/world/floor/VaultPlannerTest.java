@@ -204,6 +204,89 @@ class VaultPlannerTest {
 		}
 	}
 
+	// ---- PR 3: the vault room's keys and the secret stair
+
+	@Test
+	void threeKeysSitInThreeOtherRoomsAndNothingIsPlannedInTheStrongroomAtOneAndEightPlayers() throws Exception {
+		for (FloorTemplate template : vaultTemplates()) {
+			assertEquals(3, template.box.keys, template.id);
+			for (int players : new int[] {1, 8}) {
+				for (long seed = 0; seed < SEEDS; seed++) {
+					FloorPlanner.FloorPlan plan = FloorPlanner.plan(template, config, 4, players, seed);
+					BoxLayout layout = BoxPlanner.layout(template, plan, seed);
+					String at = template.id + " p" + players + " seed " + seed;
+					Set<Long> walk = reach(layout, Set.of());
+					Set<BoxLayout.Room> keyRooms = new HashSet<>();
+					for (FloorPlanner.PlannedSlot key : plan.slots(FloorSlotKind.CRATE)) {
+						if (!key.tag().equals(BoxPlanner.VAULT_KEY)) {
+							continue;
+						}
+						assertTrue(walk.contains(BoxLayout.key(key.x(), key.z())), at + " key " + key + " is reachable without breaking anything");
+						BoxLayout.Room room = layout.rooms().stream().filter(r -> r.contains(key.x(), key.z())).findFirst().orElse(null);
+						assertNotNull(room, at + " key " + key + " stands in a room");
+						assertTrue(Set.of("filler", "event", "mini_boss").contains(room.role()), at + " key in a " + room.role() + " room");
+						assertTrue(keyRooms.add(room), at + " one key per room");
+					}
+					assertEquals(template.box.keys, keyRooms.size(), at + " keys");
+					for (FloorPlanner.PlannedSlot slot : plan.slots()) {
+						if (slot.kind() == FloorSlotKind.NODE || slot.kind() == FloorSlotKind.CRATE) {
+							assertFalse(BoxPlanner.inStrongroom(slot.x(), slot.z(), plan.slots()), at + " " + slot + " is in the strongroom");
+						}
+					}
+				}
+			}
+		}
+	}
+
+	@Test
+	void theHiddenStairClimbsFromTheSecretRoomToAChamberAboveEveryCeilingAtOneAndEightPlayers() throws Exception {
+		for (FloorTemplate template : vaultTemplates()) {
+			for (int players : new int[] {1, 8}) {
+				for (long seed = 0; seed < SEEDS; seed++) {
+					FloorPlanner.FloorPlan plan = FloorPlanner.plan(template, config, 4, players, seed);
+					BoxLayout layout = BoxPlanner.layout(template, plan, seed);
+					String at = template.id + " p" + players + " seed " + seed;
+					VaultSecret stair = VaultSecret.plan(layout, template.box, template.height);
+					assertNotNull(stair, at);
+					BoxLayout.Room room = stair.room();
+					for (BoxLayout.Room other : layout.rooms()) {
+						assertTrue(stair.floorDy() > other.height() + 1, at + " the chamber floor is over " + other.role() + "'s ceiling");
+					}
+					assertTrue(stair.chamberHeight() >= VaultSecret.MIN_CHAMBER && stair.floorDy() + stair.chamberHeight() < template.height,
+							at + " the chamber fits under the lid");
+					for (int x = stair.shaftX() - 1; x <= stair.shaftX() + 1; x++) {
+						for (int z = stair.shaftZ() - 1; z <= stair.shaftZ() + 1; z++) {
+							assertTrue(x > room.x0() && x < room.x1() && z > room.z0() && z < room.z1() && layout.open(x, z), at + " shaft in the room");
+						}
+					}
+					int[] first = stair.step(1);
+					Set<Long> opened = reach(layout, Set.of(BoxLayout.Plug.HOLLOW));
+					boolean approach = false;
+					for (int[] d : new int[][] {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+						approach |= !stair.inShaft(first[0] + d[0], first[2] + d[1]) && opened.contains(BoxLayout.key(first[0] + d[0], first[2] + d[1]));
+					}
+					assertTrue(approach, at + " the first step is reached from the room floor once the hollow wall is down");
+					for (int k = 1; k <= stair.steps(); k++) {
+						int[] step = stair.step(k);
+						assertEquals(k, step[1]);
+						assertTrue(stair.inShaft(step[0], step[2]) && (step[0] != stair.shaftX() || step[2] != stair.shaftZ()), at + " step " + k);
+						if (k > 1) {
+							int[] last = stair.step(k - 1);
+							assertEquals(1, Math.abs(step[0] - last[0]) + Math.abs(step[2] - last[2]), at + " step " + k + " is one across");
+						}
+						if (k + 8 <= stair.steps()) {
+							int[] above = stair.step(k + 8);
+							assertTrue(above[0] == step[0] && above[2] == step[2], at + " the step over step " + k + " is eight up");
+						}
+					}
+					assertEquals(stair.floorDy(), stair.step(stair.steps())[1], at + " the last step is flush with the chamber floor");
+					int[] boss = stair.bossSpot();
+					assertTrue(room.contains(boss[0], boss[2]) && !stair.inShaft(boss[0], boss[2]) && boss[1] == stair.floorDy() + 1, at);
+				}
+			}
+		}
+	}
+
 	@Test
 	void theLayoutIsTheSameForTheSamePlanAndSeed() throws Exception {
 		FloorTemplate template = vaultTemplates().getFirst();

@@ -99,3 +99,61 @@ Spec: the "Floor 4 — The Vault" block of `docs/design/floors.md`. Code: `world
 - No upgrade chain: the Vault's armor is the gear set piece in the vault room (PR 3), not a forged piece.
 - **Shared-code note:** the drink helper is `WorldItems.drink(Consumable.Builder)` in its own marked block; Skyrift's
   `tonic(MobEffectInstance...)` does the same for plain effect drinks. Merge them when both are on main.
+
+## PR 3: the vault room, the hidden stair, mini-bosses, events, horn, roster and affix lean
+
+- **Shared hooks copied from the Skyrift slice-3 branch** (`claude/v2-floor3-skyrift-s3`, not on main yet), verbatim so
+  the two branches merge cleanly: `common` `DirectorEvents.PLACE_EVENT`; `game` `EventSpec.floorTags`/`ambush`,
+  `DirectorConfig.defaultsVersion` 2 migration, `miniBossesByFloorTag`, `DirectorRules.pickEvent(..., floorTags, ...)`.
+  Whichever lands second drops its copy.
+- **The vault room** (structure slot): a 5×5 strongroom of plain vault bricks, three high and roofed, inside the
+  vault room. Its door is a two-high `vault_lock` column on the side facing the camp hall; every block of the column
+  counts the same keys (`keys` blockstate 0–3); the third opens the whole door (it turns to air). The treasure chest
+  (`chests/vault_treasure`: one random enchanted blight-forged piece, plus deep iron, gunmetal, maybe a golden apple)
+  sits opposite the door. The blight-forged set is the world's existing armor set, so "gear set piece" reuses it;
+  the four pieces are recipe-web exempt as gear.
+- **Keys:** template knob `box.keys` (3 on all three vault templates). The planner puts one `CRATE` tagged
+  `vault_key` in each of three other rooms (shuffled filler rooms first, then the event and mini-boss rooms; never
+  the camp, the secret or the vault room), one in from the walls, at least 3 from any room slot. Its own random
+  (`seed ^ "KEYS"`), so adding keys doesn't move nodes, herbs or crates. **Not party-scaled**: the lock always takes
+  three, at 1 and 8 players (tested). Key crates roll `chests/vault_key` (the key plus scrap or deep iron).
+  `vault_key` (rare, stacks to 3) is recipe-web exempt: a key item, spent on the lock. Nothing else is planned in
+  the strongroom's footprint (reach 3).
+- **The hidden stair** (`VaultSecret`, pure, planner-tested at 1 and 8 players): behind the hollow wall, a spiral
+  stair in the secret room's inner corner farthest from the tunnel: a 3×3 shaft round a vault-brick pillar, one step
+  per block up, to a chamber over the secret room's footprint whose floor is 2 above the tallest room or hall
+  ceiling (dy 11 on the shipped templates) and 4–6 clear under the lid. The secret room's old chest is gone (the
+  trinket is the reward); with no headroom for a chamber the builder falls back to the chest.
+- **The secret's mini-boss:** a `reinforced_deepslate` seal in the chamber floor marks its spot (across the room's
+  centre from the stair). When the hollow wall bursts, the floor's SECRET slot's seal is found, swapped for a floor
+  tile, and the mini-boss wakes on it: the Listener on an even floor seed, the Colossus on an odd one. It carries
+  the `blocksouls_world.vault_secret` tag; on death every non-spectator player within `secretTrinketReach` (48) is
+  offered a trinket (`BuildHooks.offerTrinkets`).
+- **The two mini-bosses** are world entities (`blocksouls_world:vault_listener`, `vault_colossus`), in the Director's
+  `vault` roster (`miniBossesByFloorTag`). Both get a boss bar and party-scaled health (`PartyScaling.bossHealth` on
+  the server's player count, clamped 1–8, unit-tested at 1 and 8), and are persistent.
+  - **The Listener** (blind hunter): the vanilla warden's body and brain (hunts by sound and smell, pulses darkness),
+    cut to a mini-boss: `listenerHealth` 160, `listenerDamage` 7, and its dig cooldown is kept topped up so it never
+    burrows away. Vanilla warden renderer. Named "The Listener" (generic).
+  - **The Vault Colossus** (golem): the vanilla iron golem's body (the launching swing) with player-hunting goals
+    and never player-made: `colossusHealth` 200, `colossusDamage` 8. Vanilla iron golem renderer.
+  - Loot: 2–4 deep iron and 3–6 scrap each.
+- **Director events (2, both floor-tagged `vault`, from act 4):**
+  - `blocksouls_world:vault_prison` (weight 1, `ambush: true`): a roofed 5×5 iron-bar cage around an iron golem made
+    player-created (an ally once broken out); the game arms its usual ambush at the spot.
+  - `blocksouls_world:trapped_hall` (weight 1): the floor under the spot becomes a 5×7 grid of flame grates
+    (`vault_flame_trap`: rest `trapRestTicks` 30 → smoke `trapSmokeTicks` 20, the tell → flame `trapFlameTicks` 30;
+    standing on a lit grate burns for `trapBurnSeconds` 3 and `trapDamage` 3 every 10 ticks). Each row starts 10
+    ticks behind the last, so a wave of flame runs down the hall; past the far row a chest (`chests/vault_trapped_hall`:
+    deep iron, scrap, gunmetal, maybe a golden apple; no souls, so the world never names a game item).
+  - No library-of-boons event: there is no boon-reroll hook in common to call, so the third optional event waits.
+- **Horn buff capped at one tier** (`Horn.oneTierFloorTags: ["vault"]`): on a vault floor the siege horn pays its
+  souls and the drop-tier shift but never the free relic (`HornMath`, tested).
+- **Roster:** the Vault's wave roster is unchanged (the spec's lean is in the affixes). **Affix lean:**
+  `MobsConfig` affixes `weightsByFloorTag.vault = {volatile: 5}` raises the volatile affix's weight from 1 to 5 on vault floors
+  (tested in `AffixRollTest`).
+- **Tests:** `VaultPlannerTest` adds the keys (three, in three other rooms, none in the strongroom) and the stair
+  (each step one up and one across, headroom, flush with the chamber floor, boss spot in the chamber off the shaft),
+  at 1 and 8 players. `VaultGameTests` also wakes the secret's mini-boss (in the chamber, seal gone, the shaft
+  opening in its floor), opens the vault room with three keys (two don't), and places both events through
+  `DirectorEvents.PLACE_EVENT`.

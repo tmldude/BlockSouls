@@ -1,11 +1,17 @@
 package io.github.tmldude.blocksouls.common.event;
 
+import org.jspecify.annotations.Nullable;
+
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
+
+import io.github.tmldude.blocksouls.common.floor.PlacedFloor;
 
 /** The AI Director's day loop (game, server thread). Other modules react with set dressing (sounds, sky, lines). */
 public final class DirectorEvents {
@@ -36,6 +42,29 @@ public final class DirectorEvents {
 			callback.onObjective(server, objective, success);
 		}
 	});
+
+	// --- floor events (Stage 6C): a floor's own random events, placed by the module that owns its blocks ---
+
+	/**
+	 * The Director rolled a random event its own code doesn't place (a namespaced id from a floor session, e.g.
+	 * {@code blocksouls_world:wind_altar}) at {@code pos}, on {@code floor} (null off a placed floor). Returns true
+	 * once a listener placed it; the Director logs it as unplaced when none did (e.g. that module is absent).
+	 */
+	public static final Event<PlaceEvent> PLACE_EVENT = EventFactory.createArrayBacked(PlaceEvent.class, callbacks -> (level, event, pos, floor) -> {
+		for (PlaceEvent callback : callbacks) {
+			if (callback.place(level, event, pos, floor)) {
+				return true;
+			}
+		}
+		return false;
+	});
+
+	@FunctionalInterface
+	public interface PlaceEvent {
+		boolean place(ServerLevel level, Identifier event, BlockPos pos, @Nullable PlacedFloor floor);
+	}
+
+	// --- end floor events ---
 
 	private DirectorEvents() {
 	}

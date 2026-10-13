@@ -126,7 +126,7 @@ public final class MobAffixes implements Affixes.Provider {
 	public Optional<Affix> roll(RandomSource random, int floor, Set<String> floorTags) {
 		MobsConfig mobs = BlockSoulsMobs.CONFIG;
 		return AffixRoll.roll(random.nextDouble(), random.nextDouble(), floor, floorTags.contains(WaveMobs.ELITE_AFFIXES),
-				mobs.affixesInClassic, NAMES, mobs.affixes).map(Affix::byName);
+				mobs.affixesInClassic, NAMES, mobs.affixes, floorTags).map(Affix::byName);
 	}
 
 	/**
