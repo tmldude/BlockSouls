@@ -44,7 +44,8 @@ CI crafting check (#35) and every drop in 2+ recipes (#38). Releases set the Mod
 v0.10.1: faster pacing (12-minute days, 2–4 waves a night, 8 s breaks), migrated onto live servers through
 `defaultsVersion` (#42). v0.11.0: `/bs config reload` and a tuning map (#44), recipe book, tutorial advancements
 and recipe viewer (#45), denser resources (#43), wave drops that feel good with a gun pity timer and faster pacing
-(#53).
+(#53). From v2, live under classic runs (owner priority: guns, abilities, boons): the abilities kit (#50) and
+synergy builds (keystones, levels, curses, trinkets, #51).
 
 ## Next
 - v1 track (this orchestrator): next playtest → feedback pass (hit markers, ammo cues, wave-clear fanfare, death
