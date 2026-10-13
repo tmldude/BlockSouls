@@ -338,10 +338,6 @@ public class DirectorConfig {
 				"blocksouls_world:scrap", new Source("blocksouls_world:scrap_node", "Scrap nodes"),
 				"blocksouls_world:gunmetal_ingot", new Source("blocksouls_world:gunmetal_node", "Gunmetal nodes"),
 				"blocksouls_world:amber_resin", new Source("blocksouls_world:resin_node", "The floor's rare (resin nodes)"),
-				// --- floor rares (Stage 6C): one line per floor session ---
-				"blocksouls_world:skysteel", new Source("blocksouls_world:skysteel_node", "Skyrift's rare (skysteel nodes, on the shards)"),
-				"blocksouls_world:cloudbloom", new Source("blocksouls_world:cloudbloom", "Skyrift's herb (cloudbloom)"),
-				// --- end floor rares ---
 				"blocksouls_game:soul", new Source("minecraft:zombie_head", "Mobs"),
 				"minecraft:oak_log", new Source("minecraft:oak_sapling", "Trees")));
 		/** Fixed services on the board. */

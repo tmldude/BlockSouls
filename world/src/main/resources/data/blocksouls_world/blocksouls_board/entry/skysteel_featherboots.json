@@ -1,0 +1,9 @@
+{
+  "recipe": "blocksouls_world:skysteel_featherboots",
+  "board": "forge",
+  "minFloor": 3,
+  "maxFloor": 99,
+  "floorTags": [
+    "skyrift"
+  ]
+}
