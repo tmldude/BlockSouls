@@ -69,6 +69,8 @@ public abstract class BossEntity extends Monster {
 	private static final EntityDataAccessor<Byte> DATA_STAGE = SynchedEntityData.defineId(BossEntity.class, EntityDataSerializers.BYTE);
 	private static final EntityDataAccessor<Integer> DATA_ATTACK = SynchedEntityData.defineId(BossEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Boolean> DATA_ENGAGED = SynchedEntityData.defineId(BossEntity.class, EntityDataSerializers.BOOLEAN);
+	private static final EntityDataAccessor<Float> DATA_POSTURE = SynchedEntityData.defineId(BossEntity.class, EntityDataSerializers.FLOAT);
+	private static final EntityDataAccessor<Integer> DATA_BROKEN_PARTS = SynchedEntityData.defineId(BossEntity.class, EntityDataSerializers.INT);
 	private static final net.minecraft.resources.Identifier SCALING_ID = CommonIds.id(CommonIds.BOSSES, "fight_scaling");
 
 	private BossPart[] parts = new BossPart[0];
@@ -102,6 +104,20 @@ public abstract class BossEntity extends Monster {
 	private boolean scalingApplied;
 	private int attacksFinished;
 	private boolean fogWallEnabled = true;
+
+	// v2: posture, part breaks, presentation, reactions.
+	private double poise;
+	private int poiseIdleTicks;
+	private int visceral;
+	private int postureLockout;
+	private int posturesBroken;
+	private int hitStop;
+	private double[] partDamage = new double[0];
+	private final Map<UUID, Integer> lastRolled = new HashMap<>();
+	private final Map<UUID, Integer> aimTicks = new HashMap<>();
+	private int sidestepCooldown;
+	private int sidesteps;
+	private int[] lastUsedTick = new int[0];
 
 	protected BossEntity(EntityType<? extends BossEntity> type, Level level) {
 		super(type, level);
@@ -181,7 +197,15 @@ public abstract class BossEntity extends Monster {
 
 	/** Damage that landed on a part: the part's multiplier applies, then it's handled like a hit on the body. */
 	public boolean hurtFromPart(ServerLevel level, BossPart part, DamageSource source, float damage) {
-		return hurtServer(level, source, (float) (damage * part.damageMultiplier()));
+		float before = getHealth();
+		boolean hurt = hurtServer(level, source, (float) (damage * part.damageMultiplier()));
+		if (hurt && source.getEntity() instanceof Player) {
+			if (part.damageMultiplier() > 1) {
+				addPoise(framework().posture.weakPointHitPoise);
+			}
+			damagePart(level, part.partName(), Math.max(0, before - getHealth()));
+		}
+		return hurt;
 	}
 
 	@Override
@@ -211,6 +235,8 @@ public abstract class BossEntity extends Monster {
 		entityData.define(DATA_STAGE, (byte) Stage.NONE.ordinal());
 		entityData.define(DATA_ATTACK, -1);
 		entityData.define(DATA_ENGAGED, false);
+		entityData.define(DATA_POSTURE, 0f);
+		entityData.define(DATA_BROKEN_PARTS, 0);
 	}
 
 	@Override
@@ -385,6 +411,21 @@ public abstract class BossEntity extends Monster {
 		}
 		if (cooldowns.length != definition().attacks().size()) {
 			cooldowns = new int[definition().attacks().size()];
+			lastUsedTick = new int[cooldowns.length];
+			Arrays.fill(lastUsedTick, Integer.MIN_VALUE / 2);
+		}
+		if (partDamage.length != definition().breaks().size()) {
+			partDamage = new double[definition().breaks().size()];
+		}
+		if (hitStop > 0) {
+			// Hit-stop: everything holds for a beat (the bar still updates).
+			hitStop--;
+			setDeltaMovement(Vec3.ZERO);
+			getNavigation().stop();
+			if (tickCount % 2 == 0) {
+				BossBars.tick(level, this);
+			}
+			return;
 		}
 		if (!scalingApplied) {
 			// Keeps the health fraction (full for a fresh spawn).
@@ -498,6 +539,13 @@ public abstract class BossEntity extends Monster {
 			return;
 		}
 
+		postureTick();
+		if (visceral > 0) {
+			visceralTick(level);
+			return;
+		}
+		BossAffixes.tick(level, this);
+
 		if (run == null) {
 			int next = PhaseMath.next(phase, getHealth() / getMaxHealth(), definition().thresholds());
 			if (next != phase) {
@@ -517,6 +565,7 @@ public abstract class BossEntity extends Monster {
 		}
 
 		moveTick(target);
+		reactTick(level);
 		fightTick(level, target);
 		if (gap > 0) {
 			gap--;
@@ -547,22 +596,45 @@ public abstract class BossEntity extends Monster {
 	private void tryStartAttack(ServerLevel level, LivingEntity target) {
 		BossPhase current = definition().phase(phase);
 		List<Attack> attacks = current.attacks();
-		List<AttackPicker.Option> options = new ArrayList<>(attacks.size());
+		List<AttackPicker.Scored> options = new ArrayList<>(attacks.size());
 		int last = -1;
 		for (int i = 0; i < attacks.size(); i++) {
 			Attack attack = attacks.get(i);
 			AttackStats stats = attack.stats();
 			int index = definition().indexOf(attack);
-			boolean allowed = attack.canUse(this, target);
-			options.add(new AttackPicker.Option(allowed ? stats.weight : 0, cooldowns[index], stats.minRange, stats.maxRange));
+			boolean allowed = !attackLost(attack) && attack.canUse(this, target);
+			AttackPicker.Option option = new AttackPicker.Option(allowed ? stats.weight : 0, cooldowns[index], stats.minRange, stats.maxRange);
+			options.add(new AttackPicker.Scored(option, attack.traits(), tickCount - lastUsedTick[index]));
 			if (index == lastAttack) {
 				last = i;
 			}
 		}
-		int pick = AttackPicker.pick(options, distanceTo(target), last, framework().repeatPenalty, random::nextLong);
+		BossesConfig.Picker p = framework().picker;
+		int pick;
+		if (p.enabled) {
+			AttackPicker.Context context = new AttackPicker.Context(distanceTo(target), angleTo(target), 1.0, justRolled(target),
+					!target.onGround() && !target.isInWater());
+			AttackPicker.Weights weights = new AttackPicker.Weights(p.distance, p.angle, p.stamina, p.rolled, p.airborne, p.freshnessTicks);
+			pick = AttackPicker.pickScored(options, context, weights, last, framework().repeatPenalty, random::nextLong);
+		} else {
+			pick = AttackPicker.pick(options.stream().map(AttackPicker.Scored::option).toList(), distanceTo(target), last,
+					framework().repeatPenalty, random::nextLong);
+		}
 		if (pick >= 0) {
 			startAttack(level, attacks.get(pick), target);
 		}
+	}
+
+	/** Degrees between where the boss faces and {@code target} (0 = dead ahead, 180 = behind). */
+	public double angleTo(Entity target) {
+		Vec3 look = AttackRun.flat(Vec3.directionFromRotation(0, getYRot()));
+		Vec3 to = AttackRun.flatDirection(position(), target.position(), look);
+		return Math.toDegrees(Math.acos(Math.clamp(look.dot(to), -1, 1)));
+	}
+
+	private boolean justRolled(LivingEntity target) {
+		Integer at = lastRolled.get(target.getUUID());
+		return at != null && tickCount - at <= framework().picker.justRolledTicks;
 	}
 
 	/** Starts {@code attack} now (debug and tests can call this directly). */
@@ -609,6 +681,9 @@ public abstract class BossEntity extends Monster {
 		int index = definition().indexOf(attack);
 		BossPhase current = definition().phase(phase);
 		cooldowns[index] = (int) Math.round(attack.stats().cooldownTicks * current.cooldownMult());
+		if (index < lastUsedTick.length) {
+			lastUsedTick[index] = tickCount;
+		}
 		lastAttack = index;
 		gap = framework().attackGapTicks;
 		attacksFinished++;
@@ -642,6 +717,299 @@ public abstract class BossEntity extends Monster {
 		setYRot(yaw);
 		setYBodyRot(yaw);
 		setYHeadRot(yaw);
+	}
+
+	// ---------------------------------------------------------------------------------------------------------
+	// Posture / stagger (PLAN2 §3h)
+
+	/** The boss's name with its field-boss affix prefix, if any ("Burning Ashwyrm"). */
+	@Override
+	public net.minecraft.network.chat.Component getName() {
+		return BossAffixes.name(this, super.getName());
+	}
+
+	/** Poise fill, 0..1 (both sides; the bar under the boss bar). */
+	public float posture() {
+		return entityData.get(DATA_POSTURE);
+	}
+
+	/** Server: the visceral window is open. */
+	public boolean isPostureBroken() {
+		return visceral > 0;
+	}
+
+	/** Visceral windows opened since this boss was created (tests). */
+	public int posturesBroken() {
+		return posturesBroken;
+	}
+
+	/** Max poise for this fight (scaled for the party like health). */
+	public double maxPoise() {
+		double base = definition().poise() > 0 ? definition().poise() : framework().posture.basePoise;
+		return io.github.tmldude.blocksouls.bosses.logic.PostureMath.maxPoise(base, Math.max(1, mostPlayersInFight));
+	}
+
+	/** Adds poise (precision hits, rolls, debug). Opens the visceral window when it fills. */
+	public void addPoise(double amount) {
+		BossesConfig.Posture c = framework().posture;
+		if (!c.enabled || amount <= 0 || !isEngaged() || visceral > 0 || postureLockout > 0 || stagger > 0 || isDeadOrDying()) {
+			return;
+		}
+		double max = maxPoise();
+		poise = io.github.tmldude.blocksouls.bosses.logic.PostureMath.gain(poise, amount, max);
+		poiseIdleTicks = 0;
+		entityData.set(DATA_POSTURE, (float) (poise / max));
+		if (io.github.tmldude.blocksouls.bosses.logic.PostureMath.broken(poise, max) && level() instanceof ServerLevel level) {
+			breakPosture(level);
+		}
+	}
+
+	/** A player's precision hit landed on this boss. */
+	public void onPrecisionHit(ServerPlayer player, float damage) {
+		BossesConfig.Posture c = framework().posture;
+		addPoise(io.github.tmldude.blocksouls.bosses.logic.PostureMath.precisionHit(damage, c.precisionHitPoise, c.precisionDamagePoise));
+	}
+
+	/** A participant rolled: poise if it was inside the current attack's hit window and in reach. */
+	public void onRolled(ServerPlayer player) {
+		lastRolled.put(player.getUUID(), tickCount);
+		AttackRun current = run;
+		BossesConfig.Posture c = framework().posture;
+		if (current == null || !io.github.tmldude.blocksouls.bosses.logic.PostureMath.wellTimedRoll(current.ticksBeforeActive(),
+				current.activeTicks(), c.rollLeadTicks)) {
+			return;
+		}
+		double reach = current.attack().stats().maxRange + c.rollRangeSlack;
+		if (distanceTo(player) <= reach && current.markRolled(player.getUUID())) {
+			addPoise(c.rollPoise);
+		}
+	}
+
+	/** Opens the visceral window now (debug: {@code /bs boss posture break}). */
+	public void breakPosture(ServerLevel level) {
+		cancelAttack();
+		getNavigation().stop();
+		visceral = Math.max(1, framework().posture.visceralTicks);
+		posturesBroken++;
+		poise = maxPoise();
+		entityData.set(DATA_POSTURE, 1f);
+		syncStage(Stage.BROKEN, null);
+		level.playSound(null, getX(), getY(), getZ(), io.github.tmldude.blocksouls.bosses.registry.BossSounds.POSTURE_BREAK, SoundSource.HOSTILE,
+				3.0f, 1.0f);
+		level.sendParticles(ParticleTypes.EXPLOSION, getX(), getY() + getBbHeight() * 0.6, getZ(), 1, 0, 0, 0, 0);
+		level.sendParticles(ParticleTypes.CRIT, true, true, getX(), getY() + getBbHeight() * 0.6, getZ(), 40, 0.6, 0.6, 0.6, 0.5);
+		onPostureBroken();
+	}
+
+	/** Server: the visceral window just opened. */
+	protected void onPostureBroken() {
+	}
+
+	private void postureTick() {
+		if (postureLockout > 0) {
+			postureLockout--;
+		}
+		if (visceral > 0 || poise <= 0) {
+			return;
+		}
+		poiseIdleTicks++;
+		BossesConfig.Posture c = framework().posture;
+		double next = io.github.tmldude.blocksouls.bosses.logic.PostureMath.decay(poise, poiseIdleTicks, c.decayDelayTicks, c.decayPerTick);
+		if (next != poise) {
+			poise = next;
+			if (tickCount % 4 == 0 || poise == 0) {
+				entityData.set(DATA_POSTURE, (float) (poise / maxPoise()));
+			}
+		}
+	}
+
+	private void visceralTick(ServerLevel level) {
+		visceral--;
+		setDeltaMovement(getDeltaMovement().multiply(0, 1, 0));
+		if (visceral % 8 == 0) {
+			level.sendParticles(ParticleTypes.ENCHANTED_HIT, true, true, getX(), getY() + getBbHeight() * 0.7, getZ(), 8, 0.5, 0.4, 0.5, 0.2);
+		}
+		if (visceral <= 0) {
+			visceral = 0;
+			poise = 0;
+			poiseIdleTicks = 0;
+			postureLockout = framework().posture.lockoutTicks;
+			entityData.set(DATA_POSTURE, 0f);
+			gap = framework().attackGapTicks;
+			syncStage(Stage.NONE, null);
+		}
+	}
+
+	private void resetPosture() {
+		poise = 0;
+		visceral = 0;
+		postureLockout = 0;
+		poiseIdleTicks = 0;
+		hitStop = 0;
+		lastRolled.clear();
+		aimTicks.clear();
+		entityData.set(DATA_POSTURE, 0f);
+	}
+
+	/** Freezes the boss for {@code ticks} (hit-stop). */
+	public void hitStop(int ticks) {
+		hitStop = Math.max(hitStop, ticks);
+	}
+
+	public boolean inHitStop() {
+		return hitStop > 0;
+	}
+
+	/** Called by {@link AttackRun} when one of this boss's attacks damaged {@code victim}. */
+	void onAttackLanded(ServerLevel level, LivingEntity victim, float amount) {
+		if (amount >= victim.getMaxHealth() * framework().presentation.heavyHitShareOfPlayer) {
+			hitStop(framework().presentation.hitStopTicks);
+		}
+		BossAffixes.onHit(level, this, victim);
+	}
+
+	// ---------------------------------------------------------------------------------------------------------
+	// Part breaks
+
+	/** Whether the breakable part {@code name} is broken (both sides). */
+	public boolean isPartBroken(String name) {
+		int index = definition().breakIndex(name);
+		return index >= 0 && (entityData.get(DATA_BROKEN_PARTS) & (1 << index)) != 0;
+	}
+
+	/** Bit mask of broken parts, by {@link BossDefinition#breaks()} index (both sides). */
+	public int brokenParts() {
+		return entityData.get(DATA_BROKEN_PARTS);
+	}
+
+	/** Whether {@code attack} is gone because the part it needs broke. */
+	public boolean attackLost(Attack attack) {
+		List<BossDefinition.PartBreak> breaks = definition().breaks();
+		int mask = brokenParts();
+		for (int i = 0; i < breaks.size(); i++) {
+			if ((mask & (1 << i)) != 0 && attack.name().equals(breaks.get(i).lostAttack())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Sustained damage on a breakable part; breaks it at its threshold. */
+	public void damagePart(ServerLevel level, String name, double amount) {
+		int index = definition().breakIndex(name);
+		if (index < 0 || index >= partDamage.length || isPartBroken(name)) {
+			return;
+		}
+		partDamage[index] += amount;
+		if (partDamage[index] >= definition().breaks().get(index).shareOfMaxHealth() * getMaxHealth()) {
+			breakPart(level, index);
+		}
+	}
+
+	/** Breaks part {@code index} now (debug: {@code /bs boss break <part>}). */
+	public void breakPart(ServerLevel level, int index) {
+		List<BossDefinition.PartBreak> breaks = definition().breaks();
+		if (index < 0 || index >= breaks.size() || (brokenParts() & (1 << index)) != 0) {
+			return;
+		}
+		BossDefinition.PartBreak broken = breaks.get(index);
+		entityData.set(DATA_BROKEN_PARTS, brokenParts() | (1 << index));
+		AttributeInstance speed = getAttribute(Attributes.MOVEMENT_SPEED);
+		if (speed != null && broken.speedBonus() != 0) {
+			speed.addOrUpdateTransientModifier(new AttributeModifier(CommonIds.id(CommonIds.BOSSES, "broken_" + broken.part()), broken.speedBonus(),
+					AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
+		}
+		if (run != null && attackLost(run.attack())) {
+			cancelAttack();
+			gap = framework().attackGapTicks;
+		}
+		Vec3 at = position().add(0, getBbHeight() * 0.6, 0);
+		for (BossPart part : parts) {
+			if (part.partName().equals(broken.part())) {
+				at = part.position().add(0, part.getBbHeight() / 2, 0);
+			}
+		}
+		level.playSound(null, at.x, at.y, at.z, io.github.tmldude.blocksouls.bosses.registry.BossSounds.PART_BREAK, SoundSource.HOSTILE, 3.0f, 0.9f);
+		level.sendParticles(ParticleTypes.EXPLOSION, at.x, at.y, at.z, 1, 0, 0, 0, 0);
+		level.sendParticles(ParticleTypes.LARGE_SMOKE, true, true, at.x, at.y, at.z, 20, 0.5, 0.5, 0.5, 0.05);
+		hitStop(framework().presentation.hitStopTicks * 2);
+		onPartBroken(broken.part());
+	}
+
+	/** Server: a breakable part just broke. */
+	protected void onPartBroken(String part) {
+	}
+
+	private void restoreParts() {
+		List<BossDefinition.PartBreak> breaks = definition().breaks();
+		AttributeInstance speed = getAttribute(Attributes.MOVEMENT_SPEED);
+		for (BossDefinition.PartBreak broken : breaks) {
+			if (speed != null) {
+				speed.removeModifier(CommonIds.id(CommonIds.BOSSES, "broken_" + broken.part()));
+			}
+		}
+		Arrays.fill(partDamage, 0);
+		entityData.set(DATA_BROKEN_PARTS, 0);
+	}
+
+	// ---------------------------------------------------------------------------------------------------------
+	// Reactions (sidestep vs. aim)
+
+	/** Whether this boss sidesteps players who hold their aim on it. Off by default; light-footed bosses opt in. */
+	protected boolean sidesteps() {
+		return false;
+	}
+
+	/** Sidesteps since this boss was created (tests). */
+	public int sidestepCount() {
+		return sidesteps;
+	}
+
+	private void reactTick(ServerLevel level) {
+		if (sidestepCooldown > 0) {
+			sidestepCooldown--;
+		}
+		BossesConfig.Reactions c = framework().reactions;
+		if (!c.sidestep || !sidesteps() || !onGround()) {
+			return;
+		}
+		int floor = io.github.tmldude.blocksouls.bosses.logic.Fairness.reactionTicks(c.reactionTicks);
+		for (ServerPlayer player : participants()) {
+			UUID id = player.getUUID();
+			if (!inFight(player) || distanceTo(player) > c.range || !aimedAt(player, c.aimConeDegrees)) {
+				aimTicks.remove(id);
+				continue;
+			}
+			int held = aimTicks.merge(id, 1, Integer::sum);
+			if (held == floor && sidestepCooldown <= 0) {
+				// One decision per aim streak, never sooner than the reaction floor.
+				if (random.nextDouble() < c.chance) {
+					sidestep(level, player, c.speed);
+					sidestepCooldown = io.github.tmldude.blocksouls.bosses.logic.Fairness.reactionCooldown(c.cooldownTicks);
+				}
+			}
+		}
+	}
+
+	private boolean aimedAt(ServerPlayer player, double coneDegrees) {
+		Vec3 eye = player.getEyePosition();
+		Vec3 to = position().add(0, getBbHeight() / 2, 0).subtract(eye);
+		if (to.lengthSqr() < 1e-4) {
+			return false;
+		}
+		double cos = player.getLookAngle().normalize().dot(to.normalize());
+		return cos >= Math.cos(Math.toRadians(coneDegrees));
+	}
+
+	/** Hops sideways relative to {@code from}'s line of fire. */
+	public void sidestep(ServerLevel level, LivingEntity from, double speed) {
+		Vec3 to = AttackRun.flatDirection(from.position(), position(), getLookAngle());
+		Vec3 side = new Vec3(-to.z, 0, to.x).scale(random.nextBoolean() ? 1 : -1);
+		setDeltaMovement(side.scale(speed).add(0, 0.25, 0));
+		needsSync = true;
+		sidesteps++;
+		level.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 0.2, getZ(), 8, 0.4, 0.1, 0.4, 0.02);
+		playSound(SoundEvents.PLAYER_ATTACK_SWEEP, 1.0f, 0.6f);
 	}
 
 	// ---------------------------------------------------------------------------------------------------------
@@ -769,6 +1137,7 @@ public abstract class BossEntity extends Monster {
 			seal.activate(level);
 		}
 		level.playSound(null, home(), io.github.tmldude.blocksouls.bosses.registry.BossSounds.FOG_WALL_CLOSE, SoundSource.HOSTILE, 2.0f, 0.8f);
+		io.github.tmldude.blocksouls.bosses.presentation.BossSplash.send(level, this);
 		onEngage();
 		BossEvents.ENGAGED.invoker().onBoss(level, definition().id(), this, participants());
 		FieldBosses.onEngaged(level, this);
@@ -800,6 +1169,8 @@ public abstract class BossEntity extends Monster {
 		forcedTarget = null;
 		setTarget(null);
 		stagger = 0;
+		resetPosture();
+		restoreParts();
 		phase = 0;
 		entityData.set(DATA_PHASE, (byte) 0);
 		syncStage(Stage.NONE, null);
@@ -858,9 +1229,15 @@ public abstract class BossEntity extends Monster {
 				damage *= (float) framework().outsideArenaDamageMult;
 			}
 		}
+		if (visceral > 0) {
+			damage *= (float) framework().posture.visceralDamageMult;
+		}
 		boolean hurt = super.hurtServer(level, source, damage);
 		if (hurt && player != null) {
 			aggro.addDamage(player.getUUID(), damage);
+		}
+		if (hurt && damage >= getMaxHealth() * framework().presentation.heavyHitShareOfBoss) {
+			hitStop(framework().presentation.hitStopTicks);
 		}
 		return hurt;
 	}
@@ -882,6 +1259,7 @@ public abstract class BossEntity extends Monster {
 			List<ServerPlayer> players = participants();
 			Collection<ServerPlayer> credited = List.copyOf(players);
 			BossEvents.KILLED.invoker().onBoss(level, definition().id(), this, credited);
+			BossAffixes.onDeath(level, this);
 			FieldBosses.onKilled(level, this);
 			BossBars.removeAll(level, this);
 		}

@@ -33,6 +33,9 @@ public class BlockSoulsBosses implements ModInitializer {
 		BossSounds.init();
 		BossBlocks.init();
 		BossBars.init();
+		io.github.tmldude.blocksouls.bosses.presentation.BossSplash.init();
+		io.github.tmldude.blocksouls.bosses.posture.PostureListeners.init();
+		io.github.tmldude.blocksouls.bosses.api.BossAffixes.init();
 		Bosses.init();
 		FieldBosses.init();
 		BossCommands.init();

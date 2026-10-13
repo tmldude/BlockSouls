@@ -78,4 +78,53 @@ class AttackPickerTest {
 		assertTrue(AttackPicker.anyInRange(List.of(new AttackPicker.Option(1, 50, 0, 5)), 4));
 		assertFalse(AttackPicker.anyInRange(List.of(MELEE), 8));
 	}
+
+	private static final AttackPicker.Weights WEIGHTS = new AttackPicker.Weights(0.6, 0.8, 0.8, 1.2, 1.2, 200);
+
+	@Test
+	void scoringPrefersAntiAirAgainstAirborneTargets() {
+		AttackPicker.Scored ground = new AttackPicker.Scored(new AttackPicker.Option(1, 0, 0, 10), new AttackPicker.Traits(0, -1, 0, 0), 1000);
+		AttackPicker.Scored air = new AttackPicker.Scored(new AttackPicker.Option(1, 0, 0, 10), new AttackPicker.Traits(0, 1, 0, 0), 1000);
+		AttackPicker.Context airborne = new AttackPicker.Context(5, 0, 1, false, true);
+		assertTrue(AttackPicker.utility(air, airborne, WEIGHTS) > AttackPicker.utility(ground, airborne, WEIGHTS));
+		Random random = new Random(3);
+		int airPicks = 0;
+		for (int i = 0; i < 1000; i++) {
+			airPicks += AttackPicker.pickScored(List.of(ground, air), airborne, WEIGHTS, -1, 1, random);
+		}
+		assertTrue(airPicks > 700, "anti-air picked " + airPicks + "/1000");
+	}
+
+	@Test
+	void scoringPrefersRearAttacksBehind() {
+		AttackPicker.Scored thrust = new AttackPicker.Scored(new AttackPicker.Option(1, 0, 0, 10), new AttackPicker.Traits(1, 0, 0, 0), 1000);
+		AttackPicker.Scored tail = new AttackPicker.Scored(new AttackPicker.Option(1, 0, 0, 10), new AttackPicker.Traits(-1, 0, 0, 0), 1000);
+		AttackPicker.Context behind = new AttackPicker.Context(5, 170, 1, false, false);
+		AttackPicker.Context ahead = new AttackPicker.Context(5, 5, 1, false, false);
+		assertTrue(AttackPicker.utility(tail, behind, WEIGHTS) > AttackPicker.utility(thrust, behind, WEIGHTS));
+		assertTrue(AttackPicker.utility(thrust, ahead, WEIGHTS) > AttackPicker.utility(tail, ahead, WEIGHTS));
+	}
+
+	@Test
+	void scoringNeverRemovesAnAttackAndRespectsRangeAndCooldown() {
+		AttackPicker.Scored bad = new AttackPicker.Scored(new AttackPicker.Option(1, 0, 0, 10), new AttackPicker.Traits(-1, -1, -1, -1), 0);
+		AttackPicker.Context worst = new AttackPicker.Context(5, 0, 0, true, true);
+		assertTrue(AttackPicker.utility(bad, worst, WEIGHTS) >= Fairness.ADAPTATION_FLOOR);
+		AttackPicker.Scored cooling = new AttackPicker.Scored(new AttackPicker.Option(5, 20, 0, 10), AttackPicker.Traits.NONE, 1000);
+		AttackPicker.Scored far = new AttackPicker.Scored(new AttackPicker.Option(5, 0, 20, 30), AttackPicker.Traits.NONE, 1000);
+		AttackPicker.Context near = new AttackPicker.Context(5, 0, 1, false, false);
+		Random random = new Random(4);
+		for (int i = 0; i < 100; i++) {
+			assertEquals(2, AttackPicker.pickScored(List.of(cooling, far, bad), near, WEIGHTS, -1, 1, random));
+		}
+		assertEquals(-1, AttackPicker.pickScored(List.of(cooling, far), near, WEIGHTS, -1, 1, random));
+	}
+
+	@Test
+	void freshnessFavoursAttacksNotSeenInAWhile() {
+		AttackPicker.Option o = new AttackPicker.Option(1, 0, 0, 10);
+		AttackPicker.Context c = new AttackPicker.Context(5, 0, 1, false, false);
+		assertTrue(AttackPicker.utility(new AttackPicker.Scored(o, AttackPicker.Traits.NONE, 400), c, WEIGHTS)
+				> AttackPicker.utility(new AttackPicker.Scored(o, AttackPicker.Traits.NONE, 10), c, WEIGHTS));
+	}
 }

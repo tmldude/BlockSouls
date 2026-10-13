@@ -17,4 +17,12 @@ public class BossRenderState extends LivingEntityRenderState {
 	/** Phase index (0 = first). */
 	public int phase;
 	public boolean engaged;
+	/** Poise fill 0..1. */
+	public float posture;
+	/** Broken-part bit mask ({@code BossDefinition.breaks()} order). */
+	public int brokenParts;
+	/** Health / max health. */
+	public float healthShare = 1;
+	/** Field-boss affix, or null. */
+	public io.github.tmldude.blocksouls.common.mob.@Nullable Affix affix;
 }

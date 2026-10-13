@@ -45,6 +45,14 @@ public abstract class Attack {
 		return 0.7;
 	}
 
+	/**
+	 * What this move is good at, for the utility picker ({@code picker} in bosses.json): frontal, anti-air, punishing
+	 * a roll, pressuring a tired target.
+	 */
+	public io.github.tmldude.blocksouls.bosses.logic.AttackPicker.Traits traits() {
+		return io.github.tmldude.blocksouls.bosses.logic.AttackPicker.Traits.NONE;
+	}
+
 	/** Windup begins. {@link AttackRun#direction()} already faces the target. */
 	public void start(AttackRun run) {
 	}

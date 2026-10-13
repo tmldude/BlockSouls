@@ -53,6 +53,108 @@ public class BossesConfig {
 	/** Full bar resend interval (smaller updates go out whenever health or phase changes). */
 	public int barKeepAliveTicks = 20;
 
+	public Posture posture = new Posture();
+	public Presentation presentation = new Presentation();
+	public Picker picker = new Picker();
+	public Reactions reactions = new Reactions();
+	public AffixRules affixes = new AffixRules();
+
+	/**
+	 * Posture / stagger (PLAN2 §3h): hidden poise filled by precision hits and well-timed rolls; full poise opens a
+	 * visceral window. Max poise scales with the party like boss health (common's party.json {@code bossHealth}).
+	 */
+	public static class Posture {
+		public boolean enabled = true;
+		/** Max poise for one player, unless the boss's definition overrides it. */
+		public double basePoise = 100;
+		/** Poise per precision hit (flat), plus {@code precisionDamagePoise} per point of its damage. */
+		public double precisionHitPoise = 5;
+		public double precisionDamagePoise = 0.4;
+		/** Poise per melee/any hit landing on a weak-point part (a part whose damage multiplier is above 1). */
+		public double weakPointHitPoise = 3;
+		/** Poise per well-timed roll (once per player per attack). */
+		public double rollPoise = 14;
+		/** A roll counts from this many ticks before the attack's hitboxes go live until they end. */
+		public int rollLeadTicks = 6;
+		/** ...if the roller is within the attack's max range plus this. */
+		public double rollRangeSlack = 4;
+		/** Poise starts draining after this long without a gain... */
+		public int decayDelayTicks = 60;
+		/** ...at this much per tick. */
+		public double decayPerTick = 0.6;
+		/** The visceral window: the boss is down, and takes {@code visceralDamageMult} times damage. */
+		public int visceralTicks = 60;
+		public double visceralDamageMult = 2.0;
+		/** After a visceral window poise doesn't fill for this long. */
+		public int lockoutTicks = 100;
+	}
+
+	/** Boss presentation: name-splash, hit-stop, damage-state thresholds. */
+	public static class Presentation {
+		/** Name-splash length when the fight starts (1.5 s). */
+		public int splashTicks = 30;
+		/** Boss freezes this long on a heavy hit, given or taken. */
+		public int hitStopTicks = 2;
+		/** A hit on the boss is heavy at this share of its max health... */
+		public double heavyHitShareOfBoss = 0.04;
+		/** ...and a hit by the boss at this share of the victim's max health. */
+		public double heavyHitShareOfPlayer = 0.3;
+		/** Health fractions where the "damaged" texture overlay steps up (one step each). */
+		public double[] damageStates = {0.66, 0.33};
+	}
+
+	/** Utility-scoring weights for the attack picker (PLAN2 §3k Tier 1). 0 turns a factor off. */
+	public static class Picker {
+		public boolean enabled = true;
+		public double distance = 0.6;
+		public double angle = 0.8;
+		public double stamina = 0.8;
+		public double rolled = 1.2;
+		public double airborne = 1.2;
+		/** An attack unused this long scores full freshness. */
+		public double freshnessTicks = 200;
+		/** "Just rolled" means within this many ticks. */
+		public int justRolledTicks = 15;
+	}
+
+	/** Reactive moves (sidestep vs. aim). The reaction floor and cooldown are clamped by {@code Fairness}. */
+	public static class Reactions {
+		public boolean sidestep = true;
+		/** Ticks a player must aim at the boss before it reacts (clamped to 6..8). */
+		public int reactionTicks = 7;
+		/** Minimum ticks between sidesteps (at least 40). */
+		public int cooldownTicks = 100;
+		/** Aim cone half-angle, degrees. */
+		public double aimConeDegrees = 6;
+		/** Only within this range of the aiming player. */
+		public double range = 24;
+		/** Chance a qualifying aim actually makes it sidestep. */
+		public double chance = 0.5;
+		/** Sideways push, blocks/tick. */
+		public double speed = 0.9;
+	}
+
+	/** Field-boss affixes (Expedition only). */
+	public static class AffixRules {
+		public boolean enabled = true;
+		/** Field bosses roll an affix from this floor on. */
+		public int fromFloor = 2;
+		/** Chance a field boss on such a floor carries one. */
+		public double chance = 1.0;
+		/** Burning: attack hits set the victim on fire this many ticks. */
+		public int burningFireTicks = 60;
+		/** Frosted: attack hits slow (Slowness amplifier 1) for this many ticks. */
+		public int frostedSlowTicks = 60;
+		/** Volatile: on death a telegraphed ring detonates after this many ticks, dealing this damage within this radius. */
+		public int volatileFuseTicks = 30;
+		public double volatileDamage = 8;
+		public double volatileRadius = 6;
+		/** Magnetic: pulls players within this radius toward it, this hard, every {@code magneticIntervalTicks}. */
+		public double magneticRadius = 12;
+		public double magneticPull = 0.25;
+		public int magneticIntervalTicks = 40;
+	}
+
 	public Field field = new Field();
 
 	/** The field-boss spawner (bosses appearing in the world during a run). */
