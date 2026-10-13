@@ -105,7 +105,7 @@ public class RuneGameTests {
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		PlayerRunes.reset(player);
 		Item soul = BuiltInRegistries.ITEM.getValue(CommonIds.SOUL);
-		helper.assertTrue(soul != null, "the test mod registers a soul item");
+		helper.assertTrue(soul != null, "the game registers the soul item (SoulItems)");
 		player.getInventory().add(new ItemStack(soul, 40));
 
 		RunState over = new RunState(RunPhase.OVER, 7, 3, false, Difficulty.NORMAL);

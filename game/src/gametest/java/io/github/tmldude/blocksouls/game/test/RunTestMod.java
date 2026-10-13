@@ -18,8 +18,6 @@ public class RunTestMod implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		placeholder(CommonIds.STARTER_PISTOL, 1);
-		// Souls (builds) for the rune payout test.
-		placeholder(CommonIds.SOUL, 64);
 	}
 
 	private static void placeholder(net.minecraft.resources.Identifier id, int stackSize) {
