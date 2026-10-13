@@ -1,13 +1,20 @@
 package io.github.tmldude.blocksouls.mobs.test;
 
 import java.util.Set;
+import java.util.UUID;
+
+import com.mojang.authlib.GameProfile;
+import io.netty.channel.embedded.EmbeddedChannel;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
@@ -193,27 +200,55 @@ public class AffixGameTests {
 		helper.succeed();
 	}
 
-	@GameTest(structure = FLOOR, environment = ENV, maxTicks = 300)
+	@GameTest(structure = FLOOR, environment = "blocksouls_mobs_test:flank", maxTicks = 300)
 	public void flankerGetsBehindThePlayer(GameTestHelper helper) {
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-		player.setGameMode(GameType.SURVIVAL);
-		player.getAbilities().invulnerable = false;
-		player.setPos(helper.absoluteVec(new Vec3(8.5, 1, 8.5)));
+		// A hand-made survival player: the helper's mock is always creative, so mobs drop it as a target.
+		ServerPlayer player = survivor(helper, helper.absoluteVec(new Vec3(8.5, 1, 8.5)));
 		player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 20 * 30, 4));
-		// Facing north (-z); the shambler starts in front of them.
-		helper.onEachTick(() -> {
-			player.setYRot(180);
-			player.setYHeadRot(180);
-		});
 		Shambler shambler = spawn(helper, MobEntities.SHAMBLER, 8.5, 1.5, true);
 		shambler.addTag(WaveMobs.FLANKER_TAG);
 		shambler.setTarget(player);
 		double behindDegrees = BlockSoulsMobs.CONFIG.flanking.behindDegrees;
-		helper.succeedWhen(() -> {
+		boolean[] done = {false};
+		// Facing north (-z); the shambler starts in front of them.
+		helper.onEachTick(() -> {
+			if (done[0]) {
+				return;
+			}
+			player.setYRot(180);
+			player.setYHeadRot(180);
 			double bearing = FlankMath.bearing(FlankGoal.partyFacing(player), shambler.getX() - player.getX(), shambler.getZ() - player.getZ());
-			helper.assertTrue(FlankMath.behind(bearing, behindDegrees), "shambler at bearing " + bearing + ", "
-					+ helper.relativePos(shambler.blockPosition()));
+			if (FlankMath.behind(bearing, behindDegrees)) {
+				done[0] = true;
+				helper.getLevel().getServer().getPlayerList().remove(player);
+				helper.succeed();
+			}
 		});
+		helper.runAfterDelay(290, () -> {
+			if (!done[0]) {
+				done[0] = true;
+				double bearing = FlankMath.bearing(FlankGoal.partyFacing(player), shambler.getX() - player.getX(), shambler.getZ() - player.getZ());
+				helper.getLevel().getServer().getPlayerList().remove(player);
+				helper.fail("shambler at bearing " + bearing + ", " + helper.relativePos(shambler.blockPosition()));
+			}
+		});
+	}
+
+	/** A survival mock player, placed like a real login so mobs can target it. */
+	private static ServerPlayer survivor(GameTestHelper helper, Vec3 at) {
+		var server = helper.getLevel().getServer();
+		CommonListenerCookie cookie = CommonListenerCookie.createInitial(new GameProfile(UUID.randomUUID(), "test-flanked"), false);
+		ServerPlayer player = new ServerPlayer(server, helper.getLevel(), cookie.gameProfile(), cookie.clientInformation()) {
+			@Override
+			public GameType gameMode() {
+				return GameType.SURVIVAL;
+			}
+		};
+		Connection connection = new Connection(PacketFlow.SERVERBOUND);
+		new EmbeddedChannel(connection);
+		server.getPlayerList().placeNewPlayer(connection, player, cookie);
+		player.teleportTo(at.x, at.y, at.z);
+		return player;
 	}
 
 	@GameTest(structure = FLOOR, environment = ENV)
