@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.LanternBlock;
+import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Half;
@@ -47,6 +48,7 @@ final class FloorBuilder {
 	private final BlockPos centre;
 	private final RandomSource random;
 	private final BlockState top;
+	private final java.util.Map<String, BlockState> tops = new java.util.HashMap<>();
 	private final BlockState fill;
 	private final BlockState base;
 	private final double phaseA;
@@ -123,6 +125,10 @@ final class FloorBuilder {
 		if (vault == null) {
 			trees();
 		}
+		// v2-floor5-blight: blight decor (dead trees, tendrils, dry plants); null on other templates.
+		if (template.decor != null) {
+			decor(template.decor);
+		}
 		SkyShards.paintBiome(level, template, plan, centre);
 		// Camp first, then everything else in plan order (crates the contents added come after their slot).
 		filled.sort((a, b) -> Integer.compare(a.kind() == FloorSlotKind.CAMP ? 0 : 1, b.kind() == FloorSlotKind.CAMP ? 0 : 1));
@@ -172,7 +178,7 @@ final class FloorBuilder {
 				int bottom = h - Math.max(2, (int) Math.round(depth * (1 - edge * edge)) + (int) ((x * 31 + z * 17 & 3) / 2));
 				BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 				for (int y = bottom; y <= h; y++) {
-					BlockState state = y == h ? top : y >= h - 3 ? fill : base;
+					BlockState state = y == h ? topAt(x, z) : y >= h - 3 ? fill : base;
 					level.setBlock(pos.set(centre.getX() + x, y, centre.getZ() + z), state, FLAGS);
 				}
 				if (template.edgeWall && d > radius - 1) {
@@ -184,7 +190,16 @@ final class FloorBuilder {
 		}
 	}
 
+	private BlockState topAt(int x, int z) {
+		String id = template.terrain.topAt(x, z);
+		return id.equals(template.terrain.top) ? top : tops.computeIfAbsent(id, key -> block(key, top.getBlock()));
+	}
+
 	private void trees() {
+		if (template.decor != null && "dead".equals(template.decor.trees)) {
+			deadTrees();
+			return;
+		}
 		var feature = level.registryAccess().lookupOrThrow(Registries.FEATURE).get(TreeFeatures.OAK);
 		if (feature.isEmpty()) {
 			return;
@@ -202,6 +217,92 @@ final class FloorBuilder {
 			BlockPos pos = surface(x, z);
 			if (level.getBlockState(pos).isAir() && feature.get().value().place(level, level.getChunkSource().getGenerator(), random, pos)) {
 				placed++;
+			}
+		}
+	}
+
+	/** Bare dead trunks (3–5 logs, a stub branch) instead of oaks. */
+	private void deadTrees() {
+		BlockState log = block(template.decor.deadLog, Blocks.DARK_OAK_LOG);
+		double reach = plan.radius() * 0.85;
+		int placed = 0;
+		for (int attempt = 0; placed < template.trees && attempt < template.trees * 20; attempt++) {
+			double angle = random.nextDouble() * Math.PI * 2;
+			double distance = Math.sqrt(random.nextDouble()) * reach;
+			int x = (int) Math.round(Math.cos(angle) * distance);
+			int z = (int) Math.round(Math.sin(angle) * distance);
+			if (nearSlot(x, z, 3)) {
+				continue;
+			}
+			BlockPos pos = surface(x, z);
+			if (!level.getBlockState(pos).isAir()) {
+				continue;
+			}
+			int tall = 3 + random.nextInt(3);
+			for (int y = 0; y < tall; y++) {
+				level.setBlock(pos.above(y), log, FLAGS);
+			}
+			Direction side = Direction.Plane.HORIZONTAL.getRandomDirection(random);
+			BlockState branch = log.hasProperty(RotatedPillarBlock.AXIS) ? log.setValue(RotatedPillarBlock.AXIS, side.getAxis()) : log;
+			level.setBlock(pos.above(tall - 2).relative(side), branch, FLAGS);
+			placed++;
+		}
+	}
+
+	/** Ground patches with cover on them, then scattered plants (counts scale with the island's area). */
+	private void decor(FloorTemplate.Decor decor) {
+		double area = (double) plan.radius() * plan.radius() / ((double) template.radius * template.radius);
+		double reach = plan.radius() * 0.9;
+		if (!decor.patchBlock.isEmpty()) {
+			BlockState patch = block(decor.patchBlock, Blocks.COARSE_DIRT);
+			BlockState cover = decor.patchCover.isEmpty() ? null : block(decor.patchCover, Blocks.AIR);
+			int patches = (int) Math.round(decor.patches * area);
+			for (int i = 0; i < patches; i++) {
+				double angle = random.nextDouble() * Math.PI * 2;
+				double distance = Math.sqrt(random.nextDouble()) * reach;
+				int cx = (int) Math.round(Math.cos(angle) * distance);
+				int cz = (int) Math.round(Math.sin(angle) * distance);
+				int r = Math.max(1, decor.patchRadius);
+				for (int x = cx - r; x <= cx + r; x++) {
+					for (int z = cz - r; z <= cz + r; z++) {
+						int dx = x - cx;
+						int dz = z - cz;
+						if (dx * dx + dz * dz > r * r || nearSlot(x, z, 1) || (long) x * x + (long) z * z >= (long) (plan.radius() - 1) * (plan.radius() - 1)) {
+							continue;
+						}
+						BlockPos ground = surface(x, z).below();
+						if (!level.getBlockState(ground).is(topAt(x, z).getBlock())) {
+							continue;
+						}
+						level.setBlock(ground, patch, FLAGS);
+						if (cover != null && !cover.isAir() && random.nextDouble() < decor.coverChance && level.getBlockState(ground.above()).isAir()
+								&& cover.canSurvive(level, ground.above())) {
+							level.setBlock(ground.above(), cover, FLAGS);
+						}
+					}
+				}
+			}
+		}
+		for (java.util.Map.Entry<String, Integer> entry : decor.scatter.entrySet()) {
+			BlockState plant = block(entry.getKey(), Blocks.AIR);
+			if (plant.isAir()) {
+				continue;
+			}
+			int count = (int) Math.round(entry.getValue() * area);
+			int placed = 0;
+			for (int attempt = 0; placed < count && attempt < count * 8; attempt++) {
+				double angle = random.nextDouble() * Math.PI * 2;
+				double distance = Math.sqrt(random.nextDouble()) * reach;
+				int x = (int) Math.round(Math.cos(angle) * distance);
+				int z = (int) Math.round(Math.sin(angle) * distance);
+				if (nearSlot(x, z, 1)) {
+					continue;
+				}
+				BlockPos pos = surface(x, z);
+				if (level.getBlockState(pos).isAir() && plant.canSurvive(level, pos)) {
+					level.setBlock(pos, plant, FLAGS);
+					placed++;
+				}
 			}
 		}
 	}

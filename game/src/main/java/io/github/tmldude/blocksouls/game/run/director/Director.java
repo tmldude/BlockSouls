@@ -134,6 +134,7 @@ public final class Director {
 		});
 
 		DayLoop.init();
+		FloorHazards.init();
 		Objectives.init();
 		Economy.init();
 		Shop.init();
@@ -205,6 +206,7 @@ public final class Director {
 		anchorSince = now;
 		lullStartedAt = -1;
 		siegeActive = false;
+		FloorHazards.reset();
 	}
 
 	private static void onRunStarted(MinecraftServer server) {
@@ -270,6 +272,7 @@ public final class Director {
 		DayLoop.second(server, now);
 		Objectives.second(server, now);
 		Economy.second(server, now);
+		FloorHazards.second(server, now, players);
 		if (siegeActive && !DirectorHooks.charging(server)) {
 			// The charge ended without completing (the party left the act): everything riding on it is lost.
 			Economy.onSiegeEnded(server, false);

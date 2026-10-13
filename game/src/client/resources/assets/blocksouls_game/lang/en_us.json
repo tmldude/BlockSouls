@@ -292,5 +292,10 @@
 	"screen.blocksouls_game.summary.downed": "Time downed",
 	"screen.blocksouls_game.summary.souls": "Rune souls",
 	"screen.blocksouls_game.summary.best_boon": "Best boon",
-	"screen.blocksouls_game.summary.most_downed": "Most time downed"
+	"screen.blocksouls_game.summary.most_downed": "Most time downed",
+	"message.blocksouls_game.hazard.blight_storm": "A blight storm rolls across the field. Stay out of the purple.",
+	"message.blocksouls_game.hazard.storm_over": "The blight storm thins out.",
+	"message.blocksouls_game.hazard.spawn_surge": "The ground splits: the blight spits out a horde!",
+	"message.blocksouls_game.hazard.dead_camp": "The shopkeeper flees the blight. The shop is closed for a minute.",
+	"message.blocksouls_game.hazard.field_boss": "%s walks the blighted field."
 }
