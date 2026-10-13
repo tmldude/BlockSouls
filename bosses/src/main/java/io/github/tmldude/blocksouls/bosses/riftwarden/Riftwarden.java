@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -52,6 +53,12 @@ public class Riftwarden extends BossEntity {
 	private final List<Vec3> fissures = new ArrayList<>();
 	private int fissureTicks;
 	private int fissureCooldown;
+	/** Rushes started this fight (1-based once P3 begins); 0 before the first. */
+	private int rushes;
+	private int rushTicksLeft;
+	private float rushDealt;
+	/** The last timed rush failed: no timer, no healing, harder hits until it falls. */
+	private boolean unbound;
 
 	public Riftwarden(EntityType<? extends Riftwarden> type, Level level) {
 		super(type, level);
@@ -139,6 +146,107 @@ public class Riftwarden extends BossEntity {
 		} else if (level() instanceof ServerLevel level && isAlive() && isEngaged() && !isReturning() && transformed()) {
 			// Here, not fightTick: that only runs between attacks.
 			fissureTick(level);
+			if (rushing()) {
+				rushTick(level);
+			}
+		}
+	}
+
+	@Override
+	public double damageMultiplier() {
+		return unbound ? super.damageMultiplier() * config().unboundDamage : super.damageMultiplier();
+	}
+
+	@Override
+	public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
+		float before = getHealth();
+		boolean hurt = super.hurtServer(level, source, damage);
+		if (hurt && rushing() && rushTicksLeft > 0 && isAlive()) {
+			rushDealt += Math.max(0, before - getHealth());
+			if (RiftMath.rushWon(rushDealt, getMaxHealth(), config().rushFraction)) {
+				// The rush landed: the Warden falls now (the kill event ends the run).
+				setHealth(0);
+				die(source);
+			}
+		}
+		return hurt;
+	}
+
+	/** Seconds left in the current rush (0 when none is running). */
+	public int rushSecondsLeft() {
+		return (rushTicksLeft + 19) / 20;
+	}
+
+	/** Damage dealt this rush as a share of what wins it (0..1). */
+	public double rushProgress() {
+		double goal = getMaxHealth() * config().rushFraction;
+		return goal > 0 ? Math.min(1, rushDealt / goal) : 1;
+	}
+
+	/** Debug and tests: the running rush ends in {@code ticks} (no-op when none runs). */
+	public void shortenRush(int ticks) {
+		if (rushTicksLeft > 0) {
+			rushTicksLeft = Math.max(1, Math.min(rushTicksLeft, ticks));
+		}
+	}
+
+	public int rushNumber() {
+		return rushes;
+	}
+
+	public boolean isUnbound() {
+		return unbound;
+	}
+
+	private void startRush(ServerLevel level) {
+		RiftwardenConfig c = config();
+		if (unbound) {
+			return;
+		}
+		rushes++;
+		rushDealt = 0;
+		rushTicksLeft = RiftMath.rushTicks(c.rushSeconds, Math.max(1, participants().size()), rushes, c.rushShrink, c.minRushSeconds);
+		level.playSound(null, blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 3.0f, 0.5f);
+		tell(Component.translatable("boss.blocksouls_bosses.riftwarden.rush", rushSecondsLeft(),
+				(int) Math.round(c.rushFraction * 100)));
+	}
+
+	/** The rush clock: paused while staggered or shielded (no damage can land then), fails at zero. */
+	private void rushTick(ServerLevel level) {
+		if (rushTicksLeft <= 0 || isStaggered() || isShielded()) {
+			return;
+		}
+		rushTicksLeft--;
+		if (tickCount % 10 == 0) {
+			Component bar = Component.translatable("boss.blocksouls_bosses.riftwarden.rush_bar", rushSecondsLeft(),
+					(int) Math.floor(rushProgress() * 100));
+			for (ServerPlayer player : participants()) {
+				player.sendOverlayMessage(bar);
+			}
+		}
+		if (rushTicksLeft == 20 * 5) {
+			level.playSound(null, blockPosition(), SoundEvents.BELL_RESONATE, SoundSource.HOSTILE, 3.0f, 0.6f);
+		}
+		if (rushTicksLeft > 0) {
+			return;
+		}
+		RiftwardenConfig c = config();
+		level.playSound(null, blockPosition(), SoundEvents.BEACON_DEACTIVATE, SoundSource.HOSTILE, 3.0f, 0.5f);
+		if (RiftMath.lastRush(rushes, c.maxRushes)) {
+			unbound = true;
+			tell(Component.translatable("boss.blocksouls_bosses.riftwarden.unbound"));
+			return;
+		}
+		// Failed: the rift mends it to just under the phase-2 line and phase 2 resumes.
+		double share = Math.clamp(c.rushFailHealShare, c.phase3Threshold + 0.01, c.phase2Threshold - 0.001);
+		setHealth((float) Math.max(getHealth(), share * getMaxHealth()));
+		tell(Component.translatable("boss.blocksouls_bosses.riftwarden.mended"));
+		forcePhase(1);
+	}
+
+	private void tell(Component message) {
+		for (ServerPlayer player : participants()) {
+			player.sendSystemMessage(message);
 		}
 	}
 
@@ -161,6 +269,9 @@ public class Riftwarden extends BossEntity {
 		if (level() instanceof ServerLevel level) {
 			level.sendParticles(index >= 2 ? ParticleTypes.END_ROD : ParticleTypes.REVERSE_PORTAL, getX(), getY() + getBbHeight() / 2, getZ(),
 					80, 1.0, 1.4, 1.0, 0.12);
+			if (index >= 2) {
+				startRush(level);
+			}
 		}
 	}
 
@@ -168,6 +279,10 @@ public class Riftwarden extends BossEntity {
 	protected void onReset() {
 		fissures.clear();
 		fissureCooldown = 0;
+		rushes = 0;
+		rushTicksLeft = 0;
+		rushDealt = 0;
+		unbound = false;
 	}
 
 	/**

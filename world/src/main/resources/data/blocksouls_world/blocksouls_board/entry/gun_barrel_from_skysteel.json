@@ -2,7 +2,7 @@
   "recipe": "blocksouls_world:gun_barrel_from_skysteel",
   "board": "forge",
   "minFloor": 3,
-  "maxFloor": 99,
+  "maxFloor": 5,
   "floorTags": [
     "skyrift"
   ]

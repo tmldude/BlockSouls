@@ -1,1 +1,1 @@
-{ "recipe": "blocksouls_world:exotic_catalyst_from_blight_crystal", "board": "forge", "minFloor": 5, "floorTags": ["blight"] }
+{ "recipe": "blocksouls_world:exotic_catalyst_from_blight_crystal", "board": "forge", "minFloor": 5, "floorTags": ["blight"], "maxFloor": 5 }

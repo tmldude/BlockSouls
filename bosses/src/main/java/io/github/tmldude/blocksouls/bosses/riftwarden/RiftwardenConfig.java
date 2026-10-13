@@ -80,4 +80,17 @@ public class RiftwardenConfig {
 	public double phase3Recovery = 1.4;
 	public double phase3Cooldowns = 1.6;
 	public double phase3Speed = 0.8;
+	/**
+	 * The rush: deal {@code rushFraction} of max HP within the window and the Warden falls. When the window runs out,
+	 * it heals to {@code rushFailHealShare} (just under the phase-2 threshold, so phase 2 resumes) and the next rush is
+	 * {@code rushShrink}× as long (never under {@code minRushSeconds}). Window × PartyScaling rushWindow.
+	 */
+	public double rushSeconds = 60;
+	public double rushFraction = 0.25;
+	public double rushShrink = 0.8;
+	public double minRushSeconds = 25;
+	public double rushFailHealShare = 0.59;
+	/** Timed rushes; when the last one fails the Warden is unbound: no more timer or healing, its damage ×{@code unboundDamage}. */
+	public int maxRushes = 3;
+	public double unboundDamage = 1.5;
 }

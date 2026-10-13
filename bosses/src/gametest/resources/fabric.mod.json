@@ -12,7 +12,8 @@
 			"io.github.tmldude.blocksouls.bosses.test.AshwyrmGameTests",
 			"io.github.tmldude.blocksouls.bosses.test.StormplateGameTests",
 			"io.github.tmldude.blocksouls.bosses.test.ArenaSealGameTests",
-			"io.github.tmldude.blocksouls.bosses.test.BossV2GameTests"
+			"io.github.tmldude.blocksouls.bosses.test.BossV2GameTests",
+			"io.github.tmldude.blocksouls.bosses.test.RiftwardenGameTests"
 		]
 	},
 	"depends": {
