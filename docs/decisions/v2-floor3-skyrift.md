@@ -47,10 +47,11 @@ what was actually built.
 - **Skysteel only grows on shards.** Each template's `shards.node` places `shards.nodes` skysteel nodes (2, or 3 on
   the archipelago) on shards that carry no raised siege point, scaled by `PartyScaling.floorNodes` and capped
   by the free shards. Skysteel left the ground `nodeMix`: going out on the shards is how you get the rare.
-- **Herbs are NODE slots.** `FloorTemplate.herbs` (block, count, min, max) scatters herb blocks as `NODE` slots
+- **Herbs are NODE slots.** The shared `FloorTemplate.herbs` map (from Blight, #76) scatters herb blocks as `NODE` slots
   tagged with the block id, so no common change (FloorSlotKind stays as it is) and `NODE_POPPED` fires for them
   like any node. `HerbBlock` is a one-hit `NodeBlock` (`hitsToPop()` = 1) with a plant shape, no collision and an
-  XZ offset. Cloudbloom: 2 per floor, `round(2 × floorNodes)` clamped to 2–3 (1 player: 2, 8 players: 3).
+  XZ offset; cloudbloom uses the shared `HerbBlock` as-is. Cloudbloom: `{"blocksouls_world:cloudbloom_plant": 2}`, × `floorSize`
+  (1 player: 2, 8 players: 3).
 - **Shard nodes find their floor.** A shard past the rim isn't inside `Floors.at`, so `popNode` falls back to the
   nearest floor in the same dimension whose camp is within 1.5 × radius + 24 blocks (`WorldFloors.floorNear`).
 - **Recipes.**

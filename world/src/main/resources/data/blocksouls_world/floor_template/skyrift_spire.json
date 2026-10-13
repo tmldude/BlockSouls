@@ -119,9 +119,6 @@
     }
   ],
   "herbs": {
-    "block": "blocksouls_world:cloudbloom_plant",
-    "count": 2,
-    "min": 2,
-    "max": 3
+    "blocksouls_world:cloudbloom_plant": 2
   }
 }

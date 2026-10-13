@@ -160,24 +160,10 @@ public final class FloorPlanner {
 			elevate(slots, shards, radius, template.elevatedSiegePoints);
 			shardNodes(slots, shards, template, players, sky);
 		}
-		// Herbs: likewise their own random, so a template without them plans as before.
-		if (template.herbs.count > 0 && !template.herbs.block.isEmpty()) {
-			List<PlannedSlot> herbs = new ArrayList<>();
-			scatter(herbs, herbCount(template, players), FloorSlotKind.NODE, slots, radius, config, new Random(seed ^ 0x48455242L),
-					() -> template.herbs.block);
-			slots.addAll(herbs);
-		}
 
 		Set<String> tags = new LinkedHashSet<>(template.tags);
 		tags.addAll(escalationTags(config, floorNumber));
 		return new FloorPlan(template.id, radius, template.groundY, rotation, mirrored, tags, List.copyOf(slots), shards);
-	}
-
-	/** Herbs for a party: the template's count × {@code PartyScaling.floorNodes}, clamped to its min..max. */
-	public static int herbCount(FloorTemplate template, int players) {
-		FloorTemplate.Herbs herbs = template.herbs;
-		int scaled = (int) Math.round(herbs.count * PartyScaling.floorNodes(Math.max(1, players)));
-		return Math.max(herbs.min, Math.min(herbs.max, scaled));
 	}
 
 	/** Rare shard nodes for a party: the template's count × {@code PartyScaling.floorNodes} (capped later by free shards). */

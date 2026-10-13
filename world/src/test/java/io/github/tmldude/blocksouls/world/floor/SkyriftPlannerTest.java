@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gson.JsonParser;
 
@@ -170,14 +171,15 @@ class SkyriftPlannerTest {
 	@Test
 	void twoToThreeCloudbloomsScaledByTheParty() throws Exception {
 		for (FloorTemplate template : skyrift()) {
-			assertEquals("blocksouls_world:cloudbloom_plant", template.herbs.block);
-			assertEquals(2, FloorPlanner.herbCount(template, 1));
-			assertEquals(3, FloorPlanner.herbCount(template, 8));
-			for (int players : new int[] {1, 8}) {
+			assertEquals(Map.of("blocksouls_world:cloudbloom_plant", 2), template.herbs);
+			int[] expected = {2, 3};
+			int[] parties = {1, 8};
+			for (int i = 0; i < 2; i++) {
+				int players = parties[i];
 				FloorPlanner.FloorPlan plan = FloorPlanner.plan(template, config, 3, players, 9);
 				List<FloorPlanner.PlannedSlot> herbs = plan.slots(FloorSlotKind.NODE).stream()
-						.filter(slot -> slot.tag().equals(template.herbs.block)).toList();
-				assertEquals(FloorPlanner.herbCount(template, players), herbs.size(), template.id + " " + players + "p");
+						.filter(slot -> slot.tag().equals("blocksouls_world:cloudbloom_plant")).toList();
+				assertEquals(expected[i], herbs.size(), template.id + " " + players + "p");
 				assertTrue(herbs.stream().allMatch(h -> h.rise() == 0), "herbs grow on the island");
 			}
 		}
