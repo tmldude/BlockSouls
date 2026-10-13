@@ -196,7 +196,11 @@ public class DirectorConfig {
 				new EventSpec("blocksouls_world:trapped_hall", 4, 1, List.of("vault"), false),
 				// v2-floor5-blight: the Blighted Surface's own events (the soul wager runs at every siege already)
 				new EventSpec("blood_altar", 3, 1, List.of("blight"), false),
-				new EventSpec("challenge_pylon", 3, 1, List.of("blight"), false)));
+				new EventSpec("challenge_pylon", 3, 1, List.of("blight"), false),
+				// --- floor 2, Infernal (v2-floor2-infernal): placed by the world module through DirectorEvents.PLACE_EVENT ---
+				new EventSpec("blocksouls_world:soulfire_altar", 4, 1, List.of("infernal"), false),
+				new EventSpec("blocksouls_world:lava_chest", 4, 1, List.of("infernal"), false),
+				new EventSpec("blocksouls_world:stranded_trader", 3, 1, List.of("infernal"), false)));
 		/**
 		 * v2-floor5-blight: a floor carrying one of these tags rolls only its own (floor-tagged) events, not the
 		 * generic pool, as long as one of them is eligible.
@@ -229,6 +233,8 @@ public class DirectorConfig {
 		rosters.put("vault", new ArrayList<>(List.of("blocksouls_world:vault_listener", "blocksouls_world:vault_colossus")));
 		// v2-floor5-blight: Blightheart, the Pale Rider and one boss from an earlier floor ({@link DirectorRules#EARLIER})
 		rosters.put("blight", new ArrayList<>(List.of("blocksouls_bosses:blightheart", "blocksouls_bosses:pale_rider", DirectorRules.EARLIER)));
+		// --- floor 2, Infernal (v2-floor2-infernal) ---
+		rosters.put("infernal", new ArrayList<>(List.of("blocksouls_bosses:ashwyrm", "blocksouls_bosses:furnace_knight")));
 		return rosters;
 	}
 

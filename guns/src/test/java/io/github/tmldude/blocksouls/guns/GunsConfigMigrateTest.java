@@ -40,6 +40,18 @@ class GunsConfigMigrateTest {
 		assertEquals(new GunsConfig().loot.waveRarePrimaryChance, config.loot.waveRarePrimaryChance);
 	}
 
+	/** v2-floor2-infernal: a v1 file gains the floor-secret exotic tables, and keeps a chance set by hand. */
+	@Test
+	void floorSecretsJoinTheExoticTables() {
+		GunsConfig config = oldFile();
+		config.defaultsVersion = 1;
+		config.loot.exoticTables.remove("blocksouls_world:chests/soulfire_vault");
+		config.loot.exoticTables.put("blocksouls_game:wave_drops/legendary", 0.5);
+		assertTrue(GunsConfig.migrate(config));
+		assertEquals(1.0, config.loot.exoticTables.get("blocksouls_world:chests/soulfire_vault"));
+		assertEquals(0.5, config.loot.exoticTables.get("blocksouls_game:wave_drops/legendary"));
+	}
+
 	@Test
 	void currentFilesAreLeftAlone() {
 		GunsConfig config = new GunsConfig();

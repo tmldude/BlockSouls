@@ -1,7 +1,9 @@
 package io.github.tmldude.blocksouls.game.run.director;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Map;
@@ -57,6 +59,26 @@ class DayLoopTest {
 		assertEquals(roster, DirectorRules.miniBossRoster(roster, byTag, Set.of("infernal")));
 		assertEquals(roster, DirectorRules.miniBossRoster(roster, byTag, Set.of("empty")));
 		assertEquals(roster, DirectorRules.miniBossRoster(roster, null, Set.of("skyrift")));
+	}
+
+	// --- floor 2, Infernal (v2-floor2-infernal) ---
+	@Test
+	void infernalHasItsOwnEventsAndMiniBosses() {
+		DirectorConfig.Events events = new DirectorConfig.Events();
+		Set<String> infernal = Set.of("infernal", "floor_2");
+		List<String> ids = List.of("blocksouls_world:soulfire_altar", "blocksouls_world:lava_chest", "blocksouls_world:stranded_trader");
+		for (String id : ids) {
+			boolean picked = false;
+			for (int i = 0; i < 200 && !picked; i++) {
+				picked = id.equals(DirectorRules.pickEvent(events.pool, 2, infernal, i / 200.0));
+			}
+			assertTrue(picked, id + " rolls on an Infernal floor");
+			for (int i = 0; i < 200; i++) {
+				assertFalse(id.equals(DirectorRules.pickEvent(events.pool, 2, Set.of("floor_2"), i / 200.0)), id + " off Infernal");
+			}
+		}
+		assertEquals(List.of("blocksouls_bosses:ashwyrm", "blocksouls_bosses:furnace_knight"),
+				DirectorRules.miniBossRoster(events.miniBosses, events.miniBossesByFloorTag, infernal));
 	}
 
 	@Test

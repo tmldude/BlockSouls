@@ -75,6 +75,13 @@ public class FloorsConfig {
 		public int scorchSeconds = 120;
 		/** Seconds a Scorching player's hit (melee or gun) sets the target burning for. */
 		public float scorchIgniteSeconds = 4;
+		/** Lava-locked chest event: seconds before its plank bridge burns away (the moat then needs blocks or a tonic). */
+		public int lavaChestBridgeSeconds = 60;
+		/** Stranded trader event: minutes before the trader on the lava pillar leaves. */
+		public int strandedTraderMinutes = 6;
+		/** Stranded trader event: cinder for an Ashcap Tonic, and for a Scorch Draught (0 = no such offer). */
+		public int traderTonicCinder = 2;
+		public int traderDraughtCinder = 3;
 	}
 
 	private static Map<String, List<String>> defaultEscalation() {
