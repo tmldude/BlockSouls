@@ -61,9 +61,10 @@ public class FullPackGameTests {
 			"blocksouls_game", "blocksouls_mobs", "blocksouls_world", "blocksouls_vehicles", "blocksouls_bosses", "blocksouls_abilities");
 
 	private static final List<Identifier> MOBS = List.of(CommonIds.SHAMBLER, CommonIds.CRAWLER, CommonIds.SCREAMER,
-			CommonIds.BLOATER, CommonIds.BRUTE, CommonIds.MUTANT_BRUTE, CommonIds.INFECTED_PIGLIN, CommonIds.ASH_HOUND);
+			CommonIds.BLOATER, CommonIds.BRUTE, CommonIds.MUTANT_BRUTE, CommonIds.SPITTER, CommonIds.BULWARK, CommonIds.INFECTED_PIGLIN,
+			CommonIds.ASH_HOUND);
 
-	private static final List<Identifier> WAVE_MOBS = MOBS.subList(0, 6);
+	private static final List<Identifier> WAVE_MOBS = MOBS.subList(0, 8);
 
 	private static final List<Identifier> ENCHANTMENTS = List.of(CommonIds.BOUNCY, CommonIds.COMBUSTION,
 			CommonIds.VAMPIRIC, CommonIds.GRAPPLE, CommonIds.MAGNETIZED, CommonIds.MOONWALK);

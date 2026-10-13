@@ -99,7 +99,7 @@ public class MobsGameTests {
 			helper.assertTrue(mob instanceof WaveMob wm && wm.wave() == 3 && wm.canBreakBlocks(), spec.id() + " ignored the wave context");
 			helper.assertTrue(!mob.isRemoved() && mob.level() == helper.getLevel(), spec.id() + " should be created, not added");
 		}
-		helper.assertTrue(ours == 6, "expected 6 wave mobs, got " + ours);
+		helper.assertTrue(ours == 8, "expected 8 wave mobs, got " + ours);
 		helper.succeed();
 	}
 
@@ -219,7 +219,7 @@ public class MobsGameTests {
 	public void elitesDontBurnInDaylight(GameTestHelper helper) {
 		ServerLevel level = helper.getLevel();
 		for (EntityType<?> type : new EntityType<?>[] {MobEntities.SHAMBLER, MobEntities.CRAWLER, MobEntities.SCREAMER, MobEntities.BLOATER,
-				MobEntities.BRUTE}) {
+				MobEntities.BRUTE, MobEntities.SPITTER, MobEntities.BULWARK}) {
 			Mob mob = (Mob) type.create(level, EntitySpawnReason.EVENT);
 			helper.assertTrue(mob != null && mob.is(EntityTypeTags.BURN_IN_DAYLIGHT), type + " should burn in daylight");
 		}

@@ -6,7 +6,8 @@
 	"environment": "*",
 	"entrypoints": {
 		"fabric-gametest": [
-			"io.github.tmldude.blocksouls.mobs.test.MobsGameTests"
+			"io.github.tmldude.blocksouls.mobs.test.MobsGameTests",
+			"io.github.tmldude.blocksouls.mobs.test.AffixGameTests"
 		]
 	},
 	"depends": {

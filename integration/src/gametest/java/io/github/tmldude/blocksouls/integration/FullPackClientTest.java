@@ -37,10 +37,10 @@ public class FullPackClientTest implements FabricClientGameTest {
 			context.takeScreenshot("02-dusk-wave");
 
 			// A line-up of the roster in front of the player.
-			String[] mobs = {"shambler", "crawler", "screamer", "bloater", "brute", "mutant_brute"};
+			String[] mobs = {"shambler", "crawler", "screamer", "bloater", "brute", "mutant_brute", "spitter", "bulwark"};
 			for (int i = 0; i < mobs.length; i++) {
 				server.runCommand("execute as @a at @s rotated ~ 0 run summon blocksouls_mobs:" + mobs[i]
-						+ " ^" + (i * 2 - 5) + " ^ ^7 {NoAI:1b}");
+						+ " ^" + (i * 2 - 7) + " ^ ^8 {NoAI:1b}");
 			}
 			context.waitTicks(20);
 			context.takeScreenshot("03-roster");

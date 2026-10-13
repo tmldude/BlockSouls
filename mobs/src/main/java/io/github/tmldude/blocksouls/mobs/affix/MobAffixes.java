@@ -31,6 +31,7 @@ import net.minecraft.world.phys.Vec3;
 
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
 import io.github.tmldude.blocksouls.common.CommonTags;
@@ -71,6 +72,11 @@ public final class MobAffixes implements Affixes.Provider {
 		ServerLivingEntityEvents.AFTER_DAMAGE.register(MobAffixes::afterDamage);
 		ServerLivingEntityEvents.AFTER_DEATH.register(MobAffixes::afterDeath);
 		ServerTickEvents.END_LEVEL_TICK.register(MobAffixes::tick);
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+			TRACKED.clear();
+			TRAIL.clear();
+			FUSES.clear();
+		});
 	}
 
 	private static MobsConfig.AffixConfig config() {
