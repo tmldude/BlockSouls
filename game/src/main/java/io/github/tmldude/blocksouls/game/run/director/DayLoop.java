@@ -3,6 +3,7 @@ package io.github.tmldude.blocksouls.game.run.director;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
@@ -284,7 +285,10 @@ public final class DayLoop {
 			return "The horn only sounds during the day";
 		}
 		int skipped = data.daySecondsLeft();
-		HornMath.Buff buff = HornMath.buff(skipped, data.daySeconds(), config().horn);
+		// the Vault (floor 4): the horn buff stops at one tier
+		Set<String> floorTags = Floors.forAct(server, data.campAct).map(PlacedFloor::tags).orElse(Set.of());
+		boolean oneTier = config().horn.oneTierFloorTags != null && config().horn.oneTierFloorTags.stream().anyMatch(floorTags::contains);
+		HornMath.Buff buff = HornMath.buff(skipped, data.daySeconds(), config().horn, oneTier);
 		data.dayTicksLeft = 0;
 		data.hornTierShift = buff.tierShift();
 		List<ServerPlayer> players = DirectorHooks.activePlayers(server);
@@ -345,7 +349,9 @@ public final class DayLoop {
 	/** Picks (or uses {@code forced}) the act's random event and places it. Returns the event id, or null. */
 	public static @Nullable String placeEvent(MinecraftServer server, ServerLevel level, int act, @Nullable String forced) {
 		RandomSource random = level.getRandom();
-		String id = forced != null ? forced : DirectorRules.pickEvent(config().events.pool, act, random.nextDouble());
+		Optional<PlacedFloor> floor = Floors.forAct(server, act);
+		Set<String> floorTags = floor.map(PlacedFloor::tags).orElse(Set.of());
+		String id = forced != null ? forced : DirectorRules.pickEvent(config().events.pool, act, floorTags, random.nextDouble());
 		if (id == null) {
 			return null;
 		}
@@ -370,8 +376,16 @@ public final class DayLoop {
 				AMBUSHES.add(new Ambush(level.dimension().identifier().toString(), pos));
 				yield true;
 			}
-			default -> false;
+			// A floor's own event (Stage 6C): the module that owns its blocks places it.
+			default -> {
+				Identifier event = Identifier.tryParse(id);
+				yield event != null && DirectorEvents.PLACE_EVENT.invoker().place(level, event, pos, floor.orElse(null));
+			}
 		};
+		DirectorConfig.EventSpec spec = DirectorRules.spec(config().events.pool, id);
+		if (placed && spec != null && spec.ambush && !"ambush".equals(id)) {
+			AMBUSHES.add(new Ambush(level.dimension().identifier().toString(), pos));
+		}
 		Director.log(server, DirectorLog.Kind.EVENT, "Event " + id + (placed ? " at " + pos.toShortString() : " couldn't be placed"));
 		return placed ? id : null;
 	}
@@ -421,7 +435,9 @@ public final class DayLoop {
 
 	private static void placeMiniBoss(MinecraftServer server, ServerLevel level, int act) {
 		DirectorData data = DirectorData.get(server);
-		Identifier boss = miniBossFor(config().events.miniBosses, act, config().events.miniBossFromAct, data.seed);
+		Set<String> floorTags = Floors.forAct(server, act).map(PlacedFloor::tags).orElse(Set.of());
+		List<String> roster = DirectorRules.miniBossRoster(config().events.miniBosses, config().events.miniBossesByFloorTag, floorTags);
+		Identifier boss = miniBossFor(roster, act, config().events.miniBossFromAct, data.seed);
 		if (boss == null) {
 			Director.log(server, DirectorLog.Kind.EVENT, "No mini-boss for act " + act + " (none installed)");
 			return;

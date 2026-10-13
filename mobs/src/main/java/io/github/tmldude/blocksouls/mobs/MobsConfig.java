@@ -266,6 +266,13 @@ public class MobsConfig {
 		}
 	}
 
+	static Map<String, Map<String, Integer>> defaultFloorWeights() {
+		Map<String, Map<String, Integer>> byTag = new LinkedHashMap<>();
+		// --- floor 4, The Vault (Stage 6C): volatile is the common affix in the tight corridors ---
+		byTag.put("vault", new LinkedHashMap<>(Map.of("volatile", 5)));
+		return byTag;
+	}
+
 	/** Elite affixes (PLAN2 §3h). Rolled for elites; Classic only with {@link #affixesInClassic}. */
 	public static class AffixConfig {
 		/** No affixes before this floor (the first floor stays plain). */
@@ -278,6 +285,11 @@ public class MobsConfig {
 		public double classicChance = 0.35;
 		/** Relative weight of each affix (by name); 0 or missing = never rolled. */
 		public Map<String, Integer> weights = new LinkedHashMap<>(Map.of("burning", 1, "frosted", 1, "volatile", 1, "magnetic", 1));
+		/**
+		 * A floor's own affix mix, by floor tag: on a floor carrying the tag these weights replace {@link #weights} for
+		 * the affixes they name (first matching tag wins). Floor sessions add one line each.
+		 */
+		public Map<String, Map<String, Integer>> weightsByFloorTag = defaultFloorWeights();
 		/** Affixed mobs show their name ("Burning Brute") above them. */
 		public boolean showName = true;
 		/** Extra max health for an affixed mob (multiplier, 1 = none). */

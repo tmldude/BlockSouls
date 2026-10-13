@@ -2,7 +2,9 @@ package io.github.tmldude.blocksouls.game.run.director;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
@@ -42,9 +44,17 @@ final class DirectorRules {
 
 	/** Weighted pick among events unlocked at {@code act}; {@code roll} in [0, 1). Null when none qualify. */
 	static @Nullable String pickEvent(List<DirectorConfig.EventSpec> pool, int act, double roll) {
+		return pickEvent(pool, act, Set.of(), roll);
+	}
+
+	/**
+	 * Weighted pick among events unlocked at {@code act} on a floor with {@code floorTags}: a spec with floor tags
+	 * needs at least one of them (a floor's own event). Null when none qualify.
+	 */
+	static @Nullable String pickEvent(List<DirectorConfig.EventSpec> pool, int act, Set<String> floorTags, double roll) {
 		int total = 0;
 		for (DirectorConfig.EventSpec spec : pool) {
-			if (spec.id != null && spec.weight > 0 && act >= spec.minAct) {
+			if (eligible(spec, act, floorTags)) {
 				total += spec.weight;
 			}
 		}
@@ -53,7 +63,7 @@ final class DirectorRules {
 		}
 		double target = roll * total;
 		for (DirectorConfig.EventSpec spec : pool) {
-			if (spec.id != null && spec.weight > 0 && act >= spec.minAct) {
+			if (eligible(spec, act, floorTags)) {
 				target -= spec.weight;
 				if (target < 0) {
 					return spec.id;
@@ -61,6 +71,28 @@ final class DirectorRules {
 			}
 		}
 		return null;
+	}
+
+	private static boolean eligible(DirectorConfig.EventSpec spec, int act, Set<String> floorTags) {
+		return spec.id != null && spec.weight > 0 && act >= spec.minAct
+				&& (spec.floorTags == null || spec.floorTags.isEmpty() || spec.floorTags.stream().anyMatch(floorTags::contains));
+	}
+
+	/** The spec for an event id (for its {@code ambush} flag), or null. */
+	static DirectorConfig.@Nullable EventSpec spec(List<DirectorConfig.EventSpec> pool, String id) {
+		return pool.stream().filter(spec -> id.equals(spec.id)).findFirst().orElse(null);
+	}
+
+	/** The mini-boss roster for a floor: the first {@code byFloorTag} entry whose tag the floor carries, else the default. */
+	static List<String> miniBossRoster(List<String> roster, Map<String, List<String>> byFloorTag, Set<String> floorTags) {
+		if (byFloorTag != null) {
+			for (Map.Entry<String, List<String>> entry : byFloorTag.entrySet()) {
+				if (floorTags.contains(entry.getKey()) && entry.getValue() != null && !entry.getValue().isEmpty()) {
+					return entry.getValue();
+				}
+			}
+		}
+		return roster;
 	}
 
 	/** The circle's radius {@code elapsed} seconds in: shrinks linearly from start to end over the challenge. */

@@ -12,11 +12,16 @@ public final class HornMath {
 	}
 
 	public static Buff buff(int secondsSkipped, int daySeconds, DirectorConfig.Horn horn) {
+		return buff(secondsSkipped, daySeconds, horn, false);
+	}
+
+	/** {@link #buff}; {@code oneTier} (a floor in {@code Horn.oneTierFloorTags}, the Vault) withholds the free relic. */
+	public static Buff buff(int secondsSkipped, int daySeconds, DirectorConfig.Horn horn, boolean oneTier) {
 		int skipped = Math.max(0, Math.min(secondsSkipped, Math.max(0, daySeconds)));
 		double share = daySeconds <= 0 ? 0 : skipped / (double) daySeconds;
 		int souls = (int) Math.floor(horn.soulsPerMinute * skipped / 60.0);
 		int tier = share >= horn.rarityAt && horn.rarityAt > 0 ? 1 : 0;
-		boolean relic = share >= horn.boonAt && horn.boonAt > 0;
+		boolean relic = !oneTier && share >= horn.boonAt && horn.boonAt > 0;
 		return new Buff(souls, tier, relic, share);
 	}
 }

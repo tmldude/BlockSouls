@@ -39,6 +39,8 @@ import io.github.tmldude.blocksouls.world.gen.StructurePlacer;
 final class FloorBuilder {
 	static final ResourceKey<LootTable> CRATE_LOOT = CommonIds.lootTable(BlockSoulsWorld.MOD_ID, "chests/floor_crate");
 	static final ResourceKey<LootTable> SECRET_LOOT = CommonIds.lootTable(BlockSoulsWorld.MOD_ID, "chests/floor_secret");
+	/** Floor 4 (The Vault): a crate holding one of the vault room's keys. */
+	static final ResourceKey<LootTable> KEY_LOOT = CommonIds.lootTable(BlockSoulsWorld.MOD_ID, "chests/vault_key");
 	private static final int FLAGS = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE;
 
 	private final ServerLevel level;
@@ -102,7 +104,7 @@ final class FloorBuilder {
 				case CAMP -> camp(pos, slot);
 				case EXIT_PORTAL -> portal(pos);
 				case NODE -> node(pos, slot.tag());
-				case CRATE -> chest(pos, CRATE_LOOT);
+				case CRATE -> chest(pos, BoxPlanner.VAULT_KEY.equals(slot.tag()) ? KEY_LOOT : CRATE_LOOT); // floor 4: the vault keys' crates
 				case STRUCTURE -> {
 					if (vault != null && BoxPlanner.VAULT_STRUCTURE.equals(slot.tag())) {
 						vault.vaultRoom(this, pos);

@@ -31,4 +31,14 @@ class HornMathTest {
 		assertEquals(0, HornMath.buff(-5, 480, horn).souls());
 		assertEquals(0, HornMath.buff(10, 0, horn).skippedShare(), 1e-9);
 	}
+
+	// --- floor 4, The Vault (Stage 6C) ---
+	@Test
+	void theVaultCapsTheHornAtOneTier() {
+		HornMath.Buff early = HornMath.buff(400, 480, horn, true);
+		assertEquals(20, early.souls());
+		assertEquals(1, early.tierShift());
+		assertFalse(early.freeRelic());
+		assertTrue(new DirectorConfig().horn.oneTierFloorTags.contains("vault"));
+	}
 }
