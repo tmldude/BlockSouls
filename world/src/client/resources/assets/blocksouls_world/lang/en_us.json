@@ -42,5 +42,11 @@
   "block.blocksouls_world.challenge_pylon": "Challenge Pylon",
   "block.blocksouls_world.camp_horn": "Camp Horn",
   "entity.blocksouls_world.shopkeeper": "Shopkeeper",
-  "message.blocksouls_world.economy.nothing": "Nothing happens."
+  "message.blocksouls_world.economy.nothing": "Nothing happens.",
+  "block.blocksouls_world.scrap_node": "Scrap Node",
+  "block.blocksouls_world.gunmetal_node": "Gunmetal Node",
+  "block.blocksouls_world.floor_portal": "Exit Portal",
+  "message.blocksouls_world.floor.fell": "You fell off the island. Back to camp.",
+  "message.blocksouls_world.floor.portal_stray": "This portal leads nowhere.",
+  "message.blocksouls_world.floor.portal_end": "The way on isn't open yet."
 }

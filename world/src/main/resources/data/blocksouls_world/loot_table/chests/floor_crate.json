@@ -1,0 +1,96 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 4
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_world:scrap",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 5
+            }
+          },
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_world:gunmetal_nugget",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 5
+            }
+          },
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:bread",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 3
+            }
+          },
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:arrow",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 4,
+              "max": 10
+            }
+          },
+          "weight": 4
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:empty",
+          "weight": 6
+        },
+        {
+          "type": "minecraft:tag",
+          "items": "#blocksouls_world:loot/ammo",
+          "expand": true,
+          "weight": 6,
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 4,
+              "max": 12
+            }
+          }
+        },
+        {
+          "type": "minecraft:tag",
+          "items": "#blocksouls_world:loot/guns",
+          "expand": true,
+          "weight": 1
+        }
+      ]
+    }
+  ],
+  "random_sequence": "blocksouls_world:chests/floor_crate"
+}

@@ -1,0 +1,197 @@
+package io.github.tmldude.blocksouls.world.floor;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+
+import io.github.tmldude.blocksouls.common.floor.FloorSlotKind;
+import io.github.tmldude.blocksouls.common.party.PartyScaling;
+
+/**
+ * Turns a template into one run's floor plan (no Minecraft classes, so it's unit-tested): picks the template, scales the
+ * island for the party, rotates and mirrors the slots, fills empty slot tags, scatters nodes and crates, rings the camp
+ * with siege spawn points and adds the floor's escalation tags.
+ */
+public final class FloorPlanner {
+	private FloorPlanner() {
+	}
+
+	/** A planned slot; {@code x}/{@code z} are relative to the camp. */
+	public record PlannedSlot(FloorSlotKind kind, String tag, int x, int z, int radius) {
+	}
+
+	public record FloorPlan(String template, int radius, int groundY, int rotation, boolean mirrored, Set<String> tags,
+			List<PlannedSlot> slots) {
+		public List<PlannedSlot> slots(FloorSlotKind kind) {
+			return slots.stream().filter(slot -> slot.kind() == kind).toList();
+		}
+	}
+
+	/** Picks a template from {@code pool} that allows {@code floorNumber}, by weight. Null when none does. */
+	public static FloorTemplate pick(Collection<FloorTemplate> templates, String pool, int floorNumber, long seed) {
+		List<FloorTemplate> fits = templates.stream().filter(t -> t.pool.equals(pool) && t.allows(floorNumber))
+				.sorted((a, b) -> a.id.compareTo(b.id)).toList();
+		int total = fits.stream().mapToInt(t -> Math.max(0, t.weight)).sum();
+		if (total <= 0) {
+			return null;
+		}
+		int roll = new Random(seed * 31 + floorNumber).nextInt(total);
+		for (FloorTemplate template : fits) {
+			roll -= Math.max(0, template.weight);
+			if (roll < 0) {
+				return template;
+			}
+		}
+		return fits.getLast();
+	}
+
+	/** The escalation tags for a floor: every config entry whose floor number is at most {@code floorNumber}. */
+	public static Set<String> escalationTags(FloorsConfig config, int floorNumber) {
+		Set<String> tags = new LinkedHashSet<>();
+		tags.add("floor_" + floorNumber);
+		for (Map.Entry<String, List<String>> entry : config.escalationTags.entrySet()) {
+			try {
+				if (Integer.parseInt(entry.getKey().trim()) <= floorNumber) {
+					tags.addAll(entry.getValue());
+				}
+			} catch (NumberFormatException ignored) {
+				// a hand-edited key that isn't a number never applies
+			}
+		}
+		return tags;
+	}
+
+	public static FloorPlan plan(FloorTemplate template, FloorsConfig config, int floorNumber, int players, long seed) {
+		Random random = new Random(seed);
+		double scale = PartyScaling.floorSize(Math.max(1, players));
+		int radius = (int) Math.round(template.radius * scale);
+		int rotation = random.nextInt(4);
+		boolean mirrored = random.nextBoolean();
+
+		List<PlannedSlot> slots = new ArrayList<>();
+		List<FloorTemplate.Slot> nodeSlots = new ArrayList<>();
+		for (FloorTemplate.Slot slot : template.slots) {
+			FloorSlotKind kind = slot.kindEnum();
+			if (kind == FloorSlotKind.NODE) {
+				nodeSlots.add(slot);
+				continue;
+			}
+			if (kind == FloorSlotKind.SIEGE_RING) {
+				continue; // the ring is always generated
+			}
+			int[] at = transform(slot.x, slot.z, scale, rotation, mirrored);
+			String tag = slot.tag;
+			if (tag.isEmpty() && kind == FloorSlotKind.STRUCTURE && !config.structures.isEmpty()) {
+				tag = config.structures.get(random.nextInt(config.structures.size()));
+			} else if (tag.isEmpty() && kind == FloorSlotKind.SECRET && !config.secrets.isEmpty()) {
+				tag = config.secrets.get(random.nextInt(config.secrets.size()));
+			}
+			slots.add(new PlannedSlot(kind, tag, at[0], at[1], slot.radius));
+		}
+		// Camp first, then the exit portal, then the rest in template order.
+		slots.sort((a, b) -> Integer.compare(order(a.kind()), order(b.kind())));
+
+		int nodeCount = Math.max(1, (int) Math.round(template.nodes * PartyScaling.floorNodes(Math.max(1, players))
+				* config.nodeFactor(floorNumber)));
+		List<PlannedSlot> nodes = new ArrayList<>();
+		List<FloorTemplate.Slot> shuffled = new ArrayList<>(nodeSlots);
+		java.util.Collections.shuffle(shuffled, random);
+		for (FloorTemplate.Slot slot : shuffled) {
+			if (nodes.size() >= nodeCount) {
+				break;
+			}
+			int[] at = transform(slot.x, slot.z, scale, rotation, mirrored);
+			String tag = slot.tag.isEmpty() ? weighted(template.nodeMix, random) : slot.tag;
+			nodes.add(new PlannedSlot(FloorSlotKind.NODE, tag, at[0], at[1], 0));
+		}
+		scatter(nodes, nodeCount, FloorSlotKind.NODE, slots, radius, config, random, () -> weighted(template.nodeMix, random));
+		slots.addAll(nodes);
+
+		int crateCount = (int) Math.round(template.crates * PartyScaling.floorCrates(Math.max(1, players)));
+		List<PlannedSlot> crates = new ArrayList<>();
+		scatter(crates, crateCount, FloorSlotKind.CRATE, slots, radius, config, random, () -> "");
+		slots.addAll(crates);
+
+		int points = Math.max(0, config.siegeRingPoints);
+		double ring = radius * config.siegeRingFraction;
+		double offset = random.nextDouble() * Math.PI * 2;
+		for (int i = 0; i < points; i++) {
+			double angle = offset + i * Math.PI * 2 / points;
+			slots.add(new PlannedSlot(FloorSlotKind.SIEGE_RING, Integer.toString(i), (int) Math.round(Math.cos(angle) * ring),
+					(int) Math.round(Math.sin(angle) * ring), 0));
+		}
+
+		Set<String> tags = new LinkedHashSet<>(template.tags);
+		tags.addAll(escalationTags(config, floorNumber));
+		return new FloorPlan(template.id, radius, template.groundY, rotation, mirrored, tags, List.copyOf(slots));
+	}
+
+	private static int order(FloorSlotKind kind) {
+		return switch (kind) {
+			case CAMP -> 0;
+			case EXIT_PORTAL -> 1;
+			default -> 2;
+		};
+	}
+
+	/** Scale, mirror (x → −x), then rotate by quarter turns. */
+	static int[] transform(int x, int z, double scale, int rotation, boolean mirrored) {
+		int sx = (int) Math.round(x * scale);
+		int sz = (int) Math.round(z * scale);
+		if (mirrored) {
+			sx = -sx;
+		}
+		return switch (rotation & 3) {
+			case 1 -> new int[] {-sz, sx};
+			case 2 -> new int[] {-sx, -sz};
+			case 3 -> new int[] {sz, -sx};
+			default -> new int[] {sx, sz};
+		};
+	}
+
+	/** Adds random points inside 85% of the radius until {@code out} holds {@code count}, keeping clear of other slots. */
+	private static void scatter(List<PlannedSlot> out, int count, FloorSlotKind kind, List<PlannedSlot> placed, int radius,
+			FloorsConfig config, Random random, java.util.function.Supplier<String> tag) {
+		double reach = radius * 0.85;
+		for (int attempt = 0; out.size() < count && attempt < count * 60; attempt++) {
+			double angle = random.nextDouble() * Math.PI * 2;
+			double distance = Math.sqrt(random.nextDouble()) * reach;
+			int x = (int) Math.round(Math.cos(angle) * distance);
+			int z = (int) Math.round(Math.sin(angle) * distance);
+			if (clear(x, z, placed, config.slotClearance) && clear(x, z, out, config.nodeSpacing)) {
+				out.add(new PlannedSlot(kind, tag.get(), x, z, 0));
+			}
+		}
+	}
+
+	private static boolean clear(int x, int z, List<PlannedSlot> slots, int clearance) {
+		for (PlannedSlot slot : slots) {
+			long dx = x - slot.x();
+			long dz = z - slot.z();
+			long reach = slot.radius() + clearance;
+			if (dx * dx + dz * dz < reach * reach) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static String weighted(Map<String, Integer> weights, Random random) {
+		int total = weights.values().stream().mapToInt(w -> Math.max(0, w)).sum();
+		if (total <= 0) {
+			return weights.keySet().iterator().next();
+		}
+		int roll = random.nextInt(total);
+		for (Map.Entry<String, Integer> entry : weights.entrySet()) {
+			roll -= Math.max(0, entry.getValue());
+			if (roll < 0) {
+				return entry.getKey();
+			}
+		}
+		return weights.keySet().iterator().next();
+	}
+}

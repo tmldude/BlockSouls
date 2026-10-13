@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -20,6 +22,10 @@ import net.minecraft.sounds.SoundEvents;
 import io.github.tmldude.blocksouls.common.act.Act;
 import io.github.tmldude.blocksouls.common.act.Acts;
 import io.github.tmldude.blocksouls.common.event.ActEvents;
+import io.github.tmldude.blocksouls.common.event.FloorEvents;
+import io.github.tmldude.blocksouls.common.floor.FloorRequest;
+import io.github.tmldude.blocksouls.common.floor.Floors;
+import io.github.tmldude.blocksouls.common.floor.PlacedFloor;
 import io.github.tmldude.blocksouls.common.player.PlayerStatus;
 import io.github.tmldude.blocksouls.common.run.RunPhase;
 import io.github.tmldude.blocksouls.game.BlockSoulsGame;
@@ -34,6 +40,10 @@ import io.github.tmldude.blocksouls.game.BlockSoulsGame;
  */
 public final class ActMachine {
 	private static List<Act> acts = List.of();
+	/** Floors shape: the template pool per act (index 0 = act 1). */
+	private static List<Identifier> pools = List.of();
+
+	private static final Identifier DEFAULT_POOL = Identifier.fromNamespaceAndPath("blocksouls_world", "surface");
 
 	private ActMachine() {
 	}
@@ -41,7 +51,8 @@ public final class ActMachine {
 	/** Parses the act list from config (called on init and from tests after swapping config). */
 	public static void load(RunConfig config) {
 		List<Act> parsed = new ArrayList<>();
-		for (RunConfig.ActSpec spec : config.acts) {
+		List<Identifier> parsedPools = new ArrayList<>();
+		for (RunConfig.ActSpec spec : "floors".equals(config.runShape) ? config.floorActs : config.acts) {
 			Identifier id = Identifier.tryParse(spec.id);
 			Identifier dimension = Identifier.tryParse(spec.dimension);
 			if (id == null || dimension == null) {
@@ -49,12 +60,31 @@ public final class ActMachine {
 				continue;
 			}
 			parsed.add(new Act(parsed.size() + 1, id, dimension, spec.name == null || spec.name.isBlank() ? spec.id : spec.name));
+			Identifier pool = spec.pool == null ? null : Identifier.tryParse(spec.pool);
+			parsedPools.add(pool == null || spec.pool.isBlank() ? DEFAULT_POOL : pool);
 		}
 		acts = List.copyOf(parsed);
+		pools = List.copyOf(parsedPools);
 	}
 
-	/** Installs the {@code Acts} provider (classic reports the single overworld act). */
+	/** Installs the {@code Acts} provider (classic reports the single overworld act) and the floors-shape hooks. */
 	static void installProvider() {
+		// Floors shape: using the camp's unlit exit portal frame starts the act's portal charge.
+		FloorEvents.EXIT_PORTAL_USED.register((player, floor) -> {
+			if (!floors()) {
+				return;
+			}
+			MinecraftServer server = player.level().getServer();
+			RunData data = RunData.get(server);
+			if (floor.actOrdinal() != data.actOrdinal) {
+				player.sendSystemMessage(Component.literal("This floor's portal is spent").withStyle(ChatFormatting.GRAY));
+				return;
+			}
+			String error = startCharge(server, data);
+			if (error != null) {
+				player.sendSystemMessage(Component.literal(error).withStyle(ChatFormatting.GRAY));
+			}
+		});
 		Acts.setProvider(new Acts.Provider() {
 			@Override
 			public Act current(MinecraftServer server) {
@@ -73,8 +103,15 @@ public final class ActMachine {
 		});
 	}
 
+	/** The act run: {@code "expedition"} (acts are dimensions) or {@code "floors"} (acts are floor islands). */
 	public static boolean expedition() {
-		return "expedition".equals(RunSystem.config().runShape);
+		String shape = RunSystem.config().runShape;
+		return "expedition".equals(shape) || "floors".equals(shape);
+	}
+
+	/** The floors run shape: every act is a floor island the world places in its floor dimension. */
+	public static boolean floors() {
+		return "floors".equals(RunSystem.config().runShape);
 	}
 
 	public static List<Act> acts() {
@@ -111,6 +148,7 @@ public final class ActMachine {
 		data.synthetic.start(server.overworld().getOverworldClockTime());
 		data.setDirty();
 		Act first = act(1);
+		openFloor(server, first);
 		ActEvents.ACT_STARTED.invoker().onAct(server, first);
 		enterIfFirst(server, data, first);
 	}
@@ -138,23 +176,36 @@ public final class ActMachine {
 		}
 	}
 
+	/** Where each open act is: its dimension, or in the floors shape its floor ({@link #floorKey}). */
 	private static List<String> openDimensions(RunData data) {
 		List<String> dimensions = new ArrayList<>();
 		for (int ordinal = 1; ordinal <= Math.min(data.highestOpenAct, acts.size()); ordinal++) {
-			dimensions.add(act(ordinal).dimension().toString());
+			dimensions.add(floors() ? floorKey(ordinal) : act(ordinal).dimension().toString());
 		}
 		return dimensions;
 	}
 
-	/** Counted players per dimension: alive, not spectating, not downed (downed players don't drag the siege front). */
+	/**
+	 * Counted players per dimension: alive, not spectating, not downed (downed players don't drag the siege front).
+	 * In the floors shape every act shares one dimension, so players are counted per floor island instead.
+	 */
 	private static Map<String, Integer> countPlayers(MinecraftServer server) {
 		Map<String, Integer> counts = new HashMap<>();
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			if (player.isAlive() && !player.isSpectator() && !PlayerStatus.isDowned(player)) {
-				counts.merge(player.level().dimension().identifier().toString(), 1, Integer::sum);
+				Identifier dimension = player.level().dimension().identifier();
+				String key = dimension.toString();
+				if (floors()) {
+					key = Floors.at(server, dimension, player.blockPosition()).map(floor -> floorKey(floor.actOrdinal())).orElse(key);
+				}
+				counts.merge(key, 1, Integer::sum);
 			}
 		}
 		return counts;
+	}
+
+	private static String floorKey(int actOrdinal) {
+		return "floor#" + actOrdinal;
 	}
 
 	private static void enterIfFirst(MinecraftServer server, RunData data, Act act) {
@@ -171,7 +222,7 @@ public final class ActMachine {
 	/** Starts the charge. Returns null on success, else why it can't start. */
 	public static @Nullable String startCharge(MinecraftServer server, RunData data) {
 		if (!expedition() || acts.isEmpty()) {
-			return "The portal charge needs runShape \"expedition\" (game-run.json)";
+			return "The portal charge needs runShape \"expedition\" or \"floors\" (game-run.json)";
 		}
 		if (!data.isActiveRun()) {
 			return "No active run";
@@ -234,6 +285,7 @@ public final class ActMachine {
 			data.highestOpenAct = Math.max(data.highestOpenAct, act.ordinal() + 1);
 			data.setDirty();
 			Act next = act(act.ordinal() + 1);
+			openFloor(server, next);
 			ActEvents.ACT_STARTED.invoker().onAct(server, next);
 			broadcast(server, "The portal to " + next.displayName() + " is lit");
 		} else {
@@ -248,7 +300,7 @@ public final class ActMachine {
 	/** Debug ({@code /bs act advance}): opens the next act and makes it current without a charge. */
 	public static @Nullable String advance(MinecraftServer server, RunData data) {
 		if (!expedition() || acts.isEmpty()) {
-			return "Needs runShape \"expedition\" (game-run.json)";
+			return "Needs runShape \"expedition\" or \"floors\" (game-run.json)";
 		}
 		if (!data.isActiveRun()) {
 			return "No active run";
@@ -261,10 +313,41 @@ public final class ActMachine {
 		data.actOrdinal = next;
 		data.setDirty();
 		Act act = act(next);
+		openFloor(server, act);
 		ActEvents.ACT_STARTED.invoker().onAct(server, act);
+		if (floors()) {
+			// Every act shares the floor dimension, so the party follows the island it stands on: send it over.
+			Floors.forAct(server, act.ordinal()).ifPresent(floor -> sendToCamp(server, floor));
+		}
 		enterIfFirst(server, data, act);
 		RunSync.markDirty();
 		return null;
+	}
+
+	/**
+	 * Floors shape: asks the world for the act's floor before the act starts, so {@code ACT_STARTED} / {@code ACT_ENTERED}
+	 * listeners (the Director's camp, event and mini-boss) find its slots. Asking again for an act returns its floor.
+	 */
+	private static void openFloor(MinecraftServer server, Act act) {
+		if (!floors()) {
+			return;
+		}
+		int players = (int) server.getPlayerList().getPlayers().stream().filter(player -> !player.isSpectator()).count();
+		Identifier pool = act.ordinal() <= pools.size() ? pools.get(act.ordinal() - 1) : DEFAULT_POOL;
+		if (Floors.open(server, new FloorRequest(act.ordinal(), pool, act.ordinal(), 0, Math.max(1, players))).isEmpty()) {
+			BlockSoulsGame.LOGGER.warn("No floor for act {} (pool {}): is the world module loaded?", act.ordinal(), pool);
+		}
+	}
+
+	private static void sendToCamp(MinecraftServer server, PlacedFloor floor) {
+		ServerLevel level = server.getLevel(ResourceKey.create(Registries.DIMENSION, floor.dimension()));
+		if (level == null) {
+			return;
+		}
+		BlockPos camp = floor.camp();
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			player.teleportTo(level, camp.getX() + 0.5, camp.getY(), camp.getZ() + 0.5, Set.of(), player.getYRot(), player.getXRot(), true);
+		}
 	}
 
 	private static void broadcast(MinecraftServer server, String message) {

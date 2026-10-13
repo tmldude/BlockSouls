@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "blocksouls_world:block/floor_portal"
+    },
+    "lit=true": {
+      "model": "blocksouls_world:block/floor_portal_lit"
+    }
+  }
+}
