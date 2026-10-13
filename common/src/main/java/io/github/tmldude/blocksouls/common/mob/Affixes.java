@@ -2,6 +2,7 @@ package io.github.tmldude.blocksouls.common.mob;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
 
@@ -37,7 +38,7 @@ public final class Affixes {
 		}
 
 		@Override
-		public Optional<Affix> roll(RandomSource random, int floor) {
+		public Optional<Affix> roll(RandomSource random, int floor, Set<String> floorTags) {
 			return Optional.empty();
 		}
 	};
@@ -66,7 +67,15 @@ public final class Affixes {
 	 * should carry none (always empty with no provider installed).
 	 */
 	public static Optional<Affix> roll(RandomSource random, int floor) {
-		return provider.roll(random, floor);
+		return roll(random, floor, Set.of());
+	}
+
+	/**
+	 * {@link #roll(RandomSource, int)} on a floor with these tags (its escalation tags: {@link WaveMobs#ELITE_AFFIXES}
+	 * makes every elite affixed).
+	 */
+	public static Optional<Affix> roll(RandomSource random, int floor, Set<String> floorTags) {
+		return provider.roll(random, floor, floorTags);
 	}
 
 	/** Provider-side storage: sets (or, for {@code null}, clears) the stored affix without any behaviour. */
@@ -93,7 +102,7 @@ public final class Affixes {
 		/** See {@link Affixes#apply}. Implementations call {@link Affixes#attach} to store it. */
 		boolean apply(LivingEntity entity, Affix affix);
 
-		/** See {@link Affixes#roll}. */
-		Optional<Affix> roll(RandomSource random, int floor);
+		/** See {@link Affixes#roll(RandomSource, int, Set)}. */
+		Optional<Affix> roll(RandomSource random, int floor, Set<String> floorTags);
 	}
 }
