@@ -377,9 +377,10 @@ public final class ShopRecipes {
 			}
 			product = built.icon().copy();
 		}
+		int count = product.getCount(); // give() empties the stack into the inventory
 		give(player, product);
 		ServerLevel level = (ServerLevel) player.level();
-		Director.log(level.getServer(), DirectorLog.Kind.ECONOMY, player.getScoreboardName() + " crafted " + product.getCount() + "x " + entry.result()
+		Director.log(level.getServer(), DirectorLog.Kind.ECONOMY, player.getScoreboardName() + " crafted " + count + "x " + entry.result()
 				+ " at the " + entry.board().id() + " board");
 		Director.beat(level.getServer(), "craft");
 		return null;
