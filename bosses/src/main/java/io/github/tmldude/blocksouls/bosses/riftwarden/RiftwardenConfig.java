@@ -31,6 +31,12 @@ public class RiftwardenConfig {
 	/** Shoulder charge across the ring. */
 	public ArchetypeParams.Charge charge = new ArchetypeParams.Charge(new AttackStats(22, 14, 20, 150, 6, 18, 1.5, 12)).distance(16);
 
+	/** The rift core floating before the chest: a weak point (damage ×this) that breaks after this share of max HP. */
+	public double coreDamageMultiplier = 1.5;
+	public double coreBreakShare = 0.08;
+	/** Breaking the core costs the beam and slows the boss (negative = slower). */
+	public double coreSpeedBonus = -0.1;
+
 	// ---------------------------------------------------------------- phase 2: transformed
 
 	/** Phase 2 starts below this share of health: the Warden tears open and transforms. */
@@ -45,8 +51,26 @@ public class RiftwardenConfig {
 	public ArchetypeParams.Orbs orbs = new ArchetypeParams.Orbs(new AttackStats(20, 80, 16, 160, 0, 20, 2, 6)).orbs(4, 0.4);
 	/** Pull from the rift: adds from floor 5's roster (count × PartyScaling arenaAdds); a shield holds until they die. */
 	public ArchetypeParams.Summon summon = new ArchetypeParams.Summon(new AttackStats(30, 1, 20, 20 * 45, 0, 30, 1.4, 0)).adds(3, 5);
+	/** Adds come from this floor's roster (every roster's tags, {@code more_elites}); the summon's tier is the wave. */
+	public int addsFloor = 5;
+	/** Cap on adds per summon after party scaling. */
+	public int maxAdds = 12;
 	/** Feint: starts a ring, then leaps instead. */
 	public ArchetypeParams.Feint feint = new ArchetypeParams.Feint(new AttackStats(9, 1, 0, 240, 5, 10, 1.2, 0));
+
+	/**
+	 * Rift fissures (phase 2 and 3): every {@code fissureIntervalTicks}, circles open under the players (count ×
+	 * PartyScaling arenaHazards, at most {@code maxFissures}) and erupt after {@code fissureWindupTicks}, hurting
+	 * whoever stands inside the drawn circle.
+	 */
+	public int fissureIntervalTicks = 20 * 9;
+	public int fissureWindupTicks = 30;
+	public int fissures = 2;
+	public int maxFissures = 8;
+	public double fissureRadius = 1.75;
+	/** Circles land within this many blocks of the player they follow. */
+	public double fissureSpread = 4;
+	public double fissureDamage = 6;
 
 	// ---------------------------------------------------------------- phase 3: the damage rush
 

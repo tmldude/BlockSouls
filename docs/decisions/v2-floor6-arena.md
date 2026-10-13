@@ -35,6 +35,22 @@ Spec: `docs/design/floors.md` "Floor 6 — Final Arena". Code: `bosses/src/*/jav
 - **Run end:** `RunSystem.onBossKilled` ends the run (`endRun`) when the Riftwarden dies. Classic runs keep the
   dragon raid as their final boss.
 
+## Posture, parts, adds and hazards (slice 2)
+- **Posture:** the framework default poise (`poise` 0 in the config = default). The Riftwarden adds nothing special.
+- **Part break: the rift core.** The crystal floating before the chest is a weak point (×1.5 damage). After 8% of
+  max HP lands on it, it breaks: the boss loses the beam and is 10% slower. The core vanishes from the model. It
+  can be broken in P1, before the beam ever appears, which rewards aiming early.
+- **Transformed (P2):** rift-seam glow, the blades lengthen, a torrent of motes, and a wither roar on entry.
+- **Adds:** the summon draws from floor 5's roster: `WaveMobs.eligible(tier 5, addsFloor 5, every roster's tags +
+  more_elites)`. Floor 5 carries every roster, so the union of all spec tags stands in for its tag set. bosses
+  can't read world's floor tags. Count = 3 × `arenaAdds` (11 at 8 players), capped at `maxAdds` 12. This goes
+  through two new overridable hooks on `SummonShield` (`count`, `roster`); their defaults leave every other boss
+  unchanged.
+- **Arena hazards: rift fissures** (P2 and P3), owned by the boss rather than the floor. Every 9 s, circles (r 1.75)
+  open under the players: one per player first, any extras within 4 blocks of one. They fill for 30 ticks and then
+  erupt for 6 × phase damage. Only players standing in a drawn circle at the eruption are hurt, once each. Count =
+  2 × `arenaHazards` (5 at 8 players), capped at 8.
+
 ## Party scaling (1–8)
 - New `party.json` curves, all 1.0 solo:
   - `rushWindow (-0.025, 0.9)`: the P3 window shrinks a little with more players (×0.86 at 8), floor ×0.25.

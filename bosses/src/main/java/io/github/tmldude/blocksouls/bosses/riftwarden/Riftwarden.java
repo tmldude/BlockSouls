@@ -1,10 +1,14 @@
 package io.github.tmldude.blocksouls.bosses.riftwarden;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -12,10 +16,13 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 import io.github.tmldude.blocksouls.bosses.api.BossDefinition;
 import io.github.tmldude.blocksouls.bosses.api.BossEntity;
 import io.github.tmldude.blocksouls.bosses.api.BossPhase;
+import io.github.tmldude.blocksouls.bosses.api.Telegraphs;
+import io.github.tmldude.blocksouls.bosses.archetype.Archetype;
 import io.github.tmldude.blocksouls.bosses.archetype.ChargeStick;
 import io.github.tmldude.blocksouls.bosses.archetype.ExpandingRing;
 import io.github.tmldude.blocksouls.bosses.archetype.Feint;
@@ -23,7 +30,6 @@ import io.github.tmldude.blocksouls.bosses.archetype.HomingOrbs;
 import io.github.tmldude.blocksouls.bosses.archetype.LeapSlam;
 import io.github.tmldude.blocksouls.bosses.archetype.LineCross;
 import io.github.tmldude.blocksouls.bosses.archetype.RotatingBeam;
-import io.github.tmldude.blocksouls.bosses.archetype.SummonShield;
 import io.github.tmldude.blocksouls.bosses.archetype.Theme;
 import io.github.tmldude.blocksouls.common.CommonIds;
 
@@ -42,8 +48,15 @@ public class Riftwarden extends BossEntity {
 			SoundEvents.END_PORTAL_SPAWN);
 	private static BossDefinition definition;
 
+	/** Open fissure circles (server), erupting when {@link #fissureTicks} reaches the windup. */
+	private final List<Vec3> fissures = new ArrayList<>();
+	private int fissureTicks;
+	private int fissureCooldown;
+
 	public Riftwarden(EntityType<? extends Riftwarden> type, Level level) {
 		super(type, level);
+		// The rift core floating before the chest (RiftwardenModel "core"): a weak point; breaking it costs the beam.
+		addPart("core", 0.9f, 0.9f, config().coreDamageMultiplier, new Vec3(0, 2.6, 0.8));
 	}
 
 	public static RiftwardenConfig config() {
@@ -59,11 +72,12 @@ public class Riftwarden extends BossEntity {
 		ChargeStick charge = new ChargeStick("charge", c.charge, THEME, "charge");
 		RotatingBeam beam = new RotatingBeam("beam", c.beam, THEME, "cast");
 		HomingOrbs orbs = new HomingOrbs("orbs", c.orbs, THEME, "cast");
-		SummonShield summon = new SummonShield("summon", c.summon, THEME, "cast");
+		RiftSummon summon = new RiftSummon("summon", c.summon, THEME, "cast");
 		Feint feint = new Feint("feint", c.feint, ring, leap);
 		BossDefinition.Builder builder = BossDefinition.builder(CommonIds.RIFTWARDEN)
 				.health(c.health)
 				.arenaRadius(c.arenaRadius)
+				.breakable("core", c.coreBreakShare, "beam", c.coreSpeedBonus)
 				.phase(BossPhase.first().attacks(ring, cross, leap, charge))
 				.phase(BossPhase.below(c.phase2Threshold)
 						.attacks(ring, cross, leap, charge, beam, orbs, summon, feint)
@@ -122,6 +136,9 @@ public class Riftwarden extends BossEntity {
 		super.tick();
 		if (level().isClientSide() && isAlive()) {
 			motes();
+		} else if (level() instanceof ServerLevel level && isAlive() && isEngaged() && !isReturning() && transformed()) {
+			// Here, not fightTick: that only runs between attacks.
+			fissureTick(level);
 		}
 	}
 
@@ -145,6 +162,79 @@ public class Riftwarden extends BossEntity {
 			level.sendParticles(index >= 2 ? ParticleTypes.END_ROD : ParticleTypes.REVERSE_PORTAL, getX(), getY() + getBbHeight() / 2, getZ(),
 					80, 1.0, 1.4, 1.0, 0.12);
 		}
+	}
+
+	@Override
+	protected void onReset() {
+		fissures.clear();
+		fissureCooldown = 0;
+	}
+
+	/**
+	 * Rift fissures: circles open under (near) the players, fill over the windup, then erupt. Only whoever stands
+	 * inside a drawn circle at the eruption is hurt, once, however many circles overlap.
+	 */
+	private void fissureTick(ServerLevel level) {
+		RiftwardenConfig c = config();
+		if (fissures.isEmpty()) {
+			if (fissureCooldown-- > 0) {
+				return;
+			}
+			List<ServerPlayer> players = participants().stream().filter(this::canHarm).toList();
+			if (players.isEmpty()) {
+				return;
+			}
+			int n = RiftMath.fissures(c.fissures, players.size(), c.maxFissures);
+			for (int i = 0; i < n; i++) {
+				ServerPlayer anchor = players.get(i % players.size());
+				double a = random.nextDouble() * Math.PI * 2;
+				double r = i < players.size() ? random.nextDouble() * 1.5 : random.nextDouble() * c.fissureSpread;
+				fissures.add(Archetype.ground(level, clampToArena(anchor.position().add(Math.cos(a) * r, 0, Math.sin(a) * r))));
+			}
+			fissureTicks = 0;
+			level.playSound(null, blockPosition(), SoundEvents.RESPAWN_ANCHOR_CHARGE, SoundSource.HOSTILE, 2.0f, 0.6f);
+			return;
+		}
+		fissureTicks++;
+		float progress = Math.min(1f, fissureTicks / (float) Math.max(1, c.fissureWindupTicks));
+		if (fissureTicks % 3 == 0) {
+			for (Vec3 at : fissures) {
+				Telegraphs.circleFilling(level, OUTLINE, FILL, at, c.fissureRadius, progress);
+			}
+		}
+		if (fissureTicks < c.fissureWindupTicks) {
+			return;
+		}
+		for (ServerPlayer player : participants()) {
+			if (canHarm(player) && inFissure(player.position(), c.fissureRadius)) {
+				player.hurtServer(level, damageSources().mobAttack(this), (float) (c.fissureDamage * damageMultiplier()));
+			}
+		}
+		for (Vec3 at : fissures) {
+			Telegraphs.column(level, ParticleTypes.REVERSE_PORTAL, at, 3, 0.4, 6);
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.END_PORTAL_FRAME_FILL, SoundSource.HOSTILE, 1.5f, 0.6f);
+		}
+		fissures.clear();
+		fissureCooldown = c.fissureIntervalTicks;
+	}
+
+	private boolean inFissure(Vec3 pos, double radius) {
+		for (Vec3 at : fissures) {
+			double dx = pos.x - at.x;
+			double dz = pos.z - at.z;
+			if (dx * dx + dz * dz <= radius * radius && Math.abs(pos.y - at.y) < 2) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Keeps a point inside the fog wall (one block in). */
+	private Vec3 clampToArena(Vec3 point) {
+		Vec3 home = Vec3.atBottomCenterOf(home());
+		Vec3 d = new Vec3(point.x - home.x, 0, point.z - home.z);
+		double max = Math.max(1, arenaRadius() - 1.5);
+		return d.length() <= max ? point : new Vec3(home.x + d.x / d.length() * max, point.y, home.z + d.z / d.length() * max);
 	}
 
 	@Override

@@ -43,7 +43,7 @@ public class SummonShield extends Archetype {
 	@Override
 	public void start(AttackRun run) {
 		super.start(run);
-		int n = Math.max(1, params.adds);
+		int n = Math.max(1, count(run.boss(), params.adds));
 		for (int i = 0; i < n; i++) {
 			double a = i * 2 * Math.PI / n + run.random().nextDouble() * 0.4;
 			Vec3 at = inArena(run.boss(), run.boss().position().add(Math.cos(a) * params.radius, 0, Math.sin(a) * params.radius));
@@ -68,7 +68,7 @@ public class SummonShield extends Archetype {
 			return;
 		}
 		ServerLevel level = run.level();
-		List<WaveMobSpec> specs = WaveMobs.eligible(params.tier);
+		List<WaveMobSpec> specs = roster(params.tier);
 		WaveContext context = new WaveContext(params.tier, Runs.get(level.getServer()).difficulty(), Set.of(), false);
 		List<Mob> spawned = new ArrayList<>();
 		for (Vec3 point : run.points()) {
@@ -89,6 +89,16 @@ public class SummonShield extends Archetype {
 		}
 		run.boss().shieldUntilDead(spawned, params.maxShieldTicks);
 		run.sound(theme.impact(), 2.5f, 0.6f);
+	}
+
+	/** How many adds this summon calls ({@code adds} from the config); bosses override to scale it. */
+	protected int count(BossEntity boss, int adds) {
+		return adds;
+	}
+
+	/** The wave mobs the adds are drawn from: the classic roster up to {@code tier}; bosses override to narrow it. */
+	protected List<WaveMobSpec> roster(int tier) {
+		return WaveMobs.eligible(tier);
 	}
 
 	private static @Nullable Mob create(ServerLevel level, List<WaveMobSpec> specs, BlockPos pos, WaveContext context) {

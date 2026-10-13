@@ -23,7 +23,7 @@ import io.github.tmldude.blocksouls.bosses.riftwarden.Riftwardens;
 /**
  * Placeholder Riftwarden: a tall horned warden in an obsidian shell and a long robe, crystal blades jutting from both
  * forearms, a rift core floating in front of the chest. Drawn at 1.3× so it stands about 4 blocks tall. Box UVs are
- * mirrored in {@code tools/assets/riftwarden.py}.
+ * mirrored in {@code tools/assets/riftwarden.py}. Transformed (phase 2+), the blades lengthen; a broken core vanishes.
  */
 public class RiftwardenModel extends BossModel {
 	private final ModelPart body;
@@ -31,6 +31,8 @@ public class RiftwardenModel extends BossModel {
 	private final ModelPart core;
 	private final ModelPart rightArm;
 	private final ModelPart leftArm;
+	private final ModelPart rightBlade;
+	private final ModelPart leftBlade;
 	private final ModelPart rightLeg;
 	private final ModelPart leftLeg;
 
@@ -41,6 +43,8 @@ public class RiftwardenModel extends BossModel {
 		core = body.getChild("core");
 		rightArm = body.getChild("right_arm");
 		leftArm = body.getChild("left_arm");
+		rightBlade = rightArm.getChild("right_blade");
+		leftBlade = leftArm.getChild("left_blade");
 		rightLeg = root.getChild("right_leg");
 		leftLeg = root.getChild("left_leg");
 	}
@@ -74,6 +78,16 @@ public class RiftwardenModel extends BossModel {
 		root.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(76, 26).mirror().addBox(-3, 0, -3.5f, 6, 22, 7),
 				PartPose.offset(4, 2, 0));
 		return LayerDefinition.create(mesh, 128, 128);
+	}
+
+	@Override
+	public void setupAnim(BossRenderState state) {
+		super.setupAnim(state);
+		// Transformed (phase 2+): the rift blades grow long. A broken core (part 0) is gone.
+		float blade = state.phase >= 1 ? 1.6f : 1f;
+		rightBlade.zScale = blade;
+		leftBlade.zScale = blade;
+		core.visible = (state.brokenParts & 1) == 0;
 	}
 
 	@Override
