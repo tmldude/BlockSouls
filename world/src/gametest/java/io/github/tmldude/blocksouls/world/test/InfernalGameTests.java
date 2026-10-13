@@ -45,7 +45,7 @@ import io.github.tmldude.blocksouls.world.floor.WorldFloors;
  * Floor 2, Infernal (v2-floor2-infernal): opens an Infernal floor in the test level and checks the lava channels, both
  * kinds of bridge, the island's biome, the lava rise (low bridges sink, the stone arch stands) and that lava sends a
  * player back to the camp unless they drank the Ashcap Tonic. Slice 2: pops an ashcap and a cinder ore node, and drinks
- * both brews. Act 902 keeps clear of real runs, FloorGameTests (900) and SkyriftGameTests (901).
+ * both brews. Act 910 (Infernal owns 910-919) keeps clear of real runs and the other floors' test acts (900-907, 93x).
  */
 public class InfernalGameTests {
 	private static final String FLOOR = "blocksouls_world_test:floor16";
@@ -55,7 +55,7 @@ public class InfernalGameTests {
 		ServerLevel level = helper.getLevel();
 		WorldFloors.useLevelForTests(level.dimension());
 		try {
-			walk(helper, level.getServer(), level, 902);
+			walk(helper, level.getServer(), level, 910);
 		} finally {
 			WorldFloors.useLevelForTests(null);
 		}
