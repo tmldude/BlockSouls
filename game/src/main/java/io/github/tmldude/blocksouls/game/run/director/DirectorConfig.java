@@ -306,6 +306,11 @@ public class DirectorConfig {
 		/** Fixed services on the board. */
 		public int perkRerollSouls = 6;
 		public int cursePurgeSouls = 10;
+		/** Floors runs: crafting tables, the 2×2 grid, crafters and smithing tables don't craft BlockSouls recipes (the forge and brew boards do). */
+		public boolean craftingOffInFloors = true;
+		/** Forge upgrade (two of a piece → the next tier): souls, plus this many of the floor's enchant metal. */
+		public int upgradeSouls = 12;
+		public int upgradeMetalCount = 2;
 		/** Seconds between the shopkeeper's remarks about the threat. */
 		public int remarkCooldownSeconds = 20;
 	}
