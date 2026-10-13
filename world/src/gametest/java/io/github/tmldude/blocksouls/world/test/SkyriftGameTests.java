@@ -63,7 +63,7 @@ public class SkyriftGameTests {
 		ServerLevel level = helper.getLevel();
 		WorldFloors.useLevelForTests(level.dimension());
 		try {
-			pops(helper, level, 902);
+			pops(helper, level, 931); // 93x: clear of the other floors' test acts (900-907)
 		} finally {
 			WorldFloors.useLevelForTests(null);
 		}
