@@ -32,6 +32,8 @@ BOSSES = {
         "tail": [(70, 48, 8, 8, 12), (110, 48, 6, 6, 10), (142, 48, 4, 4, 10), (102, 70, 1, 4, 8)],
     }),
     "final_dragon": (2, ("#f4e0ff", "#a24bff"), {}),
+    # Floor 6 (v2-floor6-arena): cracks per phase (P2 transformed, P3 rush).
+    "riftwarden": (3, ("#f2fffd", "#4dffe1"), {}),
 }
 
 

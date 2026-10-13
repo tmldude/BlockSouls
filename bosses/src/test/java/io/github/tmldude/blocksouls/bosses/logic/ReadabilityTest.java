@@ -14,6 +14,7 @@ import io.github.tmldude.blocksouls.bosses.ashwyrm.AshwyrmConfig;
 import io.github.tmldude.blocksouls.bosses.furnace.FurnaceKnightConfig;
 import io.github.tmldude.blocksouls.bosses.palerider.PaleRiderConfig;
 import io.github.tmldude.blocksouls.bosses.raid.FinalRaidConfig;
+import io.github.tmldude.blocksouls.bosses.riftwarden.RiftwardenConfig;
 import io.github.tmldude.blocksouls.bosses.stormplate.StormplateConfig;
 
 /**
@@ -30,7 +31,7 @@ class ReadabilityTest {
 		List<String> failures = new ArrayList<>();
 		int checked = 0;
 		for (Object config : List.of(new FurnaceKnightConfig(), new StormplateConfig(), new PaleRiderConfig(), new AshwyrmConfig(),
-				new FinalRaidConfig())) {
+				new FinalRaidConfig(), new RiftwardenConfig())) {
 			double phaseMult = maxPhaseDamage(config);
 			List<Named> stats = new ArrayList<>();
 			collect(config, config.getClass().getSimpleName(), stats, 0);

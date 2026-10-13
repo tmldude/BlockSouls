@@ -14,6 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.state.BlockState;
 
+import io.github.tmldude.blocksouls.common.CommonIds;
 import io.github.tmldude.blocksouls.common.debug.DebugCommands;
 import io.github.tmldude.blocksouls.common.floor.FloorRequest;
 import io.github.tmldude.blocksouls.common.floor.FloorSlot;
@@ -24,7 +25,7 @@ import io.github.tmldude.blocksouls.world.BlockSoulsWorld;
 
 /**
  * {@code /bs floor open <act> [players] [pool]} (places a floor without a run; pool e.g. {@code skyrift}, floor number = act), {@code /bs floor tp <act>}, {@code /bs floor info},
- * {@code /bs floor light <act>} (lights its exit portal), {@code /bs floor goto <slot kind>}, {@code /bs floor pop}
+ * {@code /bs floor light <act>} (lights its exit portal), {@code /bs floor goto <slot kind>|arena}, {@code /bs floor pop}
  * (pops the nearest node) and {@code /bs floor hazard <trigger>} (fires a floor hazard at you, see {@link FloorHazards}).
  */
 public final class FloorCommands {
@@ -105,9 +106,13 @@ public final class FloorCommands {
 	}
 
 	private static int gotoSlot(CommandContext<CommandSourceStack> c) {
+		String name = com.mojang.brigadier.arguments.StringArgumentType.getString(c, "kind");
+		if ("arena".equals(name)) {
+			return gotoArena(c);
+		}
 		FloorSlotKind kind;
 		try {
-			kind = FloorSlotKind.valueOf(com.mojang.brigadier.arguments.StringArgumentType.getString(c, "kind").toUpperCase(java.util.Locale.ROOT));
+			kind = FloorSlotKind.valueOf(name.toUpperCase(java.util.Locale.ROOT));
 		} catch (IllegalArgumentException e) {
 			c.getSource().sendFailure(Component.literal("Unknown slot kind"));
 			return 0;
@@ -127,6 +132,31 @@ public final class FloorCommands {
 		boolean atOpening = (kind == FloorSlotKind.CAVE || kind == FloorSlotKind.SECRET) && level.getBlockState(pos).isAir();
 		player.teleportTo(pos.getX() + 0.5, pos.getY() + (atOpening ? 0 : 1), pos.getZ() + 0.5);
 		c.getSource().sendSuccess(() -> Component.literal(kind + " " + slot.get().tag() + " at " + pos.toShortString()), false);
+		return 1;
+	}
+
+	/**
+	 * {@code /bs floor goto arena}: to the final arena's camp, at the ring's edge. Uses the run's arena floor (or any
+	 * placed one); with none placed, opens one for act 6 first.
+	 */
+	private static int gotoArena(CommandContext<CommandSourceStack> c) {
+		if (!(c.getSource().getEntity() instanceof ServerPlayer player)) {
+			return 0;
+		}
+		MinecraftServer server = c.getSource().getServer();
+		Optional<PlacedFloor> floor = Floors.all(server).stream()
+				.filter(f -> f.slots(FloorSlotKind.STRUCTURE).stream().anyMatch(s -> CommonIds.FINAL_ARENA_SLOT.equals(s.tag())))
+				.reduce((first, second) -> second);
+		if (floor.isEmpty()) {
+			floor = Floors.open(server, new FloorRequest(6, CommonIds.ARENA_POOL, 6, 0, 1));
+		}
+		if (floor.isEmpty()) {
+			c.getSource().sendFailure(Component.literal("No arena floor (is the floor dimension loaded?)"));
+			return 0;
+		}
+		WorldFloors.sendToCamp(player, floor.get());
+		PlacedFloor arena = floor.get();
+		c.getSource().sendSuccess(() -> Component.literal("Final arena camp, act " + arena.actOrdinal() + ": step on the plate to start"), false);
 		return 1;
 	}
 

@@ -107,7 +107,7 @@ final class FloorBuilder {
 					if (vault != null && BoxPlanner.VAULT_STRUCTURE.equals(slot.tag())) {
 						vault.vaultRoom(this, pos);
 					} else {
-						structure(pos, slot.tag());
+						structure(pos, slot);
 					}
 				}
 				case WRECK -> wreck(pos, slot);
@@ -397,8 +397,16 @@ final class FloorBuilder {
 		filled.add(new FloorSlot(FloorSlotKind.CRATE, loot.identifier().toString(), pos, 0));
 	}
 
-	/** The floor's structure: {@code outpost} is the checkpoint ruin, {@code wreck_yard} the wreck ruin. */
-	private void structure(BlockPos pos, String tag) {
+	/**
+	 * The floor's structure: {@code outpost} is the checkpoint ruin, {@code wreck_yard} the wreck ruin,
+	 * {@code final_arena} floor 6's fighting ring ({@link ArenaFloor}).
+	 */
+	private void structure(BlockPos pos, FloorPlanner.PlannedSlot slot) {
+		String tag = slot.tag();
+		if (CommonIds.FINAL_ARENA_SLOT.equals(tag)) {
+			ArenaFloor.build(level, pos, slot.radius());
+			return;
+		}
 		RuinStructure.Kind kind = "wreck_yard".equals(tag) ? RuinStructure.Kind.WRECK : RuinStructure.Kind.CHECKPOINT;
 		StructurePlacer.Placed placed = StructurePlacer.place(level, random, pos, kind.layout(random.nextLong()), kind.loot);
 		placed.chests().forEach(chest -> crate(chest, kind.loot));

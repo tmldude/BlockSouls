@@ -19,6 +19,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 
+import io.github.tmldude.blocksouls.common.CommonIds;
 import io.github.tmldude.blocksouls.common.act.Act;
 import io.github.tmldude.blocksouls.common.act.Acts;
 import io.github.tmldude.blocksouls.common.event.ActEvents;
@@ -113,6 +114,16 @@ public final class ActMachine {
 	public static boolean floors() {
 		return "floors".equals(RunSystem.config().runShape);
 	}
+
+	// --- floor 6 (Stage 6C, v2-floor6-arena) ---
+	/**
+	 * Floors shape: whether an act's floor is tagged {@code timeless} (the final arena): no day timer, no siege and no
+	 * night there; the act is the boss fight.
+	 */
+	public static boolean timeless(MinecraftServer server, int actOrdinal) {
+		return floors() && Floors.forAct(server, actOrdinal).map(floor -> floor.hasTag(CommonIds.TIMELESS_TAG)).orElse(false);
+	}
+	// --- end floor 6 ---
 
 	public static List<Act> acts() {
 		return acts;

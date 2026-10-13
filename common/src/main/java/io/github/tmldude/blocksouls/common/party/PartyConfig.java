@@ -65,6 +65,18 @@ public class PartyConfig {
 	public double directorSoloEliteShare = 0.25;
 	public Curve directorEliteFade = new Curve(0.3, 0.9);
 
+	// --- floor 6 (Stage 6C, v2-floor6-arena) ---
+	/**
+	 * Final arena: the damage rush's window (× the solo seconds). The party's damage grows faster than the boss's
+	 * health, so a bigger party gets a slightly shorter window. 4 players ×0.94, 8 ×0.86; never under ×0.25.
+	 */
+	public Curve rushWindow = new Curve(-0.025, 0.9);
+	/** Final arena: adds per summon in phase 2 (× the solo count). 4 players ×2.2, 8 ×3.6. */
+	public Curve arenaAdds = new Curve(0.45, 0.9);
+	/** Final arena: hazard strikes per volley (× the solo count). 4 players ×1.7, 8 ×2.4. */
+	public Curve arenaHazards = new Curve(0.25, 0.9);
+	// --- end floor 6 ---
+
 	public static class Curve {
 		public double perExtraPlayer;
 		public double exponent;

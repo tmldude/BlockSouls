@@ -40,6 +40,7 @@ import io.github.tmldude.blocksouls.game.player.boon.BoonTier;
 import io.github.tmldude.blocksouls.game.player.boon.rule.BoonRules;
 import io.github.tmldude.blocksouls.game.player.relic.RelicOffers;
 import io.github.tmldude.blocksouls.game.player.soul.Souls;
+import io.github.tmldude.blocksouls.game.run.ActMachine;
 import io.github.tmldude.blocksouls.game.run.DirectorHooks;
 import io.github.tmldude.blocksouls.game.run.RunIds;
 
@@ -88,6 +89,10 @@ public final class DayLoop {
 		ServerLevel level = Places.levelOf(server, act);
 		if (data.campAct != act.ordinal()) {
 			placeCamp(server, level, act);
+		}
+		if (ActMachine.timeless(server, act.ordinal())) {
+			// Floor 6 (the final arena): the camp and its shopkeeper only. No day, events or mini-boss; the act is the fight.
+			return;
 		}
 		if (act.ordinal() > data.dayAct) {
 			startDay(server, act.ordinal());

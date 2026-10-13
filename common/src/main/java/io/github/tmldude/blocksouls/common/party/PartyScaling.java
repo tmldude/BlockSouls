@@ -107,6 +107,23 @@ public final class PartyScaling {
 		return Math.max(0, Math.min(1, config.directorSoloEliteShare / curve(players, config.directorEliteFade)));
 	}
 
+	// --- floor 6 (Stage 6C, v2-floor6-arena) ---
+	/** Final arena: multiplier on the damage rush's window, at least 0.25. */
+	public static double rushWindow(int players) {
+		return Math.max(0.25, curve(players, config.rushWindow));
+	}
+
+	/** Final arena: multiplier on the adds the boss summons in phase 2. */
+	public static double arenaAdds(int players) {
+		return curve(players, config.arenaAdds);
+	}
+
+	/** Final arena: multiplier on the arena's hazard strikes per volley. */
+	public static double arenaHazards(int players) {
+		return curve(players, config.arenaHazards);
+	}
+	// --- end floor 6 ---
+
 	public static int raidPlates(int players) {
 		int perPlate = Math.max(1, config.playersPerRaidPlate);
 		int plates = (partySize(players) + perPlate - 1) / perPlate;
