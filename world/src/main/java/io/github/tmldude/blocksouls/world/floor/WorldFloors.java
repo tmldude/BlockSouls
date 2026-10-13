@@ -93,6 +93,7 @@ public final class WorldFloors {
 		FloorTemplateCatalog.register();
 		SkyriftFloor.init();
 		VaultHazards.init(); // floor 4, The Vault
+		InfernalHazard.init(); // v2-floor2-infernal
 		Floors.setProvider(new Floors.Provider() {
 			@Override
 			public Optional<PlacedFloor> open(MinecraftServer server, FloorRequest request) {

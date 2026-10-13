@@ -88,6 +88,7 @@ public final class FloorPlanner {
 		int radius = (int) Math.round(template.radius * scale);
 		int rotation = random.nextInt(4);
 		boolean mirrored = random.nextBoolean();
+		LavaChannels.Plan channels = template.channels == null ? null : LavaChannels.plan(template.channels, radius, rotation, mirrored);
 
 		List<PlannedSlot> slots = new ArrayList<>();
 		List<FloorTemplate.Slot> nodeSlots = new ArrayList<>();
@@ -125,7 +126,7 @@ public final class FloorPlanner {
 			String tag = slot.tag.isEmpty() ? weighted(template.nodeMix, random) : slot.tag;
 			nodes.add(new PlannedSlot(FloorSlotKind.NODE, tag, at[0], at[1], 0));
 		}
-		scatter(nodes, nodeCount, FloorSlotKind.NODE, slots, radius, config, random, () -> weighted(template.nodeMix, random));
+		scatter(nodes, nodeCount, FloorSlotKind.NODE, slots, radius, config, random, () -> weighted(template.nodeMix, random), channels);
 		slots.addAll(nodes);
 		// v2-floor5-blight: the floor's rare nodes and herbs, scattered after the common nodes (no draws when empty).
 		slots.addAll(extras(template.rareNodes, PartyScaling.floorNodes(Math.max(1, players)) * config.nodeFactor(floorNumber),
@@ -134,7 +135,7 @@ public final class FloorPlanner {
 
 		int crateCount = (int) Math.round(template.crates * PartyScaling.floorCrates(Math.max(1, players)));
 		List<PlannedSlot> crates = new ArrayList<>();
-		scatter(crates, crateCount, FloorSlotKind.CRATE, slots, radius, config, random, () -> "");
+		scatter(crates, crateCount, FloorSlotKind.CRATE, slots, radius, config, random, () -> "", channels);
 		slots.addAll(crates);
 
 		int points = Math.max(0, config.siegeRingPoints);
@@ -142,6 +143,11 @@ public final class FloorPlanner {
 		double offset = random.nextDouble() * Math.PI * 2;
 		for (int i = 0; i < points; i++) {
 			double angle = offset + i * Math.PI * 2 / points;
+			// Infernal: a ring point that lands in (or at the lip of) a lava channel slides along the ring until clear.
+			for (int nudge = 0; channels != null && nudge < 12
+					&& channels.distance(Math.round(Math.cos(angle) * ring), Math.round(Math.sin(angle) * ring)) <= config.slotClearance; nudge++) {
+				angle += Math.PI / 36;
+			}
 			slots.add(new PlannedSlot(FloorSlotKind.SIEGE_RING, Integer.toString(i), (int) Math.round(Math.cos(angle) * ring),
 					(int) Math.round(Math.sin(angle) * ring), 0));
 		}
@@ -239,6 +245,19 @@ public final class FloorPlanner {
 		}
 	}
 
+	/**
+	 * A floor's lava channels (null when its template has none), rebuilt from the template, the placed radius and the
+	 * seed: the same rotation and mirroring {@link #plan} drew first.
+	 */
+	public static LavaChannels.Plan channels(FloorTemplate template, int radius, long seed) {
+		if (template.channels == null) {
+			return null;
+		}
+		Random random = new Random(seed);
+		int rotation = random.nextInt(4);
+		return LavaChannels.plan(template.channels, radius, rotation, random.nextBoolean());
+	}
+
 	private static int order(FloorSlotKind kind) {
 		return switch (kind) {
 			case CAMP -> 0;
@@ -278,14 +297,15 @@ public final class FloorPlanner {
 
 	/** Adds random points inside 85% of the radius until {@code out} holds {@code count}, keeping clear of other slots. */
 	private static void scatter(List<PlannedSlot> out, int count, FloorSlotKind kind, List<PlannedSlot> placed, int radius,
-			FloorsConfig config, Random random, java.util.function.Supplier<String> tag) {
+			FloorsConfig config, Random random, java.util.function.Supplier<String> tag, LavaChannels.Plan channels) {
 		double reach = radius * 0.85;
 		for (int attempt = 0; out.size() < count && attempt < count * 60; attempt++) {
 			double angle = random.nextDouble() * Math.PI * 2;
 			double distance = Math.sqrt(random.nextDouble()) * reach;
 			int x = (int) Math.round(Math.cos(angle) * distance);
 			int z = (int) Math.round(Math.sin(angle) * distance);
-			if (clear(x, z, placed, config.slotClearance) && clear(x, z, out, config.nodeSpacing)) {
+			if (clear(x, z, placed, config.slotClearance) && clear(x, z, out, config.nodeSpacing)
+					&& (channels == null || channels.distance(x, z) > config.slotClearance)) {
 				out.add(new PlannedSlot(kind, tag.get(), x, z, 0));
 			}
 		}

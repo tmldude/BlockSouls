@@ -264,6 +264,9 @@ public class RunConfig {
 			if (floor == 5) { // v2-floor5-blight: the Blighted Surface
 				spec.pool = "blocksouls_world:blight";
 			}
+			if (floor == 2) { // v2-floor2-infernal
+				spec.pool = "blocksouls_world:infernal";
+			}
 			// --- end floor pools ---
 			floorActs.add(spec);
 		}

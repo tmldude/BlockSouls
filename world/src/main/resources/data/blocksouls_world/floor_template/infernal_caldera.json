@@ -1,0 +1,125 @@
+{
+  "pool": "blocksouls_world:infernal",
+  "tags": [
+    "infernal"
+  ],
+  "minFloor": 2,
+  "maxFloor": 2,
+  "weight": 1,
+  "radius": 64,
+  "groundY": 84,
+  "depth": 20,
+  "hills": 2.5,
+  "terrain": {
+    "top": "minecraft:blackstone",
+    "fill": "minecraft:basalt",
+    "base": "minecraft:blackstone",
+    "accents": {
+      "minecraft:magma_block": 6,
+      "minecraft:basalt": 10,
+      "minecraft:netherrack": 8,
+      "minecraft:soul_soil": 3
+    },
+    "camp": "minecraft:soul_soil",
+    "campfire": "minecraft:soul_campfire"
+  },
+  "biome": "blocksouls_world:infernal",
+  "channels": {
+    "ringFraction": 0.4,
+    "width": 4,
+    "lavaDepth": 2,
+    "radials": [
+      45,
+      165,
+      285
+    ],
+    "ringBridges": [
+      345,
+      105,
+      225
+    ],
+    "highBridge": 0
+  },
+  "spires": 14,
+  "fires": 10,
+  "trees": 0,
+  "nodes": 12,
+  "nodeMix": {
+    "blocksouls_world:scrap_node": 3,
+    "blocksouls_world:gunmetal_node": 2
+  },
+  "crates": 2,
+  "slots": [
+    {
+      "kind": "camp",
+      "x": 0,
+      "z": 0,
+      "radius": 6
+    },
+    {
+      "kind": "exit_portal",
+      "x": -9,
+      "z": 0,
+      "radius": 2
+    },
+    {
+      "kind": "structure",
+      "tag": "fortress",
+      "x": -12,
+      "z": 44,
+      "radius": 8
+    },
+    {
+      "kind": "mini_boss",
+      "x": -33,
+      "z": -33,
+      "radius": 10
+    },
+    {
+      "kind": "secret",
+      "tag": "soulfire_door",
+      "x": 48,
+      "z": -13,
+      "radius": 4
+    },
+    {
+      "kind": "event",
+      "x": 11,
+      "z": 42,
+      "radius": 5
+    },
+    {
+      "kind": "cave",
+      "x": 35,
+      "z": -30,
+      "radius": 4
+    },
+    {
+      "kind": "wreck",
+      "x": -45,
+      "z": -16,
+      "radius": 7
+    },
+    {
+      "kind": "node",
+      "tag": "blocksouls_world:gunmetal_node",
+      "x": 40,
+      "z": 20
+    },
+    {
+      "kind": "node",
+      "x": -45,
+      "z": 5
+    },
+    {
+      "kind": "node",
+      "x": 5,
+      "z": -48
+    },
+    {
+      "kind": "node",
+      "x": -30,
+      "z": 30
+    }
+  ]
+}

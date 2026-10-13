@@ -53,6 +53,7 @@ public final class FloorCommands {
 				.then(Commands.literal("hazard").then(Commands.argument("trigger", com.mojang.brigadier.arguments.StringArgumentType.word())
 						.suggests((c, b) -> net.minecraft.commands.SharedSuggestionProvider.suggest(FloorHazards.names(), b))
 						.executes(FloorCommands::hazard)))));
+		InfernalCommands.init(); // v2-floor2-infernal: /bs floor open <act> <players> <pool>; lava hazards via FloorHazards
 	}
 
 	private static int open(CommandContext<CommandSourceStack> c, int players) {

@@ -69,6 +69,13 @@ public final class FloorTemplate {
 	public Shards shards = new Shards();
 	/** Siege ring points moved onto shards (waves drop in from above). */
 	public int elevatedSiegePoints = 0;
+	// ---- Infernal (v2-floor2-infernal): all optional (the biome is the Skyrift field above), absent on the Surface templates so they build as before.
+	/** Lava channels cutting the island into lobes, with bridges; null for none. */
+	public LavaChannels.Spec channels;
+	/** Basalt spires scattered outside the slots and channels. */
+	public int spires = 0;
+	/** Eternal fires lit on netherrack outside the slots. */
+	public int fires = 0;
 
 	// ---- Vault (floor 4) block: the box shape. Island templates leave these at their defaults.
 	/** {@code "island"} (default: a floating disc) or {@code "box"} (a bounded room-and-corridor dungeon, floor 4). */
@@ -119,6 +126,12 @@ public final class FloorTemplate {
 		public String top = "minecraft:grass_block";
 		public String fill = "minecraft:dirt";
 		public String base = "minecraft:stone";
+		/** Top-block swaps: block id → percent of top blocks replaced with it (Infernal: magma, basalt). */
+		public Map<String, Integer> accents = new LinkedHashMap<>();
+		/** The camp's ground and fire. */
+		public String camp = "minecraft:coarse_dirt";
+		public String campfire = "minecraft:campfire";
+
 		/**
 		 * Optional weighted top blocks replacing {@link #top}: each column picks one by a hash of its position, so the
 		 * build's random stream (and every other template's output) is unchanged.
@@ -273,6 +286,15 @@ public final class FloorTemplate {
 		}
 		if (nodeMix == null || nodeMix.isEmpty()) {
 			throw new IllegalArgumentException("nodeMix is empty");
+		}
+		if (biome == null) {
+			biome = "";
+		}
+		if (terrain.accents == null) {
+			terrain.accents = new LinkedHashMap<>();
+		}
+		if (channels != null) {
+			channels.validate();
 		}
 	}
 
