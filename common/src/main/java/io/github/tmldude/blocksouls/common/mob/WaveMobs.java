@@ -16,6 +16,11 @@ public final class WaveMobs {
 	public static final String MORE_ELITES = "more_elites";
 	/** Floor escalation tag (world's floors 5+): elites always carry an affix. */
 	public static final String ELITE_AFFIXES = "elite_affixes";
+	/**
+	 * Entity tag ({@code Entity.addTag}) marking a mob the Director sent as a flanker: mobs gives it a goal that
+	 * circles to the side its target isn't facing before closing in.
+	 */
+	public static final String FLANKER_TAG = "blocksouls_flanker";
 
 	private static final Map<Identifier, WaveMobSpec> SPECS = new LinkedHashMap<>();
 

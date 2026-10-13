@@ -30,3 +30,6 @@ Same style as `DECISIONS.md`: where this conflicts with a plan file, this logs w
 - **`WaveMobs.eligible(wave, floor, floorTags)`** is the floor overload; `eligible(wave)` (classic) is unchanged and
   ignores both new fields. `more_elites` lets elites skip their `minWave` on that floor (they join from the floor's
   first wave); `elite_affixes` is read by the affix roll. Both tag names are constants on `WaveMobs`.
+- **Flankers are marked with an entity tag, `WaveMobs.FLANKER_TAG` (`blocksouls_flanker`).** The Director adds it
+  to hunters it spawns under its `FLANKERS` composition; mobs reads it (plus its own config list of always-flanking
+  mob types). A scoreboard tag needs no attachment and is saved with the entity.
