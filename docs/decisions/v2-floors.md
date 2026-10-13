@@ -71,8 +71,15 @@ as `DECISIONS.md`: where this conflicts with a plan file, this logs what was act
   `more_elites`, 3: `stingy_nodes`, 4: `mean_mini_boss`, 5: `elite_affixes`). `nodeFactorByFloor` trims node
   counts on later floors.
 - **Structures are placed by code in step 1.** The `outpost` and `wreck_yard` structure kinds reuse the world's
-  `StructurePlacer` checkpoint and wreck layouts, and their chests become `CRATE` slots. Registering them as
-  real structures for `/locate` is step 2.
+  `StructurePlacer` checkpoint and wreck layouts, and their chests become `CRATE` slots. `/locate` can't find
+  them yet. It searches a structure set's placement grid, and a floor's structure slot moves with the per-run
+  rotation and mirroring. `/bs floor goto structure` finds the slot instead. A floor-grid structure placement
+  that `/locate` can search is follow-up work (with the floors 2–6 PRs).
+- **Surface pool:** three templates, `surface_crossroads` (floors 1+), `surface_ridge` (1+, hillier, more
+  gunmetal) and `surface_scrapfield` (2+, flat, scrap-heavy, two wrecks). Acts 2–6 draw from the same pool,
+  with escalation tags, until the per-floor design briefs arrive.
+- **Wreck repair stays in vehicles.** The floor's `WRECK` slot is a wreck layout with scrap piles around it.
+  Repairing it with scrap is the vehicles module's interaction, so the world gametest doesn't cover it.
 - **Cave and secret:** the cave is an 8-step stair tunnel to a lantern-lit hall with a chest and two gunmetal
   nodes. The secret is either a hidden drop (a trapdoor over a shaft to a vault) or a mossy hut with a cracked
   wall. Both have a `chests/floor_secret` chest. Loose crates use `chests/floor_crate`. Chest loot uses only the
