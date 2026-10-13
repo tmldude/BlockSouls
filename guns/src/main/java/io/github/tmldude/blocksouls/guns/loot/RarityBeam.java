@@ -33,6 +33,8 @@ public final class RarityBeam {
 	/** Rarity colors: aqua for rare, light purple for legendary (the tooltip's colors). */
 	private static final int RARE_COLOR = 0x55FFFF;
 	private static final int LEGENDARY_COLOR = 0xFF55FF;
+	/** Exotics are gold, matching their nameplate. */
+	private static final int EXOTIC_COLOR = 0xFFAA00;
 
 	private static final Set<ItemEntity> BEAMS = Collections.newSetFromMap(new WeakHashMap<>());
 
@@ -57,6 +59,7 @@ public final class RarityBeam {
 		return switch (GunRolls.rarity(stack)) {
 			case RARE -> RARE_COLOR;
 			case LEGENDARY -> LEGENDARY_COLOR;
+			case EXOTIC -> EXOTIC_COLOR;
 			case COMMON -> -1;
 		};
 	}
@@ -78,7 +81,7 @@ public final class RarityBeam {
 		}
 		BEAMS.add(item);
 		if (fresh && config.sting) {
-			SoundEvent sting = GunRolls.rarity(stack) == GunRarity.LEGENDARY ? GunSounds.DROP_LEGENDARY : GunSounds.DROP_RARE;
+			SoundEvent sting = GunRolls.rarity(stack) == GunRarity.RARE ? GunSounds.DROP_RARE : GunSounds.DROP_LEGENDARY;
 			level.playSound(null, item.getX(), item.getY(), item.getZ(), sting, SoundSource.NEUTRAL, 1.0F, 1.0F);
 		}
 	}
