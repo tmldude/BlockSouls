@@ -420,3 +420,10 @@ session's decisions file. Slower per session; the orchestrator keeps the paralle
 - v0.11.0 ships the abilities kit and synergy builds live under runShape classic (owner priority: guns, abilities, boons).
 - It also ships exotic guns and the gun feel pass (#54), and the four classes with rune trees, glide and Last Stand (#55).
   Players without a class keep every v1 movement verb, so classic play is unchanged until someone picks a class.
+
+## Floor rosters in the wave manager (2026-10-13, v2 orchestrator)
+
+- **Each wave spawn resolves its roster from the spawn position** (`FloorRoster`): the placed floor under it gives
+  its number and tags to `WaveMobs.eligible(wave, floor, tags)`; outside any floor in a multi-act run the current
+  act's number stands in with no tags (the same fallback the Director's affix roll uses); classic runs keep
+  `eligible(wave)` untouched. Under `more_elites`, elites also skip the per-run roster shuffle's wave offset.
