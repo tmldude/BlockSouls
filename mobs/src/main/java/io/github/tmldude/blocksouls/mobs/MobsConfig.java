@@ -1,5 +1,10 @@
 package io.github.tmldude.blocksouls.mobs;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * {@code config/blocksouls/mobs.json}. Stats are vanilla-tier, before the game's wave scaling. Speeds are the
  * movement-speed attribute, times are seconds unless named {@code ...Ticks}, distances are blocks.
@@ -19,8 +24,18 @@ public class MobsConfig {
 	public MutantBrute mutantBrute = new MutantBrute();
 	public InfectedPiglin infectedPiglin = new InfectedPiglin();
 	public AshHound ashHound = new AshHound();
+	public Spitter spitter = new Spitter();
+	public Bulwark bulwark = new Bulwark();
 	public Breaking breaking = new Breaking();
 	public Dread dread = new Dread();
+
+	/** Elite affixes appear only in Expedition (on a floor or in a multi-act run) unless this is true. */
+	public boolean affixesInClassic = false;
+	public AffixConfig affixes = new AffixConfig();
+	/** Floor roster (Expedition): mob id → first floor and required floor tags. Mobs not listed are on every floor. */
+	public Map<String, RosterEntry> roster = defaultRoster();
+	public Flanking flanking = new Flanking();
+	public AttackPicking attackPicking = new AttackPicking();
 
 	/**
 	 * Brings a mobs.json written against older defaults up to date: values still at an old default take the new one,
@@ -36,6 +51,20 @@ public class MobsConfig {
 		}
 		config.defaultsVersion = CURRENT_DEFAULTS;
 		return true;
+	}
+
+	/** Surface floors 1–6: the basics from floor 1, heavier and ranged mobs join as the act goes on. */
+	static Map<String, RosterEntry> defaultRoster() {
+		Map<String, RosterEntry> roster = new LinkedHashMap<>();
+		roster.put("blocksouls_mobs:shambler", new RosterEntry(1));
+		roster.put("blocksouls_mobs:crawler", new RosterEntry(1));
+		roster.put("blocksouls_mobs:screamer", new RosterEntry(1));
+		roster.put("blocksouls_mobs:spitter", new RosterEntry(2));
+		roster.put("blocksouls_mobs:bloater", new RosterEntry(2));
+		roster.put("blocksouls_mobs:brute", new RosterEntry(2));
+		roster.put("blocksouls_mobs:bulwark", new RosterEntry(3));
+		roster.put("blocksouls_mobs:mutant_brute", new RosterEntry(3));
+		return roster;
 	}
 
 	/** Shared by every mob. {@code minWave}/{@code weight} only matter for wave mobs. */
@@ -185,5 +214,151 @@ public class MobsConfig {
 		public double spawnMaxDistance = 30;
 		/** Average seconds between howls once past {@link #howlAt}. */
 		public double howlEverySeconds = 25;
+	}
+
+	public static class Spitter extends Stats {
+		/** Spits at targets within this range it can see. */
+		public double spitRange = 16;
+		/** Keeps at least this far from its target. */
+		public double keepAway = 9;
+		/** The throat swells (and the mob stops) this long before the glob flies. */
+		public int spitWindupTicks = 15;
+		public int spitCooldownTicks = 50;
+		public double spitDamage = 4;
+		public float spitSpeed = 1.1f;
+		/** Poison on a hit, seconds (0 = none). */
+		public int poisonSeconds = 3;
+
+		Spitter() {
+			super(16, 2, 0.24, 0, 3, 3);
+		}
+	}
+
+	/** The shielded mob: a slab of scrap in front blocks most damage, so the party has to get round it. */
+	public static class Bulwark extends Stats {
+		/** Full width of the shielded front arc, degrees. */
+		public double frontArcDegrees = 120;
+		/** Share of damage that gets through the shield from the front. */
+		public double frontDamageFactor = 0.15;
+		/** How fast it can turn its shield toward the target, degrees per tick (slow, so flanking works). */
+		public float turnDegreesPerTick = 6;
+		/** Shield bash: windup, reach, knockback, cooldown. */
+		public int bashWindupTicks = 18;
+		public double bashRange = 3;
+		public double bashKnockback = 1.4;
+		public int bashCooldownTicks = 60;
+
+		Bulwark() {
+			super(40, 6, 0.19, 4, 4, 2);
+		}
+	}
+
+	public static class RosterEntry {
+		public int minFloor = 1;
+		/** Floor tags the floor must carry (all of them), e.g. a template pool tag. */
+		public List<String> tags = new ArrayList<>();
+
+		RosterEntry() {
+		}
+
+		RosterEntry(int minFloor) {
+			this.minFloor = minFloor;
+		}
+	}
+
+	/** Elite affixes (PLAN2 §3h). Rolled for elites; Classic only with {@link #affixesInClassic}. */
+	public static class AffixConfig {
+		/** No affixes before this floor (the first floor stays plain). */
+		public int minFloor = 2;
+		/** Chance an elite gets an affix on a floor at or past {@link #minFloor}. */
+		public double chance = 0.5;
+		/** Chance on floors with the {@code elite_affixes} escalation tag. */
+		public double escalatedChance = 1.0;
+		/** Chance in Classic, when {@code affixesInClassic} is on. */
+		public double classicChance = 0.35;
+		/** Relative weight of each affix (by name); 0 or missing = never rolled. */
+		public Map<String, Integer> weights = new LinkedHashMap<>(Map.of("burning", 1, "frosted", 1, "volatile", 1, "magnetic", 1));
+		/** Affixed mobs show their name ("Burning Brute") above them. */
+		public boolean showName = true;
+		/** Extra max health for an affixed mob (multiplier, 1 = none). */
+		public double healthMultiplier = 1.25;
+
+		public Burning burning = new Burning();
+		public Frosted frosted = new Frosted();
+		public Volatile volatileAffix = new Volatile();
+		public Magnetic magnetic = new Magnetic();
+
+		public static class Burning {
+			/** Leaves a burning spot where it walks (flames only, no fire blocks), every this many ticks. */
+			public int trailEveryTicks = 6;
+			/** Ticks a trail spot keeps burning; anyone standing in it catches fire. */
+			public int trailLifeTicks = 60;
+			/** Seconds a hit sets its target on fire. */
+			public int igniteSeconds = 4;
+		}
+
+		public static class Frosted {
+			/** Slowness on a hit: seconds and amplifier (0 = Slowness I). */
+			public int slowSeconds = 3;
+			public int slowAmplifier = 1;
+			/** Share of projectile damage it takes. */
+			public double projectileDamageFactor = 0.6;
+			/** Damage types that count as projectiles besides {@code #minecraft:is_projectile} (hitscan bullets). */
+			public List<String> projectileDamageTypes = new ArrayList<>(List.of("blocksouls_guns:bullet"));
+		}
+
+		public static class Volatile {
+			/** The fuse after death: a swelling ring warns, then it blows. */
+			public int fuseTicks = 20;
+			public double radius = 3.5;
+			/** Damage at the centre; falls off linearly to half at the edge. */
+			public double damage = 10;
+			public double knockback = 0.8;
+		}
+
+		public static class Magnetic {
+			public double radius = 6;
+			/** Pull per tick on dropped items toward it (blocks/tick at the edge). */
+			public double itemPull = 0.06;
+			/** Sideways push per tick on players' projectiles flying past (arrows, thrown things). */
+			public double projectileDeflect = 0.05;
+		}
+	}
+
+	/** Flanking (see {@code FlankGoal}): Director flankers and these types circle to the side the party isn't facing. */
+	public static class Flanking {
+		public boolean enabled = true;
+		/** Mob ids that always flank, Director or not. */
+		public List<String> alwaysFlank = new ArrayList<>(List.of("blocksouls_mobs:crawler"));
+		/** Circles at this distance from the target until it's behind them. */
+		public double orbitRadius = 5;
+		/** "Behind" = at least this many degrees from where the target faces. */
+		public double behindDegrees = 110;
+		/** Gives up flanking and goes straight in after this long. */
+		public int giveUpTicks = 160;
+		/** Only flanks targets further than this (closer, it just attacks). */
+		public double minDistance = 3;
+		public double speed = 1.15;
+	}
+
+	/**
+	 * Utility scoring for the Brute, Mutant Brute and Screamer's attacks (see {@code AttackPicker}). Each ready attack
+	 * scores from these weights; the best score above {@link #threshold} is used.
+	 */
+	public static class AttackPicking {
+		public double threshold = 0.35;
+		/** How much being in the attack's ideal range counts. */
+		public double distanceWeight = 1.0;
+		/** How much the target being in front counts (vs. needing to turn). */
+		public double angleWeight = 0.4;
+		/** Bonus for punishing a target that just dodge-rolled (within {@link #rollWindowTicks}). */
+		public double justRolledBonus = 0.5;
+		public int rollWindowTicks = 20;
+		/** Bonus for ranged attacks / penalty for ground attacks when the target is in the air. */
+		public double airborneWeight = 0.4;
+		/** Score taken off an attack used last time (keeps the moveset varied). */
+		public double repeatPenalty = 0.3;
+		/** Screamer: score per wave mob within its scream radius, capped at 1. */
+		public double screamPerAlly = 0.25;
 	}
 }

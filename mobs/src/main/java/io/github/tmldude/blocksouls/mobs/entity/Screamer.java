@@ -21,6 +21,8 @@ import net.minecraft.world.phys.Vec3;
 import io.github.tmldude.blocksouls.common.CommonTags;
 import io.github.tmldude.blocksouls.mobs.BlockSoulsMobs;
 import io.github.tmldude.blocksouls.mobs.MobsConfig;
+import io.github.tmldude.blocksouls.mobs.ai.AttackChooser;
+import io.github.tmldude.blocksouls.mobs.logic.AttackPicker;
 import io.github.tmldude.blocksouls.mobs.registry.MobSounds;
 
 /**
@@ -32,6 +34,10 @@ public class Screamer extends WaveMob {
 	public static final int SCREAM_TICKS = 20;
 
 	private int nextScream;
+	/** The scream scores higher the more wave mobs would hear it. */
+	private final AttackChooser attacks = new AttackChooser(this);
+	private final int screamAttack = attacks.add(() -> new AttackPicker.Attack(0, config().screamRadius, true, false, false, allyBonus()),
+			() -> tickCount >= nextScream);
 
 	public Screamer(EntityType<? extends Screamer> type, Level level) {
 		super(type, level);
@@ -68,7 +74,16 @@ public class Screamer extends WaveMob {
 			heard++;
 		}
 		nextScream = tickCount + config.cooldownSeconds * 20;
+		attacks.used(screamAttack);
 		return heard;
+	}
+
+	/** {@code screamPerAlly} per wave mob in earshot, capped at 1. */
+	private double allyBonus() {
+		double r = config().screamRadius;
+		int allies = level().getEntitiesOfClass(Mob.class, getBoundingBox().inflate(r),
+				m -> m != this && m.isAlive() && m.is(CommonTags.WAVE_MOBS) && m.distanceToSqr(this) <= r * r).size();
+		return Math.min(1, allies * BlockSoulsMobs.CONFIG.attackPicking.screamPerAlly);
 	}
 
 	@Override
@@ -107,7 +122,7 @@ public class Screamer extends WaveMob {
 		@Override
 		public boolean canUse() {
 			return tickCount >= nextScream && getTarget() instanceof Player player && getSensing().hasLineOfSight(player)
-					&& distanceToSqr(player) < config().screamRadius * config().screamRadius;
+					&& distanceToSqr(player) < config().screamRadius * config().screamRadius && attacks.chosen(screamAttack);
 		}
 
 		@Override

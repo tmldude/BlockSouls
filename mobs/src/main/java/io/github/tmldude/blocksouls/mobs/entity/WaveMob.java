@@ -20,6 +20,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import io.github.tmldude.blocksouls.common.mob.WaveContext;
 import io.github.tmldude.blocksouls.mobs.MobsConfig;
 import io.github.tmldude.blocksouls.mobs.ai.BreakBlocksGoal;
+import io.github.tmldude.blocksouls.mobs.ai.FlankGoal;
 
 /**
  * Base of every wave mob: wave number and block-breaker flag (from {@link WaveContext}), and a synced "action"
@@ -53,6 +54,7 @@ public abstract class WaveMob extends HostileMob {
 	protected void registerGoals() {
 		goalSelector.addGoal(0, new FloatGoal(this));
 		goalSelector.addGoal(1, new BreakBlocksGoal(this));
+		goalSelector.addGoal(2, new FlankGoal(this));
 		registerAttackGoals();
 		goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 0.8));
 		goalSelector.addGoal(8, new LookAtPlayerGoal(this, Player.class, 8));

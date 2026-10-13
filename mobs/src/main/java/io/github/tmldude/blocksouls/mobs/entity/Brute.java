@@ -14,7 +14,9 @@ import net.minecraft.world.level.Level;
 
 import io.github.tmldude.blocksouls.mobs.BlockSoulsMobs;
 import io.github.tmldude.blocksouls.mobs.MobsConfig;
+import io.github.tmldude.blocksouls.mobs.ai.AttackChooser;
 import io.github.tmldude.blocksouls.mobs.ai.Shockwave;
+import io.github.tmldude.blocksouls.mobs.logic.AttackPicker;
 import io.github.tmldude.blocksouls.mobs.registry.MobSounds;
 
 /** Huge and slow. Ground slam: a one-second windup, then a shockwave that knocks everyone back. Always breaks blocks. */
@@ -22,6 +24,9 @@ public class Brute extends WaveMob {
 	public static final byte ACTION_SLAM = 1;
 
 	private int nextSlam;
+	private final AttackChooser attacks = new AttackChooser(this);
+	private final int slam = attacks.add(() -> new AttackPicker.Attack(0, config().slamRange, false, true, true, 0),
+			() -> tickCount >= nextSlam && onGround());
 
 	public Brute(EntityType<? extends Brute> type, Level level) {
 		super(type, level);
@@ -81,7 +86,7 @@ public class Brute extends WaveMob {
 		public boolean canUse() {
 			LivingEntity target = getTarget();
 			double range = config().slamRange;
-			return target != null && tickCount >= nextSlam && onGround() && distanceToSqr(target) < range * range;
+			return target != null && tickCount >= nextSlam && onGround() && distanceToSqr(target) < range * range && attacks.chosen(slam);
 		}
 
 		@Override
@@ -118,6 +123,7 @@ public class Brute extends WaveMob {
 				Shockwave.hit(level, Brute.this, position(), config().slamRadius, getAttributeValue(Attributes.ATTACK_DAMAGE), config().slamKnockback);
 			}
 			nextSlam = tickCount + config().slamCooldownTicks;
+			attacks.used(slam);
 			clearAction();
 		}
 

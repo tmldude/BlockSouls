@@ -24,10 +24,15 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
 import io.github.tmldude.blocksouls.common.CommonIds;
 import io.github.tmldude.blocksouls.common.Config;
+import io.github.tmldude.blocksouls.common.act.Acts;
 import io.github.tmldude.blocksouls.common.event.CombatEvents;
 import io.github.tmldude.blocksouls.common.event.ConfigEvents;
 import io.github.tmldude.blocksouls.common.event.PlayerRunEvents;
 import io.github.tmldude.blocksouls.common.event.RunEvents;
+import io.github.tmldude.blocksouls.common.floor.Floors;
+import io.github.tmldude.blocksouls.common.floor.PlacedFloor;
+import io.github.tmldude.blocksouls.common.mob.Affixes;
+import io.github.tmldude.blocksouls.common.mob.WaveMobs;
 import io.github.tmldude.blocksouls.common.party.PartyScaling;
 import io.github.tmldude.blocksouls.common.run.RunPhase;
 import io.github.tmldude.blocksouls.game.BlockSoulsGame;
@@ -479,12 +484,30 @@ public final class Director {
 			if (pos == null) {
 				continue;
 			}
-			Mob mob = DirectorHooks.spawnHunter(server, level, pos, preferredFor(random), random.nextDouble() < eliteChance, random);
+			boolean elite = random.nextDouble() < eliteChance;
+			Mob mob = DirectorHooks.spawnHunter(server, level, pos, preferredFor(random), elite, random);
 			if (mob != null) {
+				affixAndRole(server, level, mob, elite, random);
 				spawned.add(mob);
 			}
 		}
 		return spawned.size();
+	}
+
+	/**
+	 * v2 mobs hook: a Director elite rolls an affix for its floor (unless its factory already gave it one), and in a
+	 * flanking composition every hunter is tagged to circle to the party's blind side.
+	 */
+	private static void affixAndRole(MinecraftServer server, ServerLevel level, Mob mob, boolean elite, RandomSource random) {
+		if (elite && Affixes.of(mob).isEmpty()) {
+			PlacedFloor floor = Floors.at(server, level.dimension().identifier(), mob.blockPosition()).orElse(null);
+			// Floor 0 = Classic (affixes only with mobs.json affixesInClassic).
+			int number = floor != null ? floor.floorNumber() : Acts.all(server).size() <= 1 ? 0 : Math.max(1, Acts.current(server).ordinal());
+			Affixes.roll(random, number, floor != null ? floor.tags() : java.util.Set.of()).ifPresent(affix -> Affixes.apply(mob, affix));
+		}
+		if (composition == Composition.FLANKERS) {
+			mob.addTag(WaveMobs.FLANKER_TAG);
+		}
 	}
 
 	private static @Nullable Identifier preferredFor(RandomSource random) {
