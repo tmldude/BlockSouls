@@ -11,6 +11,9 @@ import io.github.tmldude.blocksouls.movement.MovementConfig;
 public final class JumpController {
 	private final MovementConfig.Jump config;
 
+	/** The {@code MULTI_JUMP} verb: false turns the triple-jump chain off (the hold-jump feel stays). */
+	private boolean multiJump = true;
+
 	private boolean wasOnGround;
 	private boolean wasJumpDown;
 	private int ticksInAir;
@@ -114,6 +117,11 @@ public final class JumpController {
 		return new Result(vy, jump, airPress);
 	}
 
+	/** Whether chain jumps are allowed (the {@code MULTI_JUMP} capability). Default true: v1 behavior. */
+	public void setMultiJump(boolean allowed) {
+		multiJump = allowed;
+	}
+
 	/** Forgets a buffered press, e.g. one that was spent on an air jump. */
 	public void cancelBuffer() {
 		bufferTicksLeft = 0;
@@ -126,7 +134,7 @@ public final class JumpController {
 
 	/** Records a jump launch and returns the multiplier for its upward velocity. */
 	public double onJump() {
-		boolean chained = config.tripleJump && landedFromJump && chainStep < 2 && ticksOnGround <= config.tripleJumpWindowTicks;
+		boolean chained = config.tripleJump && multiJump && landedFromJump && chainStep < 2 && ticksOnGround <= config.tripleJumpWindowTicks;
 		chainStep = chained ? chainStep + 1 : 0;
 
 		jumpedSinceGrounded = true;

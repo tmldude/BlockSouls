@@ -1,0 +1,15 @@
+{
+  "class": "blocksouls_game:warden",
+  "cost": 40,
+  "requires": [
+    "blocksouls_game:warden_thick_plate"
+  ],
+  "effects": [
+    {
+      "type": "attribute",
+      "attribute": "minecraft:attack_damage",
+      "amount": 1,
+      "operation": "add_value"
+    }
+  ]
+}

@@ -23,16 +23,28 @@ public record StaminaState(float value, int regenDelay) {
 
 	/** @param regenMultiplier scales the regen rate (the {@code STAMINA_REGEN} trait) */
 	public StaminaState tick(MovementConfig.Stamina config, double regenMultiplier) {
+		return tick(config, regenMultiplier, config.max);
+	}
+
+	/** @param max this player's max ({@code STAMINA_MAX_PENALTY}); stamina above it is clamped down at once */
+	public StaminaState tick(MovementConfig.Stamina config, double regenMultiplier, double max) {
+		if (value > max) {
+			return new StaminaState((float) max, regenDelay);
+		}
 		if (regenDelay > 0) {
 			return new StaminaState(value, regenDelay - 1);
 		}
-		if (value >= config.max) {
-			return value == config.max ? this : new StaminaState((float) config.max, 0);
+		if (value >= max) {
+			return value == max ? this : new StaminaState((float) max, 0);
 		}
-		return new StaminaState((float) Math.min(config.max, value + config.regenPerSecond * regenMultiplier / 20.0), 0);
+		return new StaminaState((float) Math.min(max, value + config.regenPerSecond * regenMultiplier / 20.0), 0);
 	}
 
 	public float fraction(MovementConfig.Stamina config) {
-		return (float) (value / config.max);
+		return fraction(config.max);
+	}
+
+	public float fraction(double max) {
+		return (float) Math.min(1.0, value / max);
 	}
 }

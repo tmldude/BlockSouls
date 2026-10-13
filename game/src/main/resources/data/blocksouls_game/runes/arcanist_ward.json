@@ -1,0 +1,15 @@
+{
+  "class": "blocksouls_game:arcanist",
+  "cost": 40,
+  "requires": [
+    "blocksouls_game:arcanist_clear_mind"
+  ],
+  "effects": [
+    {
+      "type": "attribute",
+      "attribute": "minecraft:armor",
+      "amount": 2,
+      "operation": "add_value"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "class": "blocksouls_game:arcanist",
+  "cost": 40,
+  "requires": [
+    "blocksouls_game:arcanist_deep_lungs"
+  ],
+  "effects": [
+    {
+      "type": "trait",
+      "trait": "blocksouls:double_jump",
+      "level": 1
+    }
+  ]
+}

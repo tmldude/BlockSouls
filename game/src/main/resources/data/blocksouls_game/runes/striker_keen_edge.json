@@ -1,0 +1,13 @@
+{
+  "class": "blocksouls_game:striker",
+  "cost": 20,
+  "requires": [],
+  "effects": [
+    {
+      "type": "attribute",
+      "attribute": "minecraft:attack_damage",
+      "amount": 1,
+      "operation": "add_value"
+    }
+  ]
+}

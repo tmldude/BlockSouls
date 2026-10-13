@@ -1,0 +1,13 @@
+{
+  "class": "blocksouls_game:ranger",
+  "cost": 20,
+  "requires": [],
+  "effects": [
+    {
+      "type": "attribute",
+      "attribute": "minecraft:movement_speed",
+      "amount": 0.05,
+      "operation": "add_multiplied_total"
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import io.github.tmldude.blocksouls.common.player.PlayerStatus;
+import io.github.tmldude.blocksouls.movement.trait.MovementTraits;
 
 /** World queries for wall climbing, shared by the client (prediction) and server (stamina). */
 public final class ClimbWorld {
@@ -38,8 +39,10 @@ public final class ClimbWorld {
 		return player.level().noCollision(player, standing);
 	}
 
+	/** Climbing needs the {@code CLIMB} verb (origins); the rest is the usual "not already moving some other way". */
 	public static boolean isEligible(Player player) {
-		return !player.getAbilities().flying
+		return MovementTraits.canClimb(player)
+				&& !player.getAbilities().flying
 				&& !player.isFallFlying()
 				&& !player.isInLiquid()
 				&& !player.onClimbable()

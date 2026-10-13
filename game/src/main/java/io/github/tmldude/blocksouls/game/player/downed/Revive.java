@@ -18,6 +18,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import io.github.tmldude.blocksouls.common.Networking;
 import io.github.tmldude.blocksouls.common.player.PlayerStatus;
 import io.github.tmldude.blocksouls.game.player.PlayersConfig;
+import io.github.tmldude.blocksouls.game.player.classes.PlayerClasses;
 
 /**
  * Reviving: a teammate holds use on a downed player. The client says when it starts and stops; the server
@@ -121,12 +122,12 @@ public final class Revive {
 			}
 
 			int ticks = entry.getValue().ticks() + 1;
-			if (ticks >= config.reviveTicks) {
+			if (ticks >= ticksNeeded(reviver)) {
 				it.remove();
 				finished.put(target, reviver);
 			} else {
 				entry.setValue(new Attempt(target.getUUID(), ticks));
-				send(reviver, target, (float) ticks / config.reviveTicks);
+				send(reviver, target, (float) ticks / ticksNeeded(reviver));
 			}
 		}
 
@@ -135,6 +136,12 @@ public final class Revive {
 			sendEnded(reviver, target);
 			Downed.revive(target, reviver);
 		});
+	}
+
+	/** Ticks a reviver must hold: the config time, divided by their class's revive speed (Warden: 2×). */
+	public static int ticksNeeded(ServerPlayer reviver) {
+		double speed = Math.max(0.01, PlayerClasses.rules(reviver).reviveSpeed());
+		return Math.max(1, (int) Math.ceil(config.reviveTicks / speed));
 	}
 
 	/** Ticks of progress {@code reviver} has made, or -1 if they aren't reviving anyone. */

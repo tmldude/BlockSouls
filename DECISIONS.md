@@ -414,3 +414,9 @@ session's decisions file. Slower per session; the orchestrator keeps the paralle
   move to the new one and hand-tuned values are kept (`RunConfig.migrate`). Use this pattern whenever a default
   changes after release.
 - Drop guarantees, a cheaper first gun and resource density follow in v0.11 (`drops-and-pacing`, `resources`).
+
+## v0.11.0 (2026-10-13, orchestrators)
+
+- v0.11.0 ships the abilities kit and synergy builds live under runShape classic (owner priority: guns, abilities, boons).
+- It also ships exotic guns and the gun feel pass (#54), and the four classes with rune trees, glide and Last Stand (#55).
+  Players without a class keep every v1 movement verb, so classic play is unchanged until someone picks a class.

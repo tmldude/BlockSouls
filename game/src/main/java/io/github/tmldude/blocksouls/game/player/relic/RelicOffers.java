@@ -25,6 +25,8 @@ import io.github.tmldude.blocksouls.common.player.PlayerStatus;
 import io.github.tmldude.blocksouls.common.run.Runs;
 import io.github.tmldude.blocksouls.common.synergy.SynergyTags;
 import io.github.tmldude.blocksouls.game.player.PlayersConfig;
+import io.github.tmldude.blocksouls.game.player.classes.ClassRules;
+import io.github.tmldude.blocksouls.game.player.classes.PlayerClasses;
 import io.github.tmldude.blocksouls.game.player.boon.Boon;
 import io.github.tmldude.blocksouls.game.player.boon.BoonCatalog;
 import io.github.tmldude.blocksouls.game.player.boon.BoonPayloads;
@@ -113,7 +115,7 @@ public final class RelicOffers {
 	}
 
 	public static CardRoller.Offer roll(ServerPlayer player, BoonTier tier) {
-		return CardRoller.roll(BoonCatalog.all(), PlayerBoons.ownedById(player), ownedTags(player), tier, settings(),
+		return CardRoller.roll(BoonCatalog.all(), PlayerBoons.ownedById(player), ownedTags(player), tier, settings(player),
 				!PlayerBoons.upgradable(player).isEmpty(), RANDOM);
 	}
 
@@ -129,8 +131,12 @@ public final class RelicOffers {
 		return new OfferRules.Weighting(offers.tagWeightPerStack, offers.tagWeightMax, offers.keystoneMinTagStacks, offers.oneKeystonePerTrigger);
 	}
 
-	private static CardRoller.Settings settings() {
-		return new CardRoller.Settings(config.cardsPerRelic, config.wildcardChance, config.combosAnyTier, build.offers.upgradeCardChance, weighting());
+	/** The relic shape, with the player's class tweaks (the Arcanist's 4 cards with a Wildcard always last). */
+	private static CardRoller.Settings settings(ServerPlayer player) {
+		ClassRules rules = PlayerClasses.rules(player);
+		int cards = Math.max(config.cardsPerRelic, rules.relicCards());
+		double wildcard = rules.relicAlwaysWildcard() ? 1.0 : config.wildcardChance;
+		return new CardRoller.Settings(cards, wildcard, config.combosAnyTier, build.offers.upgradeCardChance, weighting());
 	}
 
 	/** Souls paid for declining a relic of this tier, with the player's bonuses. */

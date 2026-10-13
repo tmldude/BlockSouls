@@ -1,0 +1,13 @@
+{
+  "class": "blocksouls_game:arcanist",
+  "cost": 40,
+  "requires": [
+    "blocksouls_game:arcanist_clear_mind"
+  ],
+  "effects": [
+    {
+      "type": "effect",
+      "effect": "minecraft:night_vision"
+    }
+  ]
+}

@@ -81,6 +81,22 @@ public class FullPackClientTest implements FabricClientGameTest {
 			context.waitTicks(10);
 			context.takeScreenshot("04c-build-line-and-trinkets");
 
+			// v2 players: the class select screen, a class's rune tree (two runes bought), and the run summary cards.
+			server.runCommand("bs class select @p");
+			context.waitTicks(10);
+			context.takeScreenshot("04d-class-select");
+			server.runCommand("bs class set @p blocksouls_game:ranger");
+			server.runCommand("bs rune souls @p 200");
+			server.runCommand("bs rune unlock @p blocksouls_game:ranger_fleet");
+			server.runCommand("bs rune unlock @p blocksouls_game:ranger_wings");
+			server.runCommand("bs rune tree @p");
+			context.waitTicks(10);
+			context.takeScreenshot("04e-rune-tree");
+			server.runCommand("execute as @p run bs summary show");
+			context.waitTicks(10);
+			context.takeScreenshot("04f-run-summary");
+			context.setScreen(() -> null);
+
 			// A wave in progress (mobs come from 24-40 blocks out).
 			server.runCommand("kill @e[type=blocksouls_mobs:shambler,nbt={NoAI:1b}]");
 			context.waitTicks(200);

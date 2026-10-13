@@ -1,0 +1,26 @@
+{
+  "icon": "blocksouls_game:class/warden",
+  "signature_capabilities": [],
+  "kit": [
+    {"item": "blocksouls_world:scrap_plate_helmet"},
+    {"item": "blocksouls_world:scrap_plate_chestplate"},
+    {"item": "blocksouls_world:scrap_plate_leggings"},
+    {"item": "blocksouls_world:scrap_plate_boots"}
+  ],
+  "passives": [
+    {"type": "attribute", "attribute": "minecraft:max_health", "amount": 4, "operation": "add_value"},
+    {"type": "attribute", "attribute": "minecraft:knockback_resistance", "amount": 1.0, "operation": "add_value"}
+  ],
+  "drawbacks": [
+    {"type": "attribute", "attribute": "minecraft:movement_speed", "amount": -0.15, "operation": "add_multiplied_total"}
+  ],
+  "rules": {
+    "revive_speed": 2.0,
+    "slam_min_fall": 4,
+    "slam_radius": 3,
+    "slam_knockback": 1.2,
+    "slam_damage": 4
+  },
+  "signature_ability": "blocksouls_abilities:taunt_slam",
+  "synergy_tags": {"kinetic": 2, "explosion": 1}
+}

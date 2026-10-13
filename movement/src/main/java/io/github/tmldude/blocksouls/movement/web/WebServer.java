@@ -122,8 +122,10 @@ public final class WebServer {
 		}
 	}
 
-	private static boolean canSwing(ServerPlayer player) {
-		return player.isAlive() && !player.isSpectator() && !player.isPassenger() && !PlayerStatus.isDowned(player);
+	/** Whether this player may start or keep a swing: alive, not riding or downed, and holding the {@code SWING} verb. */
+	public static boolean canSwing(ServerPlayer player) {
+		return player.isAlive() && !player.isSpectator() && !player.isPassenger() && !PlayerStatus.isDowned(player)
+				&& MovementTraits.canSwing(player);
 	}
 
 	/** In reach (with some tolerance for latency), in line of sight, and on a solid block. */
