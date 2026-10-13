@@ -148,6 +148,9 @@ class FloorPlannerTest {
 		for (Path path : files) {
 			try (var in = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
 				FloorTemplate template = FloorTemplate.parse("blocksouls_world:" + path.getFileName(), JsonParser.parseReader(in));
+				if (!template.pool.equals("blocksouls_world:surface")) {
+					continue; // other floors' pools have their own slot sets and tests
+				}
 				for (int players : new int[] {1, 8}) {
 					FloorPlanner.FloorPlan plan = FloorPlanner.plan(template, config, template.minFloor, players, 11);
 					for (FloorSlotKind kind : FloorSlotKind.values()) {

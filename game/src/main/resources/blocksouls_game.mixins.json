@@ -6,7 +6,8 @@
 		"player.PlayerMixin",
 		"player.LivingEntityDamageMixin",
 		"player.FoodDataMixin",
-		"player.LivingEntityMixin"
+		"player.LivingEntityMixin",
+		"shop.RecipeManagerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

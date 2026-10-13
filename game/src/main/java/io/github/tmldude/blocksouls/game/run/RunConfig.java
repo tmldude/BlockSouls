@@ -258,6 +258,9 @@ public class RunConfig {
 			if (floor == 3) {
 				spec.pool = "blocksouls_world:skyrift";
 			}
+			if (floor == 4) {
+				spec.pool = "blocksouls_world:vault";
+			}
 			if (floor == 2) { // v2-floor2-infernal
 				spec.pool = "blocksouls_world:infernal";
 			}

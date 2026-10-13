@@ -50,5 +50,8 @@
   "biome.blocksouls_world.infernal": "Infernal",
   "message.blocksouls_world.floor.burned": "The lava spat you back out at camp.",
   "message.blocksouls_world.floor.portal_stray": "This portal leads nowhere.",
-  "message.blocksouls_world.floor.portal_end": "The way on isn't open yet."
+  "message.blocksouls_world.floor.portal_end": "The way on isn't open yet.",
+  "block.blocksouls_world.vault_bricks": "Vault Bricks",
+  "block.blocksouls_world.mossy_vault_bricks": "Mossy Vault Bricks",
+  "block.blocksouls_world.cracked_vault_bricks": "Cracked Vault Bricks"
 }

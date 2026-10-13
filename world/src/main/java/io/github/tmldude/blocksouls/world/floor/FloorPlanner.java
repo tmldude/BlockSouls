@@ -80,6 +80,9 @@ public final class FloorPlanner {
 	}
 
 	public static FloorPlan plan(FloorTemplate template, FloorsConfig config, int floorNumber, int players, long seed) {
+		if (template.isBox()) {
+			return BoxPlanner.plan(template, config, floorNumber, players, seed); // floor 4, The Vault
+		}
 		Random random = new Random(seed);
 		double scale = PartyScaling.floorSize(Math.max(1, players));
 		int radius = (int) Math.round(template.radius * scale);
@@ -302,7 +305,7 @@ public final class FloorPlanner {
 		return true;
 	}
 
-	private static String weighted(Map<String, Integer> weights, Random random) {
+	static String weighted(Map<String, Integer> weights, Random random) {
 		int total = weights.values().stream().mapToInt(w -> Math.max(0, w)).sum();
 		if (total <= 0) {
 			return weights.keySet().iterator().next();

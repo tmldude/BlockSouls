@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:apple",
+    "minecraft:sugar"
+  ],
+  "result": {
+    "id": "minecraft:honey_bottle",
+    "count": 1
+  }
+}

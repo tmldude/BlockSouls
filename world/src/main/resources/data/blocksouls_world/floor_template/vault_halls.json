@@ -1,0 +1,87 @@
+{
+  "pool": "blocksouls_world:vault",
+  "tags": [
+    "vault",
+    "dungeon"
+  ],
+  "minFloor": 4,
+  "maxFloor": 4,
+  "weight": 2,
+  "shape": "box",
+  "radius": 40,
+  "groundY": 60,
+  "height": 24,
+  "terrain": {
+    "top": "minecraft:deepslate_tiles",
+    "fill": "minecraft:deepslate_tiles",
+    "base": "minecraft:deepslate_tiles"
+  },
+  "trees": 0,
+  "nodes": 10,
+  "nodeMix": {
+    "blocksouls_world:gunmetal_node": 3,
+    "blocksouls_world:scrap_node": 2
+  },
+  "crates": 3,
+  "box": {
+    "rooms": 7,
+    "shortcuts": 3,
+    "deadEnds": 4,
+    "closets": 5,
+    "wallNodeShare": 0.4,
+    "corridorWidth": 3,
+    "corridorHeight": 4,
+    "roomHeight": 6,
+    "hallHeight": 9,
+    "mossyShare": 0.2,
+    "crackedShare": 0.08
+  },
+  "slots": [
+    {
+      "kind": "camp",
+      "x": 0,
+      "z": 0,
+      "radius": 6
+    },
+    {
+      "kind": "exit_portal",
+      "x": 0,
+      "z": -5,
+      "radius": 2
+    },
+    {
+      "kind": "structure",
+      "x": 26,
+      "z": -24,
+      "radius": 6
+    },
+    {
+      "kind": "mini_boss",
+      "x": -24,
+      "z": 22,
+      "radius": 8
+    },
+    {
+      "kind": "secret",
+      "x": 32,
+      "z": 32,
+      "radius": 3
+    },
+    {
+      "kind": "event",
+      "x": -26,
+      "z": -24,
+      "radius": 4
+    },
+    {
+      "kind": "node",
+      "x": 20,
+      "z": 4
+    },
+    {
+      "kind": "node",
+      "x": -10,
+      "z": 30
+    }
+  ]
+}

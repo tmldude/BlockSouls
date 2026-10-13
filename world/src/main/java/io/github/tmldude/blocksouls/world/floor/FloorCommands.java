@@ -120,7 +120,9 @@ public final class FloorCommands {
 			return 0;
 		}
 		BlockPos pos = slot.get().pos();
-		player.teleportTo(pos.getX() + 0.5, pos.getY() + (kind == FloorSlotKind.CAVE || kind == FloorSlotKind.SECRET ? 0 : 1), pos.getZ() + 0.5);
+		// caves and island secrets sit at the opening (air); the vault's secret room stands on its floor
+		boolean atOpening = (kind == FloorSlotKind.CAVE || kind == FloorSlotKind.SECRET) && level.getBlockState(pos).isAir();
+		player.teleportTo(pos.getX() + 0.5, pos.getY() + (atOpening ? 0 : 1), pos.getZ() + 0.5);
 		c.getSource().sendSuccess(() -> Component.literal(kind + " " + slot.get().tag() + " at " + pos.toShortString()), false);
 		return 1;
 	}

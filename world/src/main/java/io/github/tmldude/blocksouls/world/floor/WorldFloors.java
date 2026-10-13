@@ -92,6 +92,7 @@ public final class WorldFloors {
 		FloorBlocks.init();
 		FloorTemplateCatalog.register();
 		SkyriftFloor.init();
+		VaultHazards.init(); // floor 4, The Vault
 		InfernalHazard.init(); // v2-floor2-infernal
 		Floors.setProvider(new Floors.Provider() {
 			@Override
@@ -162,7 +163,7 @@ public final class WorldFloors {
 		BlockPos camp = slots.stream().filter(slot -> slot.kind() == FloorSlotKind.CAMP).findFirst().map(FloorSlot::pos).orElse(centre.above());
 		Identifier templateId = Identifier.tryParse(template.id);
 		PlacedFloor floor = new PlacedFloor(request.actOrdinal(), request.floorNumber(), request.pool(),
-				templateId != null ? templateId : BlockSoulsWorld.id("unknown"), level.dimension().identifier(), camp, plan.radius(), plan.groundY(),
+				templateId != null ? templateId : BlockSoulsWorld.id("unknown"), level.dimension().identifier(), camp, reach(template, plan), plan.groundY(),
 				floorSeed, plan.tags(), slots);
 		data.floors.add(floor);
 		data.setDirty();
@@ -174,6 +175,11 @@ public final class WorldFloors {
 			}
 		}
 		return Optional.of(floor);
+	}
+
+	/** The placed floor's radius: the island's, or the circle around a box's corners (floor 4, The Vault). */
+	private static int reach(FloorTemplate template, FloorPlanner.FloorPlan plan) {
+		return template.isBox() ? (int) Math.ceil((plan.radius() + 1) * Math.sqrt(2)) : plan.radius();
 	}
 
 	public static void sendToCamp(ServerPlayer player, PlacedFloor floor) {
