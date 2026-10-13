@@ -30,6 +30,15 @@ public final class BossDefinition {
 	private final double[] thresholds;
 	private final double chaseSpeed;
 	private final List<ResourceKey<LootTable>> extraLoot;
+	private final double poise;
+	private final List<PartBreak> breaks;
+
+	/**
+	 * A part that breaks off after taking {@code shareOfMaxHealth} of the boss's max health in damage: the boss loses
+	 * {@code lostAttack} (may be null) and moves {@code speedBonus} faster (0.15 = +15%).
+	 */
+	public record PartBreak(String part, double shareOfMaxHealth, @Nullable String lostAttack, double speedBonus) {
+	}
 
 	private BossDefinition(Builder builder) {
 		this.id = builder.id;
@@ -39,6 +48,8 @@ public final class BossDefinition {
 		this.phases = List.copyOf(builder.phases);
 		this.chaseSpeed = builder.chaseSpeed;
 		this.extraLoot = List.copyOf(builder.extraLoot);
+		this.poise = builder.poise;
+		this.breaks = List.copyOf(builder.breaks);
 		Map<String, Attack> byName = new LinkedHashMap<>();
 		for (BossPhase phase : phases) {
 			for (Attack attack : phase.attacks()) {
@@ -114,6 +125,25 @@ public final class BossDefinition {
 		return extraLoot;
 	}
 
+	/** Max poise for one player; negative = the framework default ({@code bosses.json posture.basePoise}). */
+	public double poise() {
+		return poise;
+	}
+
+	/** Breakable parts, in order (the index is the bit in the synced broken-parts mask). */
+	public List<PartBreak> breaks() {
+		return breaks;
+	}
+
+	public int breakIndex(String part) {
+		for (int i = 0; i < breaks.size(); i++) {
+			if (breaks.get(i).part().equals(part)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
 	public static final class Builder {
 		private final Identifier id;
 		private double baseHealth = 200;
@@ -122,6 +152,8 @@ public final class BossDefinition {
 		private final List<BossPhase> phases = new ArrayList<>();
 		private double chaseSpeed = 1.0;
 		private final List<ResourceKey<LootTable>> extraLoot = new ArrayList<>();
+		private double poise = -1;
+		private final List<PartBreak> breaks = new ArrayList<>();
 
 		private Builder(Identifier id) {
 			this.id = id;
@@ -158,6 +190,18 @@ public final class BossDefinition {
 			for (Identifier table : tables) {
 				extraLoot.add(ResourceKey.create(Registries.LOOT_TABLE, table));
 			}
+			return this;
+		}
+
+		/** Per-boss max poise for one player (overrides {@code bosses.json posture.basePoise}; 0 or less = default). */
+		public Builder poise(double poise) {
+			this.poise = poise > 0 ? poise : -1;
+			return this;
+		}
+
+		/** Makes the part named {@code part} breakable; see {@link PartBreak}. */
+		public Builder breakable(String part, double shareOfMaxHealth, @Nullable String lostAttack, double speedBonus) {
+			breaks.add(new PartBreak(part, shareOfMaxHealth, lostAttack, speedBonus));
 			return this;
 		}
 

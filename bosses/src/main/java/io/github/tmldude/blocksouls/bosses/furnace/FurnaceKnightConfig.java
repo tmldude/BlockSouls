@@ -1,6 +1,7 @@
 package io.github.tmldude.blocksouls.bosses.furnace;
 
 import io.github.tmldude.blocksouls.bosses.api.AttackStats;
+import io.github.tmldude.blocksouls.bosses.archetype.ArchetypeParams;
 import io.github.tmldude.blocksouls.bosses.field.FieldBossSettings;
 
 /** {@code config/blocksouls/boss-furnace_knight.json}. Ticks are 1/20 s; damage is at normal difficulty, phase 1. */
@@ -47,6 +48,18 @@ public class FurnaceKnightConfig {
 	/** Extra pillars land within this distance of a player. */
 	public double pillarScatter = 5;
 	public int pillarFireTicks = 60;
+
+	/** Extra recovery when the charge slams into terrain: the knight is stuck for 2 s. */
+	public int chargeStuckTicks = 40;
+
+	/** v2 archetypes. Shockwave: two fire rings roll out from a stomp; jump them. */
+	public ArchetypeParams.Ring ring = new ArchetypeParams.Ring(new AttackStats(20, 60, 20, 140, 0, 8, 2, 9)).rings(2, 14).reach(13, 0.45);
+	/** Slag pools (phase 2): molten pools under each player; damage per half-second of contact. */
+	public ArchetypeParams.Pools pools = new ArchetypeParams.Pools(new AttackStats(24, 100, 12, 220, 0, 20, 2, 3)).pools(4, 2.0);
+	/** Leap: jumps onto a player; the shadow shows where. */
+	public ArchetypeParams.Leap leap = new ArchetypeParams.Leap(new AttackStats(30, 3, 26, 180, 6, 16, 1.5, 13)).leap(14, 3.5);
+	/** Feint (phase 2): starts the overhead slam, then sweeps instead. */
+	public ArchetypeParams.Feint feint = new ArchetypeParams.Feint(new AttackStats(10, 1, 0, 260, 0, 4.5, 1.5, 0));
 
 	/** Phase 2 starts below this share of health: the blade ignites. */
 	public double phase2Threshold = 0.5;

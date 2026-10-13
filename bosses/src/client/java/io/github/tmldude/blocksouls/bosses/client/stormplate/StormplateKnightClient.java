@@ -28,7 +28,10 @@ public final class StormplateKnightClient {
 		EntityRendererRegistry.register(StormplateKnights.TYPE, ctx ->
 				new BossRenderer<>(ctx, new StormplateKnightModel(ctx.bakeLayer(LAYER)), 1.3f, "stormplate_knight", 1.15f)
 						.glow("stormplate_knight_glow", state -> true)
-						.glow("stormplate_knight_storm_glow", state -> state.phase >= 1));
+						.glow("stormplate_knight_storm_glow", state -> state.phase >= 1)
+						.damageStates()
+						.brokenPart(0, "pauldron")
+						.cracks(2));
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
 			if (DragonscaleArmor.isPiece(stack)) {
 				lines.add(Component.translatable("tooltip.blocksouls_bosses.dragonscale_set").withStyle(ChatFormatting.GRAY));

@@ -11,7 +11,9 @@ public enum Stage {
 	/** Punish window. */
 	RECOVERY,
 	/** Phase-change roar; the boss can't be hurt. */
-	STAGGER;
+	STAGGER,
+	/** Posture broken: the visceral window. The boss is down and takes extra damage. */
+	BROKEN;
 
 	private static final Stage[] VALUES = values();
 

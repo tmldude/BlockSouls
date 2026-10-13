@@ -25,6 +25,9 @@ public class BlockSoulsBossesClient implements ClientModInitializer {
 		LockOn.init();
 		HudElementRegistry.attachElementAfter(VanillaHudElements.BOSS_BAR, CommonIds.id(BlockSoulsBosses.MOD_ID, "boss_bar"), BossBarHud::extract);
 		HudElementRegistry.addLast(CommonIds.id(BlockSoulsBosses.MOD_ID, "lock_on"), LockOnReticle::extract);
+		io.github.tmldude.blocksouls.bosses.client.splash.BossSplashHud.init();
+		HudElementRegistry.addLast(CommonIds.id(BlockSoulsBosses.MOD_ID, "boss_splash"),
+				io.github.tmldude.blocksouls.bosses.client.splash.BossSplashHud::extract);
 
 		// Weak-point parts must be pickable by the crosshair on the client too.
 		ClientEntityEvents.ENTITY_LOAD.register((entity, level) -> {

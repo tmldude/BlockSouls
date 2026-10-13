@@ -201,6 +201,7 @@ public final class FieldBosses {
 		}
 		boss.makeFieldBoss(rule.settings().leaveAfterTicks);
 		boss.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), EntitySpawnReason.EVENT, null);
+		io.github.tmldude.blocksouls.bosses.api.BossAffixes.rollFor(boss);
 		if (!level.addFreshEntity(boss)) {
 			return null;
 		}

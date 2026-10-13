@@ -1,6 +1,7 @@
 package io.github.tmldude.blocksouls.bosses.ashwyrm;
 
 import io.github.tmldude.blocksouls.bosses.api.AttackStats;
+import io.github.tmldude.blocksouls.bosses.archetype.ArchetypeParams;
 import io.github.tmldude.blocksouls.bosses.field.FieldBossSettings;
 
 /** {@code config/blocksouls/boss-ashwyrm.json}. Ticks are 1/20 s; damage is at normal difficulty, phase 1. */
@@ -86,6 +87,16 @@ public class AshwyrmConfig {
 	public int meteorFireTicks = 60;
 
 	// --- Phases ---
+
+	/** v2 archetypes. Burrow (grounded): dives, a dirt plume tracks its target, then it erupts under the plume. */
+	public ArchetypeParams.Burrow burrow = new ArchetypeParams.Burrow(new AttackStats(60, 4, 30, 280, 8, 26, 1.5, 12));
+	/** Fire spiral (flight): bolts stream along rotating arms on the floor below. */
+	public ArchetypeParams.Spiral spiral = new ArchetypeParams.Spiral(new AttackStats(24, 90, 20, 240, 0, 64, 2, 5)).arms(3, 3);
+	/** Magma pools (phase 3): spat under each player; damage per half-second of contact. */
+	public ArchetypeParams.Pools pools = new ArchetypeParams.Pools(new AttackStats(22, 120, 14, 220, 0, 20, 2, 3)).pools(5, 2.2);
+	/** Tail: breaks after this share of max health dealt to it; the tail sweep is lost, the wyrm speeds up. */
+	public double tailBreakShare = 0.08;
+	public double tailSpeedBonus = 0.1;
 
 	public double phase2Threshold = 0.6;
 	public double phase3Threshold = 0.25;

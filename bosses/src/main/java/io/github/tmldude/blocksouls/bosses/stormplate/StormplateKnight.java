@@ -29,6 +29,11 @@ import net.minecraft.world.phys.Vec3;
 import io.github.tmldude.blocksouls.bosses.api.BossDefinition;
 import io.github.tmldude.blocksouls.bosses.api.BossEntity;
 import io.github.tmldude.blocksouls.bosses.api.BossPhase;
+import io.github.tmldude.blocksouls.bosses.archetype.ChargeStick;
+import io.github.tmldude.blocksouls.bosses.archetype.Feint;
+import io.github.tmldude.blocksouls.bosses.archetype.LineCross;
+import io.github.tmldude.blocksouls.bosses.archetype.RotatingBeam;
+import io.github.tmldude.blocksouls.bosses.archetype.SummonShield;
 import io.github.tmldude.blocksouls.common.CommonIds;
 
 /**
@@ -49,6 +54,8 @@ public class StormplateKnight extends BossEntity {
 
 	public StormplateKnight(EntityType<? extends StormplateKnight> type, Level level) {
 		super(type, level);
+		// The left pauldron (breakable, plain damage): breaking it costs the knight its spear throw.
+		addPart("pauldron", 1.1f, 0.8f, 1.0, new Vec3(0.8, 3.25, 0));
 	}
 
 	public static StormplateConfig config() {
@@ -63,15 +70,21 @@ public class StormplateKnight extends BossEntity {
 		StormplateAttacks.ThunderCall thunder = new StormplateAttacks.ThunderCall();
 		StormplateAttacks.SpearThrow spearThrow = new StormplateAttacks.SpearThrow();
 		StormplateAttacks.Leap leap = new StormplateAttacks.Leap();
+		LineCross cross = new LineCross("cross", c.cross, StormplateAttacks.THEME, "thunder");
+		RotatingBeam beam = new RotatingBeam("beam", c.beam, StormplateAttacks.THEME, "sweep");
+		ChargeStick charge = new ChargeStick("charge", c.charge, StormplateAttacks.THEME, "thrust");
+		SummonShield summon = new SummonShield("summon", c.summon, StormplateAttacks.THEME, "thunder");
+		Feint feint = new Feint("feint", c.feint, thrust, spearThrow);
 		definition = BossDefinition.builder(CommonIds.STORMPLATE_KNIGHT)
 				.health(c.health)
 				.arenaRadius(c.arenaRadius)
 				.music(StormplateSounds.MUSIC)
 				// A legendary gun, only when the guns module is installed.
 				.extraLoot(CommonIds.id(CommonIds.BOSSES, "boss_drops/legendary_gun"))
-				.phase(BossPhase.first().attacks(thrust, sweep, thunder, spearThrow))
+				.breakable("pauldron", c.pauldronBreakShare, "throw", c.pauldronSpeedBonus)
+				.phase(BossPhase.first().attacks(thrust, sweep, thunder, spearThrow, cross, charge))
 				.phase(BossPhase.below(c.phase2Threshold)
-						.attacks(thrust, sweep, thunder, spearThrow, leap)
+						.attacks(thrust, sweep, thunder, spearThrow, leap, cross, beam, charge, summon, feint)
 						.damage(c.phase2Damage)
 						.recovery(c.phase2Recovery)
 						.cooldowns(c.phase2Cooldowns)
@@ -87,6 +100,12 @@ public class StormplateKnight extends BossEntity {
 	@Override
 	public BossDefinition definition() {
 		return definition;
+	}
+
+	/** Sidesteps a held aim (v2 reactions). */
+	@Override
+	protected boolean sidesteps() {
+		return true;
 	}
 
 	StormPuddles puddles() {

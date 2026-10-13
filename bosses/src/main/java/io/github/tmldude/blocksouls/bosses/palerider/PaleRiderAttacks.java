@@ -21,6 +21,11 @@ final class PaleRiderAttacks {
 		return PaleRider.config();
 	}
 
+	/** Theme for the shared archetypes: pale soul fire. */
+	static final io.github.tmldude.blocksouls.bosses.archetype.Theme THEME = new io.github.tmldude.blocksouls.bosses.archetype.Theme(
+			new net.minecraft.core.particles.DustParticleOptions(0x9FE3E8, 1.6f), new net.minecraft.core.particles.DustParticleOptions(0xF0FFFF, 1.2f),
+			ParticleTypes.SOUL_FIRE_FLAME, PaleRiderSounds.WINDUP, PaleRiderSounds.SCREAM);
+
 	private static void slashParticles(AttackRun run, Vec3 origin, Vec3 dir, double radius, double angle) {
 		double half = Math.toRadians(angle / 2);
 		double base = Math.atan2(dir.z, dir.x);
