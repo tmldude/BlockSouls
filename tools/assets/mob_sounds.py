@@ -17,7 +17,7 @@ import sys
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from synth import (SR, Gen, band, bubbles, clicks, curve, drive, env, finish, groan, growl, mix,  # noqa: E402
+from synth import (SR, Gen, band, bubbles, clicks, curve, drive, env, finish, groan, growl, metal, mix,  # noqa: E402
                    resonances, reverb, shriek, stft_filter, sweep_band, t_axis, thump, voice, vowel_path, write_ogg)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -209,6 +209,53 @@ def sounds():
         splinter = clicks(g, d, 90, 1500, 6000, decay=0.003) * np.exp(-t_axis(d)[:n] / 0.08)
         return mix((hit, 0.8), (body, 1.0), (splinter, 0.35))
     make("wave_mob/break_hit", 2, bang)
+
+    # Spitter: a wet, rattling throat; the hork and splat of a spit; a choking gurgle when it dies.
+    make("spitter/ambient", 2, lambda g, i: mix((groan(g, 1.1, [(0, 140 + 15 * i), (1, 120)], [(0, "uh"), (1, "o")], scale=0.95,
+                                                       rough=0.5, gurgle=1.4), 1.0), (bubbles(g, 1.1, 18, 150, 500), 0.5)))
+
+    def spit(g, i):
+        d = 0.7
+        n = int(d * SR)
+        hork = sweep_band(g.noise(n), [(0, 300), (0.4, 800), (1, 1500)], [(0, 1500), (0.4, 4000), (1, 6000)], d)
+        hork *= env(n, shape=[(0, 0), (0.35, 1), (0.45, 0.2), (1, 0)])
+        splat = bubbles(g, d, 60, 300, 1200) * env(n, shape=[(0, 0), (0.4, 0), (0.45, 1), (1, 0)])
+        return mix((hork, 1.0), (splat, 0.6))
+    make("spitter/spit", 2, spit)
+    make("spitter/hurt", 2, lambda g, i: groan(g, 0.35, [(0, 200 + 20 * i), (1, 150)], [(0, "a"), (1, "uh")], rough=0.6, gurgle=0.8,
+                                               shape=[(0, 0), (0.1, 1), (1, 0)]))
+    make("spitter/death", 1, lambda g, i: mix((groan(g, 1.5, [(0, 180), (0.4, 130), (1, 50)], [(0, "a"), (0.5, "o"), (1, "u")],
+                                                     gurgle=1.8, rough=0.6, shape=[(0, 0), (0.05, 1), (0.7, 0.5), (1, 0)]), 1.0),
+                                              (bubbles(g, 1.5, 30, 120, 600), 0.6)))
+
+    # Bulwark: a heavy breath behind a helm; the shield bash (a scrape then a slam); a metal clang when blocked.
+    make("bulwark/ambient", 2, lambda g, i: band(growl(g, 1.4, [(0, 70 + 8 * i), (1, 60)], scale=0.6, am=10,
+                                                       vowels=((0, "o"), (1, "u"))), 60, 1800))
+
+    def bash(g, i):
+        d = 0.9
+        n = int(d * SR)
+        scrape = band(g.noise(n), 600, 3500) * env(n, shape=[(0, 0), (0.3, 0.6), (0.35, 0), (1, 0)])
+        hit = np.zeros(n)
+        hit[int(0.33 * SR):] = (metal(g, d - 0.33, 140 + 10 * i, 0.15) + thump(d - 0.33, 120, 40, 0.1))[:n - int(0.33 * SR)]
+        return mix((scrape, 0.5), (hit, 1.0))
+    make("bulwark/bash", 2, bash)
+    make("bulwark/clang", 3, lambda g, i: mix((metal(g, 0.6, 320 + 60 * i, 0.12), 1.0),
+                                              (band(g.noise(int(0.6 * SR)), 2000, 8000) * np.exp(-t_axis(0.6) / 0.01), 0.4)))
+    make("bulwark/hurt", 2, lambda g, i: growl(g, 0.4, [(0, 90 + 10 * i), (0.3, 120), (1, 80)], scale=0.6, am=16,
+                                               vowels=((0, "a"), (1, "uh")), shape=[(0, 0), (0.1, 1), (1, 0)]))
+    make("bulwark/death", 1, lambda g, i: mix((growl(g, 1.8, [(0, 110), (0.4, 80), (1, 30)], scale=0.6, rough=0.8,
+                                                     vowels=((0, "a"), (1, "u")), shape=[(0, 0), (0.05, 1), (0.7, 0.5), (1, 0)]), 1.0),
+                                              (np.concatenate([np.zeros(int(1.0 * SR)), metal(g, 0.8, 110, 0.25)]), 0.6)))
+
+    # Volatile fuse: a rising sizzle that tells you it's about to go.
+    def fuse(g, i):
+        d = 1.0
+        n = int(d * SR)
+        sizzle = sweep_band(g.noise(n), [(0, 1500), (1, 4000)], [(0, 5000), (1, 11000)], d) * env(n, shape=[(0, 0), (0.1, 0.4), (1, 1)])
+        tick = clicks(g, d, 14, 800, 3000, decay=0.006) * env(n, shape=[(0, 0.3), (1, 1)])
+        return mix((sizzle, 1.0), (tick, 0.5))
+    make("affix/fuse", 1, fuse)
     return S
 
 
@@ -231,14 +278,20 @@ EVENTS = {
     "entity.ash_hound.ambient": "ash_hound/ambient", "entity.ash_hound.hurt": "ash_hound/hurt", "entity.ash_hound.death": "ash_hound/death",
     "ambient.dread.howl": "dread/howl",
     "entity.wave_mob.break_hit": "wave_mob/break_hit",
+    "entity.spitter.ambient": "spitter/ambient", "entity.spitter.spit": "spitter/spit", "entity.spitter.hurt": "spitter/hurt",
+    "entity.spitter.death": "spitter/death",
+    "entity.bulwark.ambient": "bulwark/ambient", "entity.bulwark.bash": "bulwark/bash", "entity.bulwark.clang": "bulwark/clang",
+    "entity.bulwark.hurt": "bulwark/hurt", "entity.bulwark.death": "bulwark/death",
+    "affix.volatile.fuse": "affix/fuse",
 }
 # Per-sound peak level: ambient chatter sits under combat sounds; telegraphs and impacts are loud.
 PEAK = {"ambient": 0.6, "hurt": 0.75, "death": 0.8, "scream": 0.95, "slam": 0.95, "burst": 0.95, "roar": 0.95,
-        "windup": 0.9, "hiss": 0.8, "howl": 0.85, "leap": 0.7, "throw": 0.8, "break_hit": 0.85}
+        "windup": 0.9, "hiss": 0.8, "howl": 0.85, "leap": 0.7, "throw": 0.8, "break_hit": 0.85,
+        "spit": 0.85, "bash": 0.95, "clang": 0.8, "fuse": 0.9}
 
 
 # Telegraphs and far-off cues carry further than the vanilla 16 blocks, so a horde's tells read from a distance.
-RANGE = {"scream": 32, "roar": 32, "slam": 24, "windup": 24, "burst": 24, "howl": 32}
+RANGE = {"scream": 32, "roar": 32, "slam": 24, "windup": 24, "burst": 24, "howl": 32, "bash": 24, "fuse": 24}
 
 
 def main():

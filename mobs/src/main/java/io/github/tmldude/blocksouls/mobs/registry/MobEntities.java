@@ -28,6 +28,7 @@ import io.github.tmldude.blocksouls.mobs.BlockSoulsMobs;
 import io.github.tmldude.blocksouls.mobs.MobsConfig;
 import io.github.tmldude.blocksouls.mobs.entity.AshHound;
 import io.github.tmldude.blocksouls.mobs.entity.Bloater;
+import io.github.tmldude.blocksouls.mobs.entity.Bulwark;
 import io.github.tmldude.blocksouls.mobs.entity.Brute;
 import io.github.tmldude.blocksouls.mobs.entity.Crawler;
 import io.github.tmldude.blocksouls.mobs.entity.Debris;
@@ -36,6 +37,8 @@ import io.github.tmldude.blocksouls.mobs.entity.InfectedPiglin;
 import io.github.tmldude.blocksouls.mobs.entity.MutantBrute;
 import io.github.tmldude.blocksouls.mobs.entity.Screamer;
 import io.github.tmldude.blocksouls.mobs.entity.Shambler;
+import io.github.tmldude.blocksouls.mobs.entity.SpitGlob;
+import io.github.tmldude.blocksouls.mobs.entity.Spitter;
 import io.github.tmldude.blocksouls.mobs.entity.WaveMob;
 
 /** Entity types (ids fixed in {@link CommonIds}) and their spawn eggs. */
@@ -59,8 +62,15 @@ public final class MobEntities {
 	public static final EntityType<AshHound> ASH_HOUND = mob(CommonIds.ASH_HOUND, AshHound::new, 0.7f, 0.75f, 0.6f, true,
 			() -> HostileMob.attributes(C.ashHound, 64));
 
+	public static final EntityType<Spitter> SPITTER = mob(CommonIds.SPITTER, Spitter::new, 0.6f, 1.9f, 1.65f, false,
+			() -> WaveMob.attributes(C.spitter));
+	public static final EntityType<Bulwark> BULWARK = mob(CommonIds.BULWARK, Bulwark::new, 1.1f, 2.3f, 2.0f, false,
+			() -> WaveMob.attributes(C.bulwark).add(net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE, 0.7));
+
 	public static final EntityType<Debris> DEBRIS = register(CommonIds.id(CommonIds.MOBS, "debris"),
 			EntityType.Builder.<Debris>of(Debris::new, MobCategory.MISC).noLootTable().sized(0.5f, 0.5f).clientTrackingRange(4).updateInterval(10));
+	public static final EntityType<SpitGlob> SPIT_GLOB = register(CommonIds.id(CommonIds.MOBS, "spit_glob"),
+			EntityType.Builder.<SpitGlob>of(SpitGlob::new, MobCategory.MISC).noLootTable().sized(0.4f, 0.4f).clientTrackingRange(4).updateInterval(10));
 
 	/** Spawn eggs by entity type, in roster order. */
 	public static final Map<EntityType<?>, Item> SPAWN_EGGS = new LinkedHashMap<>();
@@ -95,7 +105,8 @@ public final class MobEntities {
 	}
 
 	public static void init() {
-		for (EntityType<?> type : new EntityType<?>[] {SHAMBLER, CRAWLER, SCREAMER, BLOATER, BRUTE, MUTANT_BRUTE, INFECTED_PIGLIN, ASH_HOUND}) {
+		for (EntityType<?> type : new EntityType<?>[] {SHAMBLER, CRAWLER, SCREAMER, BLOATER, BRUTE, MUTANT_BRUTE, SPITTER, BULWARK, INFECTED_PIGLIN,
+				ASH_HOUND}) {
 			spawnEgg(type);
 		}
 		ResourceKey<CreativeModeTab> spawnEggs = ResourceKey.create(Registries.CREATIVE_MODE_TAB, Identifier.withDefaultNamespace("spawn_eggs"));

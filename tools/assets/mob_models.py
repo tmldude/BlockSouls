@@ -336,8 +336,61 @@ def ash_hound():
     ])
 
 
+def spitter():
+    return Model("spitter", (64, 64), [
+        # Stooped forward over a throat swollen with bile; sacs bulge along its back.
+        P("body", "root", (0, 12, 0), (0.22, 0, 0), [
+            C("torso", (-4, -12, -2.5), (8, 12, 5)),
+            C("back_sac1", (-3.5, -10, 2.5), (3, 3, 2)),
+            C("back_sac2", (1, -6, 2.5), (2, 2, 2)),
+        ]),
+        P("head", "body", (0, -12, -1), (-0.22, 0, 0), [C("skull", (-3.5, -7, -4), (7, 7, 7))]),
+        P("jaw", "head", (0, -1, -1), (0.2, 0, 0), [C("jaw", (-3, 0, -3.5), (6, 2, 4))]),
+        # The throat sac hangs under the jaw and swells before every spit.
+        P("throat", "head", (0, 0.5, -2), (0, 0, 0), [C("throat", (-3, 0, -2.5), (6, 4, 5))]),
+        P("right_arm", "body", (-5.5, -11, 0), (0, 0, 0.08), [C("right_arm", (-1.5, -1, -1.5), (3, 13, 3))]),
+        P("left_arm", "body", (5.5, -11, 0), (0, 0, -0.08), [C("left_arm", (-1.5, -1, -1.5), (3, 13, 3), mirror=True, uv="right_arm")]),
+        P("right_leg", "root", (-2, 12, 0), (0, 0, 0), [C("right_leg", (-1.5, 0, -1.5), (3, 12, 3))]),
+        P("left_leg", "root", (2, 12, 0), (0, 0, 0), [C("left_leg", (-1.5, 0, -1.5), (3, 12, 3), mirror=True, uv="right_leg")]),
+    ])
+
+
+def bulwark():
+    return Model("bulwark", (128, 64), [
+        P("right_leg", "root", (-4, 10, 0), (0, 0, 0), [C("right_leg", (-3, 0, -3), (6, 14, 6))]),
+        P("left_leg", "root", (4, 10, 0), (0, 0, 0), [C("left_leg", (-3, 0, -3), (6, 14, 6), mirror=True, uv="right_leg")]),
+        P("body", "root", (0, 10, 0), (0.12, 0, 0), [
+            C("waist", (-6, -6, -4), (12, 6, 8)),
+            C("chest", (-8, -17, -5), (16, 11, 10)),
+        ]),
+        P("head", "body", (0, -17, -2), (-0.12, 0, 0), [
+            C("head", (-3, -6, -3.5), (6, 6, 6)),
+            C("helm", (-3, -6, -3.5), (6, 6, 6), grow=0.5),
+        ]),
+        # The right arm swings a heavy fist; the left holds the slab up in front.
+        P("right_arm", "body", (-10, -15, 0), (-0.2, 0, 0.1), [
+            C("right_shoulder", (-3.5, -3, -3.5), (7, 6, 7)),
+            C("right_arm", (-2.5, 3, -2.5), (5, 11, 5)),
+            C("right_fist", (-3, 13, -3), (6, 5, 6)),
+        ]),
+        P("left_arm", "body", (9, -15, -1), (-1.2, -0.45, 0), [
+            C("left_shoulder", (-3.5, -3, -3.5), (7, 6, 7), mirror=True, uv="right_shoulder"),
+            C("left_arm", (-2.5, 3, -2.5), (5, 11, 5), mirror=True, uv="right_arm"),
+        ]),
+        # A slab of riveted scrap covering it from the eyes to the knees.
+        P("shield", "body", (1, -9, -8), (-0.12, 0, 0), [
+            C("slab", (-9, -7, -2), (18, 24, 3)),
+            C("boss", (-3, -1, -3.5), (6, 6, 2)),
+            C("spike1", (-7, -5, -4), (2, 2, 2)),
+            C("spike2", (5, -5, -4), (2, 2, 2)),
+            C("spike3", (-7, 13, -4), (2, 2, 2)),
+            C("spike4", (5, 13, -4), (2, 2, 2)),
+        ]),
+    ])
+
+
 MODELS = {m.name: m for m in (shambler(), crawler(), screamer(), bloater(), brute(), mutant_brute(), infected_piglin(),
-                              ash_hound())}
+                              ash_hound(), spitter(), bulwark())}
 
 
 # --- UV packing ---------------------------------------------------------------------------------------------------

@@ -12,10 +12,12 @@ import io.github.tmldude.blocksouls.mobs.client.model.AshHoundModel;
 import io.github.tmldude.blocksouls.mobs.client.model.BloaterModel;
 import io.github.tmldude.blocksouls.mobs.client.model.BruteAnimations;
 import io.github.tmldude.blocksouls.mobs.client.model.BruteModel;
+import io.github.tmldude.blocksouls.mobs.client.model.BulwarkModel;
 import io.github.tmldude.blocksouls.mobs.client.model.CrawlerModel;
 import io.github.tmldude.blocksouls.mobs.client.model.InfectedPiglinModel;
 import io.github.tmldude.blocksouls.mobs.client.model.ScreamerModel;
 import io.github.tmldude.blocksouls.mobs.client.model.ShamblerModel;
+import io.github.tmldude.blocksouls.mobs.client.model.SpitterModel;
 import io.github.tmldude.blocksouls.mobs.client.render.BlockSoulsMobRenderer;
 import io.github.tmldude.blocksouls.mobs.client.render.InfectedPiglinRenderer;
 import io.github.tmldude.blocksouls.mobs.registry.MobEntities;
@@ -29,6 +31,8 @@ public class BlockSoulsMobsClient implements ClientModInitializer {
 	public static final ModelLayerLocation MUTANT_BRUTE = layer("mutant_brute");
 	public static final ModelLayerLocation INFECTED_PIGLIN = layer("infected_piglin");
 	public static final ModelLayerLocation ASH_HOUND = layer("ash_hound");
+	public static final ModelLayerLocation SPITTER = layer("spitter");
+	public static final ModelLayerLocation BULWARK = layer("bulwark");
 
 	private static ModelLayerLocation layer(String name) {
 		return new ModelLayerLocation(CommonIds.id(CommonIds.MOBS, name), "main");
@@ -44,6 +48,8 @@ public class BlockSoulsMobsClient implements ClientModInitializer {
 		ModelLayerRegistry.registerModelLayer(MUTANT_BRUTE, BruteModel::createMutantLayer);
 		ModelLayerRegistry.registerModelLayer(INFECTED_PIGLIN, InfectedPiglinModel::createBodyLayer);
 		ModelLayerRegistry.registerModelLayer(ASH_HOUND, AshHoundModel::createBodyLayer);
+		ModelLayerRegistry.registerModelLayer(SPITTER, SpitterModel::createBodyLayer);
+		ModelLayerRegistry.registerModelLayer(BULWARK, BulwarkModel::createBodyLayer);
 
 		EntityRendererRegistry.register(MobEntities.SHAMBLER, ctx ->
 				new BlockSoulsMobRenderer<>(ctx, new ShamblerModel(ctx.bakeLayer(SHAMBLER)), 0.5f, "shambler", 1f, false));
@@ -60,6 +66,11 @@ public class BlockSoulsMobsClient implements ClientModInitializer {
 		EntityRendererRegistry.register(MobEntities.INFECTED_PIGLIN, ctx -> new InfectedPiglinRenderer(ctx, INFECTED_PIGLIN));
 		EntityRendererRegistry.register(MobEntities.ASH_HOUND, ctx ->
 				new BlockSoulsMobRenderer<>(ctx, new AshHoundModel(ctx.bakeLayer(ASH_HOUND)), 0.5f, "ash_hound", 1f, true));
+		EntityRendererRegistry.register(MobEntities.SPITTER, ctx ->
+				new BlockSoulsMobRenderer<>(ctx, new SpitterModel(ctx.bakeLayer(SPITTER)), 0.5f, "spitter", 1f, true));
+		EntityRendererRegistry.register(MobEntities.BULWARK, ctx ->
+				new BlockSoulsMobRenderer<>(ctx, new BulwarkModel(ctx.bakeLayer(BULWARK)), 0.9f, "bulwark", 1f, false));
 		EntityRendererRegistry.register(MobEntities.DEBRIS, ctx -> new ThrownItemRenderer<>(ctx, 1.5f, false));
+		EntityRendererRegistry.register(MobEntities.SPIT_GLOB, ctx -> new ThrownItemRenderer<>(ctx, 1.2f, true));
 	}
 }

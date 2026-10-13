@@ -28,7 +28,8 @@ OUT = os.path.join(os.path.dirname(__file__), "previews")
 # Renderer scale and hitbox (blocks) per mob, as in BlockSoulsMobsClient / MobEntities.
 SCALE = {"brute": 1.15, "mutant_brute": 1.35}
 HITBOX = {"shambler": (0.6, 1.95), "crawler": (0.9, 0.8), "screamer": (0.5, 2.0), "bloater": (1.2, 1.7),
-          "brute": (1.3, 2.6), "mutant_brute": (1.5, 3.0), "infected_piglin": (0.6, 1.95), "ash_hound": (0.7, 0.75)}
+          "brute": (1.3, 2.6), "mutant_brute": (1.5, 3.0), "infected_piglin": (0.6, 1.95), "ash_hound": (0.7, 0.75),
+          "spitter": (0.6, 1.9), "bulwark": (1.1, 2.3)}
 
 
 def rot_zyx(x, y, z):
@@ -208,10 +209,15 @@ def render(name, pose=None, yaw=-35, pitch=18, size=(260, 300), ppb=None, hitbox
 def walk(name, t):
     """A mid-stride pose; t in radians of the gait cycle."""
     s = math.sin(t)
-    if name in ("shambler", "screamer", "infected_piglin"):
+    if name in ("shambler", "screamer", "infected_piglin", "spitter", "bulwark"):
         pose = {"right_leg": {"rot": (s * 0.6, 0, 0)}, "left_leg": {"rot": (-s * 0.6, 0, 0)}}
         if name == "screamer":
             pose.update({"right_arm": {"rot": (-s * 0.4, 0, 0)}, "left_arm": {"rot": (s * 0.4, 0, 0)}})
+        if name == "spitter":
+            pose.update({"right_arm": {"rot": (-s * 0.3, 0, 0)}, "left_arm": {"rot": (s * 0.3, 0, 0)}})
+        if name == "bulwark":
+            pose = {"right_leg": {"rot": (s * 0.4, 0, 0)}, "left_leg": {"rot": (-s * 0.4, 0, 0)},
+                    "right_arm": {"rot": (-s * 0.3, 0, 0)}}
         if name == "infected_piglin":
             pose.update({"right_arm": {"rot": (-s * 0.5, 0, 0)}, "left_arm": {"rot": (s * 0.5, 0, 0)}})
         return pose
@@ -267,6 +273,14 @@ def telegraph(name):
                 "right_leg": {"rot": (0, 0, 0.15)}, "left_leg": {"rot": (0, 0, -0.15)}}
     if name == "infected_piglin":
         return {"right_arm": {"rot": (-2.6, 0, 0)}, "left_arm": {"rot": (-1.2, 0, 0)}}
+    if name == "spitter":
+        # As SpitterModel at full windup: head thrown back, throat swollen, jaw wide.
+        return {"head": {"rot": (-0.5, 0, 0)}, "jaw": {"rot": (0.7, 0, 0)}, "throat": {"scale": (1.4, 1.5, 1.4)},
+                "body": {"rot": (-0.15, 0, 0)}, "right_arm": {"rot": (0.3, 0, 0.3)}, "left_arm": {"rot": (0.3, 0, -0.3)}}
+    if name == "bulwark":
+        # As BulwarkModel at full bash windup: shield drawn back and twisted, weight on the back foot.
+        return {"shield": {"pos": (0, 0, 3), "rot": (0.15, 0.35, 0)}, "body": {"rot": (-0.12, 0.25, 0)},
+                "right_arm": {"rot": (0.4, 0, 0.2)}, "right_leg": {"rot": (0.4, 0, 0)}, "left_leg": {"rot": (-0.3, 0, 0)}}
     if name == "ash_hound":
         return {"body": {"rot": (-0.2, 0, 0)}, "jaw": {"rot": (0.6, 0, 0)}, "head": {"rot": (-0.2, 0, 0)},
                 "right_front_leg": {"rot": (-1.1, 0, 0)}, "left_front_leg": {"rot": (-1.0, 0, 0)},
@@ -275,9 +289,11 @@ def telegraph(name):
 
 
 TITLES = {"shambler": "Shambler", "crawler": "Crawler", "screamer": "Screamer", "bloater": "Bloater", "brute": "Brute",
-          "mutant_brute": "Mutant Brute", "infected_piglin": "Infected Piglin", "ash_hound": "Ash Hound"}
+          "mutant_brute": "Mutant Brute", "infected_piglin": "Infected Piglin", "ash_hound": "Ash Hound",
+          "spitter": "Spitter", "bulwark": "Bulwark"}
 TELEGRAPH = {"shambler": "swing", "crawler": "pounce", "screamer": "scream", "bloater": "swell (burst telegraph)",
-             "brute": "slam windup", "mutant_brute": "leap / slam windup", "infected_piglin": "swing", "ash_hound": "pounce"}
+             "brute": "slam windup", "mutant_brute": "leap / slam windup", "infected_piglin": "swing", "ash_hound": "pounce",
+             "spitter": "spit windup", "bulwark": "shield bash windup"}
 
 
 def sheet(name, hitbox=False):

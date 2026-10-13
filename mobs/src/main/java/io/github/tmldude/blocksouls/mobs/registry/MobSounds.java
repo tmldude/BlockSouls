@@ -52,6 +52,21 @@ public final class MobSounds {
 	public static final SoundEvent ASH_HOUND_HURT = register("entity.ash_hound.hurt");
 	public static final SoundEvent ASH_HOUND_DEATH = register("entity.ash_hound.death");
 
+	public static final SoundEvent SPITTER_AMBIENT = register("entity.spitter.ambient");
+	public static final SoundEvent SPITTER_SPIT = register("entity.spitter.spit");
+	public static final SoundEvent SPITTER_HURT = register("entity.spitter.hurt");
+	public static final SoundEvent SPITTER_DEATH = register("entity.spitter.death");
+
+	public static final SoundEvent BULWARK_AMBIENT = register("entity.bulwark.ambient");
+	public static final SoundEvent BULWARK_BASH = register("entity.bulwark.bash");
+	/** A hit glancing off its shield. */
+	public static final SoundEvent BULWARK_CLANG = register("entity.bulwark.clang");
+	public static final SoundEvent BULWARK_HURT = register("entity.bulwark.hurt");
+	public static final SoundEvent BULWARK_DEATH = register("entity.bulwark.death");
+
+	/** A Volatile elite's corpse fizzing before it blows. */
+	public static final SoundEvent AFFIX_VOLATILE_FUSE = register("affix.volatile.fuse");
+
 	/** Far-off howl the player hears as Nether dread builds. */
 	public static final SoundEvent DREAD_HOWL = register("ambient.dread.howl");
 

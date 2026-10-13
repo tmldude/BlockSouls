@@ -6,7 +6,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
@@ -23,7 +22,7 @@ public final class Shockwave {
 	 *
 	 * @return how many entities were hit
 	 */
-	public static int hit(ServerLevel level, Mob source, Vec3 center, double radius, double damage, double knockback) {
+	public static int hit(ServerLevel level, LivingEntity source, Vec3 center, double radius, double damage, double knockback) {
 		DamageSource damageSource = level.damageSources().mobAttack(source);
 		int hits = 0;
 		for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, source.getBoundingBox().move(center.subtract(source.position())).inflate(radius),

@@ -19,7 +19,9 @@ import net.minecraft.world.phys.Vec3;
 
 import io.github.tmldude.blocksouls.mobs.BlockSoulsMobs;
 import io.github.tmldude.blocksouls.mobs.MobsConfig;
+import io.github.tmldude.blocksouls.mobs.ai.AttackChooser;
 import io.github.tmldude.blocksouls.mobs.ai.Shockwave;
+import io.github.tmldude.blocksouls.mobs.logic.AttackPicker;
 import io.github.tmldude.blocksouls.mobs.registry.MobSounds;
 
 /**
@@ -37,6 +39,12 @@ public class MutantBrute extends WaveMob {
 	private int nextLeap;
 	private int nextThrow;
 	private @Nullable Vec3 landing;
+	/** Leap and throw scored against each other (range, facing, a dodge roll to punish, a target in the air). */
+	private final AttackChooser attacks = new AttackChooser(this);
+	private final int leap = attacks.add(() -> new AttackPicker.Attack(config().leapMinRange, config().leapMaxRange, false, true, true, 0),
+			() -> tickCount >= nextLeap && onGround());
+	private final int toss = attacks.add(() -> new AttackPicker.Attack(config().debrisMinRange, getAttributeValue(Attributes.FOLLOW_RANGE), true, false, false, 0),
+			() -> tickCount >= nextThrow);
 
 	public MutantBrute(EntityType<? extends MutantBrute> type, Level level) {
 		super(type, level);
@@ -113,7 +121,7 @@ public class MutantBrute extends WaveMob {
 				return false;
 			}
 			double dist = distanceTo(target);
-			return dist >= config().leapMinRange && dist <= config().leapMaxRange;
+			return dist >= config().leapMinRange && dist <= config().leapMaxRange && attacks.chosen(leap);
 		}
 
 		@Override
@@ -164,6 +172,7 @@ public class MutantBrute extends WaveMob {
 				Shockwave.floorDust(level, position(), config().slamRadius);
 				Shockwave.hit(level, MutantBrute.this, position(), config().slamRadius, getAttributeValue(Attributes.ATTACK_DAMAGE), config().slamKnockback);
 				nextLeap = tickCount + config().leapCooldownTicks;
+				attacks.used(leap);
 				clearAction();
 			}
 		}
@@ -203,7 +212,7 @@ public class MutantBrute extends WaveMob {
 		public boolean canUse() {
 			LivingEntity target = getTarget();
 			return target != null && tickCount >= nextThrow && getSensing().hasLineOfSight(target)
-					&& distanceTo(target) >= config().debrisMinRange;
+					&& distanceTo(target) >= config().debrisMinRange && attacks.chosen(toss);
 		}
 
 		@Override
@@ -246,6 +255,7 @@ public class MutantBrute extends WaveMob {
 			playSound(MobSounds.MUTANT_BRUTE_THROW, 1.5f, 0.8f);
 			swingForAttack(net.minecraft.world.InteractionHand.MAIN_HAND);
 			nextThrow = tickCount + config().debrisCooldownTicks;
+			attacks.used(toss);
 			clearAction();
 		}
 

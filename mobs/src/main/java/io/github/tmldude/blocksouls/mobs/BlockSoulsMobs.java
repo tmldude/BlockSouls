@@ -7,6 +7,8 @@ import net.fabricmc.api.ModInitializer;
 
 import io.github.tmldude.blocksouls.common.Config;
 import io.github.tmldude.blocksouls.common.event.ConfigEvents;
+import io.github.tmldude.blocksouls.mobs.affix.MobAffixes;
+import io.github.tmldude.blocksouls.mobs.ai.RollTracker;
 import io.github.tmldude.blocksouls.mobs.command.MobCommands;
 import io.github.tmldude.blocksouls.mobs.dread.Dread;
 import io.github.tmldude.blocksouls.mobs.nether.NetherSpawns;
@@ -35,6 +37,8 @@ public class BlockSoulsMobs implements ModInitializer {
 		MobSounds.init();
 		MobEntities.init();
 		MobWaves.init();
+		MobAffixes.init();
+		RollTracker.init();
 		NetherSpawns.init();
 		Dread.init();
 		MobCommands.init();

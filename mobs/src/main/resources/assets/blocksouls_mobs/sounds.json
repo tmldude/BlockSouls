@@ -256,5 +256,82 @@
       "blocksouls_mobs:mob/wave_mob/break_hit1",
       "blocksouls_mobs:mob/wave_mob/break_hit2"
     ]
+  },
+  "entity.spitter.ambient": {
+    "subtitle": "subtitles.blocksouls_mobs.entity.spitter.ambient",
+    "sounds": [
+      "blocksouls_mobs:mob/spitter/ambient1",
+      "blocksouls_mobs:mob/spitter/ambient2"
+    ]
+  },
+  "entity.spitter.spit": {
+    "subtitle": "subtitles.blocksouls_mobs.entity.spitter.spit",
+    "sounds": [
+      "blocksouls_mobs:mob/spitter/spit1",
+      "blocksouls_mobs:mob/spitter/spit2"
+    ]
+  },
+  "entity.spitter.hurt": {
+    "subtitle": "subtitles.blocksouls_mobs.entity.spitter.hurt",
+    "sounds": [
+      "blocksouls_mobs:mob/spitter/hurt1",
+      "blocksouls_mobs:mob/spitter/hurt2"
+    ]
+  },
+  "entity.spitter.death": {
+    "subtitle": "subtitles.blocksouls_mobs.entity.spitter.death",
+    "sounds": [
+      "blocksouls_mobs:mob/spitter/death1"
+    ]
+  },
+  "entity.bulwark.ambient": {
+    "subtitle": "subtitles.blocksouls_mobs.entity.bulwark.ambient",
+    "sounds": [
+      "blocksouls_mobs:mob/bulwark/ambient1",
+      "blocksouls_mobs:mob/bulwark/ambient2"
+    ]
+  },
+  "entity.bulwark.bash": {
+    "subtitle": "subtitles.blocksouls_mobs.entity.bulwark.bash",
+    "sounds": [
+      {
+        "name": "blocksouls_mobs:mob/bulwark/bash1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "blocksouls_mobs:mob/bulwark/bash2",
+        "attenuation_distance": 24
+      }
+    ]
+  },
+  "entity.bulwark.clang": {
+    "subtitle": "subtitles.blocksouls_mobs.entity.bulwark.clang",
+    "sounds": [
+      "blocksouls_mobs:mob/bulwark/clang1",
+      "blocksouls_mobs:mob/bulwark/clang2",
+      "blocksouls_mobs:mob/bulwark/clang3"
+    ]
+  },
+  "entity.bulwark.hurt": {
+    "subtitle": "subtitles.blocksouls_mobs.entity.bulwark.hurt",
+    "sounds": [
+      "blocksouls_mobs:mob/bulwark/hurt1",
+      "blocksouls_mobs:mob/bulwark/hurt2"
+    ]
+  },
+  "entity.bulwark.death": {
+    "subtitle": "subtitles.blocksouls_mobs.entity.bulwark.death",
+    "sounds": [
+      "blocksouls_mobs:mob/bulwark/death1"
+    ]
+  },
+  "affix.volatile.fuse": {
+    "subtitle": "subtitles.blocksouls_mobs.affix.volatile.fuse",
+    "sounds": [
+      {
+        "name": "blocksouls_mobs:mob/affix/fuse1",
+        "attenuation_distance": 24
+      }
+    ]
   }
 }
