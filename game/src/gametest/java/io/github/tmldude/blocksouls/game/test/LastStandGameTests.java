@@ -36,14 +36,16 @@ public class LastStandGameTests {
 			Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(3, 1, 3));
 			zombie.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(player), 1000.0F);
 		}
-		helper.runAfterDelay(5, () -> {
-			helper.assertTrue(!PlayerStatus.isDowned(player), "three kills while down: back on your feet");
-			helper.assertTrue(!LastStand.isActive(), "the stand is over");
-			helper.assertTrue(LastStand.usedThisSiege(), "spent for this siege");
-			helper.assertTrue(!LastStand.tryStart(player, 1), "once per siege");
-			LastStand.resetForTests(server);
-			helper.succeed();
-		});
+		// The self-revive happens inside the killing blow, so check right away: the siege flag is shared state that
+		// other tests in the batch (run starts, resets) may clear a few ticks later.
+		helper.assertTrue(!PlayerStatus.isDowned(player), "three kills while down: back on your feet");
+		helper.assertTrue(!LastStand.isActive(), "the stand is over");
+		helper.assertTrue(LastStand.usedThisSiege(), "spent for this siege");
+		Downed.goDown(player);
+		helper.assertTrue(!LastStand.tryStart(player, 1), "once per siege");
+		Downed.revive(player, null);
+		LastStand.resetForTests(server);
+		helper.succeed();
 	}
 
 	@GameTest(maxTicks = 100)
@@ -79,12 +81,19 @@ public class LastStandGameTests {
 			helper.assertTrue(pistol.isPresent(), "the test mod registers a pistol");
 			helper.assertTrue(downed.getInventory().getItem(downed.getInventory().getSelectedSlot()).is(pistol.get()), "a lent pistol in hand");
 
+			// Compare with a standing player's hit for the scaled amount: armor and other damage rules apply to both.
+			float scaled = (float) (4.0 * PlayerSystem.CONFIG.downed.downedDamageMultiplier);
+			ServerPlayer standing = DownedTestPlayers.make(helper, 2, 1);
+			Zombie reference = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(1, 1, 3));
+			float referenceBefore = reference.getHealth();
+			reference.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(standing), scaled);
+			float expected = referenceBefore - reference.getHealth();
+
 			Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(3, 1, 3));
 			float before = zombie.getHealth();
 			zombie.hurtServer(helper.getLevel(), helper.getLevel().damageSources().playerAttack(downed), 4.0F);
 			float dealt = before - zombie.getHealth();
-			double expected = 4.0 * PlayerSystem.CONFIG.downed.downedDamageMultiplier;
-			helper.assertTrue(Math.abs(dealt - expected) < 0.01, "downed damage scaled to " + expected + ", dealt " + dealt);
+			helper.assertTrue(expected > 0 && Math.abs(dealt - expected) < 0.01, "downed 4.0 lands like a standing " + scaled + " (" + expected + "), dealt " + dealt);
 
 			Downed.revive(downed, null);
 			helper.assertTrue(!downed.getInventory().contains(new net.minecraft.world.item.ItemStack(pistol.get())), "the lent pistol is taken back");

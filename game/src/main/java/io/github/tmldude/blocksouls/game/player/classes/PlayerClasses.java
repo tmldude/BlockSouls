@@ -42,6 +42,7 @@ import io.github.tmldude.blocksouls.common.run.Runs;
 import io.github.tmldude.blocksouls.common.synergy.SynergyTags;
 import io.github.tmldude.blocksouls.game.BlockSoulsGame;
 import io.github.tmldude.blocksouls.game.player.rune.PlayerRunes;
+import io.github.tmldude.blocksouls.game.player.rune.Rune;
 
 /**
  * The class a player plays this run (PLAN2 §2/§3f: Warden, Striker, Arcanist, Ranger): picked with the Class Sigil
@@ -141,22 +142,21 @@ public final class PlayerClasses {
 		}
 		ClassState old = state(player);
 		PlayerClass previous = get(player);
-		if (previous != null) {
-			PlayerRunes.removeAll(player);
-			ClassEffects.remove(player, previous);
-		}
+		List<Rune> previousRunes = PlayerRunes.active(player);
 		ClassState state = old == null ? new ClassState(playerClass.id(), Set.of(), 0) : old.withClass(playerClass.id());
-		if (previous != null) {
-			// The old signature's verbs go; runes and cross-training re-grant theirs on the next apply.
-			Capabilities.grantAll(player);
-		}
-		grantSignature(player, playerClass);
 		if (!state.kitsGiven().contains(playerClass.id())) {
 			ClassKits.give(player, playerClass);
 			state = state.withKitGiven(playerClass.id());
 		}
+		// Switch first, then take the old layer off: trait removal recounts every *current* owner's share.
 		((AttachmentTarget) player).setAttached(TYPE, state);
-		ClassEffects.apply(player, playerClass, state, config);
+		if (previous != null) {
+			PlayerRunes.removeEffects(player, previousRunes);
+			ClassEffects.remove(player, previous);
+			// The old signature's and runes' verbs go; the new class and its runes re-grant theirs below.
+			Capabilities.grantAll(player);
+		}
+		apply(player);
 		player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.7F, 0.9F);
 		player.sendSystemMessage(Component.translatable("message.blocksouls_game.class.chosen", name(originId)).withStyle(ChatFormatting.GOLD));
 		return true;
@@ -165,11 +165,13 @@ public final class PlayerClasses {
 	/** Back to the plain v1 player: effects off, the signature's extra verbs gone (the v1 kit was never touched). */
 	public static void clear(ServerPlayer player) {
 		PlayerClass playerClass = get(player);
+		List<Rune> runes = PlayerRunes.active(player);
+		// Detach first: trait removal recounts every current owner's share, and none should be left.
+		((AttachmentTarget) player).removeAttached(TYPE);
 		if (playerClass != null) {
-			PlayerRunes.removeAll(player);
+			PlayerRunes.removeEffects(player, runes);
 			ClassEffects.remove(player, playerClass);
 		}
-		((AttachmentTarget) player).removeAttached(TYPE);
 		Capabilities.grantAll(player);
 	}
 

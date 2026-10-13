@@ -100,9 +100,9 @@ public final class PlayerRunes {
 		}
 	}
 
-	/** Removes every rune's effects (the class is cleared; verbs come off with the class's grantAll). */
-	public static void removeAll(ServerPlayer player) {
-		for (Rune rune : active(player)) {
+	/** Removes these runes' effects; the class layer calls it with the runes of a class it just took off. */
+	public static void removeEffects(ServerPlayer player, List<Rune> runes) {
+		for (Rune rune : runes) {
 			ClassEffects.removeEffects(player, owner(rune), rune.effects());
 		}
 	}
@@ -168,10 +168,12 @@ public final class PlayerRunes {
 
 	/** Debug: forgets every unlock and the balance. */
 	public static void reset(ServerPlayer player) {
-		removeAll(player);
+		List<Rune> runes = active(player);
 		RuneProfile profile = profile(player);
 		profile.souls = 0;
 		profile.unlocked.clear();
+		// After the unlocks are gone, so trait removal doesn't count these runes as still active.
+		removeEffects(player, runes);
 		RuneProfiles.save(player.level().getServer(), player.getUUID());
 		PlayerClasses.apply(player);
 	}
