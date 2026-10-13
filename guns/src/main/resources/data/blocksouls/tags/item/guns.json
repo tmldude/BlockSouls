@@ -5,6 +5,11 @@
     "blocksouls_guns:hand_cannon",
     "blocksouls_guns:auto_rifle",
     "blocksouls_guns:shotgun",
-    "blocksouls_guns:sniper_rifle"
+    "blocksouls_guns:sniper_rifle",
+    "blocksouls_guns:stray_verdict",
+    "blocksouls_guns:lantern_eye",
+    "blocksouls_guns:backdraft",
+    "blocksouls_guns:kindling_engine",
+    "blocksouls_guns:tether_lance"
   ]
 }

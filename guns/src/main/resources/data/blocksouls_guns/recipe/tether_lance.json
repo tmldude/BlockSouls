@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:smithing_transform",
+  "template": "blocksouls_guns:exotic_catalyst",
+  "base": "blocksouls_guns:gun_barrel",
+  "addition": "minecraft:cobweb",
+  "result": {
+    "id": "blocksouls_guns:tether_lance",
+    "components": {
+      "blocksouls_guns:rarity": "exotic",
+      "minecraft:rarity": "epic"
+    }
+  }
+}

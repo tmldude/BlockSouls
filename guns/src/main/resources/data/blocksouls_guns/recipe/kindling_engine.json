@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:smithing_transform",
+  "template": "blocksouls_guns:exotic_catalyst",
+  "base": "blocksouls_guns:auto_rifle",
+  "addition": "minecraft:blaze_rod",
+  "result": {
+    "id": "blocksouls_guns:kindling_engine",
+    "components": {
+      "blocksouls_guns:rarity": "exotic",
+      "minecraft:rarity": "epic"
+    }
+  }
+}

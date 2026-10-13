@@ -1,0 +1,42 @@
+{
+	"criteria": {
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipes": "blocksouls_guns:backdraft"
+			}
+		},
+		"has_exotic_catalyst": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_guns:exotic_catalyst"
+					}
+				]
+			}
+		},
+		"has_shotgun": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_guns:shotgun"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_exotic_catalyst",
+			"has_shotgun"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"blocksouls_guns:backdraft"
+		]
+	}
+}

@@ -18,10 +18,13 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 
 import io.github.tmldude.blocksouls.guns.BlockSoulsGuns;
 import io.github.tmldude.blocksouls.guns.client.GunClient;
+import io.github.tmldude.blocksouls.guns.exotic.KindlingEngine;
+import io.github.tmldude.blocksouls.guns.exotic.KindlingState;
 import io.github.tmldude.blocksouls.guns.item.GunItem;
 import io.github.tmldude.blocksouls.guns.item.GunsItems;
 import io.github.tmldude.blocksouls.guns.net.HitMarkerPayload;
 import io.github.tmldude.blocksouls.guns.weapon.GunStats;
+import io.github.tmldude.blocksouls.guns.weapon.Weapons;
 
 /** Ammo counter, reload bar, gun crosshair (widens with spread), hit markers and the sniper scope. */
 public final class GunHud {
@@ -140,6 +143,17 @@ public final class GunHud {
 			int top = bottom - 22;
 			graphics.fill(left - 1, top - 1, right + 1, top + 3, 0x99000000);
 			graphics.fill(left, top, left + Math.round(width * progress), top + 2, YELLOW);
+		}
+		if (Weapons.KINDLING_ENGINE.equals(gun.weaponId())) {
+			// Kindling Engine: heat above the ammo counter, red while venting.
+			long now = player.level().getGameTime();
+			KindlingState state = KindlingEngine.state(stack);
+			float heat = (float) (KindlingEngine.heat(stack, now) / KindlingState.MAX);
+			int width = 60;
+			int left = right - width;
+			int top = bottom - 28;
+			graphics.fill(left - 1, top - 1, right + 1, top + 3, 0x99000000);
+			graphics.fill(left, top, left + Math.round(width * heat), top + 2, state.venting(now) ? RED : heat > 0.6F ? 0xFFFF8A3A : YELLOW);
 		}
 	}
 

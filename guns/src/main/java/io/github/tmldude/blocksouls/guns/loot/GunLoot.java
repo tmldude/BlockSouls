@@ -1,10 +1,12 @@
 package io.github.tmldude.blocksouls.guns.loot;
 
 import java.util.Map;
+import java.util.Optional;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -18,6 +20,7 @@ import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import io.github.tmldude.blocksouls.common.CommonIds;
 import io.github.tmldude.blocksouls.guns.BlockSoulsGuns;
 import io.github.tmldude.blocksouls.guns.GunsConfig;
+import io.github.tmldude.blocksouls.guns.item.ExoticGunItem;
 import io.github.tmldude.blocksouls.guns.item.GunItem;
 import io.github.tmldude.blocksouls.guns.item.GunsItems;
 
@@ -65,6 +68,11 @@ public final class GunLoot {
 				table.withPool(ammo);
 			}
 		}
+		Double exoticChance = config.exoticTables.get(key.identifier().toString());
+		if (exoticChance != null && exoticChance > 0) {
+			table.withPool(LootPool.lootPool().when(LootItemRandomChanceCondition.randomChance(exoticChance.floatValue()))
+					.add(LootItem.lootTableItem(GunsItems.STRAY_VERDICT).apply(RollPerksFunction.roll("exotic"))));
+		}
 	}
 
 	private static void waveDrops(LootTable.Builder table, String tier, double primary, double special, double gun) {
@@ -90,6 +98,25 @@ public final class GunLoot {
 			}
 		}
 		return pool;
+	}
+
+	/** A random exotic item by the config weights; empty when every weight is 0. */
+	public static Optional<Item> randomExotic(RandomSource random) {
+		int total = 0;
+		for (ExoticGunItem exotic : GunsItems.exotics()) {
+			total += Math.max(0, BlockSoulsGuns.CONFIG.loot.exoticWeights.getOrDefault(exotic.weaponId(), 0));
+		}
+		if (total <= 0) {
+			return Optional.empty();
+		}
+		int pick = random.nextInt(total);
+		for (ExoticGunItem exotic : GunsItems.exotics()) {
+			pick -= Math.max(0, BlockSoulsGuns.CONFIG.loot.exoticWeights.getOrDefault(exotic.weaponId(), 0));
+			if (pick < 0) {
+				return Optional.of(exotic);
+			}
+		}
+		return Optional.empty();
 	}
 
 	private static Item gunItem(String weaponId) {
