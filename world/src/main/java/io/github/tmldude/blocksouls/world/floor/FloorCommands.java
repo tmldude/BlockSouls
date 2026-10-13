@@ -37,12 +37,17 @@ public final class FloorCommands {
 						.executes(c -> open(c, 1))
 						.then(Commands.argument("players", IntegerArgumentType.integer(1, 8))
 								.executes(c -> open(c, IntegerArgumentType.getInteger(c, "players")))
+								// v2-floor5-blight: the pool to draw from (a blocksouls_world pool name, e.g. blight).
 								.then(Commands.argument("pool", com.mojang.brigadier.arguments.StringArgumentType.word())
-										.executes(c -> open(c, IntegerArgumentType.getInteger(c, "players")))))))
+										.suggests((c, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(java.util.List.of("surface", "blight"), builder))
+										.executes(c -> open(c, IntegerArgumentType.getInteger(c, "players"),
+												com.mojang.brigadier.arguments.StringArgumentType.getString(c, "pool")))))))
 				.then(Commands.literal("tp").then(Commands.argument("act", IntegerArgumentType.integer(1, 64)).executes(FloorCommands::tp)))
 				.then(Commands.literal("light").then(Commands.argument("act", IntegerArgumentType.integer(1, 64)).executes(FloorCommands::light)))
 				.then(Commands.literal("info").executes(FloorCommands::info))
 				.then(Commands.literal("goto").then(Commands.argument("kind", com.mojang.brigadier.arguments.StringArgumentType.word())
+						.suggests((c, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(java.util.Arrays.stream(FloorSlotKind.values())
+								.map(kind -> kind.name().toLowerCase(java.util.Locale.ROOT)), builder))
 						.executes(FloorCommands::gotoSlot)))
 				.then(Commands.literal("pop").executes(FloorCommands::pop))
 				.then(Commands.literal("hazard").then(Commands.argument("trigger", com.mojang.brigadier.arguments.StringArgumentType.word())
@@ -51,15 +56,13 @@ public final class FloorCommands {
 	}
 
 	private static int open(CommandContext<CommandSourceStack> c, int players) {
+		return open(c, players, "surface");
+	}
+
+	private static int open(CommandContext<CommandSourceStack> c, int players, String pool) {
 		MinecraftServer server = c.getSource().getServer();
 		int act = IntegerArgumentType.getInteger(c, "act");
-		String pool = "surface";
-		try {
-			pool = com.mojang.brigadier.arguments.StringArgumentType.getString(c, "pool");
-		} catch (IllegalArgumentException ignored) {
-			// no pool given: Surface
-		}
-		Optional<PlacedFloor> floor = Floors.open(server, new FloorRequest(act, BlockSoulsWorld.id(pool), act, 0, players));
+		Optional<PlacedFloor> floor = Floors.open(server, new FloorRequest(act, BlockSoulsWorld.id(pool.toLowerCase(java.util.Locale.ROOT)), act, 0, players));
 		if (floor.isEmpty()) {
 			c.getSource().sendFailure(Component.literal("No floor placed (is the floor dimension loaded and a template in the pool?)"));
 			return 0;

@@ -10,7 +10,8 @@
 			"io.github.tmldude.blocksouls.world.test.EconomyBlockGameTests",
 			"io.github.tmldude.blocksouls.world.test.FloorGameTests",
 			"io.github.tmldude.blocksouls.world.test.SkyriftGameTests",
-			"io.github.tmldude.blocksouls.world.test.VaultGameTests"
+			"io.github.tmldude.blocksouls.world.test.VaultGameTests",
+			"io.github.tmldude.blocksouls.world.test.BlightFloorGameTests"
 		]
 	},
 	"depends": {
