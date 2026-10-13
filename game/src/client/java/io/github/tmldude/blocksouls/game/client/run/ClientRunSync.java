@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 
 import io.github.tmldude.blocksouls.common.client.ClientNetworking;
 import io.github.tmldude.blocksouls.game.run.RunSyncPayload;
+import io.github.tmldude.blocksouls.game.run.director.DirectorSyncPayload;
 
 /** Fills {@link ClientRun} and {@link RunSkyEffects} from the server's {@link RunSyncPayload}. */
 public final class ClientRunSync {
@@ -28,8 +29,11 @@ public final class ClientRunSync {
 			ClientCycle.update(payload.syntheticTimeOfDay(), payload.syntheticRate());
 			RunSkyEffects.update(payload);
 		});
+		ClientNetworking.receive(DirectorSyncPayload.TYPE, (payload, context) -> ClientRun.setDirector(new ClientRun.DirectorView(
+				payload.daySecondsLeft(), payload.daySeconds(), payload.stress(), payload.mood(), payload.objective(), payload.progress())));
 		ClientPlayConnectionEvents.DISCONNECT.register((listener, client) -> {
 			ClientRun.set(ClientRun.View.EMPTY);
+			ClientRun.setDirector(ClientRun.DirectorView.EMPTY);
 			ClientCycle.reset();
 			RunSkyEffects.reset();
 		});
