@@ -1,0 +1,9 @@
+{
+  "minFloor": 2,
+  "maxFloor": 2,
+  "floorTags": ["infernal"],
+  "metal": "blocksouls_world:cinder",
+  "metalCount": 3,
+  "souls": 8,
+  "enchantments": ["blocksouls_world:combustion", "minecraft:fire_aspect", "minecraft:flame", "minecraft:fire_protection"]
+}

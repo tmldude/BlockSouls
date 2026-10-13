@@ -104,6 +104,12 @@ public final class CommonIds {
 	public static final Identifier BLIGHT_CRYSTAL_NODE = id(WORLD, "blight_crystal_node");
 	public static final Identifier BLIGHT_CRYSTAL = id(WORLD, "blight_crystal");
 	public static final Identifier GHOSTCAP = id(WORLD, "ghostcap");
+	// v2-floor2-infernal: the Infernal floor's rare node (cinder ore → cinder) and herb (the ashcap block, the ashcap item).
+	public static final Identifier CINDER_ORE = id(WORLD, "cinder_ore");
+	public static final Identifier CINDER = id(WORLD, "cinder");
+	/** The herb (world): the block pops in one hit into the item of the same id. */
+	public static final Identifier ASHCAP = id(WORLD, "ashcap");
+	// end v2-floor2-infernal
 	// --- floor 3, Skyrift (Stage 6C) ---
 	/** Skyrift's rare node block (world), mostly on the floating shards; pops into skysteel. */
 	public static final Identifier SKYSTEEL_NODE = id(WORLD, "skysteel_node");

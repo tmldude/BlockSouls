@@ -24,6 +24,11 @@ public final class FloorBlocks {
 			node(MapColor.COLOR_PURPLE, SoundType.AMETHYST).lightLevel(state -> 6).noOcclusion());
 	public static final Block GHOSTCAP = register(CommonIds.GHOSTCAP, props -> new HerbBlock(props, 1),
 			node(MapColor.TERRACOTTA_WHITE, SoundType.FUNGUS).lightLevel(state -> 9).noCollision().noOcclusion());
+	/** v2-floor2-infernal: the Infernal floor's rare node and herb. */
+	public static final Block CINDER_ORE = register(CommonIds.CINDER_ORE, NodeBlock::new,
+			node(MapColor.FIRE, SoundType.NETHER_ORE).lightLevel(state -> 6));
+	public static final Block ASHCAP = register(CommonIds.ASHCAP, AshcapBlock::new,
+			node(MapColor.CRIMSON_NYLIUM, SoundType.FUNGUS).noCollision().noOcclusion().lightLevel(state -> 9));
 	// --- floor 3, Skyrift (Stage 6C) ---
 	public static final Block SKYSTEEL_NODE = register(CommonIds.SKYSTEEL_NODE, NodeBlock::new,
 			node(MapColor.ICE, SoundType.AMETHYST).lightLevel(state -> 6));
