@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "active=false": {
+      "model": "blocksouls_world:block/seed_pedestal"
+    },
+    "active=true": {
+      "model": "blocksouls_world:block/seed_pedestal_active"
+    }
+  }
+}

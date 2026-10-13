@@ -70,9 +70,9 @@
     {
       "kind": "secret",
       "tag": "sky_seed",
-      "x": -40,
-      "z": 18,
-      "radius": 4
+      "x": -7,
+      "z": -7,
+      "radius": 2
     },
     {
       "kind": "event",

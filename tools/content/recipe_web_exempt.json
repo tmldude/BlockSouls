@@ -27,7 +27,9 @@
 		"blocksouls_world:blight_forged_helmet": "gear (armor set piece; also drops from floor 4's vault room)",
 		"blocksouls_world:blight_forged_chestplate": "gear (armor set piece; also drops from floor 4's vault room)",
 		"blocksouls_world:blight_forged_leggings": "gear (armor set piece; also drops from floor 4's vault room)",
-		"blocksouls_world:blight_forged_boots": "gear (armor set piece; also drops from floor 4's vault room)"
+		"blocksouls_world:blight_forged_boots": "gear (armor set piece; also drops from floor 4's vault room)",
+		"blocksouls_world:skysteel_featherboots": "gear (Skyrift armor; also the sky temple's top-chest prize)",
+		"blocksouls_world:cloudbloom_tonic": "consumable (Skyrift brew)"
 	},
 	"debt": {}
 }

@@ -3,6 +3,7 @@ package io.github.tmldude.blocksouls.world.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.entity.IronGolemRenderer;
+import net.minecraft.client.renderer.entity.PhantomRenderer;
 import net.minecraft.client.renderer.entity.WanderingTraderRenderer;
 import net.minecraft.client.renderer.entity.WardenRenderer;
 import net.minecraft.client.player.LocalPlayer;
@@ -18,6 +19,7 @@ import io.github.tmldude.blocksouls.world.BlockSoulsWorld;
 import io.github.tmldude.blocksouls.world.WorldConfig;
 import io.github.tmldude.blocksouls.world.economy.WorldEconomy;
 import io.github.tmldude.blocksouls.world.floor.VaultMobs;
+import io.github.tmldude.blocksouls.world.floor.SkyMobs;
 
 public class BlockSoulsWorldClient implements ClientModInitializer {
 	@Override
@@ -28,6 +30,10 @@ public class BlockSoulsWorldClient implements ClientModInitializer {
 		// floor 4, The Vault: its mini-bosses wear the vanilla warden and golem
 		EntityRendererRegistry.register(VaultMobs.VAULT_LISTENER, WardenRenderer::new);
 		EntityRendererRegistry.register(VaultMobs.VAULT_COLOSSUS, IronGolemRenderer::new);
+		// Skyrift (floor 3): phantom-bodied flyers on the vanilla phantom renderer (it scales with their size).
+		EntityRendererRegistry.register(SkyMobs.STORM_ROC, PhantomRenderer::new);
+		EntityRendererRegistry.register(SkyMobs.GLIDER_MATRIARCH, PhantomRenderer::new);
+		EntityRendererRegistry.register(SkyMobs.SKY_GLIDER, PhantomRenderer::new);
 	}
 
 	/** Ash drifting around the player in the Nether (the fog itself is {@code FogRendererMixin}). */

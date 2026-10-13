@@ -405,7 +405,8 @@ final class FloorBuilder {
 
 	/**
 	 * The floor's structure: {@code outpost} is the checkpoint ruin, {@code wreck_yard} the wreck ruin,
-	 * {@code final_arena} floor 6's fighting ring ({@link ArenaFloor}), {@code nest} floor 5's hive.
+	 * {@code final_arena} floor 6's fighting ring ({@link ArenaFloor}), {@code nest} floor 5's hive,
+	 * {@code sky_temple} Skyrift's three-tier temple.
 	 */
 	private void structure(BlockPos pos, FloorPlanner.PlannedSlot slot) {
 		String tag = slot.tag();
@@ -415,6 +416,10 @@ final class FloorBuilder {
 		}
 		if ("nest".equals(tag)) { // v2-floor5-blight
 			nest(pos, Math.max(4, slot.radius()));
+			return;
+		}
+		if (SkyTemple.TAG.equals(tag)) { // floor 3, Skyrift
+			crate(SkyTemple.build(level, pos, FLAGS), SkyTemple.LOOT);
 			return;
 		}
 		RuinStructure.Kind kind = "wreck_yard".equals(tag) ? RuinStructure.Kind.WRECK : RuinStructure.Kind.CHECKPOINT;
@@ -490,10 +495,22 @@ final class FloorBuilder {
 	/**
 	 * The floor's secret. {@code cracked_wall}: a sealed mossy hut, one wall cracked (break it to get in);
 	 * {@code hidden_drop}: a trapdoor in the grass over a shaft to a small vault. Both hold a legendary-leaning chest.
+	 * {@code sky_seed} (Skyrift): the camp altar for the sky temple's seed.
 	 */
 	private void secret(BlockPos pos, String tag) {
 		if ("grave".equals(tag)) { // v2-floor5-blight
 			grave(pos);
+			return;
+		}
+		if (SkyTemple.SEED_SECRET.equals(tag)) { // floor 3, Skyrift: the camp altar the temple's seed is carried to
+			for (int x = -2; x <= 2; x++) {
+				for (int z = -2; z <= 2; z++) {
+					if (x * x + z * z <= 5) {
+						level.setBlock(pos.offset(x, -1, z), Blocks.CALCITE.defaultBlockState(), FLAGS);
+					}
+				}
+			}
+			level.setBlock(pos, FloorBlocks.SKY_ALTAR.defaultBlockState(), FLAGS);
 			return;
 		}
 		if ("hidden_drop".equals(tag)) {

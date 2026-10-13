@@ -75,3 +75,58 @@ what was actually built.
   - Enchant spec: Skyrift's enchant service takes 3 skysteel and 8 souls for one of feather falling,
     projectile protection, power or punch.
   - Upgrade chain: featherboots → blight-forged boots.
+
+## PR 3: sky temple, glowing seed, events, siege twist and roster (the floor is done)
+
+- **Sky temple** (`SkyTemple`, the `sky_temple` structure slot): three calcite tiers (half-sizes 5, 4, 3, 6 blocks
+  apart) with quartz corner pillars, climbed by a ladder up the middle; the roof holds the seed pedestal and the top
+  chest. The chest (`chests/sky_temple`) rolls **one** of the featherboots or a long-range gun
+  (`#blocksouls_world:loot/long_range_guns`, the sniper rifle, `required: false`), plus skysteel, cloudbloom and
+  tonics. Without the guns module the gun entry is empty, so that roll can come up with nothing; the boots still
+  come up half the time. The temple is placed by code, like PR 1's structures.
+- **Glowing seed secret.** The pedestal on the temple roof hands out one `glowing_seed` (it stores the pedestal's
+  position). Use it on the **sky altar** (the `sky_seed` secret slot, moved next to camp in all three templates)
+  to plant it.
+  - Planting pays everyone on the same floor a **legendary relic** (`blocksouls_game:relic_legendary`). Without
+    the game module, they get a roll of `chests/floor_secret` instead.
+  - The seed **dims** on any damage taken, on the fall back to camp, and when it is dropped or tossed. A dimmed
+    seed leaves the inventory and its pedestal relights, so the carry can be retried.
+  - The altar stays lit once planted, so the secret pays once per floor.
+- **Director events go through a common hook.** `DirectorEvents.PLACE_EVENT` (common) is fired by the Director
+  when it places an event id it doesn't own, so the world builds Skyrift's three events without game importing
+  world. The events are floor-tagged `EventSpec`s (`floorTags: ["skyrift"]`) in `DirectorConfig`
+  (`defaultsVersion` 2). A spec with floor tags only rolls on a floor carrying one of those tags.
+  - **Wind altar:** offer a held common or rare relic. Win (`windAltarWinChance` 0.5): you get the next-tier
+    relic plus `windAltarTonics` (2) cloudbloom tonics. Lose: you get slow fall and a push. One offer per altar.
+    The brief's "rune" prize is the tier-up relic, because there is no rune item.
+  - **Falling-shard chest:** a calcite disc `fallingShardRise` (8) above the slot, with a ladder up and a crate
+    chest on it. After `fallingShardSeconds` (45) it breaks up into falling blocks and the chest is gone.
+  - **Bridge ambush:** a plank bridge between two stone pillars, with a crate chest on the deck. It is an
+    ambush spec, so the Director's pack springs on whoever reaches it.
+  - Event state (shards counting down) is live-only, like the Director's objectives.
+- **Siege twist (waves come from the shards):** during a wave, each wave mob that loads in a Skyrift floor has a
+  `shardSiegeChance` (0.4) chance to be moved to a random raised siege point (the shards PR 1 put up). It gets
+  `shardSiegeSlowFall` (160) ticks of slow falling and drops in. Each mob is tagged so it's only moved once. The
+  world does this, not the wave spawner, so `game/run` isn't touched.
+- **Mini-boss pool** (`miniBossesByFloorTag.skyrift`): Stormplate (`blocksouls_bosses:stormplate_knight`), the
+  Storm Roc and the Glider Matriarch. Like the base roster, bosses that aren't installed are skipped.
+  - **Storm Roc:** a size-6 phantom, `rocHealth` 90. Every `rocGustTicks` (140) it pushes players inside
+    `rocGustRadius` (9) outward at `rocGustStrength` (1.3), toward the edge.
+  - **Glider Matriarch:** a size-3 phantom, `matriarchHealth` 60. She calls a glider pack at spawn and again at
+    half health.
+  - **Glider pack:** `gliderPack` (4) small frosted sky gliders, `gliderHealth` 8.
+  - Health scales with `PartyScaling.bossHealth` and pack size with `directorBurst` (`SkyBossMath`, tested at 1
+    and 8 players). All three use the vanilla phantom model and texture; dedicated art can replace them without
+    touching code.
+  - The Matriarch's "pack called" flags aren't saved, so after a reload she can call a pack once more.
+- **Roster:** `AffixConfig.weightsByFloorTag.skyrift` makes **frosted** the common affix (weight 5) on Skyrift.
+  The brief's other roster entries map to existing mobs, because roster entries can't be weighted per floor:
+  - flyers: the gliders and the Roc
+  - leapers: the crawlers
+  - snipers: the spitters
+- **Lane exceptions:**
+  - common `DirectorEvents` (the place-event hook)
+  - game `DirectorConfig` / `DirectorRules` / `DayLoop` (floor-tagged events, mini-boss roster by floor tag)
+  - mobs `MobsConfig` / `AffixRoll` / `MobAffixes` (affix weights by floor tag)
+- **Exemptions:** the featherboots are gear and the cloudbloom tonic is a consumable. Both now drop from the
+  temple chest, so they are listed in `recipe_web_exempt.json`.
