@@ -83,9 +83,12 @@ Spec: `docs/design/floors.md` "Floor 6 — Final Arena". Code: `bosses/src/*/jav
 - **Data, not code:** board entries only narrow, so `tools/content/gen_floor6_shop.py` writes one entry per other
   BlockSouls recipe, capping it at floor 5. The entries go in `world/.../blocksouls_board/entry/floor6_arena/`,
   as `{"recipe", "maxFloor": 5}`.
-- **Kept (no file):** results in `#blocksouls:ammo` or `#blocksouls:brew_board`, ids naming a tonic, antidote or
-  ammo, and recipes that already have an entry elsewhere. That other file decides, because two entries for one
-  recipe means the last loaded wins. Today's three such entries (the vault tonics and receiver) are
-  `vault`-tagged, so they never show on the arena anyway.
-- **New recipes show on floor 6 until the script is rerun.** `--check` reports stale files. A session that gives a
-  recipe its own entry and wants it off floor 6 sets `maxFloor` 5 itself.
+- **Kept (no file):** results in `#blocksouls:ammo` or `#blocksouls:brew_board`, and ids naming a tonic, antidote,
+  draught, broth or ammo. Draughts and broths are brewed consumables, which is what the arena's "tonics" means.
+- **Recipes with their own entry elsewhere** (floor gear such as the skysteel featherboots or the cinder plate) get
+  no second file, because for two entries on one recipe the last one loaded wins, and that order depends on file
+  names. Instead, the script writes `"maxFloor": 5` into that file with a minimal text edit, unless it starts on
+  floor 6 or later. This edits other floor sessions' entry files; it is the only way to cap them that does not
+  depend on load order.
+- **New recipes show on floor 6 until the script is rerun.** `--check` reports missing or stale files and
+  uncapped entries.

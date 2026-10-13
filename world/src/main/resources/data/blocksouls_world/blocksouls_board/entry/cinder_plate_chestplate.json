@@ -1,5 +1,6 @@
 {
   "recipe": "blocksouls_world:cinder_plate_chestplate",
   "board": "forge",
-  "minFloor": 2
+  "minFloor": 2,
+  "maxFloor": 5
 }
