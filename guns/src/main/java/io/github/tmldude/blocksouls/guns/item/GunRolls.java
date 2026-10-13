@@ -38,13 +38,16 @@ public final class GunRolls {
 		return stack.getItem() instanceof GunItem gun && gun.stats().perks();
 	}
 
-	/** Rolls rarity and perks onto a gun that can have them; other stacks are left alone. */
+	/**
+	 * Rolls rarity and perks onto a gun that can have them; other stacks are left alone. Exotic guns ignore the odds:
+	 * they are always {@link GunRarity#EXOTIC} with its perk count.
+	 */
 	public static void roll(ItemStack stack, double[] odds, RandomSource random) {
 		if (!canRoll(stack)) {
 			return;
 		}
 		Random rng = new Random(random.nextLong());
-		GunRarity rarity = Rolls.rarity(odds, rng);
+		GunRarity rarity = stack.getItem() instanceof ExoticGunItem ? GunRarity.EXOTIC : Rolls.rarity(odds, rng);
 		set(stack, rarity, Rolls.perks(List.of(Perk.values()), rarity.perkCount(), rng));
 	}
 
@@ -58,7 +61,7 @@ public final class GunRolls {
 		stack.set(DataComponents.RARITY, switch (rarity) {
 			case COMMON -> Rarity.COMMON;
 			case RARE -> Rarity.RARE;
-			case LEGENDARY -> Rarity.EPIC;
+			case LEGENDARY, EXOTIC -> Rarity.EPIC;
 		});
 	}
 
@@ -90,6 +93,7 @@ public final class GunRolls {
 			case COMMON -> config.commonDamageMult;
 			case RARE -> config.rareDamageMult;
 			case LEGENDARY -> config.legendaryDamageMult;
+			case EXOTIC -> config.exoticDamageMult;
 		};
 	}
 

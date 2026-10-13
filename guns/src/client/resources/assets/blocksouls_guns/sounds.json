@@ -103,6 +103,29 @@
       "blocksouls_guns:gun/perk/vorpal1"
     ]
   },
+  "gun.kill_confirm": {
+    "sounds": [
+      "blocksouls_guns:gun/kill_confirm1"
+    ]
+  },
+  "gun.exotic.vent": {
+    "subtitle": "subtitles.blocksouls_guns.gun.exotic.vent",
+    "sounds": [
+      "blocksouls_guns:gun/exotic/vent1"
+    ]
+  },
+  "gun.exotic.tether": {
+    "subtitle": "subtitles.blocksouls_guns.gun.exotic.tether",
+    "sounds": [
+      "blocksouls_guns:gun/exotic/tether1"
+    ]
+  },
+  "gun.exotic.mark": {
+    "subtitle": "subtitles.blocksouls_guns.gun.exotic.mark",
+    "sounds": [
+      "blocksouls_guns:gun/exotic/mark1"
+    ]
+  },
   "gun.drop.rare": {
     "subtitle": "subtitles.blocksouls_guns.gun.drop",
     "sounds": [

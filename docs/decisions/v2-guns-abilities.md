@@ -73,3 +73,42 @@ feel pass) where `PLAN2.md` §3j or the brief was silent. Same rules as `DECISIO
   starts.
 - **HUD** bottom-left (margins in config): 20px slots, cooldown sweep draining from the top plus a seconds label,
   the ultimate bar above the row; a denied press flashes the slot red, a full bar flashes and chimes once.
+
+## Guns v2: exotics + feel pass (PR 3)
+- **Exotics are a new item class alongside** (`ExoticGunItem extends GunItem`), registered next to the regular guns,
+  never replacing them, with the v0.11 drops-and-pacing lane in mind (no restructuring of `GunItem`/`GunsItems`,
+  gun-part lang keys untouched). Behavior is one class per exotic (`exotic/`), hooked into `GunServer` through
+  `ExoticBehavior` (`canFire`, `fireInterval`, `onShot`, `onHit`); every number is in `guns.json` → `exotics`.
+- **`GunRarity.EXOTIC`** is a fourth rarity the odds tables never roll: exotic items force it (one perk, ×1.2 damage,
+  gold name). Dropped exotics roll one perk; **a smithed exotic keeps its base gun's perks** (smithing copies the
+  base's components), so a good legendary roll is worth transmuting.
+- **Names** (original): Stray Verdict (hand cannon), Lantern Eye (sniper), Backdraft (shotgun), Kindling Engine
+  (auto rifle), Tether Lance (rocket launcher). The rocket launcher archetype didn't exist; the Tether Lance is
+  its first gun: special ammo, 1-round mag, 3 s reload, the rocket is the hitscan round with a blast at the end.
+- **Kindling heat lives on the item** (`blocksouls_guns:kindling` component: heat, the game time it was measured
+  at, vent end) with lazy decay, so it syncs to the HUD for free and nothing ticks per gun.
+- **Lantern marks and tethers are server tables** in `Exotics` (uuid → expiry; tethered pairs), ticked from
+  `GunServer.tick`; marks glow (vanilla glowing tag) and give +25% from any gun.
+- **Loot:** `roll_perks` grew a `"tier": "exotic"` that swaps any gun entry for a random exotic (weights in
+  `loot.exoticWeights`), so tables drop exotics without naming them. Guns adds an exotic pool to the tables in
+  `loot.exoticTables` (boss legendary-gun 20%, final dragon 100%, legendary wave tier 1%) through
+  `LootTableEvents.MODIFY`, so no other module's loot JSON changes. v2-builds' offer API (`BuildHooks.offerTrinkets`,
+  #51) only offers trinkets (a Trinket Case item), so an exotic pick-1-of-3 would need a new contract; the loot-table
+  path stays the drop path (orchestrator, 2026-10-12) until a generic offer hook exists.
+- **Crafting web:** exotics are exempt end items. **Exotic Catalyst** (soul-infused: 2 souls + 2 gunmetal + a gun
+  receiver) is the soul recipe on this side, gated with `fabric:registry_contains` on `blocksouls_game:soul` so
+  it only loads once v2-builds registers the item; it feeds five smithing recipes (catalyst + hand cannon →
+  Stray Verdict, etc.; Tether Lance from a gun barrel), satisfying R2. Owner's trade-board direction: the
+  Director's board can list the same offer; the recipe stays for R1 on souls.
+- **Feel pass:** muzzle flash is a bright core + spark cone + smoke scaled by the gun; impacts chip the block hit
+  (block particles of its state) or spark on flesh, computed client-side from the tracer's end so no payload
+  changed; a kill-confirm tick plays for the shooter on the red marker (new synthesized `gun.kill_confirm`); the
+  precision marker/sound already existed. **Rarity glow on dropped guns is deliberately not here** (v0.11
+  drops-and-pacing owns it).
+- **Reload-cancel on roll** listens to `PlayerMoveEvents.ROLLED` (v2-players fires it from movement): a roll at
+  ≥ 80% (`shooting.reloadCancelThreshold`; 1 disables) completes the reload at once and fires `RELOADED`.
+- **Contract wiring on the guns side:** fires `CombatEvents.HIT` (every living hit, after damage) and
+  `CombatEvents.RELOADED` (rounds loaded); installs the `WeaponHooks` provider (instant refill from the player's
+  ammo, cancelling a running reload); gates firing on `PlayerStatus.canShoot`; registers a `SynergyTags.Source`
+  for the main-hand gun (perk → tags: Outlaw on_precision + on_reload, Rampage on_kill, Explosive Rounds
+  on_precision + explosion, Vorpal kinetic; plus an exotic's own tags).

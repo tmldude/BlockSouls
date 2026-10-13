@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:smithing_transform",
+  "template": "blocksouls_guns:exotic_catalyst",
+  "base": "blocksouls_guns:shotgun",
+  "addition": "minecraft:tnt",
+  "result": {
+    "id": "blocksouls_guns:backdraft",
+    "components": {
+      "blocksouls_guns:rarity": "exotic",
+      "minecraft:rarity": "epic"
+    }
+  }
+}

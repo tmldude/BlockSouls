@@ -1,8 +1,10 @@
 package io.github.tmldude.blocksouls.guns.item;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -11,7 +13,11 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.component.UseEffects;
 
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
@@ -27,6 +33,14 @@ public final class GunsItems {
 	public static GunItem AUTO_RIFLE;
 	public static GunItem SHOTGUN;
 	public static GunItem SNIPER_RIFLE;
+
+	public static ExoticGunItem STRAY_VERDICT;
+	public static ExoticGunItem LANTERN_EYE;
+	public static ExoticGunItem BACKDRAFT;
+	public static ExoticGunItem KINDLING_ENGINE;
+	public static ExoticGunItem TETHER_LANCE;
+	/** Soul-infused smithing template: catalyst + a gun → its exotic. */
+	public static Item EXOTIC_CATALYST;
 
 	public static Item PRIMARY_AMMO;
 	public static Item SPECIAL_AMMO;
@@ -48,6 +62,17 @@ public final class GunsItems {
 		AUTO_RIFLE = gun(Weapons.AUTO_RIFLE);
 		SHOTGUN = gun(Weapons.SHOTGUN);
 		SNIPER_RIFLE = gun(Weapons.SNIPER_RIFLE);
+		STRAY_VERDICT = exotic(Weapons.STRAY_VERDICT);
+		LANTERN_EYE = exotic(Weapons.LANTERN_EYE);
+		BACKDRAFT = exotic(Weapons.BACKDRAFT);
+		KINDLING_ENGINE = exotic(Weapons.KINDLING_ENGINE);
+		TETHER_LANCE = exotic(Weapons.TETHER_LANCE);
+		EXOTIC_CATALYST = register("exotic_catalyst", props -> new Item(props.stacksTo(16)) {
+			@Override
+			public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag flag) {
+				builder.accept(Component.translatable("tooltip." + BlockSoulsGuns.MOD_ID + ".exotic_catalyst").withStyle(ChatFormatting.GOLD));
+			}
+		});
 
 		PRIMARY_AMMO = register("primary_ammo", props -> new Item(props.stacksTo(stackSize(BlockSoulsGuns.CONFIG.loot.primaryAmmoStack))));
 		SPECIAL_AMMO = register("special_ammo", props -> new Item(props.stacksTo(stackSize(BlockSoulsGuns.CONFIG.loot.specialAmmoStack))));
@@ -57,15 +82,25 @@ public final class GunsItems {
 		GUN_STOCK = register("gun_stock", Item::new);
 
 		CreativeModeTabEvents.modifyOutputEvent(tab("combat")).register(output -> {
-			output.insertAfter(Items.CROSSBOW, STARTER_PISTOL, HAND_CANNON, AUTO_RIFLE, SHOTGUN, SNIPER_RIFLE, PRIMARY_AMMO, SPECIAL_AMMO);
+			output.insertAfter(Items.CROSSBOW, STARTER_PISTOL, HAND_CANNON, AUTO_RIFLE, SHOTGUN, SNIPER_RIFLE, STRAY_VERDICT, LANTERN_EYE,
+					BACKDRAFT, KINDLING_ENGINE, TETHER_LANCE, PRIMARY_AMMO, SPECIAL_AMMO);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(tab("ingredients")).register(output -> {
-			output.insertAfter(Items.GUNPOWDER, GUN_BARREL, GUN_RECEIVER, GUN_STOCK);
+			output.insertAfter(Items.GUNPOWDER, GUN_BARREL, GUN_RECEIVER, GUN_STOCK, EXOTIC_CATALYST);
 		});
 	}
 
 	public static List<GunItem> guns() {
-		return List.of(STARTER_PISTOL, HAND_CANNON, AUTO_RIFLE, SHOTGUN, SNIPER_RIFLE);
+		return List.of(STARTER_PISTOL, HAND_CANNON, AUTO_RIFLE, SHOTGUN, SNIPER_RIFLE, STRAY_VERDICT, LANTERN_EYE, BACKDRAFT, KINDLING_ENGINE,
+				TETHER_LANCE);
+	}
+
+	public static List<ExoticGunItem> exotics() {
+		return List.of(STRAY_VERDICT, LANTERN_EYE, BACKDRAFT, KINDLING_ENGINE, TETHER_LANCE);
+	}
+
+	private static ExoticGunItem exotic(String weaponId) {
+		return (ExoticGunItem) register(weaponId, props -> new ExoticGunItem(gun(props), weaponId));
 	}
 
 	/** Ammo item a gun reloads from; {@code null} for infinite ammo. */
