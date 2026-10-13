@@ -35,7 +35,9 @@ public final class PaleRiderClient {
 		ModelLayerRegistry.registerModelLayer(STEED_LAYER, WraithSteedModel::createBodyLayer);
 		EntityRendererRegistry.register(PaleRiders.TYPE, ctx ->
 				new Renderer(ctx, new PaleRiderModel(ctx.bakeLayer(LAYER)))
-						.glow("pale_rider_glow", state -> true));
+						.glow("pale_rider_glow", state -> true)
+						.damageStates()
+						.cracks(2));
 		EntityRendererRegistry.register(WraithSteeds.TYPE, SteedRenderer::new);
 	}
 

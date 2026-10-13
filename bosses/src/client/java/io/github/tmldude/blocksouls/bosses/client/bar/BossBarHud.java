@@ -9,6 +9,9 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 
+import io.github.tmldude.blocksouls.bosses.api.BossEntity;
+import io.github.tmldude.blocksouls.bosses.api.Stage;
+
 /**
  * Our boss bar (vanilla's never shows for our bosses): top center under the run HUD, the boss's name over a wide
  * framed bar, a pale "damage taken" chunk that drains 0.6 s after a hit, notches at the phase thresholds, and a short
@@ -27,6 +30,10 @@ public final class BossBarHud {
 	private static final int NOTCH = 0xFF0B0604;
 	private static final int NAME = 0xFFF0E6D2;
 	private static final long SHAKE_MS = 500;
+	private static final int POSTURE_HEIGHT = 2;
+	private static final int POSTURE_BACK = 0xA0140C08;
+	private static final int POSTURE_FILL = 0xFFE8C05A;
+	private static final int POSTURE_FULL = 0xFFFFF4D0;
 
 	private BossBarHud() {
 	}
@@ -74,9 +81,30 @@ public final class BossBarHud {
 			int nx = x + Math.round(width * notch);
 			graphics.fill(nx - 1, barY - 2, nx + 1, barY + BAR_HEIGHT + 2, NOTCH);
 		}
+		drawPosture(graphics, bar, x, barY + BAR_HEIGHT + 3, width);
 		if (sinceChange < SHAKE_MS) {
 			int alpha = (int) (200 * (1 - sinceChange / SHAKE_MS));
 			graphics.fill(x - 2, barY - 2, x + width + 2, barY + BAR_HEIGHT + 2, (alpha << 24) | 0xFFF4E0);
 		}
+	}
+
+	/** The thin posture bar under the boss bar, filling from both ends toward the middle; white while broken. */
+	private static void drawPosture(GuiGraphicsExtractor graphics, ClientBossBars.Bar bar, int x, int y, int width) {
+		Minecraft minecraft = Minecraft.getInstance();
+		if (minecraft.level == null || !(minecraft.level.getEntity(bar.entityId) instanceof BossEntity boss)) {
+			return;
+		}
+		float posture = Mth.clamp(boss.posture(), 0, 1);
+		boolean broken = boss.stage() == Stage.BROKEN;
+		if (posture <= 0 && !broken) {
+			return;
+		}
+		int w = Math.round(width * 0.6f);
+		int left = x + (width - w) / 2;
+		graphics.fill(left - 1, y - 1, left + w + 1, y + POSTURE_HEIGHT + 1, POSTURE_BACK);
+		int half = Math.round(w / 2f * (broken ? 1 : posture));
+		int color = broken && (Util.getMillis() / 120) % 2 == 0 ? POSTURE_FULL : POSTURE_FILL;
+		graphics.fill(left, y, left + half, y + POSTURE_HEIGHT, color);
+		graphics.fill(left + w - half, y, left + w, y + POSTURE_HEIGHT, color);
 	}
 }

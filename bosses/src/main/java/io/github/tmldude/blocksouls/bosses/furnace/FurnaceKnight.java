@@ -14,6 +14,10 @@ import io.github.tmldude.blocksouls.bosses.api.BossDefinition;
 import io.github.tmldude.blocksouls.bosses.api.BossEntity;
 import io.github.tmldude.blocksouls.bosses.api.BossPhase;
 import io.github.tmldude.blocksouls.bosses.api.Stage;
+import io.github.tmldude.blocksouls.bosses.archetype.ExpandingRing;
+import io.github.tmldude.blocksouls.bosses.archetype.Feint;
+import io.github.tmldude.blocksouls.bosses.archetype.LeapSlam;
+import io.github.tmldude.blocksouls.bosses.archetype.LingeringPools;
 import io.github.tmldude.blocksouls.common.CommonIds;
 
 /**
@@ -42,6 +46,10 @@ public class FurnaceKnight extends BossEntity {
 		FurnaceKnightAttacks.Breath breath = new FurnaceKnightAttacks.Breath();
 		FurnaceKnightAttacks.Charge charge = new FurnaceKnightAttacks.Charge();
 		FurnaceKnightAttacks.Pillars pillars = new FurnaceKnightAttacks.Pillars();
+		ExpandingRing ring = new ExpandingRing("ring", c.ring, FurnaceKnightAttacks.THEME, "slam");
+		LingeringPools pools = new LingeringPools("pools", c.pools, FurnaceKnightAttacks.THEME, "pillars");
+		LeapSlam leap = new LeapSlam("leap", c.leap, FurnaceKnightAttacks.THEME, "charge");
+		Feint feint = new Feint("feint", c.feint, slam, sweep);
 		definition = BossDefinition.builder(CommonIds.FURNACE_KNIGHT)
 				.health(c.health)
 				.arenaRadius(c.arenaRadius)
@@ -49,9 +57,9 @@ public class FurnaceKnight extends BossEntity {
 				// Blight core (world) and a legendary gun (guns), only when those modules are installed.
 				.extraLoot(CommonIds.id(CommonIds.BOSSES, "boss_drops/furnace_knight_world"),
 						CommonIds.id(CommonIds.BOSSES, "boss_drops/legendary_gun"))
-				.phase(BossPhase.first().attacks(slam, sweep, breath, charge))
+				.phase(BossPhase.first().attacks(slam, sweep, breath, charge, ring, leap))
 				.phase(BossPhase.below(c.phase2Threshold)
-						.attacks(slam, sweep, breath, charge, pillars)
+						.attacks(slam, sweep, breath, charge, pillars, ring, leap, pools, feint)
 						.damage(c.phase2Damage)
 						.recovery(c.phase2Recovery)
 						.cooldowns(c.phase2Cooldowns)
@@ -74,6 +82,12 @@ public class FurnaceKnight extends BossEntity {
 	/** Phase 2: the cleaver burns (client and server). */
 	public boolean bladeLit() {
 		return phase() >= 1;
+	}
+
+	/** Sidesteps a held aim (v2 reactions). */
+	@Override
+	protected boolean sidesteps() {
+		return true;
 	}
 
 	@Override

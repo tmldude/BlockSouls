@@ -1,6 +1,7 @@
 package io.github.tmldude.blocksouls.bosses.palerider;
 
 import io.github.tmldude.blocksouls.bosses.api.AttackStats;
+import io.github.tmldude.blocksouls.bosses.archetype.ArchetypeParams;
 import io.github.tmldude.blocksouls.bosses.field.FieldBossSettings;
 
 /** {@code config/blocksouls/boss-pale_rider.json}. Ticks are 1/20 s; damage is at normal difficulty, phase 1. */
@@ -77,6 +78,15 @@ public class PaleRiderConfig {
 	public double floatSpeed = 0.9;
 
 	/** Phase 2 starts below this share of health: the horse dissolves. */
+	/** v2 archetypes. Soul burst: a tall ring of soul fire with one gap; stand in the lane. */
+	public ArchetypeParams.Burst burst = new ArchetypeParams.Burst(new AttackStats(24, 40, 22, 180, 0, 10, 2, 10));
+	/** Wisps: three soul orbs hang for a second, then hunt. */
+	public ArchetypeParams.Orbs orbs = new ArchetypeParams.Orbs(new AttackStats(20, 90, 16, 200, 4, 22, 2, 6)).orbs(3, 0.38);
+	/** Leap (on foot): vaults onto a player; the shadow shows where. */
+	public ArchetypeParams.Leap leap = new ArchetypeParams.Leap(new AttackStats(28, 3, 24, 160, 5, 16, 1.5, 11)).leap(15, 3.0);
+	/** Feint (phase 2): starts a slash, then blinks instead. */
+	public ArchetypeParams.Feint feint = new ArchetypeParams.Feint(new AttackStats(8, 1, 0, 220, 2, 3.5, 1.5, 0));
+
 	public double phase2Threshold = 0.55;
 	public double phase2Damage = 1.15;
 	public double phase2Recovery = 0.85;

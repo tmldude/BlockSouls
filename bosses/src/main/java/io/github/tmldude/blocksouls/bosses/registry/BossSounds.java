@@ -17,6 +17,12 @@ public final class BossSounds {
 	public static final SoundEvent FOG_WALL_OPEN = register("block.fog_wall.open");
 	/** The player's own cue when lock-on catches a target (client side, UI). */
 	public static final SoundEvent LOCK_ON = register("ui.lock_on");
+	/** Full poise: the boss buckles and the visceral window opens. */
+	public static final SoundEvent POSTURE_BREAK = register("entity.boss.posture_break");
+	/** A breakable part (pauldron, tail) shatters. */
+	public static final SoundEvent PART_BREAK = register("entity.boss.part_break");
+	/** The name-splash sting as the fog wall rises (each player hears it once per fight). */
+	public static final SoundEvent STING = register("ui.boss_sting");
 
 	private BossSounds() {
 	}

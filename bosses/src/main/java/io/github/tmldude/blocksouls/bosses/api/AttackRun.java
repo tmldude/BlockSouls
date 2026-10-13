@@ -30,7 +30,7 @@ public final class AttackRun {
 	private final BossPhase phase;
 	private final int windupTicks;
 	private final int activeTicks;
-	private final int recoveryTicks;
+	private int recoveryTicks;
 	private @Nullable LivingEntity target;
 	private Stage stage = Stage.WINDUP;
 	private int tick;
@@ -41,6 +41,9 @@ public final class AttackRun {
 	private final Map<LivingEntity, Integer> lastHitTick = new HashMap<>();
 	private int totalTicks;
 	private boolean endActive;
+	private final Set<java.util.UUID> rolled = new HashSet<>();
+	private int firstTelegraphTick = -1;
+	private int firstHitTick = -1;
 
 	AttackRun(BossEntity boss, ServerLevel level, Attack attack, BossPhase phase, @Nullable LivingEntity target) {
 		this.boss = boss;
@@ -143,6 +146,51 @@ public final class AttackRun {
 		endActive = true;
 	}
 
+	/** Lengthens the recovery (e.g. a charge stuck in a wall). Only from the active stage or the recovery itself. */
+	public void extendRecovery(int ticks) {
+		if (ticks > 0 && (stage == Stage.ACTIVE || stage == Stage.RECOVERY)) {
+			recoveryTicks += ticks;
+		}
+	}
+
+	/**
+	 * Ticks until the hitboxes go live: positive during the windup, 0 on the first active tick, negative after that
+	 * (and {@code Integer.MIN_VALUE / 2} once in recovery).
+	 */
+	public int ticksBeforeActive() {
+		return switch (stage) {
+			case WINDUP -> windupTicks - tick;
+			case ACTIVE -> -tick;
+			default -> Integer.MIN_VALUE / 2;
+		};
+	}
+
+	public int activeTicks() {
+		return activeTicks;
+	}
+
+	/** Marks that this run drew its telegraph this tick (archetypes call it; tests check telegraph-before-hit). */
+	public void telegraphed() {
+		if (firstTelegraphTick < 0) {
+			firstTelegraphTick = totalTicks;
+		}
+	}
+
+	/** Run tick of the first telegraph, or -1. */
+	public int firstTelegraphTick() {
+		return firstTelegraphTick;
+	}
+
+	/** Run tick of the first landed hit, or -1. */
+	public int firstHitTick() {
+		return firstHitTick;
+	}
+
+	/** Records that {@code player} rolled during this run; false if they already had. */
+	boolean markRolled(java.util.UUID player) {
+		return rolled.add(player);
+	}
+
 	/** Advances the clock; returns false once the attack is over. Called by the boss after the stage's hook. */
 	boolean advance() {
 		tick++;
@@ -195,7 +243,15 @@ public final class AttackRun {
 
 	private boolean deal(LivingEntity victim, double baseDamage) {
 		DamageSource source = level.damageSources().mobAttack(boss);
-		return victim.hurtServer(level, source, (float) scaled(baseDamage));
+		float amount = (float) scaled(baseDamage);
+		boolean landed = victim.hurtServer(level, source, amount);
+		if (landed) {
+			if (firstHitTick < 0) {
+				firstHitTick = totalTicks;
+			}
+			boss.onAttackLanded(level, victim, amount);
+		}
+		return landed;
 	}
 
 	/** Everyone this run has hit so far. */
@@ -220,13 +276,13 @@ public final class AttackRun {
 		this.direction = flatDirection(boss.position(), target.position(), direction);
 	}
 
-	static Vec3 flat(Vec3 dir) {
+	public static Vec3 flat(Vec3 dir) {
 		Vec3 flat = new Vec3(dir.x, 0, dir.z);
 		double length = flat.length();
 		return length < 1e-4 ? new Vec3(0, 0, 1) : flat.scale(1 / length);
 	}
 
-	static Vec3 flatDirection(Vec3 from, Vec3 to, Vec3 fallback) {
+	public static Vec3 flatDirection(Vec3 from, Vec3 to, Vec3 fallback) {
 		Vec3 delta = new Vec3(to.x - from.x, 0, to.z - from.z);
 		return delta.lengthSqr() < 1e-4 ? flat(fallback) : delta.normalize();
 	}

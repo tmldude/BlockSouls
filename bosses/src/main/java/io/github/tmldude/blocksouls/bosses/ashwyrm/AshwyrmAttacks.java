@@ -28,6 +28,9 @@ final class AshwyrmAttacks {
 	/** Brighter fill as the windup runs out. */
 	static final ParticleOptions FILL = new DustParticleOptions(0xFFC25A, 1.2f);
 	/** Ash-grey outline for the wind (buffet) ring. */
+	/** Theme for the shared archetypes: flame and magma. */
+	static final io.github.tmldude.blocksouls.bosses.archetype.Theme THEME = new io.github.tmldude.blocksouls.bosses.archetype.Theme(OUTLINE, FILL,
+			ParticleTypes.FLAME, AshwyrmSounds.ROAR, AshwyrmSounds.IMPACT);
 	static final ParticleOptions ASH_OUTLINE = new DustParticleOptions(0xB8B0AA, 1.6f);
 
 	private AshwyrmAttacks() {

@@ -35,6 +35,10 @@ import net.minecraft.world.phys.Vec3;
 import io.github.tmldude.blocksouls.bosses.api.BossDefinition;
 import io.github.tmldude.blocksouls.bosses.api.BossEntity;
 import io.github.tmldude.blocksouls.bosses.api.BossPhase;
+import io.github.tmldude.blocksouls.bosses.archetype.Feint;
+import io.github.tmldude.blocksouls.bosses.archetype.HomingOrbs;
+import io.github.tmldude.blocksouls.bosses.archetype.LeapSlam;
+import io.github.tmldude.blocksouls.bosses.archetype.RadialBurst;
 import io.github.tmldude.blocksouls.bosses.api.Hitboxes;
 import io.github.tmldude.blocksouls.bosses.api.Telegraphs;
 import io.github.tmldude.blocksouls.bosses.logic.BossScaling;
@@ -84,15 +88,19 @@ public class PaleRider extends BossEntity {
 		PaleRiderAttacks.Spears spears = new PaleRiderAttacks.Spears();
 		PaleRiderAttacks.Blink blink = new PaleRiderAttacks.Blink();
 		PaleRiderAttacks.Slash slash = new PaleRiderAttacks.Slash();
+		RadialBurst burst = new RadialBurst("burst", c.burst, PaleRiderAttacks.THEME, "stomp");
+		HomingOrbs orbs = new HomingOrbs("wisps", c.orbs, PaleRiderAttacks.THEME, "call");
+		LeapSlam leap = new LeapSlam("leap", c.leap, PaleRiderAttacks.THEME, "blink");
+		Feint feint = new Feint("feint", c.feint, slash, blink);
 		definition = BossDefinition.builder(CommonIds.PALE_RIDER)
 				.health(c.health)
 				.arenaRadius(c.arenaRadius)
 				.music(PaleRiderSounds.MUSIC)
 				// A legendary gun, only when the guns module is installed.
 				.extraLoot(CommonIds.id(CommonIds.BOSSES, "boss_drops/legendary_gun"))
-				.phase(BossPhase.first().attacks(lance, sweep, stomp, call))
+				.phase(BossPhase.first().attacks(lance, sweep, stomp, call, burst, orbs))
 				.phase(BossPhase.below(c.phase2Threshold)
-						.attacks(spears, blink, slash, call)
+						.attacks(spears, blink, slash, call, orbs, leap, feint)
 						.damage(c.phase2Damage)
 						.recovery(c.phase2Recovery)
 						.cooldowns(c.phase2Cooldowns)
@@ -118,6 +126,12 @@ public class PaleRider extends BossEntity {
 	@Override
 	protected EntityDimensions getDefaultDimensions(Pose pose) {
 		return unhorsed() ? ON_FOOT : super.getDefaultDimensions(pose);
+	}
+
+	/** Sidesteps a held aim (v2 reactions). */
+	@Override
+	protected boolean sidesteps() {
+		return true;
 	}
 
 	@Override

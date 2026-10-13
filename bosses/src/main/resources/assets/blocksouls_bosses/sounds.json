@@ -566,5 +566,22 @@
         "volume": 0.6
       }
     ]
+  },
+  "entity.boss.posture_break": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.boss.posture_break",
+    "sounds": [
+      "blocksouls_bosses:boss/framework/posture_break1"
+    ]
+  },
+  "entity.boss.part_break": {
+    "subtitle": "subtitles.blocksouls_bosses.entity.boss.part_break",
+    "sounds": [
+      "blocksouls_bosses:boss/framework/part_break1"
+    ]
+  },
+  "ui.boss_sting": {
+    "sounds": [
+      "blocksouls_bosses:boss/framework/sting1"
+    ]
   }
 }

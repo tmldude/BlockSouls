@@ -26,6 +26,10 @@ final class FurnaceKnightAttacks {
 	/** Brighter fill as the windup runs out. */
 	static final ParticleOptions FILL = new DustParticleOptions(0xFFD24A, 1.2f);
 
+	/** Theme for the shared archetypes: embers and slag. */
+	static final io.github.tmldude.blocksouls.bosses.archetype.Theme THEME = new io.github.tmldude.blocksouls.bosses.archetype.Theme(OUTLINE, FILL,
+			ParticleTypes.FLAME, FurnaceKnightSounds.WINDUP, FurnaceKnightSounds.SLAM);
+
 	private FurnaceKnightAttacks() {
 	}
 
@@ -233,6 +237,9 @@ final class FurnaceKnightAttacks {
 				run.level().sendParticles(ParticleTypes.EXPLOSION, boss.getX(), boss.getY() + 1, boss.getZ(), 1, 0, 0, 0, 0);
 				run.sound(FurnaceKnightSounds.SLAM, 1.5f, 1.2f);
 				run.endActive();
+				// Wedged in: a 2 s punish window.
+				run.extendRecovery(config().chargeStuckTicks);
+				return;
 			}
 			run.level().sendParticles(ParticleTypes.FLAME, boss.getX(), boss.getY() + 0.3, boss.getZ(), 4, 0.5, 0.2, 0.5, 0.02);
 			for (LivingEntity victim : Hitboxes.inBox(boss, boss.getBoundingBox().inflate(0.6, 0, 0.6).expandTowards(dir.scale(speed)))) {

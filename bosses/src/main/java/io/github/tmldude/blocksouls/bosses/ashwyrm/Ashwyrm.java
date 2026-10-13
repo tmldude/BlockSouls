@@ -24,6 +24,9 @@ import net.minecraft.world.phys.Vec3;
 import io.github.tmldude.blocksouls.bosses.api.BossDefinition;
 import io.github.tmldude.blocksouls.bosses.api.BossEntity;
 import io.github.tmldude.blocksouls.bosses.api.BossPhase;
+import io.github.tmldude.blocksouls.bosses.archetype.Burrow;
+import io.github.tmldude.blocksouls.bosses.archetype.LingeringPools;
+import io.github.tmldude.blocksouls.bosses.archetype.Spiral;
 import io.github.tmldude.blocksouls.bosses.api.Stage;
 import io.github.tmldude.blocksouls.common.CommonIds;
 
@@ -79,16 +82,20 @@ public class Ashwyrm extends BossEntity {
 		AshwyrmAttacks.TailSweep tail = new AshwyrmAttacks.TailSweep();
 		AshwyrmAttacks.Breath breath = new AshwyrmAttacks.Breath();
 		AshwyrmAttacks.WingBuffet buffet = new AshwyrmAttacks.WingBuffet();
+		Burrow burrow = new Burrow("burrow", c.burrow, AshwyrmAttacks.THEME, "land");
+		Spiral spiral = new Spiral("spiral", c.spiral, AshwyrmAttacks.THEME, "breath");
+		LingeringPools pools = new LingeringPools("pools", c.pools, AshwyrmAttacks.THEME, "breath");
 		definition = BossDefinition.builder(CommonIds.ASHWYRM)
 				.health(c.health)
 				.arenaRadius(c.arenaRadius)
 				.music(AshwyrmSounds.MUSIC)
 				// A legendary gun, only when guns is installed.
 				.extraLoot(CommonIds.id(CommonIds.BOSSES, "boss_drops/legendary_gun"))
-				.phase(BossPhase.first().attacks(bite, tail, breath, buffet))
-				.phase(BossPhase.below(c.phase2Threshold).attacks(new AshwyrmAttacks.FireballRun(), new AshwyrmAttacks.Land()))
+				.breakable("tail", c.tailBreakShare, "tail_sweep", c.tailSpeedBonus)
+				.phase(BossPhase.first().attacks(bite, tail, breath, buffet, burrow))
+				.phase(BossPhase.below(c.phase2Threshold).attacks(new AshwyrmAttacks.FireballRun(), new AshwyrmAttacks.Land(), spiral))
 				.phase(BossPhase.below(c.phase3Threshold)
-						.attacks(bite, tail, breath, buffet, new AshwyrmAttacks.Firestorm())
+						.attacks(bite, tail, breath, buffet, new AshwyrmAttacks.Firestorm(), burrow, pools)
 						.damage(c.phase3Damage)
 						.speed(c.phase3Speed)
 						.cooldowns(c.phase3Cooldowns)

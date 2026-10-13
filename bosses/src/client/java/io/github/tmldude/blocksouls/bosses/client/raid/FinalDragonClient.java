@@ -22,7 +22,9 @@ public final class FinalDragonClient {
 		ModelLayerRegistry.registerModelLayer(LAYER, FinalDragonModel::createBodyLayer);
 		EntityRendererRegistry.register(FinalRaids.TYPE, ctx -> new FinalDragonRenderer(ctx)
 				.glow("final_dragon_glow", state -> true)
-				.glow("final_dragon_enraged_glow", state -> state.phase >= 1 || state instanceof FinalDragonRenderState s && s.enraged));
+				.glow("final_dragon_enraged_glow", state -> state.phase >= 1 || state instanceof FinalDragonRenderState s && s.enraged)
+				.damageStates()
+				.cracks(2));
 		EntityRendererRegistry.register(FinalRaids.CRYSTAL, RaidCrystalRenderer::new);
 	}
 }

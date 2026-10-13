@@ -168,6 +168,28 @@ def sounds():
     make("arena/lock_on", 1, lambda g, i: mix((metal(g, 0.15, 1100, 0.025, gains=(1, 0.3, 0.1, 0.05)), 1.0),
                                               (sine(curve([(0, 600), (1, 900)], int(0.15 * SR)), int(0.15 * SR)) * decay(0.15, 0.04), 0.5)))
 
+    # v2 framework cues (every boss): posture break, part break, the name-splash sting.
+    def posture_break(g, i):
+        d = 1.2
+        crack = metal(g, d, 520, 0.35, gains=(1, 0.7, 0.5, 0.3))
+        boom = thump(d, 90, 35, 0.3)
+        return reverb(g, mix((crack, 0.9), (boom, 1.0), (noise_hit(g, d, 2000, 9000, 0.05), 0.5)), 0.9, 0.3)
+    make("framework/posture_break", 1, posture_break)
+
+    def part_break(g, i):
+        d = 1.0
+        shatter = mix(*((at(metal(g, 0.5, 300 + 170 * k, 0.12), 0.03 * k, d), 0.6 / (k + 1)) for k in range(5)))
+        return reverb(g, mix((shatter, 1.0), (impact(g, d, 140, 40, 0.25), 0.8), (noise_hit(g, d, 1500, 7000, 0.08), 0.6)), 0.7, 0.25)
+    make("framework/part_break", 1, part_break)
+
+    def sting(g, i):
+        d = 2.2
+        n = int(d * SR)
+        hit = impact(g, d, 90, 28, 0.6, debris=0.1)
+        chord = sum(saw(curve([(0, 55 * r), (1, 54 * r)], n), n) for r in (1, 1.5, 2, 2.38)) * decay(d, 0.9)
+        return reverb(g, mix((hit, 1.0), (band(chord, 60, 2200), 0.35), (bell(g, d, 440, 0.8, 0.3), 0.15)), 1.5, 0.4)
+    make("framework/sting", 1, sting)
+
     # Furnace Knight: iron, bellows, fire.
     make("furnace_knight/ambient", 2, lambda g, i: mix((bellows(g, 2.2, 0.7 + 0.1 * i), 1.0), (fire(g, 2.2, 20), 0.35),
                                                        (at(iron(g, 0.4, 300 + 40 * i, 0.08), 1.4, 2.2), 0.25)))
@@ -398,7 +420,9 @@ def sounds():
 
 # Event id -> (sound key, subtitle). Every existing event keeps its subtitle key.
 def _events():
-    ev = {"block.fog_wall.close": "arena/fog_close", "block.fog_wall.open": "arena/fog_open", "ui.lock_on": "arena/lock_on"}
+    ev = {"block.fog_wall.close": "arena/fog_close", "block.fog_wall.open": "arena/fog_open", "ui.lock_on": "arena/lock_on",
+          "entity.boss.posture_break": "framework/posture_break", "entity.boss.part_break": "framework/part_break",
+          "ui.boss_sting": "framework/sting"}
     per_boss = {
         "furnace_knight": ["ambient", "hurt", "death", "step", "roar", "windup", "slam", "swing", "breath", "charge", "pillar"],
         "pale_rider": ["ambient", "hurt", "death", "hooves", "scream", "windup", "charge", "swing", "stomp", "call", "throw", "blink"],
@@ -420,7 +444,7 @@ def _events():
     ev["block.raid_plate.hum"] = "raid/plate_hum"
     ev["block.raid_plate.held"] = "raid/plate_held"
     ev["block.raid_plate.chains"] = "raid/chains"
-    return {e: (k, None if e == "ui.lock_on" else f"subtitles.blocksouls_bosses.{e}") for e, k in ev.items()}
+    return {e: (k, None if e in ("ui.lock_on", "ui.boss_sting") else f"subtitles.blocksouls_bosses.{e}") for e, k in ev.items()}
 
 
 EVENTS = _events()
@@ -429,7 +453,7 @@ MUSIC = {"music.furnace_knight": "furnace_knight", "music.pale_rider": "pale_rid
          "music.stormplate_knight": "stormplate_knight", "music.final_dragon": "final_raid"}
 
 # Peaks by kind: telegraphs and big impacts loudest, idle sounds and steps quieter.
-PEAKS = {"ambient": 0.6, "step": 0.6, "hooves": 0.7, "hurt": 0.75, "death": 0.9, "lock_on": 0.45, "plate_hum": 0.55, "orb": 0.7,
+PEAKS = {"ambient": 0.6, "step": 0.6, "hooves": 0.7, "hurt": 0.75, "death": 0.9, "lock_on": 0.45, "sting": 0.8, "plate_hum": 0.55, "orb": 0.7,
          "crystal_chime": 0.7, "plate_held": 0.7}
 
 
