@@ -197,6 +197,8 @@ CINDER = ramp("#6e6661", "#958a83", "#b9b0a8")
 EMBER = hexrgb("#ff7a1a"), hexrgb("#ffb347"), hexrgb("#c23c0c"), hexrgb("#ffe08a")
 RAD = hexrgb("#7fd33a"), hexrgb("#c8ff6e"), hexrgb("#4fae24"), hexrgb("#efffb8")
 BLACK = hexrgb("#0b0a0a")
+VOMIT = ramp("#262a17", "#3b4222", "#535c30", "#6b7542", "#868f58", "#a3aa74")
+SCRAP = ramp("#1e1f22", "#33363a", "#4b4f53", "#666a6c", "#858785", "#a8a7a0")
 
 
 # --- Painters -----------------------------------------------------------------------------------------------------
@@ -683,6 +685,137 @@ def ash_hound():
     g.save(path("ash_hound_glow"))
 
 
+def spitter():
+    c = Canvas("spitter")
+    c.skin(["torso", "skull", "jaw", "right_arm", "right_leg"], VOMIT, base=0.5)
+    c.skin(["throat", "back_sac1", "back_sac2"], BILE, base=0.62, amp=0.2, cell=2)
+    c.scatter(["torso", "skull", "right_arm"], BRUISE, 0.04)
+    # Sacs: stretched thin, glossy highlight, green veins crawling over them.
+    for cid in ("throat", "back_sac1", "back_sac2"):
+        for k in ("front", "right", "left", "back", "top", "bottom"):
+            f = c.face(cid, k)
+            c.px(f, 1, 1, BILE[5])
+            c.vein(f, f.w - 1, 0, max(2, f.h), hexrgb("#2f3a12"), wander=0.5)
+    # Face: milky eyes, a nose slit, lips eaten back from the teeth by acid.
+    f = c.face("skull", "front")
+    for x in (1, 5):
+        c.px(f, x, 3, hexrgb("#d8e8a0"))
+        c.px(f, x, 2, VOMIT[0])
+    c.px(f, 3, 4, VOMIT[0])
+    teeth(c, f, 6, 1, 6, BONE[2], hexrgb("#1f2a0c"))
+    j = c.face("jaw", "top")
+    c.rect(j, 0, 0, j.w, j.h, hexrgb("#2a3a0e"))
+    teeth(c, j, 0, 0, j.w, BONE[2], hexrgb("#2a3a0e"))
+    # Bile stains dribbling down the chest from the mouth.
+    f = c.face("torso", "front")
+    for x in (2, 3, 5):
+        c.vein(f, x, 0, int(c.rng.integers(4, 9)), BILE[3], wander=0.2)
+    torn_edge(c, c.face("torso", "front"), VOMIT[0], depth=1)
+    c.save(path("spitter"))
+    # Glow: the bile in the sacs and dribbling from the mouth.
+    g = Canvas("spitter", transparent=True)
+    for cid in ("throat", "back_sac1", "back_sac2"):
+        for k in ("front", "right", "left", "back", "bottom"):
+            f = g.face(cid, k)
+            for y in range(f.h):
+                for x in range(f.w):
+                    if g.rng.random() < 0.3:
+                        g.px(f, x, y, hexrgb("#4f6a12"))
+            g.px(f, 1, 1, hexrgb("#b6e04a"))
+    g.save(path("spitter_glow"))
+
+
+def bulwark():
+    c = Canvas("bulwark")
+    c.skin(["waist", "chest", "head", "right_shoulder", "right_arm", "right_fist", "right_leg"], MEAT, base=0.42, cell=4)
+    c.skin(["helm"], SCRAP, base=0.5, amp=0.25)
+    c.skin(["slab", "boss"], SCRAP, base=0.5, amp=0.3, cell=4)
+    c.skin(["spike1", "spike2", "spike3", "spike4"], BONE, base=0.6, amp=0.15)
+    # Shield: plates of scrap riveted together, rust bleeding from the seams, gouged by old blows.
+    f = c.face("slab", "front")
+    for y in (7, 15):
+        c.rect(f, 0, y, f.w, 1, SCRAP[0])
+        for x in range(1, f.w, 3):
+            c.px(f, x, y - 1, SCRAP[4])
+    c.rect(f, 9, 0, 1, f.h, SCRAP[0])
+    for _ in range(6):
+        c.vein(f, int(c.rng.integers(f.w)), int(c.rng.choice([8, 16])), int(c.rng.integers(2, 6)), RUST[2], wander=0.2)
+    for _ in range(5):
+        x, y = int(c.rng.integers(1, f.w - 4)), int(c.rng.integers(1, f.h - 2))
+        for i in range(3):
+            c.px(f, x + i, y + (i % 2), SCRAP[5])
+    c.scatter(["slab", "boss", "helm"], RUST, 0.06)
+    b = c.face("boss", "front")
+    c.rect(b, 1, 1, b.w - 2, b.h - 2, SCRAP[1])
+    c.rect(b, 2, 2, b.w - 4, b.h - 4, SCRAP[4])
+    # Helm: an eye slit with two dull orange points behind it.
+    h = c.face("helm", "front")
+    c.rect(h, 0, 2, h.w, 1, BLACK)
+    c.px(h, 1, 2, hexrgb("#ff9a3a"))
+    c.px(h, 4, 2, hexrgb("#ff9a3a"))
+    # Leather straps across the chest, a shackle on the fist.
+    for k in ("front", "back"):
+        f = c.face("chest", k)
+        for i in range(f.w):
+            c.px(f, i, (i * 10) // f.w, LEATHER[1])
+            c.px(f, i, (i * 10) // f.w + 1, LEATHER[0])
+    c.band("right_arm", 8, RUST[1], 2)
+    c.band("right_arm", 8, RUST[3], 1, chance=0.4)
+    c.wound(c.face("chest", "front"), 10, 6, 3, 3, BLOOD[0], SCAR[1])
+    c.save(path("bulwark"))
+
+
+def affix_overlays():
+    """Affix tints: tileable 64x64 emissive patterns drawn over a mob's whole model (any UV layout).
+
+    Mostly transparent so the mob's own skin reads through; the pattern says what the affix does."""
+    os.makedirs(os.path.join(ROOT, "entity", "affix"), exist_ok=True)
+    size = 64
+    for name, (colors, density, alpha) in AFFIX_TINTS.items():
+        rng = np.random.default_rng(int(hashlib.sha256(("affix_" + name).encode()).hexdigest()[:12], 16))
+        a = np.zeros((size, size, 4), np.uint8)
+        a[:, :, :3] = colors[0]
+        a[:, :, 3] = alpha
+        if name == "burning":
+            # Flame tongues licking upward.
+            for _ in range(int(size * density)):
+                x, y = int(rng.integers(size)), int(rng.integers(size))
+                for i in range(int(rng.integers(2, 6))):
+                    a[(y - i) % size, (x + int(rng.integers(-1, 2))) % size] = (*colors[1 + (i > 1)], 200)
+        elif name == "frosted":
+            # Six-armed ice crystals.
+            for _ in range(int(size * density)):
+                x, y = int(rng.integers(size)), int(rng.integers(size))
+                for dx, dy in ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, -1)):
+                    a[(y + dy) % size, (x + dx) % size] = (*colors[1 if (dx or dy) else 2], 210)
+        elif name == "volatile":
+            # Glowing cracks, as if the skin is about to split.
+            for _ in range(int(size * density)):
+                x, y = int(rng.integers(size)), int(rng.integers(size))
+                for i in range(int(rng.integers(4, 9))):
+                    a[y % size, x % size] = (*colors[1 if i % 3 else 2], 220)
+                    x += int(rng.integers(-1, 2))
+                    y += 1
+        elif name == "magnetic":
+            # Arcs: zigzag lightning lines.
+            for _ in range(int(size * density)):
+                x, y = int(rng.integers(size)), int(rng.integers(size))
+                for i in range(int(rng.integers(4, 8))):
+                    a[y % size, x % size] = (*colors[1 if i % 2 else 2], 220)
+                    x += 1
+                    y += 1 if i % 2 else -1
+        Image.fromarray(a, "RGBA").save(os.path.join(ROOT, "entity", "affix", name + ".png"))
+
+
+# Base tint, two pattern colours, pattern count per row of texture, base alpha.
+AFFIX_TINTS = {
+    "burning": ((hexrgb("#ff5a10"), hexrgb("#ff9a2a"), hexrgb("#ffe08a")), 1.2, 46),
+    "frosted": ((hexrgb("#7ac8ff"), hexrgb("#c8ecff"), hexrgb("#ffffff")), 0.8, 52),
+    "volatile": ((hexrgb("#ff2a2a"), hexrgb("#ff6a3a"), hexrgb("#fff0a0")), 0.6, 40),
+    "magnetic": ((hexrgb("#6a5aff"), hexrgb("#9ab4ff"), hexrgb("#e0f0ff")), 0.6, 44),
+}
+
+
 # --- Spawn eggs ---------------------------------------------------------------------------------------------------
 
 EGG = [
@@ -700,6 +833,8 @@ EGGS = {
     "mutant_brute": (SICK, RAD[0], RAD[1]),
     "infected_piglin": (PIG, BLIGHT[2], GOLD[0]),
     "ash_hound": (ASH, CINDER[1], EMBER[0]),
+    "spitter": (VOMIT, BILE[4], hexrgb("#b6e04a")),
+    "bulwark": (SCRAP, RUST[2], hexrgb("#ff9a3a")),
 }
 
 
@@ -732,7 +867,8 @@ def path(name):
 
 
 PAINTERS = {"shambler": shambler, "crawler": crawler, "screamer": screamer, "bloater": bloater, "brute": brute,
-            "mutant_brute": mutant_brute, "infected_piglin": infected_piglin, "ash_hound": ash_hound}
+            "mutant_brute": mutant_brute, "infected_piglin": infected_piglin, "ash_hound": ash_hound,
+            "spitter": spitter, "bulwark": bulwark}
 
 
 def main():
@@ -741,6 +877,7 @@ def main():
     for name, paint in PAINTERS.items():
         paint()
         spawn_egg(name).save(os.path.join(ROOT, "item", name + "_spawn_egg.png"))
+    affix_overlays()
 
 
 if __name__ == "__main__":

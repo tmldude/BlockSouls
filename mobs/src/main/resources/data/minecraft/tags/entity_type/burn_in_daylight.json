@@ -5,6 +5,8 @@
     "blocksouls_mobs:crawler",
     "blocksouls_mobs:screamer",
     "blocksouls_mobs:bloater",
-    "blocksouls_mobs:brute"
+    "blocksouls_mobs:brute",
+    "blocksouls_mobs:spitter",
+    "blocksouls_mobs:bulwark"
   ]
 }

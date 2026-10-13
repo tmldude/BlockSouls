@@ -95,6 +95,22 @@ public final class MobAffixes implements Affixes.Provider {
 		return true;
 	}
 
+	/** Removes the entity's affix, its extra health and its nameplate (debug command). */
+	public static void clear(LivingEntity entity) {
+		if (Affixes.of(entity).isEmpty()) {
+			return;
+		}
+		Affixes.attach(entity, null);
+		AttributeInstance health = entity.getAttribute(Attributes.MAX_HEALTH);
+		if (health != null) {
+			health.removeModifier(HEALTH_MODIFIER);
+			entity.setHealth(Math.min(entity.getHealth(), entity.getMaxHealth()));
+		}
+		entity.setCustomName(null);
+		entity.setCustomNameVisible(false);
+		TRACKED.remove(entity);
+	}
+
 	/** "Burning Brute": the affix prefix plus the entity type's name. */
 	public static Component name(LivingEntity entity, Affix affix) {
 		return Component.translatable("affix.blocksouls_mobs.name", Component.translatable(affix.translationKey()), entity.getType().getDescription());

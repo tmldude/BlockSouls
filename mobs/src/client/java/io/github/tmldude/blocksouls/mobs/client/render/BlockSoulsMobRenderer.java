@@ -11,12 +11,13 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
 
 import io.github.tmldude.blocksouls.common.CommonIds;
+import io.github.tmldude.blocksouls.common.mob.Affixes;
 import io.github.tmldude.blocksouls.mobs.entity.HostileMob;
 import io.github.tmldude.blocksouls.mobs.entity.WaveMob;
 
 /**
  * Renderer shared by our custom-model mobs: one texture at {@code textures/entity/<name>.png}, an optional
- * full-bright layer at {@code <name>_glow.png} (veins, eyes), and an optional uniform scale.
+ * full-bright layer at {@code <name>_glow.png} (veins, eyes), an elite's affix tint, and an optional uniform scale.
  */
 public class BlockSoulsMobRenderer<T extends HostileMob, M extends EntityModel<MobRenderState>> extends MobRenderer<T, MobRenderState, M> {
 	private final Identifier texture;
@@ -35,6 +36,7 @@ public class BlockSoulsMobRenderer<T extends HostileMob, M extends EntityModel<M
 				}
 			});
 		}
+		addLayer(new AffixLayer<>(this, state -> state.affix));
 	}
 
 	public static Identifier texture(String name) {
@@ -58,6 +60,7 @@ public class BlockSoulsMobRenderer<T extends HostileMob, M extends EntityModel<M
 		state.aggressive = entity.isAggressive();
 		state.airborne = !entity.onGround() && !entity.isInWater() && !entity.isPassenger();
 		state.phase = (entity.getId() * 0.618034f) % 1f * 200f;
+		state.affix = Affixes.of(entity).orElse(null);
 		if (entity instanceof WaveMob mob && mob.action() != WaveMob.ACTION_NONE) {
 			state.action = mob.action();
 			state.actionTicks = mob.actionTicks() + partialTicks;

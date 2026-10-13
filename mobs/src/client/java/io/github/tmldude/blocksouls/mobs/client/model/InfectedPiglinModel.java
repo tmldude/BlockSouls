@@ -4,15 +4,16 @@ import net.minecraft.client.model.AnimationUtils;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.util.Mth;
+
+import io.github.tmldude.blocksouls.mobs.client.render.InfectedPiglinRenderState;
 
 /**
  * Piglin proportions (wide snouted head, floppy ear, tusks) overgrown with fleshy blight: a growth swallowing the
  * left eye, the left ear fused into a lump, tumors on the scalp, back, knee and a swollen left arm. Humanoid rig
  * so it can hold its gold sword.
  */
-public class InfectedPiglinModel extends HumanoidModel<HumanoidRenderState> {
+public class InfectedPiglinModel extends HumanoidModel<InfectedPiglinRenderState> {
 	private final ModelPart rightEar;
 	private final ModelPart leftEar;
 	private final ModelPart headGrowth;
@@ -31,7 +32,7 @@ public class InfectedPiglinModel extends HumanoidModel<HumanoidRenderState> {
 	}
 
 	@Override
-	public void setupAnim(HumanoidRenderState state) {
+	public void setupAnim(InfectedPiglinRenderState state) {
 		super.setupAnim(state);
 		float t = state.ageInTicks * 0.1f + state.walkAnimationPos * 0.5f;
 		float amp = 0.08f + state.walkAnimationSpeed * 0.4f;
@@ -51,7 +52,7 @@ public class InfectedPiglinModel extends HumanoidModel<HumanoidRenderState> {
 	}
 
 	@Override
-	protected void setupAttackAnimation(HumanoidRenderState state) {
+	protected void setupAttackAnimation(InfectedPiglinRenderState state) {
 		super.setupAttackAnimation(state);
 		// Off arm claws forward like the infected do.
 		AnimationUtils.bobModelPart(leftArm, state.ageInTicks, -1);

@@ -1,14 +1,19 @@
 package io.github.tmldude.blocksouls.mobs.command;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
@@ -20,20 +25,32 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
 
 import io.github.tmldude.blocksouls.common.CommonIds;
 import io.github.tmldude.blocksouls.common.debug.DebugCommands;
+import io.github.tmldude.blocksouls.common.mob.Affix;
+import io.github.tmldude.blocksouls.common.mob.Affixes;
 import io.github.tmldude.blocksouls.common.mob.WaveContext;
 import io.github.tmldude.blocksouls.common.mob.WaveMobSpec;
 import io.github.tmldude.blocksouls.common.mob.WaveMobs;
 import io.github.tmldude.blocksouls.common.run.Difficulty;
+import io.github.tmldude.blocksouls.mobs.affix.MobAffixes;
 import io.github.tmldude.blocksouls.mobs.dread.Dread;
 import io.github.tmldude.blocksouls.mobs.registry.MobEntities;
 
-/** {@code /bs spawn <mob> [count] [wave] [breaker]}, {@code /bs dread get|set <player> [value]}, {@code /bs mobs list}. */
+/**
+ * {@code /bs spawn <mob> [count] [wave] [breaker]}, {@code /bs dread get|set <player> [value]}, {@code /bs mobs list},
+ * {@code /bs mob affix <targets|look> <affix|none>}, {@code /bs mob roster <floor> [tags]}.
+ */
 public final class MobCommands {
 	private MobCommands() {
 	}
@@ -42,7 +59,8 @@ public final class MobCommands {
 	private static Map<String, EntityType<? extends Mob>> mobs() {
 		Map<String, EntityType<? extends Mob>> mobs = new LinkedHashMap<>();
 		for (EntityType<? extends Mob> type : List.<EntityType<? extends Mob>>of(MobEntities.SHAMBLER, MobEntities.CRAWLER, MobEntities.SCREAMER,
-				MobEntities.BLOATER, MobEntities.BRUTE, MobEntities.MUTANT_BRUTE, MobEntities.INFECTED_PIGLIN, MobEntities.ASH_HOUND)) {
+				MobEntities.BLOATER, MobEntities.BRUTE, MobEntities.MUTANT_BRUTE, MobEntities.SPITTER, MobEntities.BULWARK, MobEntities.INFECTED_PIGLIN,
+				MobEntities.ASH_HOUND)) {
 			mobs.put(EntityType.getKey(type).getPath(), type);
 		}
 		return mobs;
@@ -79,7 +97,91 @@ public final class MobCommands {
 							})))));
 
 			root.then(Commands.literal("mobs").then(Commands.literal("list").executes(MobCommands::list)));
+
+			root.then(Commands.literal("mob")
+					.then(Commands.literal("affix")
+							.then(Commands.literal("look").then(affixArgument(ctx -> {
+								ServerPlayer player = ctx.getSource().getPlayerOrException();
+								Entity looked = lookedAt(player, 32);
+								return looked == null ? List.of() : List.of(looked);
+							})))
+							.then(Commands.argument("targets", EntityArgument.entities()).then(affixArgument(ctx -> List.copyOf(EntityArgument.getEntities(ctx, "targets"))))))
+					.then(Commands.literal("roster")
+							.then(Commands.argument("floor", IntegerArgumentType.integer(0, 99))
+									.executes(ctx -> roster(ctx, ""))
+									.then(Commands.argument("tags", StringArgumentType.greedyString())
+											.executes(ctx -> roster(ctx, StringArgumentType.getString(ctx, "tags")))))));
 		});
+	}
+
+	@FunctionalInterface
+	private interface Targets {
+		List<Entity> get(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException;
+	}
+
+	private static RequiredArgumentBuilder<CommandSourceStack, String> affixArgument(Targets targets) {
+		List<String> names = new ArrayList<>(Arrays.stream(Affix.values()).map(Affix::getSerializedName).toList());
+		names.add("none");
+		return Commands.argument("affix", StringArgumentType.word())
+				.suggests((ctx, builder) -> SharedSuggestionProvider.suggest(names, builder))
+				.executes(ctx -> affix(ctx, targets.get(ctx), StringArgumentType.getString(ctx, "affix")));
+	}
+
+	/** Gives each living target the affix (or clears it with {@code none}). */
+	private static int affix(CommandContext<CommandSourceStack> ctx, List<Entity> targets, String name) {
+		CommandSourceStack source = ctx.getSource();
+		Affix affix = Affix.byName(name);
+		if (affix == null && !name.equals("none")) {
+			source.sendFailure(Component.literal("Unknown affix: " + name));
+			return 0;
+		}
+		int done = 0;
+		for (Entity entity : targets) {
+			if (!(entity instanceof LivingEntity living) || entity instanceof Player) {
+				continue;
+			}
+			if (affix == null) {
+				MobAffixes.clear(living);
+				done++;
+			} else if (Affixes.apply(living, affix)) {
+				done++;
+			}
+		}
+		int total = done;
+		if (total == 0) {
+			source.sendFailure(Component.literal("No mob to affix (players can't carry affixes)"));
+		} else {
+			source.sendSuccess(() -> Component.literal((affix == null ? "Cleared the affix on " : "Gave " + name + " to ") + total + " mob(s)"), true);
+		}
+		return total;
+	}
+
+	/** The living entity under the player's crosshair within {@code range}, if any. */
+	private static @Nullable Entity lookedAt(ServerPlayer player, double range) {
+		Vec3 eye = player.getEyePosition();
+		Vec3 end = eye.add(player.getViewVector(1).scale(range));
+		EntityHitResult hit = ProjectileUtil.getEntityHitResult(player, eye, end, player.getBoundingBox().expandTowards(end.subtract(eye)).inflate(1),
+				e -> e instanceof LivingEntity && !e.isSpectator() && e != player, range * range);
+		return hit == null ? null : hit.getEntity();
+	}
+
+	/** Which wave mobs a floor's roster allows (any wave), with their first floor and required tags. */
+	private static int roster(CommandContext<CommandSourceStack> ctx, String tagList) {
+		int floor = IntegerArgumentType.getInteger(ctx, "floor");
+		Set<String> tags = tagList.isBlank() ? Set.of() : Set.copyOf(Arrays.asList(tagList.trim().split("[\\s,]+")));
+		StringBuilder out = new StringBuilder("Floor " + floor + (tags.isEmpty() ? "" : " " + tags) + " roster:");
+		int eligible = 0;
+		for (WaveMobSpec spec : WaveMobs.all()) {
+			boolean ok = WaveMobs.eligible(spec, Integer.MAX_VALUE, floor, tags);
+			if (ok) {
+				eligible++;
+			}
+			out.append("\n  ").append(ok ? "+ " : "- ").append(spec.id().getPath()).append(": floor ").append(spec.minFloor()).append("+")
+					.append(spec.tags().isEmpty() ? "" : ", needs " + spec.tags()).append(spec.elite() ? ", elite" : "");
+		}
+		String text = out.toString();
+		ctx.getSource().sendSuccess(() -> Component.literal(text), false);
+		return eligible;
 	}
 
 	private static int spawn(CommandContext<CommandSourceStack> ctx, int count, int wave, boolean breaker) throws CommandSyntaxException {
