@@ -14,7 +14,7 @@ import java.util.Map;
 public class DirectorConfig {
 	public static final String FILE = "director";
 	/** Defaults revision {@link #migrate} brings older files up to. */
-	public static final int CURRENT_DEFAULTS = 3;
+	public static final int CURRENT_DEFAULTS = 4; // 4: floor 3, Skyrift (Stage 6C)
 
 	/** Which defaults revision this file was written against (0 = before the field existed). */
 	public int defaultsVersion;
@@ -66,6 +66,21 @@ public class DirectorConfig {
 				}
 			}
 		}
+		// --- floor 3, Skyrift (Stage 6C) ---
+		// 4: floors whose events and rosters landed after 3 (Skyrift) join a file already at 3; ids and tags kept by hand win.
+		if (config.defaultsVersion < 4 && config.events != null) {
+			if (config.events.pool != null) {
+				for (EventSpec spec : new Events().pool) {
+					if (!spec.floorTags.isEmpty() && config.events.pool.stream().noneMatch(old -> spec.id.equals(old.id))) {
+						config.events.pool.add(spec);
+					}
+				}
+			}
+			if (config.events.miniBossesByFloorTag != null) {
+				defaultFloorMiniBosses().forEach(config.events.miniBossesByFloorTag::putIfAbsent);
+			}
+		}
+		// --- end Skyrift block
 		config.defaultsVersion = CURRENT_DEFAULTS;
 		return true;
 	}
@@ -196,7 +211,11 @@ public class DirectorConfig {
 				new EventSpec("blocksouls_world:trapped_hall", 4, 1, List.of("vault"), false),
 				// v2-floor5-blight: the Blighted Surface's own events (the soul wager runs at every siege already)
 				new EventSpec("blood_altar", 3, 1, List.of("blight"), false),
-				new EventSpec("challenge_pylon", 3, 1, List.of("blight"), false)));
+				new EventSpec("challenge_pylon", 3, 1, List.of("blight"), false),
+				// --- floor 3, Skyrift (Stage 6C): placed by the world module through DirectorEvents.PLACE_EVENT ---
+				new EventSpec("blocksouls_world:wind_altar", 4, 1, List.of("skyrift"), false),
+				new EventSpec("blocksouls_world:falling_shard_chest", 4, 1, List.of("skyrift"), false),
+				new EventSpec("blocksouls_world:bridge_ambush", 3, 1, List.of("skyrift"), true)));
 		/**
 		 * v2-floor5-blight: a floor carrying one of these tags rolls only its own (floor-tagged) events, not the
 		 * generic pool, as long as one of them is eligible.
@@ -229,6 +248,9 @@ public class DirectorConfig {
 		rosters.put("vault", new ArrayList<>(List.of("blocksouls_world:vault_listener", "blocksouls_world:vault_colossus")));
 		// v2-floor5-blight: Blightheart, the Pale Rider and one boss from an earlier floor ({@link DirectorRules#EARLIER})
 		rosters.put("blight", new ArrayList<>(List.of("blocksouls_bosses:blightheart", "blocksouls_bosses:pale_rider", DirectorRules.EARLIER)));
+		// --- floor 3, Skyrift (Stage 6C) ---
+		rosters.put("skyrift", new ArrayList<>(List.of("blocksouls_bosses:stormplate_knight", "blocksouls_world:storm_roc",
+				"blocksouls_world:glider_matriarch")));
 		return rosters;
 	}
 

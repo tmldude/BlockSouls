@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.jspecify.annotations.Nullable;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -13,11 +15,13 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 
 import io.github.tmldude.blocksouls.common.event.FloorEvents;
@@ -30,13 +34,18 @@ import io.github.tmldude.blocksouls.world.BlockSoulsWorld;
 import io.github.tmldude.blocksouls.world.content.WorldItems;
 import io.github.tmldude.blocksouls.world.floor.FloorHazards;
 import io.github.tmldude.blocksouls.world.floor.HerbBlock;
+import io.github.tmldude.blocksouls.world.floor.FloorBlocks;
 import io.github.tmldude.blocksouls.world.floor.NodeBlock;
+import io.github.tmldude.blocksouls.world.floor.SkySecret;
+import io.github.tmldude.blocksouls.world.floor.SkyTemple;
+import io.github.tmldude.blocksouls.world.floor.SkyriftBlock;
 import io.github.tmldude.blocksouls.world.floor.WorldFloors;
 
 /**
  * Floor 3, Skyrift: opens a Skyrift floor (in the test level, like {@link FloorGameTests}) and checks its look and
  * hazard: the open edge (no glass wall), siege points up on floating shards, the painted biome, the rim-wind gust and
- * the fall back to camp; then pops a skysteel node out on a shard and a cloudbloom herb.
+ * the fall back to camp; then pops a skysteel node out on a shard and a cloudbloom herb; then triggers the glowing-seed
+ * secret (take it from the sky temple, get hit and watch it dim home, take it again and plant it at the camp altar).
  */
 public class SkyriftGameTests {
 	private static final String FLOOR = "blocksouls_world_test:floor16";
@@ -68,6 +77,75 @@ public class SkyriftGameTests {
 			WorldFloors.useLevelForTests(null);
 		}
 		helper.succeed();
+	}
+
+	@GameTest(structure = FLOOR, skyAccess = true, maxTicks = 200)
+	public void glowingSeedDimsOnAHitAndPaysAtTheCampAltar(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		WorldFloors.useLevelForTests(level.dimension());
+		try {
+			seed(helper, level, 932);
+		} finally {
+			WorldFloors.useLevelForTests(null);
+		}
+		helper.succeed();
+	}
+
+	private static void seed(GameTestHelper helper, ServerLevel level, int act) {
+		Optional<PlacedFloor> opened = Floors.open(level.getServer(), new FloorRequest(act, BlockSoulsWorld.id("skyrift"), 3, 1357L, 1));
+		helper.assertTrue(opened.isPresent(), "a Skyrift floor opened");
+		PlacedFloor floor = opened.get();
+		FloorSlot temple = floor.slots(FloorSlotKind.STRUCTURE).stream().filter(slot -> SkyTemple.TAG.equals(slot.tag())).findFirst()
+				.orElseThrow(() -> helper.assertionException(Component.literal("the floor has a sky temple, structures " + floor.slots(FloorSlotKind.STRUCTURE))));
+		FloorSlot secret = floor.slots(FloorSlotKind.SECRET).stream().filter(slot -> SkyTemple.SEED_SECRET.equals(slot.tag())).findFirst()
+				.orElseThrow(() -> helper.assertionException(Component.literal("the floor has the seed secret, secrets " + floor.slots(FloorSlotKind.SECRET))));
+		BlockPos pedestal = SkyTemple.pedestal(temple.pos());
+		BlockPos altar = secret.pos();
+		helper.assertTrue(level.getBlockState(pedestal).is(FloorBlocks.SEED_PEDESTAL) && level.getBlockState(pedestal).getValue(SkyriftBlock.ACTIVE),
+				"a lit seed pedestal tops the temple at " + pedestal + ", found " + level.getBlockState(pedestal));
+		helper.assertTrue(level.getBlockState(SkyTemple.chest(temple.pos())).is(Blocks.CHEST), "the temple's top chest is there");
+		helper.assertTrue(level.getBlockState(altar).is(FloorBlocks.SKY_ALTAR) && !level.getBlockState(altar).getValue(SkyriftBlock.ACTIVE),
+				"an unlit sky altar stands by camp at " + altar + ", found " + level.getBlockState(altar));
+		helper.assertTrue(altar.closerThan(floor.camp(), 12), "the altar is near camp");
+
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		player.teleportTo(pedestal.getX() + 0.5, pedestal.getY() + 1, pedestal.getZ() + 0.5);
+		SkySecret.take(level, pedestal, level.getBlockState(pedestal), player);
+		helper.assertTrue(carried(player) != null, "taking the seed puts it in the inventory");
+		helper.assertTrue(!level.getBlockState(pedestal).getValue(SkyriftBlock.ACTIVE), "the pedestal goes dark");
+
+		// A mock player ignores damage until its client has loaded (ServerPlayer.isInvulnerableTo), so fire the
+		// after-damage hook a landed hit would fire.
+		ServerLivingEntityEvents.AFTER_DAMAGE.invoker().afterDamage(player, level.damageSources().generic(), 1.0F, 1.0F, false);
+		helper.assertTrue(carried(player) == null, "a hit takes the seed");
+		helper.assertTrue(level.getBlockState(pedestal).getValue(SkyriftBlock.ACTIVE), "and it dims back to its pedestal");
+
+		SkySecret.take(level, pedestal, level.getBlockState(pedestal), player);
+		ItemStack seed = carried(player);
+		helper.assertTrue(seed != null, "the seed can be taken again");
+		player.teleportTo(altar.getX() + 0.5, altar.getY() + 1, altar.getZ() + 0.5);
+		int before = items(player);
+		SkySecret.plant(level, altar, level.getBlockState(altar), player, seed);
+		helper.assertTrue(level.getBlockState(altar).getValue(SkyriftBlock.ACTIVE), "the seed takes root in the altar");
+		helper.assertTrue(carried(player) == null, "the seed is spent");
+		helper.assertTrue(items(player) >= before || dropped(level, player.blockPosition(), null), "and the planter gets the reward");
+	}
+
+	private static @Nullable ItemStack carried(ServerPlayer player) {
+		for (ItemStack stack : player.getInventory()) {
+			if (stack.is(WorldItems.GLOWING_SEED)) {
+				return stack;
+			}
+		}
+		return null;
+	}
+
+	private static int items(ServerPlayer player) {
+		int count = 0;
+		for (ItemStack stack : player.getInventory()) {
+			count += stack.isEmpty() ? 0 : 1;
+		}
+		return count;
 	}
 
 	private static void pops(GameTestHelper helper, ServerLevel level, int act) {

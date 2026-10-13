@@ -70,4 +70,19 @@ class AffixRollTest {
 		}
 		assertTrue(volatileCount > 50, "volatile " + volatileCount);
 	}
+
+	// --- floor 3, Skyrift (Stage 6C) ---
+	@Test
+	void skyriftMakesFrostedTheCommonAffix() {
+		Map<String, Integer> sky = AffixRoll.weights(config, java.util.Set.of("skyrift"));
+		assertTrue(sky.get("frosted") > sky.get("burning"));
+		assertEquals(config.weights, AffixRoll.weights(config, java.util.Set.of("surface")));
+		int frosted = 0;
+		for (int i = 0; i < 100; i++) {
+			if (AffixRoll.roll(0.0, i / 100.0, 3, false, false, NAMES, config, java.util.Set.of("skyrift")).orElseThrow().equals("frosted")) {
+				frosted++;
+			}
+		}
+		assertTrue(frosted > 50, "frosted " + frosted);
+	}
 }

@@ -89,5 +89,22 @@
   "item.blocksouls_world.updraft_tonic": "Updraft Tonic",
   "item.blocksouls_world.skysteel_featherboots": "Skysteel Featherboots",
   "block.blocksouls_world.skysteel_node": "Skysteel Node",
-  "block.blocksouls_world.cloudbloom_plant": "Cloudbloom"
+  "block.blocksouls_world.cloudbloom_plant": "Cloudbloom",
+  "block.blocksouls_world.seed_pedestal": "Seed Pedestal",
+  "block.blocksouls_world.sky_altar": "Sky Altar",
+  "block.blocksouls_world.wind_altar": "Wind Altar",
+  "item.blocksouls_world.glowing_seed": "Glowing Seed",
+  "entity.blocksouls_world.storm_roc": "Storm Roc",
+  "entity.blocksouls_world.glider_matriarch": "Glider Matriarch",
+  "entity.blocksouls_world.sky_glider": "Sky Glider",
+  "message.blocksouls_world.sky_seed.taken": "The seed glows in your hands. Carry it to the camp's sky altar without taking a hit.",
+  "message.blocksouls_world.sky_seed.gone": "The pedestal is empty. Someone is carrying the seed.",
+  "message.blocksouls_world.sky_seed.dimmed": "The seed dims and drifts back to its temple.",
+  "message.blocksouls_world.sky_seed.planted": "%s planted the glowing seed. The sky answers with a gift.",
+  "message.blocksouls_world.sky_seed.rooted": "The seed has already taken root here.",
+  "message.blocksouls_world.sky_seed.altar_hint": "An empty socket. Something from the sky temple belongs here.",
+  "message.blocksouls_world.wind_altar.hint": "The wind wants an offering: hold a common or rare relic.",
+  "message.blocksouls_world.wind_altar.spent": "The wind altar is quiet now.",
+  "message.blocksouls_world.wind_altar.won": "The wind carries your relic higher.",
+  "message.blocksouls_world.wind_altar.lost": "The wind takes your relic and throws you back."
 }
