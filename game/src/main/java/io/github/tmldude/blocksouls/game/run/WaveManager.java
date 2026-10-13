@@ -215,9 +215,10 @@ public final class WaveManager {
 		boolean breaks = random.nextDouble() < WaveMath.breakerShare(data.wave, config());
 		WaveContext context = new WaveContext(data.wave, data.difficulty, modifierIds(data), breaks);
 		boolean allowElite = data.waveElites < WaveMath.maxElites(data.wave, players.size(), config());
-		WaveMobSpec spec = DirectorHooks.preferredSpec(server, data, random, allowElite);
+		FloorRoster roster = FloorRoster.at(server, level, pos);
+		WaveMobSpec spec = DirectorHooks.preferredSpec(server, data, roster, random, allowElite);
 		if (spec == null) {
-			spec = pickSpec(data, random, allowElite);
+			spec = pickSpec(data, roster, random, allowElite);
 		}
 		Mob mob = null;
 		if (spec != null) {
@@ -259,7 +260,7 @@ public final class WaveManager {
 			boolean elite, RandomSource random) {
 		WaveMobSpec spec = preferred == null ? null : WaveMobs.get(preferred).filter(s -> s.weight() > 0).orElse(null);
 		if (spec == null) {
-			spec = pickSpec(data, random, elite);
+			spec = pickSpec(data, FloorRoster.at(server, level, pos), random, elite);
 		}
 		WaveContext context = new WaveContext(data.wave, data.difficulty, modifierIds(data), false);
 		Mob mob = null;
@@ -297,19 +298,23 @@ public final class WaveManager {
 		return zombie;
 	}
 
-	/** Weighted pick among this run's eligible specs (roster shuffled per run). Null = vanilla fallback. */
-	static @Nullable WaveMobSpec pickSpec(RunData data, RandomSource random, boolean allowElite) {
+	/**
+	 * Weighted pick among the specs eligible on this roster (shuffled per run; floor rosters narrow it on Expedition
+	 * floors). Null = vanilla fallback.
+	 */
+	static @Nullable WaveMobSpec pickSpec(RunData data, FloorRoster roster, RandomSource random, boolean allowElite) {
 		int spread = Math.max(0, config().rosterShuffle);
 		List<WaveMobSpec> candidates = new ArrayList<>();
-		for (WaveMobSpec spec : WaveMobs.eligible(data.wave + spread)) {
+		for (WaveMobSpec spec : roster.eligible(data.wave + spread)) {
 			int offset = data.rosterOffsets.computeIfAbsent(spec.id().toString(), id -> RosterShuffle.offset(id, data.runSeed, spread));
-			if (RosterShuffle.shiftedMinWave(spec.minWave(), offset) <= data.wave && (allowElite || !spec.elite()) && spec.weight() > 0) {
+			boolean waveOk = roster.skipsMinWave(spec) || RosterShuffle.shiftedMinWave(spec.minWave(), offset) <= data.wave;
+			if (waveOk && (allowElite || !spec.elite()) && spec.weight() > 0) {
 				candidates.add(spec);
 			}
 		}
 		if (candidates.isEmpty()) {
 			// The shuffle never leaves a wave with nothing to spawn: fall back to the unshuffled roster.
-			for (WaveMobSpec spec : WaveMobs.eligible(data.wave)) {
+			for (WaveMobSpec spec : roster.eligible(data.wave)) {
 				if ((allowElite || !spec.elite()) && spec.weight() > 0) {
 					candidates.add(spec);
 				}

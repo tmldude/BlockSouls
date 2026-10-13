@@ -16,7 +16,6 @@ import net.minecraft.world.entity.Mob;
 
 import io.github.tmldude.blocksouls.common.mob.WaveContext;
 import io.github.tmldude.blocksouls.common.mob.WaveMobSpec;
-import io.github.tmldude.blocksouls.common.mob.WaveMobs;
 import io.github.tmldude.blocksouls.common.run.RunPhase;
 import io.github.tmldude.blocksouls.game.BlockSoulsGame;
 
@@ -103,7 +102,8 @@ public final class DirectorHooks {
 	 * The Director's pick for this spawn, or null for the normal roster pick: an unlocked elite (the elite bias),
 	 * else one of its preferred mobs (composition) if the roster has it unlocked.
 	 */
-	static @Nullable WaveMobSpec preferredSpec(MinecraftServer server, RunData data, RandomSource random, boolean allowElite) {
+	static @Nullable WaveMobSpec preferredSpec(MinecraftServer server, RunData data, FloorRoster roster, RandomSource random,
+			boolean allowElite) {
 		List<Identifier> ids;
 		double eliteBias;
 		try {
@@ -113,7 +113,7 @@ public final class DirectorHooks {
 			BlockSoulsGame.LOGGER.error("Director composition failed", e);
 			return null;
 		}
-		List<WaveMobSpec> eligible = WaveMobs.eligible(data.wave);
+		List<WaveMobSpec> eligible = roster.eligible(data.wave);
 		if (allowElite && eliteBias > 0 && random.nextDouble() < eliteBias) {
 			List<WaveMobSpec> elites = eligible.stream().filter(spec -> spec.elite() && spec.weight() > 0).toList();
 			if (!elites.isEmpty()) {
