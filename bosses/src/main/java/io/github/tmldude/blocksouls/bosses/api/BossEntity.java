@@ -422,9 +422,6 @@ public abstract class BossEntity extends Monster {
 			lastUsedTick = new int[cooldowns.length];
 			Arrays.fill(lastUsedTick, Integer.MIN_VALUE / 2);
 		}
-		if (partDamage.length != definition().breaks().size()) {
-			partDamage = new double[definition().breaks().size()];
-		}
 		if (surfaceOnLoad) {
 			surfaceOnLoad = false;
 			setBurrowed(false, Vec3.atBottomCenterOf(home()));
@@ -1002,8 +999,12 @@ public abstract class BossEntity extends Monster {
 	/** Sustained damage on a breakable part; breaks it at its threshold. */
 	public void damagePart(ServerLevel level, String name, double amount) {
 		int index = definition().breakIndex(name);
-		if (index < 0 || index >= partDamage.length || isPartBroken(name)) {
+		if (index < 0 || isPartBroken(name)) {
 			return;
+		}
+		// Sized here, not in tick(): a part can take damage before the boss's first tick.
+		if (partDamage.length != definition().breaks().size()) {
+			partDamage = new double[definition().breaks().size()];
 		}
 		partDamage[index] += amount;
 		if (partDamage[index] >= definition().breaks().get(index).shareOfMaxHealth() * getMaxHealth()) {
