@@ -53,6 +53,8 @@ final class FloorBuilder {
 	private final double phaseB;
 	private final double phaseC;
 	private final List<FloorSlot> filled = new ArrayList<>();
+	/** Box templates (floor 4, The Vault) carve a room-and-corridor box instead of an island; null for islands. */
+	private final VaultBuilder vault;
 
 	FloorBuilder(ServerLevel level, FloorTemplate template, FloorPlanner.FloorPlan plan, FloorsConfig config, BlockPos centre, long seed) {
 		this.level = level;
@@ -67,6 +69,9 @@ final class FloorBuilder {
 		this.phaseA = random.nextDouble() * 100;
 		this.phaseB = random.nextDouble() * 100;
 		this.phaseC = random.nextDouble() * 100;
+		this.vault = template.isBox()
+				? new VaultBuilder(level, template, BoxPlanner.layout(template, plan, seed), centre, plan.groundY(), seed, top)
+				: null;
 	}
 
 	private static BlockState block(String id, Block fallback) {
@@ -76,8 +81,12 @@ final class FloorBuilder {
 
 	/** Builds everything and returns the filled slots (camp first). */
 	List<FloorSlot> build() {
-		terrain();
-		SkyShards.build(level, plan, template, centre, random, this::height, top, fill, base);
+		if (vault != null) {
+			vault.terrain();
+		} else {
+			terrain();
+			SkyShards.build(level, plan, template, centre, random, this::height, top, fill, base);
+		}
 		for (FloorPlanner.PlannedSlot slot : plan.slots()) {
 			BlockPos pos = slot.rise() > 0 ? centre.offset(slot.x(), plan.groundY() + slot.rise() + 1 - centre.getY(), slot.z())
 					: surface(slot.x(), slot.z());
@@ -86,10 +95,22 @@ final class FloorBuilder {
 				case EXIT_PORTAL -> portal(pos);
 				case NODE -> node(pos, slot.tag());
 				case CRATE -> chest(pos, CRATE_LOOT);
-				case STRUCTURE -> structure(pos, slot.tag());
+				case STRUCTURE -> {
+					if (vault != null && BoxPlanner.VAULT_STRUCTURE.equals(slot.tag())) {
+						vault.vaultRoom(this, pos);
+					} else {
+						structure(pos, slot.tag());
+					}
+				}
 				case WRECK -> wreck(pos, slot);
 				case CAVE -> cave(pos);
-				case SECRET -> secret(pos, slot.tag());
+				case SECRET -> {
+					if (vault != null && BoxPlanner.HOLLOW_WALL.equals(slot.tag())) {
+						vault.hollowSecret(this, pos);
+					} else {
+						secret(pos, slot.tag());
+					}
+				}
 				case MINI_BOSS -> arena(pos, slot.radius());
 				case EVENT -> eventSpot(pos);
 				case SIEGE_RING -> {
@@ -99,7 +120,9 @@ final class FloorBuilder {
 				filled.add(new FloorSlot(slot.kind(), slot.tag(), pos, slot.radius()));
 			}
 		}
-		trees();
+		if (vault == null) {
+			trees();
+		}
 		SkyShards.paintBiome(level, template, plan, centre);
 		// Camp first, then everything else in plan order (crates the contents added come after their slot).
 		filled.sort((a, b) -> Integer.compare(a.kind() == FloorSlotKind.CAMP ? 0 : 1, b.kind() == FloorSlotKind.CAMP ? 0 : 1));
@@ -110,6 +133,9 @@ final class FloorBuilder {
 
 	/** Ground height (the top block's y) at a column relative to the centre. */
 	int height(int x, int z) {
+		if (vault != null) {
+			return plan.groundY(); // the vault's floor is flat
+		}
 		double noise = (Math.sin(x * 0.11 + phaseA) + Math.sin(z * 0.13 + phaseB) + Math.sin((x + z) * 0.07 + phaseC)) / 3.0;
 		double flat = 0;
 		for (FloorPlanner.PlannedSlot slot : plan.slots()) {
@@ -230,7 +256,7 @@ final class FloorBuilder {
 		level.setBlock(pos, block.defaultBlockState(), FLAGS);
 	}
 
-	private void chest(BlockPos pos, ResourceKey<LootTable> loot) {
+	void chest(BlockPos pos, ResourceKey<LootTable> loot) {
 		Direction facing = Direction.Plane.HORIZONTAL.getRandomDirection(random);
 		level.setBlock(pos, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, facing), FLAGS);
 		RandomizableContainer.setBlockEntityLootTable(level, random, pos, loot);
