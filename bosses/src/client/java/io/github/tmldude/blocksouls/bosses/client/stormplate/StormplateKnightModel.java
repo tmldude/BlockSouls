@@ -76,7 +76,7 @@ public class StormplateKnightModel extends BossModel {
 				PartPose.offset(0, 17, 0));
 		body.addOrReplaceChild("left_arm", CubeListBuilder.create()
 				.texOffs(0, 70).mirror().addBox(-3, -2, -3, 6, 20, 6)
-				.texOffs(24, 70).mirror().addBox(-3, -4, -4.5f, 8, 6, 9),
+				.texOffs(80, 100).mirror().addBox(-3, -4, -4.5f, 8, 6, 9),
 				PartPose.offset(10.5f, -18, 0));
 		root.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(86, 26).addBox(-3, 0, -3.5f, 6, 22, 7),
 				PartPose.offset(-4, 2, 0));

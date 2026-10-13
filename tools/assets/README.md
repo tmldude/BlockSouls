@@ -57,6 +57,16 @@ python3 tools/assets/check_mob_assets.py  # fails if MobGeometry.java is stale o
 `textures/gui/sprites/ability/`, like `boon_icons.py` does for boons. Add a glyph row for a new ability and re-run
 (`--sheet docs/art/ability-icons-sheet.png` for a contact sheet).
 
+## Boss damage overlays (`bosses` module)
+
+```sh
+python3 tools/assets/boss_damage.py     # run after the boss skin scripts
+```
+
+This paints each boss's damage states (`<boss>_damaged1/2`), its per-phase emissive cracks (`<boss>_cracks<n>`) and
+its broken-part textures (`<boss>_broken_<part>`) over the current skin. The output is seeded, so a re-run gives the
+same images.
+
 ## Sound effects and music (`guns`, `bosses`, `vehicles`, `abilities`)
 
 All original and synthesized, no samples. The helpers (voices, formants, noise, impacts, metal, bells, fire,

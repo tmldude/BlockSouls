@@ -21,6 +21,8 @@ public final class FurnaceKnightClient {
 		EntityRendererRegistry.register(FurnaceKnights.TYPE, ctx ->
 				new BossRenderer<>(ctx, new FurnaceKnightModel(ctx.bakeLayer(LAYER)), 1.2f, "furnace_knight", 0.95f)
 						.glow("furnace_knight_glow", state -> true)
-						.glow("furnace_knight_blade_glow", state -> state.phase >= 1));
+						.glow("furnace_knight_blade_glow", state -> state.phase >= 1)
+						.damageStates()
+						.cracks(2));
 	}
 }

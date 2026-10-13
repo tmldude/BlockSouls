@@ -47,6 +47,8 @@ BOXES = {
     "cape": (56, 20, 14, 28, 1),
     "arm": (0, 70, 6, 20, 6),
     "pauldron": (24, 70, 8, 6, 9),
+    # The left pauldron has its own UVs: it is the breakable one (boss_damage.py paints its broken overlay).
+    "pauldron_l": (80, 100, 8, 6, 9),
     "shaft": (0, 96, 1, 1, 26),
     "guard": (76, 85, 2, 6, 1),
     "spearhead": (58, 85, 1, 4, 8),
@@ -189,6 +191,7 @@ def knight():
             return GOLD[3] if f == "front" or x % 2 else GOLD[2]
         return SCALE[5 - y // 2 + (1 if x == 0 else 0)]
     paint_box(img, rng, BOXES["pauldron"], pauldron)
+    paint_box(img, rng, BOXES["pauldron_l"], pauldron)
     # Legs: scaled thighs, plate greaves from the knee down.
     def leg(f, x, y, w, h):
         if f == "bottom":

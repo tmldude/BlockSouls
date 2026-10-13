@@ -20,6 +20,9 @@ public final class AshwyrmClient {
 		ModelLayerRegistry.registerModelLayer(LAYER, AshwyrmModel::createBodyLayer);
 		EntityRendererRegistry.register(Ashwyrms.TYPE, ctx -> new AshwyrmRenderer(ctx, new AshwyrmModel(ctx.bakeLayer(LAYER)))
 				.glow("ashwyrm_glow", state -> true)
-				.glow("ashwyrm_enraged_glow", state -> state.phase >= Ashwyrm.ENRAGED));
+				.glow("ashwyrm_enraged_glow", state -> state.phase >= Ashwyrm.ENRAGED)
+				.damageStates()
+				.brokenPart(0, "tail")
+				.cracks(3));
 	}
 }
