@@ -40,7 +40,7 @@ public class BlightFloorGameTests {
 		ServerLevel level = helper.getLevel();
 		WorldFloors.useLevelForTests(level.dimension());
 		try {
-			Optional<PlacedFloor> opened = Floors.open(server, new FloorRequest(905, BlockSoulsWorld.id("blight"), 5, 4321L, 1));
+			Optional<PlacedFloor> opened = Floors.open(server, new FloorRequest(921, BlockSoulsWorld.id("blight"), 5, 4321L, 1));
 			helper.assertTrue(opened.isPresent(), "a Blighted Surface floor opened");
 			PlacedFloor floor = opened.get();
 			helper.assertTrue(floor.template().getPath().startsWith("blight_"), "a blight template, got " + floor.template());
@@ -64,7 +64,7 @@ public class BlightFloorGameTests {
 		ServerLevel level = helper.getLevel();
 		WorldFloors.useLevelForTests(level.dimension());
 		try {
-			PlacedFloor floor = Floors.open(server, new FloorRequest(906, BlockSoulsWorld.id("blight"), 5, 98L, 1)).orElseThrow();
+			PlacedFloor floor = Floors.open(server, new FloorRequest(922, BlockSoulsWorld.id("blight"), 5, 98L, 1)).orElseThrow();
 			ServerPlayer player = helper.makeMockServerPlayerInLevel();
 			FloorSlot crystal = slot(floor, CommonIds.BLIGHT_CRYSTAL_NODE.toString());
 			FloorSlot herb = slot(floor, CommonIds.GHOSTCAP.toString());
@@ -105,7 +105,7 @@ public class BlightFloorGameTests {
 		ServerLevel level = helper.getLevel();
 		WorldFloors.useLevelForTests(level.dimension());
 		try {
-			PlacedFloor floor = Floors.open(server, new FloorRequest(907, BlockSoulsWorld.id("blight"), 5, 77L, 1)).orElseThrow();
+			PlacedFloor floor = Floors.open(server, new FloorRequest(923, BlockSoulsWorld.id("blight"), 5, 77L, 1)).orElseThrow();
 			FloorSlot nest = floor.slots(FloorSlotKind.STRUCTURE).getFirst();
 			helper.assertTrue(nest.tag().equals("nest"), "the structure is the nest, got " + nest.tag());
 			boolean nestChest = false;
