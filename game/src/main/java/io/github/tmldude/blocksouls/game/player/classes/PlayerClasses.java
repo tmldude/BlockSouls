@@ -107,7 +107,7 @@ public final class PlayerClasses {
 
 	// ---------------------------------------------------------------- reading
 
-	/** The player's playerClass, or null (the all-granted v1 player). Both sides for the local player. */
+	/** The player's class, or null (the all-granted v1 player). Both sides for the local player. */
 	public static @Nullable PlayerClass get(Player player) {
 		ClassState state = ((AttachmentTarget) player).getAttached(TYPE);
 		return state == null ? null : ClassCatalog.get(state.classId());
@@ -132,7 +132,7 @@ public final class PlayerClasses {
 
 	/**
 	 * Gives the player this class: clears the old one, restricts the movement verbs to the signature, hands the
-	 * kit over (once per class per run) and applies the effects. Returns false for an unknown playerClass.
+	 * kit over (once per class per run) and applies the effects. Returns false for an unknown class.
 	 */
 	public static boolean choose(ServerPlayer player, Identifier originId) {
 		PlayerClass playerClass = ClassCatalog.get(originId);
@@ -195,7 +195,7 @@ public final class PlayerClasses {
 		}
 	}
 
-	/** Opens the select screen on the player's client (the sigil, or {@code /bs playerClass select}). */
+	/** Opens the select screen on the player's client (the sigil, or {@code /bs class select}). */
 	public static void openSelect(ServerPlayer player) {
 		List<ClassPayloads.ClassView> views = ClassCatalog.all().stream().map(ClassPayloads.ClassView::of).toList();
 		if (views.isEmpty()) {
@@ -212,7 +212,7 @@ public final class PlayerClasses {
 		boolean paid = takeSigil(player);
 		if (!paid && !player.hasInfiniteMaterials()) {
 			// The screen was opened by something other than a sigil (a command): the pick still stands.
-			BlockSoulsGame.LOGGER.info("{} picked playerClass {} without a sigil", player.getPlainTextName(), originId);
+			BlockSoulsGame.LOGGER.info("{} picked class {} without a sigil", player.getPlainTextName(), originId);
 		}
 		choose(player, originId);
 	}
@@ -253,7 +253,7 @@ public final class PlayerClasses {
 			if (solo && config.soloAutoPick) {
 				Identifier fallback = Identifier.tryParse(config.soloDefault);
 				if (fallback == null || !choose(player, fallback)) {
-					BlockSoulsGame.LOGGER.warn("classes.soloDefault {} isn't a known playerClass", config.soloDefault);
+					BlockSoulsGame.LOGGER.warn("classes.soloDefault {} isn't a known class", config.soloDefault);
 				}
 			}
 			if (config.giveSigilAtRunStart) {
@@ -298,7 +298,7 @@ public final class PlayerClasses {
 		}
 	}
 
-	/** The class's display name from the lang file ({@code playerClass.<ns>.<path>}). */
+	/** The class's display name from the lang file ({@code class.<ns>.<path>}). */
 	public static Component name(Identifier id) {
 		return Component.translatable("class." + id.getNamespace() + "." + id.getPath());
 	}

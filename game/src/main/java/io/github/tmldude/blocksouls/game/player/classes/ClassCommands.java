@@ -17,13 +17,13 @@ import net.minecraft.server.level.ServerPlayer;
 import io.github.tmldude.blocksouls.common.debug.DebugCommands;
 import io.github.tmldude.blocksouls.common.player.Capabilities;
 
-/** {@code /bs playerClass list|set|clear|select|sigil ...}. */
+/** {@code /bs class list|set|clear|select|sigil ...}. */
 public final class ClassCommands {
 	private ClassCommands() {
 	}
 
 	public static void register() {
-		DebugCommands.register((root, context) -> root.then(Commands.literal("player_class")
+		DebugCommands.register((root, context) -> root.then(Commands.literal("class")
 				.then(Commands.literal("list").executes(ClassCommands::list))
 				.then(Commands.literal("set")
 						.then(Commands.argument("player", EntityArgument.player())
@@ -56,7 +56,7 @@ public final class ClassCommands {
 			ctx.getSource().sendFailure(Component.literal("Unknown class " + id));
 			return 0;
 		}
-		ctx.getSource().sendSuccess(() -> Component.literal("Set playerClass " + id + " for " + player.getPlainTextName()), true);
+		ctx.getSource().sendSuccess(() -> Component.literal("Set class " + id + " for " + player.getPlainTextName()), true);
 		return 1;
 	}
 
@@ -76,7 +76,7 @@ public final class ClassCommands {
 	private static int sigil(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
 		ServerPlayer player = EntityArgument.getPlayer(ctx, "player");
 		PlayerClasses.giveSigil(player);
-		ctx.getSource().sendSuccess(() -> Component.literal("Gave an Class Sigil to " + player.getPlainTextName()), true);
+		ctx.getSource().sendSuccess(() -> Component.literal("Gave a Class Sigil to " + player.getPlainTextName()), true);
 		return 1;
 	}
 
@@ -85,7 +85,7 @@ public final class ClassCommands {
 		PlayerClass playerClass = PlayerClasses.get(player);
 		var caps = Capabilities.granted(player);
 		String verbs = caps == null ? "all v1 verbs" : caps.isEmpty() ? "no verbs" : caps.stream().map(Identifier::toString).sorted().collect(Collectors.joining(", "));
-		ctx.getSource().sendSuccess(() -> Component.literal(player.getPlainTextName() + ": playerClass " + (playerClass == null ? "none" : playerClass.id()) + ", verbs: " + verbs), false);
+		ctx.getSource().sendSuccess(() -> Component.literal(player.getPlainTextName() + ": class " + (playerClass == null ? "none" : playerClass.id()) + ", verbs: " + verbs), false);
 		return 1;
 	}
 }

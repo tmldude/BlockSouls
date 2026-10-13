@@ -242,5 +242,15 @@
 	"synergy.blocksouls.ricochet": "Ricochet",
 	"synergy.blocksouls.explosion": "Explosion",
 	"synergy.blocksouls.pull": "Pull",
-	"synergy.blocksouls.heal": "Heal"
+	"synergy.blocksouls.heal": "Heal",
+	"screen.blocksouls_game.summary": "Run Over",
+	"screen.blocksouls_game.summary.run": "Wave %s · Threat %s · Night %s · Act %s · %s bosses felled",
+	"screen.blocksouls_game.summary.done": "Done",
+	"screen.blocksouls_game.summary.no_class": "No class",
+	"screen.blocksouls_game.summary.bosses": "Boss kills",
+	"screen.blocksouls_game.summary.revives": "Revives given",
+	"screen.blocksouls_game.summary.downed": "Time downed",
+	"screen.blocksouls_game.summary.souls": "Rune souls",
+	"screen.blocksouls_game.summary.best_boon": "Best boon",
+	"screen.blocksouls_game.summary.most_downed": "Most time downed"
 }

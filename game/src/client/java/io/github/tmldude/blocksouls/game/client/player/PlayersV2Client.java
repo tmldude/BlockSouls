@@ -14,10 +14,12 @@ import io.github.tmldude.blocksouls.game.client.hud.LastStandHud;
 import io.github.tmldude.blocksouls.game.client.hud.ClassSelectScreen;
 import io.github.tmldude.blocksouls.game.client.hud.PingHud;
 import io.github.tmldude.blocksouls.game.client.hud.RuneTreeScreen;
+import io.github.tmldude.blocksouls.game.client.hud.RunSummaryScreen;
 import io.github.tmldude.blocksouls.game.player.downed.LastStandPayloads;
 import io.github.tmldude.blocksouls.game.player.classes.ClassPayloads;
 import io.github.tmldude.blocksouls.game.player.ping.PingPayloads;
 import io.github.tmldude.blocksouls.game.player.rune.RunePayloads;
+import io.github.tmldude.blocksouls.game.player.summary.SummaryPayloads;
 
 /** Client side of the v2 player layer (classes, Last Stand, pings, the run summary): packet receivers and input. */
 public final class PlayersV2Client {
@@ -31,6 +33,7 @@ public final class PlayersV2Client {
 		ClientNetworking.receive(ClassPayloads.Offer.TYPE, (payload, context) -> Minecraft.getInstance().gui.setScreen(new ClassSelectScreen(payload)));
 		ClientNetworking.receive(LastStandPayloads.State.TYPE, (payload, context) -> LastStandHud.onState(payload));
 		ClientNetworking.receive(PingPayloads.Pinged.TYPE, (payload, context) -> PingHud.onPinged(payload));
+		ClientNetworking.receive(SummaryPayloads.Cards.TYPE, (payload, context) -> Minecraft.getInstance().gui.setScreen(new RunSummaryScreen(payload)));
 		ClientNetworking.receive(RunePayloads.Tree.TYPE, (payload, context) -> {
 			Minecraft minecraft = Minecraft.getInstance();
 			if (minecraft.gui.screen() instanceof RuneTreeScreen screen) {

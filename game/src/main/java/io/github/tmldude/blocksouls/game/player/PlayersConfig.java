@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.github.tmldude.blocksouls.game.player.classes.ClassesConfig;
+import io.github.tmldude.blocksouls.game.player.summary.SummaryConfig;
 import io.github.tmldude.blocksouls.game.player.rune.RunesConfig;
 
 /** {@code config/blocksouls/game-players.json}. Times are ticks unless named otherwise. */
@@ -16,6 +17,7 @@ public class PlayersConfig {
 	public Ping ping = new Ping();
 	public ClassesConfig classes = new ClassesConfig();
 	public RunesConfig runes = new RunesConfig();
+	public SummaryConfig summary = new SummaryConfig();
 
 	public static class Downed {
 		/** Movement speed change while downed (−0.85 = 85% slower). */

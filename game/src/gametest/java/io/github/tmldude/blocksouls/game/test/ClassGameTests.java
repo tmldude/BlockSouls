@@ -137,6 +137,24 @@ public class ClassGameTests {
 		helper.succeed();
 	}
 
+	@GameTest
+	public void wardenSlamLandingsCostNoHealthButShortFallsStillHurt(GameTestHelper helper) {
+		ServerPlayer player = DownedTestPlayers.make(helper, 1, 1);
+		helper.assertTrue(PlayerClasses.choose(player, id("warden")), "warden");
+		double minFall = PlayerClasses.rules(player).slamMinFall();
+		helper.assertTrue(minFall > 0, "the warden slams");
+		float health = player.getHealth();
+		player.fallDistance = minFall + 2;
+		player.hurtServer(helper.getLevel(), helper.getLevel().damageSources().fall(), 4.0F);
+		helper.assertTrue(player.getHealth() == health, "a slam landing forgives the fall");
+		player.fallDistance = 0;
+		player.hurtServer(helper.getLevel(), helper.getLevel().damageSources().fall(), 4.0F);
+		helper.assertTrue(player.getHealth() < health, "fall damage outside a slam still lands");
+		PlayerClasses.clear(player);
+		helper.assertTrue(!PlayerClasses.rules(player).slams(), "no class, no slam");
+		helper.succeed();
+	}
+
 	// ---------------------------------------------------------------- the per-class check
 
 	private static void check(GameTestHelper helper, String name, Set<Identifier> signature) {
