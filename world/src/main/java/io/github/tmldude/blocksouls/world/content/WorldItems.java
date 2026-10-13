@@ -92,7 +92,7 @@ public final class WorldItems {
 				.build());
 	}
 
-	private static Item item(String name, Function<Item.Properties, Item> factory, Item.Properties properties) {
+	static Item item(String name, Function<Item.Properties, Item> factory, Item.Properties properties) {
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, BlockSoulsWorld.id(name));
 		Item item = Registry.register(BuiltInRegistries.ITEM, key, factory.apply(properties.setId(key)));
 		TAB_ORDER.add(item);

@@ -56,3 +56,32 @@ Defaults picked while building floor 2, Infernal (Stage 6C wave A; brief `docs/s
   - `open` registers as its own `/bs floor` contributor (`InfernalCommands`), and Brigadier merges the nodes.
 - **Interim slot tags until slice 3:** the `fortress` structure falls back to the checkpoint ruin and the
   `soulfire_door` secret to the cracked wall (the builder's defaults for unknown tags).
+
+## Slice 2: cinder ore node and ashcap herb
+
+- **Cinder ore** (`blocksouls_world:cinder_ore`) is a rare node in every Infernal template's `nodeMix` (weight 1,
+  beside scrap and gunmetal). It pops in `nodeHits` like the others; its loot (`nodes/cinder_ore`) is cinder 1–2
+  (weight 6) or scrap 1–2 (weight 2), rolled `nodeBurstRolls` times. It glows faintly (light 6).
+- **Ashcap herbs are NODE slots tagged with the herb's block id**, so common's `FloorSlotKind` doesn't change. They
+  use Blight's herb API on main: each Infernal template sets `"herbs": {"blocksouls_world:ashcap": 2}`, and the planner
+  scatters `round(2 × floorSize)` of them (2 solo, 3 at 8 players). The planner's `extras` (rare nodes and herbs) now
+  also keeps clear of lava channels; templates without channels pass null, so their plans don't change. The ashcap is an
+  `AshcapBlock`, a `HerbBlock` (pops in one hit, light 9, non-colliding) that sheds spore and flame particles. It rolls
+  `nodeBurstRolls` like a node, unlike the ghostcap's fixed 1, because the tonic takes 2 ashcap.
+- **What cinder and ashcap make** (each drop feeds 2+ recipes):
+  - **Cinder Plate Chestplate** (forge): Scrap Plate Chestplate + 4 cinder. Scrap-plate stats a step up (defense 5,
+    toughness 1) and −50% burn time (the `burning_time` attribute), repaired with cinder. Its upgrade chain leads
+    into the Blight-Forged Chestplate.
+  - **Combustion book** (forge): book + 3 cinder + gunmetal ingot → an enchanted book with Combustion I.
+  - **The gun fire-perk reroll** is the Infernal enchant spec (`blocksouls_board/enchant/infernal.json`): on floor 2,
+    3 cinder + 8 souls rolls one of Combustion, Fire Aspect, Flame or Fire Protection onto the held item.
+  - **Ashcap Tonic** (brew): glass bottle + 2 ashcap → fire resistance for `tonicSeconds` (90). This is the drink that
+    lets you wade the lava (slice 1's hazard).
+  - **Scorch Draught** (brew): glass bottle + ashcap + cinder → the new Scorching effect for `scorchSeconds` (120):
+    your melee hits set the target alight for `scorchIgniteSeconds` (4) × level.
+  - Brews stack to 16 and leave their bottle. Every board entry is `minFloor` 2, so they show from the Infernal on.
+- **Sources:** board source entries name where cinder and ashcap come from ("Cinder ore nodes (Infernal)",
+  "Ashcap herbs (Infernal)").
+- **Gametests use a creative mock player** (vanilla's `makeMockServerPlayerInLevel` is always creative), so the lava
+  test calls `InfernalHazard.burn` (the check minus the game-mode exemption), and the tonic's bottle is checked
+  through its use-remainder component (creative doesn't use the stack up).

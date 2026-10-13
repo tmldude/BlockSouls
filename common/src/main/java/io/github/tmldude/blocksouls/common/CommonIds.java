@@ -91,6 +91,12 @@ public final class CommonIds {
 	public static final Identifier BLIGHT_CRYSTAL_NODE = id(WORLD, "blight_crystal_node");
 	public static final Identifier BLIGHT_CRYSTAL = id(WORLD, "blight_crystal");
 	public static final Identifier GHOSTCAP = id(WORLD, "ghostcap");
+	// v2-floor2-infernal: the Infernal floor's rare node (cinder ore → cinder) and herb (the ashcap block, the ashcap item).
+	public static final Identifier CINDER_ORE = id(WORLD, "cinder_ore");
+	public static final Identifier CINDER = id(WORLD, "cinder");
+	/** The herb (world): the block pops in one hit into the item of the same id. */
+	public static final Identifier ASHCAP = id(WORLD, "ashcap");
+	// end v2-floor2-infernal
 	/** The camp's exit portal block (world); using it starts the act's portal charge, lit it leads on. */
 	public static final Identifier FLOOR_PORTAL = id(WORLD, "floor_portal");
 	// --- floor 4, The Vault (Stage 6C) ---

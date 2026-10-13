@@ -69,6 +69,12 @@ public class FloorsConfig {
 		public int warnSeconds = 5;
 		/** Lava sends a player without fire resistance back to the camp, like falling off. */
 		public boolean lavaSendsBack = true;
+		/** Seconds of fire resistance from an Ashcap Tonic (wade the lava, shrug off the burning affix). */
+		public int tonicSeconds = 90;
+		/** Seconds of Scorching from a Scorch Draught. */
+		public int scorchSeconds = 120;
+		/** Seconds a Scorching player's hit (melee or gun) sets the target burning for. */
+		public float scorchIgniteSeconds = 4;
 	}
 
 	private static Map<String, List<String>> defaultEscalation() {

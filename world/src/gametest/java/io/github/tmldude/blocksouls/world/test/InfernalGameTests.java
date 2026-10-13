@@ -1,35 +1,51 @@
 package io.github.tmldude.blocksouls.world.test;
 
+import java.util.List;
 import java.util.Optional;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.animal.pig.Pig;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.UseRemainder;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.AABB;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 
 import io.github.tmldude.blocksouls.common.floor.FloorRequest;
+import io.github.tmldude.blocksouls.common.floor.FloorSlot;
+import io.github.tmldude.blocksouls.common.floor.FloorSlotKind;
 import io.github.tmldude.blocksouls.common.floor.Floors;
 import io.github.tmldude.blocksouls.common.floor.PlacedFloor;
 import io.github.tmldude.blocksouls.world.BlockSoulsWorld;
+import io.github.tmldude.blocksouls.world.content.InfernalContent;
+import io.github.tmldude.blocksouls.world.floor.FloorBlocks;
 import io.github.tmldude.blocksouls.world.floor.FloorPlanner;
 import io.github.tmldude.blocksouls.world.floor.FloorTemplate;
 import io.github.tmldude.blocksouls.world.floor.FloorTemplateCatalog;
 import io.github.tmldude.blocksouls.world.floor.InfernalHazard;
 import io.github.tmldude.blocksouls.world.floor.LavaChannels;
+import io.github.tmldude.blocksouls.world.floor.NodeBlock;
 import io.github.tmldude.blocksouls.world.floor.WorldFloors;
 
 /**
  * Floor 2, Infernal (v2-floor2-infernal): opens an Infernal floor in the test level and checks the lava channels, both
  * kinds of bridge, the island's biome, the lava rise (low bridges sink, the stone arch stands) and that lava sends a
- * player back to the camp unless they drank fire resistance. Act 902 keeps clear of real runs, FloorGameTests (900) and SkyriftGameTests (901).
+ * player back to the camp unless they drank the Ashcap Tonic. Slice 2: pops an ashcap and a cinder ore node, and drinks
+ * both brews. Act 902 keeps clear of real runs, FloorGameTests (900) and SkyriftGameTests (901).
  */
 public class InfernalGameTests {
 	private static final String FLOOR = "blocksouls_world_test:floor16";
@@ -44,6 +60,10 @@ public class InfernalGameTests {
 			WorldFloors.useLevelForTests(null);
 		}
 		helper.succeed();
+	}
+
+	private static boolean dropped(ServerLevel level, BlockPos pos, Item item) {
+		return level.getEntitiesOfClass(ItemEntity.class, new AABB(pos).inflate(3)).stream().anyMatch(drop -> drop.getItem().is(item));
 	}
 
 	private static void walk(GameTestHelper helper, MinecraftServer server, ServerLevel level, int act) {
@@ -93,14 +113,45 @@ public class InfernalGameTests {
 		helper.assertTrue(level.getBlockState(low).is(Blocks.CRIMSON_PLANKS), "a low bridge deck at " + low.toShortString());
 		helper.assertTrue(level.getBlockState(high).is(Blocks.POLISHED_BLACKSTONE_BRICKS), "the stone arch at " + high.toShortString());
 
-		// Lava sends you back to the camp; fire resistance lets you wade. The mock player is creative (exempt in play), so
-		// this calls the check without the game-mode exemption.
+		// Slice 2: the ashcaps pop in one hit, a cinder ore node in nodeHits, each into its loot.
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		List<FloorSlot> herbs = floor.slots(FloorSlotKind.NODE).stream().filter(slot -> slot.tag().equals("blocksouls_world:ashcap")).toList();
+		helper.assertTrue(herbs.size() >= 2 && herbs.size() <= 3, "two or three ashcaps, found " + herbs.size());
+		BlockPos herb = herbs.getFirst().pos();
+		helper.assertTrue(level.getBlockState(herb).is(FloorBlocks.ASHCAP), "an ashcap grows at " + herb.toShortString());
+		helper.assertTrue(((NodeBlock) FloorBlocks.ASHCAP).hit(level, herb, player), "one hit pops the ashcap");
+		helper.assertTrue(level.getBlockState(herb).isAir(), "the popped ashcap is gone");
+		helper.assertTrue(dropped(level, herb, InfernalContent.ASHCAP), "the ashcap dropped ashcap");
+		BlockPos ore = floor.slots(FloorSlotKind.NODE).stream().filter(slot -> slot.tag().equals("blocksouls_world:cinder_ore"))
+				.map(FloorSlot::pos).findFirst().orElse(null);
+		if (ore == null) { // this seed rolled no cinder ore: stand one up by the camp
+			ore = camp.above(4);
+			level.setBlock(ore, FloorBlocks.CINDER_ORE.defaultBlockState(), Block.UPDATE_ALL);
+		}
+		helper.assertTrue(level.getBlockState(ore).is(FloorBlocks.CINDER_ORE), "cinder ore at " + ore.toShortString());
+		for (int i = 1; i < WorldFloors.config().nodeHits; i++) {
+			helper.assertTrue(!((NodeBlock) FloorBlocks.CINDER_ORE).hit(level, ore, player), "hit " + i + " doesn't pop the cinder ore");
+		}
+		helper.assertTrue(((NodeBlock) FloorBlocks.CINDER_ORE).hit(level, ore, player), "the last hit pops the cinder ore");
+		helper.assertTrue(dropped(level, ore, InfernalContent.CINDER), "the cinder ore burst cinder");
+
+		// The brews: the Scorch Draught's hits set the target burning.
+		InfernalContent.SCORCH_DRAUGHT.finishUsingItem(new ItemStack(InfernalContent.SCORCH_DRAUGHT), level, player);
+		helper.assertTrue(player.hasEffect(InfernalContent.SCORCHING), "the draught gives Scorching");
+		Pig pig = helper.spawn(EntityTypes.PIG, new BlockPos(2, 2, 2));
+		pig.hurtServer(level, player.damageSources().playerAttack(player), 1.0F);
+		helper.assertTrue(pig.getRemainingFireTicks() > 0, "a Scorching hit sets the target burning");
+
+		// Lava sends you back to the camp; the Ashcap Tonic's fire resistance lets you wade.
 		player.teleportTo(lavaCell.getX() + 0.5, lavaCell.getY(), lavaCell.getZ() + 0.5);
 		helper.assertTrue(!InfernalHazard.checkLava(player), "creative players are exempt");
 		helper.assertTrue(InfernalHazard.burn(player), "lava sends the player back");
 		helper.assertTrue(player.blockPosition().distManhattan(camp) <= 4, "back at the camp, at " + player.blockPosition().toShortString());
-		player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 200));
+		ItemStack tonic = new ItemStack(InfernalContent.ASHCAP_TONIC);
+		UseRemainder remainder = tonic.get(DataComponents.USE_REMAINDER);
+		helper.assertTrue(remainder != null && remainder.convertInto().create().is(Items.GLASS_BOTTLE), "the tonic leaves its bottle");
+		InfernalContent.ASHCAP_TONIC.finishUsingItem(tonic, level, player); // creative mock: the stack isn't used up
+		helper.assertTrue(player.hasEffect(MobEffects.FIRE_RESISTANCE), "the tonic gives fire resistance");
 		player.teleportTo(lavaCell.getX() + 0.5, lavaCell.getY(), lavaCell.getZ() + 0.5);
 		helper.assertTrue(!InfernalHazard.burn(player), "fire resistance wades the lava");
 

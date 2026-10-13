@@ -46,8 +46,10 @@
   "nodes": 12,
   "nodeMix": {
     "blocksouls_world:scrap_node": 3,
-    "blocksouls_world:gunmetal_node": 2
+    "blocksouls_world:gunmetal_node": 2,
+    "blocksouls_world:cinder_ore": 1
   },
+  "herbs": { "blocksouls_world:ashcap": 2 },
   "crates": 2,
   "slots": [
     {

@@ -11,6 +11,7 @@ import io.github.tmldude.blocksouls.common.Config;
 import io.github.tmldude.blocksouls.world.armor.SetBonuses;
 import io.github.tmldude.blocksouls.world.command.WorldCommands;
 import io.github.tmldude.blocksouls.world.content.WorldBlocks;
+import io.github.tmldude.blocksouls.world.content.InfernalContent;
 import io.github.tmldude.blocksouls.world.content.WorldItems;
 import io.github.tmldude.blocksouls.world.economy.WorldEconomy;
 import io.github.tmldude.blocksouls.world.enchant.WackyEnchantments;
@@ -36,6 +37,7 @@ public class BlockSoulsWorld implements ModInitializer {
 		}
 		WorldBlocks.init();
 		WorldItems.init();
+		InfernalContent.init(); // v2-floor2-infernal
 		WorldEconomy.init();
 		WorldFloors.init();
 		WorldGen.init();

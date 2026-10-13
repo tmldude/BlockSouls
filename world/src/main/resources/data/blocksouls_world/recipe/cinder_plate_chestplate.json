@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "blocksouls_world:scrap_plate_chestplate",
+    "blocksouls_world:cinder",
+    "blocksouls_world:cinder",
+    "blocksouls_world:cinder",
+    "blocksouls_world:cinder"
+  ],
+  "result": {
+    "id": "blocksouls_world:cinder_plate_chestplate"
+  }
+}
