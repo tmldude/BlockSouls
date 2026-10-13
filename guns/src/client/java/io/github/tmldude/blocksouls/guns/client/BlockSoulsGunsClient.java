@@ -36,6 +36,7 @@ public class BlockSoulsGunsClient implements ClientModInitializer {
 		KeyMapping reload = Keybinds.keyboard("reload", SDLScancode.SDL_SCANCODE_R);
 		GunClient.register(reload);
 		GunHud.register();
+		PartTooltips.register();
 
 		ClientNetworking.receive(HitMarkerPayload.TYPE, (payload, context) -> {
 			GunHud.onHitMarker(payload.kind());

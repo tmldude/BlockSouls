@@ -49,8 +49,8 @@ public final class GunsItems {
 		SHOTGUN = gun(Weapons.SHOTGUN);
 		SNIPER_RIFLE = gun(Weapons.SNIPER_RIFLE);
 
-		PRIMARY_AMMO = register("primary_ammo", props -> new Item(props.stacksTo(64)));
-		SPECIAL_AMMO = register("special_ammo", props -> new Item(props.stacksTo(32)));
+		PRIMARY_AMMO = register("primary_ammo", props -> new Item(props.stacksTo(stackSize(BlockSoulsGuns.CONFIG.loot.primaryAmmoStack))));
+		SPECIAL_AMMO = register("special_ammo", props -> new Item(props.stacksTo(stackSize(BlockSoulsGuns.CONFIG.loot.specialAmmoStack))));
 
 		GUN_BARREL = register("gun_barrel", Item::new);
 		GUN_RECEIVER = register("gun_receiver", Item::new);
@@ -75,6 +75,10 @@ public final class GunsItems {
 			case "special" -> SPECIAL_AMMO;
 			default -> null;
 		};
+	}
+
+	private static int stackSize(int configured) {
+		return Math.clamp(configured, 1, 99);
 	}
 
 	private static GunItem gun(String weaponId) {

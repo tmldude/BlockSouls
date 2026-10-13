@@ -32,6 +32,9 @@ public class PartyConfig {
 	/** Final raid: crystals in each Crystal Order (× its solo count). 2 players ×1.3, 4 ×1.8, 8 ×2.7. */
 	public Curve raidCrystals = new Curve(0.3, 0.9);
 
+	/** Loot shared by the whole party (wave-clear reward bundles, pity guns). 2 players ×1.5, 4 ×2.2, 8 ×3.4. */
+	public Curve rewards = new Curve(0.5, 0.8);
+
 	/**
 	 * Abilities: ultimate charge gained per kill and per precision hit. Wave sizes grow slower than the party, so each
 	 * player's share of kills shrinks; this keeps ultimates on a similar clock. 2 players ×1.25, 4 ×1.67, 8 ×2.4.

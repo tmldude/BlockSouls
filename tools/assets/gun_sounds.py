@@ -155,6 +155,24 @@ def sounds():
         gong = at(metal(g, 0.85, 180, 0.35, ratios=(1.0, 2.0, 2.98, 4.1), gains=(1, 0.5, 0.35, 0.2)), 0.15, d)
         return reverb(g, mix((pad_to(slice_, d), 0.6), (gong, 1.0)), 0.6, 0.2)
     make("perk/vorpal", 1, vorpal)
+
+    # Rare drop: two rising bell notes, so a good gun on the ground is heard before it's seen.
+    def drop_rare(g, i):
+        d = 1.0
+        notes = mix((pad_to(bell(g, 0.6, 880, 0.18, bright=0.5), d), 1.0), (at(bell(g, 0.7, 1320, 0.22, bright=0.5), 0.12, d), 0.9))
+        return reverb(g, notes, 0.6, 0.25)
+    make("drop/rare", 1, drop_rare)
+
+    # Legendary drop: a bright three-note arpeggio over a low swell and a shimmer of high noise.
+    def drop_legendary(g, i):
+        d = 1.6
+        n = int(d * SR)
+        arp = sum(at(bell(g, 0.9, f, 0.3, bright=0.7), t0, d) * gain
+                  for f, t0, gain in ((660, 0.0, 0.9), (990, 0.11, 0.9), (1320, 0.22, 1.0)))
+        swell = sine(110, n) * env(n, shape=[(0, 0), (0.15, 1), (1, 0)]) * 0.35
+        shimmer = band(g.noise(n), 6000, 14000) * env(n, shape=[(0, 0), (0.2, 1), (1, 0)]) * 0.08
+        return reverb(g, mix((arp, 1.0), (swell, 1.0), (shimmer, 1.0)), 0.8, 0.3)
+    make("drop/legendary", 1, drop_legendary)
     return S
 
 
@@ -176,11 +194,14 @@ EVENTS = {
     "gun.perk.outlaw": ("perk/outlaw", SUB + "gun.perk.outlaw"),
     "gun.perk.rampage": ("perk/rampage", SUB + "gun.perk.rampage"),
     "gun.perk.vorpal": ("perk/vorpal", SUB + "gun.perk.vorpal"),
+    "gun.drop.rare": ("drop/rare", SUB + "gun.drop"),
+    "gun.drop.legendary": ("drop/legendary", SUB + "gun.drop"),
 }
 # Shots are the loudest thing a player makes (the heavy guns most of all); handling sounds sit well under them.
 PEAKS = {"starter_pistol/fire": 0.8, "auto_rifle/fire": 0.82, "hand_cannon/fire": 0.92, "shotgun/fire": 0.92,
          "sniper_rifle/fire": 0.92, "explosive_round": 0.85, "ricochet": 0.45, "empty": 0.6, "reload_start": 0.6, "reload_end": 0.65,
-         "ammo_pickup": 0.5, "headshot": 0.55, "outlaw": 0.7, "rampage": 0.7, "vorpal": 0.75}
+         "ammo_pickup": 0.5, "headshot": 0.55, "outlaw": 0.7, "rampage": 0.7, "vorpal": 0.75,
+         "drop/rare": 0.6, "drop/legendary": 0.7}
 
 
 def main():
