@@ -14,7 +14,7 @@ import java.util.Map;
 public class DirectorConfig {
 	public static final String FILE = "director";
 	/** Defaults revision {@link #migrate} brings older files up to. */
-	public static final int CURRENT_DEFAULTS = 4;
+	public static final int CURRENT_DEFAULTS = 5;
 
 	/** Which defaults revision this file was written against (0 = before the field existed). */
 	public int defaultsVersion;
@@ -58,8 +58,7 @@ public class DirectorConfig {
 			}
 		}
 		// 3 (v2-floor5-blight): floor events that share a generic event's id (the blight altar and pylon) join too.
-		// 4 (v2-floor2-infernal): the same rule again, so files already at 3 get the Infernal's events.
-		if (config.defaultsVersion < 4 && config.events != null && config.events.pool != null) {
+		if (config.defaultsVersion < 3 && config.events != null && config.events.pool != null) {
 			for (EventSpec spec : new Events().pool) {
 				if (!spec.floorTags.isEmpty() && config.events.pool.stream()
 						.noneMatch(old -> spec.id.equals(old.id) && spec.floorTags.equals(old.floorTags))) {
@@ -67,6 +66,17 @@ public class DirectorConfig {
 				}
 			}
 		}
+		// 4: reserved for floor 3, Skyrift (Stage 6C).
+		// 5 (v2-floor2-infernal): the Infernal's floor events join a pool that lacks them (by id and tags).
+		if (config.defaultsVersion < 5 && config.events != null && config.events.pool != null) {
+			for (EventSpec spec : new Events().pool) {
+				if (spec.floorTags.contains("infernal") && config.events.pool.stream()
+						.noneMatch(old -> spec.id.equals(old.id) && spec.floorTags.equals(old.floorTags))) {
+					config.events.pool.add(spec);
+				}
+			}
+		}
+		// end v2-floor2-infernal
 		config.defaultsVersion = CURRENT_DEFAULTS;
 		return true;
 	}

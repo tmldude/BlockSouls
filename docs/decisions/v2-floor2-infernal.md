@@ -117,8 +117,8 @@ Defaults picked while building floor 2, Infernal (Stage 6C wave A; brief `docs/s
   - `stranded_trader` (weight 3): a wandering trader on a basalt pillar in the same moat, no bridge (build one or
     drink a tonic). Permanent fire resistance, leaves after `strandedTraderMinutes` (6). On top of his vanilla offers
     he sells an Ashcap Tonic for `traderTonicCinder` (2) cinder and a Scorch Draught for `traderDraughtCinder` (3).
-  - Existing director.json files get these through the migration: `CURRENT_DEFAULTS` goes to 4, which reruns Blight's
-    revision-3 rule (add every default floor-tagged event a file lacks, by id and tags), so a file already at 3 gets them.
+  - Existing director.json files get these through the migration: `CURRENT_DEFAULTS` goes to 5 (4 is Skyrift's), with
+    an additive step 5 that adds each default `infernal`-tagged event a file lacks (by id and tags).
 - **No wall-buy:** the spec's "fire-gun wall-buy" has no wall-buy system anywhere in the code to hang it on; skipped.
 - **Mini-bosses:** `miniBossesByFloorTag.infernal` = Ashwyrm, Furnace Knight. There is no Hound-pack archetype in
   bosses or mobs, so the pool is those two.

@@ -138,11 +138,11 @@ class DayLoopTest {
 		assertEquals(1, old.events.pool.stream().filter(spec -> "blood_altar".equals(spec.id) && spec.floorTags.isEmpty()).count());
 	}
 
-	// v2-floor2-infernal: a file already at revision 3 (Blight's) still gets the Infernal's events, once.
+	// v2-floor2-infernal: a file already at revision 3 or 4 still gets the Infernal's events, once.
 	@Test
-	void migrationAddsTheInfernalEventsToARevision3Pool() {
+	void migrationAddsTheInfernalEventsToALaterPool() {
 		DirectorConfig old = new DirectorConfig();
-		old.defaultsVersion = 3;
+		old.defaultsVersion = 4;
 		old.events.pool = new java.util.ArrayList<>(List.of(new DirectorConfig.EventSpec("blood_altar", 3, 1),
 				new DirectorConfig.EventSpec("blood_altar", 3, 1, List.of("blight"), false)));
 		assertEquals(true, DirectorConfig.migrate(old));
