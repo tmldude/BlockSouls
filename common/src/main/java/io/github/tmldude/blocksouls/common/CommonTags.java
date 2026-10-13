@@ -10,6 +10,13 @@ import net.minecraft.world.level.block.Block;
 public final class CommonTags {
 	public static final TagKey<Item> GUNS = item("guns");
 	public static final TagKey<Item> AMMO = item("ammo");
+	/**
+	 * Shopkeeper boards (docs/decisions/v2-boards.md): a BlockSouls recipe whose result is in {@code brew_board}
+	 * goes on the brew board, in {@code forge_board} on the forge board. Untagged results default by kind
+	 * (food, consumable or ammo → brew, everything else → forge). Any module may add its items.
+	 */
+	public static final TagKey<Item> FORGE_BOARD = item("forge_board");
+	public static final TagKey<Item> BREW_BOARD = item("brew_board");
 
 	/** Player-buildable blocks that wave mobs may break (filled by mobs). Never natural terrain. */
 	public static final TagKey<Block> WAVE_BREAKABLE = block("wave_breakable");
