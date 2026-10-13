@@ -109,6 +109,8 @@ public final class CommonIds {
 	public static final Identifier CINDER = id(WORLD, "cinder");
 	/** The herb (world): the block pops in one hit into the item of the same id. */
 	public static final Identifier ASHCAP = id(WORLD, "ashcap");
+	/** The Infernal fortress's soulfire door block (world): a water bucket puts it out. */
+	public static final Identifier SOULFIRE_SEAL = id(WORLD, "soulfire_seal");
 	// end v2-floor2-infernal
 	// --- floor 3, Skyrift (Stage 6C) ---
 	/** Skyrift's rare node block (world), mostly on the floating shards; pops into skysteel. */

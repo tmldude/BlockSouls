@@ -154,6 +154,35 @@ class InfernalPlannerTest {
 		}
 	}
 
+	/**
+	 * Slice 3: the water pocket (the secret slot) and the fortress (the structure) sit on different lobes, so the bucket is
+	 * carried over a bridge; the fortress's footprint (17 × 7, InfernalFortress) stays clear of the lava.
+	 */
+	@Test
+	void waterPocketAcrossTheLavaFromTheFortress() throws Exception {
+		for (String name : INFERNAL) {
+			FloorTemplate template = load(name);
+			for (int players : new int[] {1, 8}) {
+				for (long seed = 0; seed < 40; seed++) {
+					FloorPlanner.FloorPlan plan = FloorPlanner.plan(template, config, 2, players, seed);
+					LavaChannels.Plan channels = FloorPlanner.channels(template, plan.radius(), seed);
+					String at = name + " players=" + players + " seed=" + seed;
+					FloorPlanner.PlannedSlot pocket = plan.slots(FloorSlotKind.SECRET).getFirst();
+					FloorPlanner.PlannedSlot fortress = plan.slots(FloorSlotKind.STRUCTURE).getFirst();
+					assertEquals("water_pocket", pocket.tag(), at);
+					assertEquals("fortress", fortress.tag(), at);
+					assertTrue(channels.distance(fortress.x(), fortress.z()) > Math.hypot(8, 3) + 1, at + ": the fortress reaches the lava");
+					boolean crosses = false;
+					for (int step = 0; step <= 100 && !crosses; step++) {
+						double t = step / 100.0;
+						crosses = channels.inChannel(pocket.x() + (fortress.x() - pocket.x()) * t, pocket.z() + (fortress.z() - pocket.z()) * t);
+					}
+					assertTrue(crosses, at + ": the water pocket shares the fortress's lobe");
+				}
+			}
+		}
+	}
+
 	@Test
 	void surfaceTemplatesHaveNoChannels() throws Exception {
 		for (String name : List.of("surface_crossroads", "surface_ridge", "surface_scrapfield")) {

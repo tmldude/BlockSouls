@@ -403,14 +403,24 @@ final class FloorBuilder {
 		filled.add(new FloorSlot(FloorSlotKind.CRATE, loot.identifier().toString(), pos, 0));
 	}
 
+	/** Records a slot a structure built inside its own slot (the Infernal fortress's soulfire door). */
+	void record(FloorSlot slot) {
+		filled.add(slot);
+	}
+
 	/**
 	 * The floor's structure: {@code outpost} is the checkpoint ruin, {@code wreck_yard} the wreck ruin,
-	 * {@code final_arena} floor 6's fighting ring ({@link ArenaFloor}), {@code nest} floor 5's hive.
+	 * {@code final_arena} floor 6's fighting ring ({@link ArenaFloor}), {@code nest} floor 5's hive,
+	 * {@code fortress} the Infernal fortress stub ({@link InfernalFortress}).
 	 */
 	private void structure(BlockPos pos, FloorPlanner.PlannedSlot slot) {
 		String tag = slot.tag();
 		if (CommonIds.FINAL_ARENA_SLOT.equals(tag)) {
 			ArenaFloor.build(level, pos, slot.radius());
+			return;
+		}
+		if (InfernalFortress.TAG.equals(tag)) { // v2-floor2-infernal
+			InfernalFortress.build(this, level, pos, random);
 			return;
 		}
 		if ("nest".equals(tag)) { // v2-floor5-blight
@@ -490,8 +500,13 @@ final class FloorBuilder {
 	/**
 	 * The floor's secret. {@code cracked_wall}: a sealed mossy hut, one wall cracked (break it to get in);
 	 * {@code hidden_drop}: a trapdoor in the grass over a shaft to a small vault. Both hold a legendary-leaning chest.
+	 * {@code water_pocket} (Infernal) is the spring whose water opens the fortress's soulfire door.
 	 */
 	private void secret(BlockPos pos, String tag) {
+		if (InfernalFortress.WATER_POCKET.equals(tag)) { // v2-floor2-infernal
+			InfernalFortress.waterPocket(level, pos);
+			return;
+		}
 		if ("grave".equals(tag)) { // v2-floor5-blight
 			grave(pos);
 			return;

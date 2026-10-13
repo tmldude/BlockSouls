@@ -77,9 +77,9 @@
     },
     {
       "kind": "secret",
-      "tag": "soulfire_door",
-      "x": 23,
-      "z": 40,
+      "tag": "water_pocket",
+      "x": -30,
+      "z": -40,
       "radius": 4
     },
     {

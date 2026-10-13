@@ -37,6 +37,10 @@ public final class FloorBlocks {
 					.sound(SoundType.AZALEA).offsetType(BlockBehaviour.OffsetType.XZ).pushReaction(PushReaction.IMMOVEABLE)
 					.lightLevel(state -> 9));
 	// --- end floor 3 ---
+	/** v2-floor2-infernal: the fortress vault's soulfire door; a water bucket puts it out. */
+	public static final Block SOULFIRE_SEAL = register(CommonIds.SOULFIRE_SEAL, SoulfireSealBlock::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE).strength(-1.0F, 3600000.0F).noLootTable()
+					.sound(SoundType.SOUL_SOIL).pushReaction(PushReaction.IMMOVEABLE).lightLevel(state -> 10).emissiveRendering(state -> true));
 	public static final Block FLOOR_PORTAL = register(CommonIds.FLOOR_PORTAL, FloorPortalBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(-1.0F, 3600000.0F).noLootTable().noOcclusion()
 					.pushReaction(PushReaction.IMMOVEABLE).sound(SoundType.GLASS)
