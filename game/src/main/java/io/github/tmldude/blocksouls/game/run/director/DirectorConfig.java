@@ -1,7 +1,9 @@
 package io.github.tmldude.blocksouls.game.run.director;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The AI Director and the run economy, loaded from {@code config/blocksouls/director.json} (PLAN2 §3b, §3c, §3e).
@@ -285,11 +287,22 @@ public class DirectorConfig {
 				Offer.of(1, 99, 1).product("minecraft:oak_fence", 16).price("blocksouls_world:scrap", 2)
 						.price("minecraft:oak_log", 2),
 				Offer.loot("blocksouls_game:gun_pity", 1, 2, 2).price("blocksouls_game:soul", 8),
-				Offer.loot("blocksouls_game:gun_pity", 3, 99, 2).price("blocksouls_world:gunmetal_ingot", 2).price("blocksouls_game:soul", 6),
-				Offer.of(2, 99, 1).product("blocksouls_game:trinket_case", 1).price("blocksouls_world:amber_resin", 2)
+				Offer.loot("blocksouls_game:gun_pity", 3, 99, 2).rare().price("blocksouls_world:gunmetal_ingot", 2).price("blocksouls_world:scrap", 4)
+						.price("blocksouls_game:soul", 6),
+				Offer.of(2, 99, 1).product("blocksouls_game:trinket_case", 1).rare().price("blocksouls_world:amber_resin", 2)
 						.price("blocksouls_world:gunmetal_ingot", 2).price("blocksouls_game:soul", 6),
 				Offer.of(1, 99, 2).product("minecraft:golden_apple", 1).price("blocksouls_world:amber_resin", 1)
 						.price("blocksouls_world:scrap", 3)));
+		/**
+		 * The icon a price shows: where that resource comes from (a node, trees, mobs, the floor's rare), so the
+		 * board reads as "go get this there". Items without an entry show themselves.
+		 */
+		public Map<String, Source> sources = new LinkedHashMap<>(Map.of(
+				"blocksouls_world:scrap", new Source("blocksouls_world:scrap_node", "Scrap nodes"),
+				"blocksouls_world:gunmetal_ingot", new Source("blocksouls_world:gunmetal_node", "Gunmetal nodes"),
+				"blocksouls_world:amber_resin", new Source("blocksouls_world:resin_node", "The floor's rare (resin nodes)"),
+				"blocksouls_game:soul", new Source("minecraft:zombie_head", "Mobs"),
+				"minecraft:oak_log", new Source("minecraft:oak_sapling", "Trees")));
 		/** Fixed services on the board. */
 		public int perkRerollSouls = 6;
 		public int cursePurgeSouls = 10;
@@ -308,6 +321,8 @@ public class DirectorConfig {
 		public int maxAct = 99;
 		public int weight = 1;
 		public List<Price> prices = new ArrayList<>();
+		/** A rare offer must cost two or more resource kinds besides souls (checked at load; see {@link #valid}). */
+		public boolean rare;
 
 		public Offer() {
 		}
@@ -335,6 +350,35 @@ public class DirectorConfig {
 		Offer price(String id, int amount) {
 			prices.add(new Price(id, amount));
 			return this;
+		}
+
+		Offer rare() {
+			rare = true;
+			return this;
+		}
+
+		/** Distinct price items other than souls. */
+		public long resourceKinds() {
+			return prices.stream().filter(p -> p.item != null && !p.item.equals("blocksouls_game:soul")).map(p -> p.item).distinct().count();
+		}
+
+		/** Has a product and 1+ prices; a rare offer needs two resource kinds besides souls. */
+		public boolean valid() {
+			boolean product = (loot != null && !loot.isBlank()) || (item != null && !item.equals("minecraft:air") && count > 0);
+			return product && !prices.isEmpty() && prices.stream().allMatch(p -> p.item != null && p.count > 0) && (!rare || resourceKinds() >= 2);
+		}
+	}
+
+	public static class Source {
+		public String icon;
+		public String label;
+
+		public Source() {
+		}
+
+		public Source(String icon, String label) {
+			this.icon = icon;
+			this.label = label;
 		}
 	}
 

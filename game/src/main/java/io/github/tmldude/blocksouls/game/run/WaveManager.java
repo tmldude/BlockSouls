@@ -142,7 +142,7 @@ public final class WaveManager {
 		}
 		if (canStartAnotherWave(server, data, config().waveBreakSeconds)) {
 			data.phase = RunPhase.WAVE_BREAK;
-			data.breakEndsAt = server.overworld().getGameTime() + config().waveBreakSeconds * 20L;
+			data.breakEndsAt = server.overworld().getGameTime() + DirectorHooks.breakSeconds(server, config().waveBreakSeconds) * 20L;
 			data.setDirty();
 			RunSync.markDirty();
 		}
@@ -193,7 +193,8 @@ public final class WaveManager {
 		if (players.isEmpty()) {
 			return;
 		}
-		for (int i = 0; i < SPAWNS_PER_TICK && data.waveSpawned < data.waveTotal && data.waveMobs.size() < PartyScaling.aliveCap(players.size()); i++) {
+		int perTick = DirectorHooks.spawnsThisTick(server, SPAWNS_PER_TICK);
+		for (int i = 0; i < perTick && data.waveSpawned < data.waveTotal && data.waveMobs.size() < PartyScaling.aliveCap(players.size()); i++) {
 			// A failed spawn still counts, so a wave can't stall on bad terrain; it retries next tick otherwise.
 			if (!spawnOne(server, data, players)) {
 				return;
@@ -214,7 +215,10 @@ public final class WaveManager {
 		boolean breaks = random.nextDouble() < WaveMath.breakerShare(data.wave, config());
 		WaveContext context = new WaveContext(data.wave, data.difficulty, modifierIds(data), breaks);
 		boolean allowElite = data.waveElites < WaveMath.maxElites(data.wave, players.size(), config());
-		WaveMobSpec spec = pickSpec(data, random, allowElite);
+		WaveMobSpec spec = DirectorHooks.preferredSpec(server, data, random, allowElite);
+		if (spec == null) {
+			spec = pickSpec(data, random, allowElite);
+		}
 		Mob mob = null;
 		if (spec != null) {
 			try {
@@ -245,8 +249,43 @@ public final class WaveManager {
 			data.waveElites++;
 		}
 		retarget(level, mob, players);
+		DirectorHooks.onSpawned(server, mob);
 		RunSync.markDirty();
 		return true;
+	}
+
+	/** An out-of-wave mob for the Director (see {@link DirectorHooks#spawnHunter}). */
+	static @Nullable Mob spawnHunter(MinecraftServer server, RunData data, ServerLevel level, BlockPos pos, @Nullable Identifier preferred,
+			boolean elite, RandomSource random) {
+		WaveMobSpec spec = preferred == null ? null : WaveMobs.get(preferred).filter(s -> s.weight() > 0).orElse(null);
+		if (spec == null) {
+			spec = pickSpec(data, random, elite);
+		}
+		WaveContext context = new WaveContext(data.wave, data.difficulty, modifierIds(data), false);
+		Mob mob = null;
+		if (spec != null) {
+			try {
+				mob = spec.factory().create(level, pos, context);
+			} catch (RuntimeException e) {
+				BlockSoulsGame.LOGGER.error("Wave mob factory {} failed", spec.id(), e);
+			}
+		}
+		if (mob == null) {
+			mob = vanillaZombie(level, pos);
+		}
+		if (mob == null) {
+			return null;
+		}
+		mob.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, random.nextFloat() * 360, 0);
+		setUpWaveMob(mob, data, elite || (spec != null && spec.elite()) || isElite(mob));
+		data.hunters.add(mob.getUUID());
+		if (!level.addFreshEntity(mob)) {
+			data.hunters.remove(mob.getUUID());
+			return null;
+		}
+		data.setDirty();
+		retarget(level, mob, activePlayers(server));
+		return mob;
 	}
 
 	private static @Nullable Mob vanillaZombie(ServerLevel level, BlockPos pos) {
@@ -327,8 +366,12 @@ public final class WaveManager {
 		RunConfig config = config();
 		BlockPos best = null;
 		int bestLight = Integer.MAX_VALUE;
+		double aimed = DirectorHooks.spawnAngle(level, anchor, random);
 		for (int attempt = 0; attempt < SPAWN_ATTEMPTS; attempt++) {
-			double angle = random.nextDouble() * Math.PI * 2;
+			// The Director aims at a sector (jittered within it); later attempts fall back to anywhere.
+			double angle = !Double.isNaN(aimed) && attempt < SPAWN_ATTEMPTS / 2
+					? aimed + (random.nextDouble() - 0.5) * (Math.PI / 4)
+					: random.nextDouble() * Math.PI * 2;
 			double distance = config.spawnMinDistance + random.nextDouble() * Math.max(0, config.spawnMaxDistance - config.spawnMinDistance);
 			int x = Mth.floor(anchor.getX() + Math.cos(angle) * distance);
 			int z = Mth.floor(anchor.getZ() + Math.sin(angle) * distance);
@@ -596,7 +639,8 @@ public final class WaveManager {
 		if (!elite && random.nextDouble() >= config().dropChance) {
 			return;
 		}
-		int tier = WaveMath.pickTier(data.wave, random.nextDouble(), NightModifiers.tierShift(data.nightModifiers), elite, config());
+		int shift = NightModifiers.tierShift(data.nightModifiers) + DirectorHooks.tierShift(level.getServer());
+		int tier = WaveMath.pickTier(data.wave, random.nextDouble(), shift, elite, config());
 		if (elite) {
 			// Elites always drop something worth walking to, even when a trap or a teammate's pet got the kill.
 			WaveRewards.dropElite(level, mob, source, dropTable(tier), killer != null);
