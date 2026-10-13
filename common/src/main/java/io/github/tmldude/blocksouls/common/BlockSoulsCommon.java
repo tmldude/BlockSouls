@@ -7,6 +7,7 @@ import io.github.tmldude.blocksouls.common.advancement.Milestones;
 import io.github.tmldude.blocksouls.common.debug.ConfigCommands;
 import io.github.tmldude.blocksouls.common.debug.DebugCommands;
 import io.github.tmldude.blocksouls.common.event.ConfigEvents;
+import io.github.tmldude.blocksouls.common.mob.Affixes;
 import io.github.tmldude.blocksouls.common.party.PartyConfig;
 import io.github.tmldude.blocksouls.common.party.PartyScaling;
 import io.github.tmldude.blocksouls.common.player.Capabilities;
@@ -22,6 +23,7 @@ public class BlockSoulsCommon implements ModInitializer {
 		PlayerStatus.init();
 		Capabilities.init();
 		Abilities.init();
+		Affixes.init();
 		DebugCommands.init();
 		ConfigCommands.init();
 		VersionCheck.init();
