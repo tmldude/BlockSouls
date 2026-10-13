@@ -161,20 +161,6 @@ public class GunsConfig {
 		public double tetherBlastDamage = 12;
 		public int tetherTicks = 60;
 		public double tetherPull = 0.18;
-		public int waveClearPrimaryMin = 24;
-		public int waveClearPrimaryMax = 48;
-		public int waveClearSpecialMin = 6;
-		public int waveClearSpecialMax = 12;
-		/** Elite kills (game's {@code wave_drops/elite} table, per roll): a gun at this chance and tier, plus ammo. */
-		public double eliteGunChance = 0.35;
-		public String eliteGunTier = "rare";
-		public int elitePrimaryMin = 16;
-		public int elitePrimaryMax = 32;
-		/** The night-2 pity gun's {@code roll_perks} tier. */
-		public String pityGunTier = "rare";
-		/** Max stack sizes (applied at startup). Vanilla allows up to 99. */
-		public int primaryAmmoStack = 99;
-		public int specialAmmoStack = 64;
 	}
 
 	/** Rare and legendary guns on the ground: a colored particle beam, glow outline, rarity-colored name and a sound sting. */
