@@ -49,9 +49,18 @@ public final class FloorTemplate {
 	public int crates = 2;
 	public List<Slot> slots = new ArrayList<>();
 
-	// ---- Infernal (v2-floor2-infernal): all optional, absent on the Surface templates so they build as before.
-	/** Biome painted over the island (sky, fog, particles, ambience); empty keeps the dimension's look. */
+	// ---- Skyrift (floor 3) additions: all optional, the defaults build a Surface floor exactly as before.
+	/** Glass wall at the island edge; false leaves the edge open (the drop is the death plane). */
+	public boolean edgeWall = true;
+	/** Biome painted over the floor's cell (sky, fog, clouds, grass and leaf tint); empty keeps the dimension's. */
 	public String biome = "";
+	/** Outward wind near the open edge, as a multiple of {@code FloorsConfig.rimWindStrength}; 0 = none. */
+	public double rimWind = 0;
+	/** Floating shards above and around the island (count 0 = none). */
+	public Shards shards = new Shards();
+	/** Siege ring points moved onto shards (waves drop in from above). */
+	public int elevatedSiegePoints = 0;
+	// ---- Infernal (v2-floor2-infernal): all optional (the biome is the Skyrift field above), absent on the Surface templates so they build as before.
 	/** Lava channels cutting the island into lobes, with bridges; null for none. */
 	public LavaChannels.Spec channels;
 	/** Basalt spires scattered outside the slots and channels. */
@@ -68,6 +77,26 @@ public final class FloorTemplate {
 		/** The camp's ground and fire. */
 		public String camp = "minecraft:coarse_dirt";
 		public String campfire = "minecraft:campfire";
+	}
+
+	/**
+	 * Floating shards: small islands {@code minRise}..{@code maxRise} above the ground, {@code minReach}..{@code maxReach}
+	 * of the island radius from the camp (above 1.0 they float past the edge). Their count is scaled by
+	 * {@code PartyScaling.floorSize} and clamped to {@code maxCount}.
+	 */
+	public static class Shards {
+		public int count = 0;
+		public int maxCount = 8;
+		public int minSize = 3;
+		public int maxSize = 6;
+		public int minRise = 9;
+		public int maxRise = 18;
+		public double minReach = 0.45;
+		public double maxReach = 1.12;
+		/** Edge-to-edge gap (blocks) a shard past the rim may leave to the island: a swing, not a leap of faith. */
+		public int maxGap = 9;
+		/** Share of shards over the island that hang a climbable vine strand toward the ground. */
+		public double vineChance = 0.5;
 	}
 
 	/** One hand-placed slot. {@code kind} is a {@link FloorSlotKind} name (any case). */
@@ -133,6 +162,12 @@ public final class FloorTemplate {
 		}
 		if (camps != 1 || portals != 1) {
 			throw new IllegalArgumentException("needs exactly one camp and one exit_portal slot");
+		}
+		if (shards == null) {
+			shards = new Shards();
+		}
+		if (shards.minSize < 1 || shards.maxSize < shards.minSize || shards.maxRise < shards.minRise || shards.maxReach < shards.minReach) {
+			throw new IllegalArgumentException("shards: min must not exceed max");
 		}
 		if (nodeMix == null || nodeMix.isEmpty()) {
 			throw new IllegalArgumentException("nodeMix is empty");

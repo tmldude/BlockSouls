@@ -125,6 +125,17 @@ public final class CommonIds {
 	 */
 	public static final ResourceKey<LootTable> GUN_PITY = lootTable(GAME, "gun_pity");
 
+	/**
+	 * Data folders (under {@code data/<namespace>/}) the shopkeeper's forge and brew boards read on every
+	 * {@code /reload}; any module may ship files there. Formats: docs/decisions/v2-boards.md.
+	 * {@code entry}: a recipe's board, floors and floor tags. {@code source}: "where to get it" for an ingredient.
+	 * {@code enchant}: a floor's forge enchant service (metal, souls, enchantments). {@code upgrade}: a gear tier chain.
+	 */
+	public static final String BOARD_ENTRIES = "blocksouls_board/entry";
+	public static final String BOARD_SOURCES = "blocksouls_board/source";
+	public static final String BOARD_ENCHANTS = "blocksouls_board/enchant";
+	public static final String BOARD_UPGRADES = "blocksouls_board/upgrade";
+
 	private CommonIds() {
 	}
 

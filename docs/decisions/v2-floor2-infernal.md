@@ -42,15 +42,17 @@ Defaults picked while building floor 2, Infernal (Stage 6C wave A; brief `docs/s
   - The rise is live state only. A server restart mid-siege skips it, and a finished charge cancels a pending rise.
 - **Look:** a new biome `blocksouls_world:infernal` (red sky and fog, white ash and ash particles, basalt-delta
   ambience; water does not evaporate, because slice 3's secret needs a bucket of it) is painted over the island's
-  chunks after building. That is the same fill `/fillbiome` does, and it is resent to clients. Ground: blackstone top
+  chunks after building by the shared template `biome` field (Skyrift's painter; the same fill `/fillbiome` does,
+  resent to clients). Ground: blackstone top
   with magma, basalt, netherrack and soul-soil accents (`terrain.accents`, percent per top block, seeded per column),
   basalt fill, blackstone base, basalt spires and eternal fires on netherrack. The camp is soul soil with a soul
   campfire.
 - **Debug:**
-  - `/bs floor hazard warn|rise|schedule` acts on the floor you stand on, else the current act's floor.
+  - `/bs floor hazard lava_warn|lava_rise|lava_schedule` (registered with Skyrift's shared `FloorHazards`) acts on the
+    Infernal floor you stand on.
   - `/bs floor open <act> <players> <pool>` opens a floor from any pool. The floor number is the act, so
     `/bs floor open 2 1 blocksouls_world:infernal` opens an Infernal floor.
   - `/bs floor goto <slot kind>` already works on any floor.
-  - These register as their own `/bs floor` contributor (`InfernalCommands`), and Brigadier merges the nodes.
+  - `open` registers as its own `/bs floor` contributor (`InfernalCommands`), and Brigadier merges the nodes.
 - **Interim slot tags until slice 3:** the `fortress` structure falls back to the checkpoint ruin and the
   `soulfire_door` secret to the cracked wall (the builder's defaults for unknown tags).

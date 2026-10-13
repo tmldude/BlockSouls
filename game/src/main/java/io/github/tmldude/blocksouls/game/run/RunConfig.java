@@ -253,7 +253,15 @@ public class RunConfig {
 		List<ActSpec> floorActs = new ArrayList<>();
 		for (int floor = 1; floor <= 6; floor++) {
 			ActSpec spec = new ActSpec(RunIds.NAMESPACE + ":floor_" + floor, "blocksouls_world:floors", "Floor " + floor);
-			spec.pool = floor == 2 ? "blocksouls_world:infernal" : "blocksouls_world:surface"; // v2-floor2-infernal: act 2
+			spec.pool = "blocksouls_world:surface";
+			// --- floor pools (Stage 6C): one line per floor session ---
+			if (floor == 3) {
+				spec.pool = "blocksouls_world:skyrift";
+			}
+			if (floor == 2) { // v2-floor2-infernal
+				spec.pool = "blocksouls_world:infernal";
+			}
+			// --- end floor pools ---
 			floorActs.add(spec);
 		}
 		return floorActs;

@@ -29,7 +29,7 @@ import io.github.tmldude.blocksouls.world.floor.WorldFloors;
 /**
  * Floor 2, Infernal (v2-floor2-infernal): opens an Infernal floor in the test level and checks the lava channels, both
  * kinds of bridge, the island's biome, the lava rise (low bridges sink, the stone arch stands) and that lava sends a
- * player back to the camp unless they drank fire resistance. Act 901 keeps clear of real runs and FloorGameTests.
+ * player back to the camp unless they drank fire resistance. Act 902 keeps clear of real runs, FloorGameTests (900) and SkyriftGameTests (901).
  */
 public class InfernalGameTests {
 	private static final String FLOOR = "blocksouls_world_test:floor16";
@@ -39,7 +39,7 @@ public class InfernalGameTests {
 		ServerLevel level = helper.getLevel();
 		WorldFloors.useLevelForTests(level.dimension());
 		try {
-			walk(helper, level.getServer(), level, 901);
+			walk(helper, level.getServer(), level, 902);
 		} finally {
 			WorldFloors.useLevelForTests(null);
 		}

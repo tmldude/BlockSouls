@@ -1,0 +1,119 @@
+{
+  "pool": "blocksouls_world:skyrift",
+  "tags": [
+    "skyrift",
+    "spire"
+  ],
+  "minFloor": 3,
+  "maxFloor": 3,
+  "weight": 2,
+  "radius": 54,
+  "groundY": 92,
+  "depth": 18,
+  "hills": 3.0,
+  "trees": 8,
+  "nodes": 12,
+  "nodeMix": {
+    "blocksouls_world:scrap_node": 2,
+    "blocksouls_world:gunmetal_node": 2
+  },
+  "crates": 2,
+  "shards": {
+    "count": 6,
+    "maxCount": 8,
+    "minSize": 3,
+    "maxSize": 6,
+    "minRise": 9,
+    "maxRise": 18,
+    "minReach": 0.45,
+    "maxReach": 1.12,
+    "maxGap": 9,
+    "vineChance": 0.6
+  },
+  "elevatedSiegePoints": 3,
+  "edgeWall": false,
+  "biome": "blocksouls_world:skyrift",
+  "rimWind": 1.0,
+  "terrain": {
+    "top": "minecraft:grass_block",
+    "fill": "minecraft:calcite",
+    "base": "minecraft:diorite"
+  },
+  "slots": [
+    {
+      "kind": "camp",
+      "x": 0,
+      "z": 0,
+      "radius": 6
+    },
+    {
+      "kind": "exit_portal",
+      "x": 9,
+      "z": 0,
+      "radius": 2
+    },
+    {
+      "kind": "structure",
+      "tag": "sky_temple",
+      "x": -30,
+      "z": -28,
+      "radius": 7
+    },
+    {
+      "kind": "mini_boss",
+      "x": 34,
+      "z": -26,
+      "radius": 10
+    },
+    {
+      "kind": "secret",
+      "tag": "sky_seed",
+      "x": -40,
+      "z": 18,
+      "radius": 4
+    },
+    {
+      "kind": "event",
+      "x": 28,
+      "z": 30,
+      "radius": 5
+    },
+    {
+      "kind": "cave",
+      "x": -14,
+      "z": 16,
+      "radius": 4
+    },
+    {
+      "kind": "wreck",
+      "x": 6,
+      "z": 42,
+      "radius": 6
+    },
+    {
+      "kind": "node",
+      "tag": "blocksouls_world:gunmetal_node",
+      "x": -44,
+      "z": -4,
+      "radius": 0
+    },
+    {
+      "kind": "node",
+      "x": 46,
+      "z": 6,
+      "radius": 0
+    },
+    {
+      "kind": "node",
+      "x": 12,
+      "z": -42,
+      "radius": 0
+    },
+    {
+      "kind": "node",
+      "x": -24,
+      "z": 38,
+      "radius": 0
+    }
+  ]
+}

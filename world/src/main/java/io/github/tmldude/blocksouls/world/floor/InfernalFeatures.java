@@ -164,33 +164,4 @@ final class InfernalFeatures {
 		double distance = Math.sqrt(random.nextDouble()) * reach;
 		return new int[] {(int) Math.round(Math.cos(angle) * distance), (int) Math.round(Math.sin(angle) * distance)};
 	}
-
-	/** Paints the template's biome over the island's chunks (the sky tint, fog, ash and ambience come from it). */
-	void paintBiome() {
-		if (template.biome.isEmpty()) {
-			return;
-		}
-		Identifier id = Identifier.tryParse(template.biome);
-		var biome = id == null ? java.util.Optional.<Holder.Reference<Biome>>empty()
-				: level.registryAccess().lookupOrThrow(Registries.BIOME).get(ResourceKey.create(Registries.BIOME, id));
-		if (biome.isEmpty()) {
-			BlockSoulsWorld.LOGGER.warn("Floor template {} names an unknown biome {}", template.id, template.biome);
-			return;
-		}
-		Holder<Biome> holder = biome.get();
-		int reach = plan.radius() + 16;
-		List<ChunkAccess> chunks = new ArrayList<>();
-		for (int cx = (centre.getX() - reach) >> 4; cx <= (centre.getX() + reach) >> 4; cx++) {
-			for (int cz = (centre.getZ() - reach) >> 4; cz <= (centre.getZ() + reach) >> 4; cz++) {
-				ChunkAccess chunk = level.getChunk(cx, cz, ChunkStatus.FULL, true);
-				if (chunk == null) {
-					continue;
-				}
-				chunk.fillBiomesFromNoise((qx, qy, qz) -> holder);
-				chunk.markUnsaved();
-				chunks.add(chunk);
-			}
-		}
-		level.getChunkSource().chunkMap.resendBiomesForChunks(chunks);
-	}
 }

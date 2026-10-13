@@ -20,12 +20,26 @@ public final class FloorPlanner {
 	private FloorPlanner() {
 	}
 
-	/** A planned slot; {@code x}/{@code z} are relative to the camp. */
-	public record PlannedSlot(FloorSlotKind kind, String tag, int x, int z, int radius) {
+	/**
+	 * A planned slot; {@code x}/{@code z} are relative to the camp. {@code rise} &gt; 0 puts the slot on a floating shard
+	 * whose top block is {@code rise} above the ground level (Skyrift's elevated siege points); 0 is the island ground.
+	 */
+	public record PlannedSlot(FloorSlotKind kind, String tag, int x, int z, int radius, int rise) {
+		public PlannedSlot(FloorSlotKind kind, String tag, int x, int z, int radius) {
+			this(kind, tag, x, z, radius, 0);
+		}
+	}
+
+	/** A floating shard (Skyrift): centre relative to the camp, top block {@code rise} above the ground level. */
+	public record Shard(int x, int z, int rise, int size) {
 	}
 
 	public record FloorPlan(String template, int radius, int groundY, int rotation, boolean mirrored, Set<String> tags,
-			List<PlannedSlot> slots) {
+			List<PlannedSlot> slots, List<Shard> shards) {
+		public FloorPlan(String template, int radius, int groundY, int rotation, boolean mirrored, Set<String> tags, List<PlannedSlot> slots) {
+			this(template, radius, groundY, rotation, mirrored, tags, slots, List.of());
+		}
+
 		public List<PlannedSlot> slots(FloorSlotKind kind) {
 			return slots.stream().filter(slot -> slot.kind() == kind).toList();
 		}
@@ -131,9 +145,97 @@ public final class FloorPlanner {
 					(int) Math.round(Math.sin(angle) * ring), 0));
 		}
 
+		// Skyrift: shards and elevated siege points use their own random so templates without shards plan as before.
+		List<Shard> shards = List.of();
+		if (template.shards.count > 0) {
+			Random sky = new Random(seed ^ 0x5348415244L);
+			shards = shards(template, slots, radius, players, sky);
+			elevate(slots, shards, radius, template.elevatedSiegePoints);
+		}
+
 		Set<String> tags = new LinkedHashSet<>(template.tags);
 		tags.addAll(escalationTags(config, floorNumber));
-		return new FloorPlan(template.id, radius, template.groundY, rotation, mirrored, tags, List.copyOf(slots));
+		return new FloorPlan(template.id, radius, template.groundY, rotation, mirrored, tags, List.copyOf(slots), shards);
+	}
+
+	/** The shard count for a party: the template's count scaled like the island's radius, capped at {@code maxCount}. */
+	public static int shardCount(FloorTemplate template, int players) {
+		FloorTemplate.Shards spec = template.shards;
+		return Math.max(0, Math.min(spec.maxCount, (int) Math.round(spec.count * PartyScaling.floorSize(Math.max(1, players)))));
+	}
+
+	/**
+	 * Places floating shards around the camp: clear of the camp, portal and structure footprints and of each other, and
+	 * those past the rim within {@code maxGap} of the island's edge so the movement kit can reach them.
+	 */
+	static List<Shard> shards(FloorTemplate template, List<PlannedSlot> slots, int radius, int players, Random random) {
+		FloorTemplate.Shards spec = template.shards;
+		int count = shardCount(template, players);
+		List<PlannedSlot> keepClear = slots.stream().filter(slot -> slot.kind() == FloorSlotKind.CAMP
+				|| slot.kind() == FloorSlotKind.EXIT_PORTAL || slot.kind() == FloorSlotKind.STRUCTURE).toList();
+		List<Shard> out = new ArrayList<>();
+		double offset = random.nextDouble() * Math.PI * 2;
+		for (int attempt = 0; out.size() < count && attempt < count * 80; attempt++) {
+			// Spread the shards around the compass: each one starts from its own sector, jittered.
+			double angle = offset + (out.size() + random.nextDouble() * 0.8) * Math.PI * 2 / count;
+			int size = spec.minSize + random.nextInt(spec.maxSize - spec.minSize + 1);
+			double reach = (spec.minReach + random.nextDouble() * (spec.maxReach - spec.minReach)) * radius;
+			int rise = spec.minRise + random.nextInt(spec.maxRise - spec.minRise + 1);
+			int x = (int) Math.round(Math.cos(angle) * reach);
+			int z = (int) Math.round(Math.sin(angle) * reach);
+			if (reach - size - radius > spec.maxGap || !clear(x, z, keepClear, size + 3)) {
+				continue;
+			}
+			boolean apart = true;
+			for (Shard other : out) {
+				long dx = x - other.x();
+				long dz = z - other.z();
+				long gap = size + other.size() + 3;
+				apart &= dx * dx + dz * dz >= gap * gap;
+			}
+			if (apart) {
+				out.add(new Shard(x, z, rise, size));
+			}
+		}
+		return List.copyOf(out);
+	}
+
+	/** Whether a shard lies wholly inside the island's radius (with a two-block margin). */
+	public static boolean overIsland(Shard shard, int radius) {
+		double reach = Math.sqrt((double) shard.x() * shard.x() + (double) shard.z() * shard.z()) + shard.size();
+		return reach <= radius - 2;
+	}
+
+	/**
+	 * Moves {@code count} siege ring points (spread evenly round the ring) onto the shard nearest each, one per shard. Only
+	 * shards wholly over the island qualify, so what spawns there drops onto the island, not into the void.
+	 */
+	static void elevate(List<PlannedSlot> slots, List<Shard> allShards, int radius, int count) {
+		List<Shard> shards = allShards.stream().filter(shard -> overIsland(shard, radius)).toList();
+		List<Integer> ring = new ArrayList<>();
+		for (int i = 0; i < slots.size(); i++) {
+			if (slots.get(i).kind() == FloorSlotKind.SIEGE_RING) {
+				ring.add(i);
+			}
+		}
+		int moves = Math.min(Math.max(0, count), Math.min(ring.size(), shards.size()));
+		Set<Shard> used = new java.util.HashSet<>();
+		for (int m = 0; m < moves; m++) {
+			int index = ring.get(m * ring.size() / moves);
+			PlannedSlot point = slots.get(index);
+			Shard best = null;
+			long bestDistance = Long.MAX_VALUE;
+			for (Shard shard : shards) {
+				long dx = shard.x() - point.x();
+				long dz = shard.z() - point.z();
+				if (!used.contains(shard) && dx * dx + dz * dz < bestDistance) {
+					bestDistance = dx * dx + dz * dz;
+					best = shard;
+				}
+			}
+			used.add(best);
+			slots.set(index, new PlannedSlot(FloorSlotKind.SIEGE_RING, point.tag(), best.x(), best.z(), 0, best.rise()));
+		}
 	}
 
 	/**
