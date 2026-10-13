@@ -254,6 +254,11 @@ public class RunConfig {
 		for (int floor = 1; floor <= 6; floor++) {
 			ActSpec spec = new ActSpec(RunIds.NAMESPACE + ":floor_" + floor, "blocksouls_world:floors", "Floor " + floor);
 			spec.pool = "blocksouls_world:surface";
+			// --- floor pools (Stage 6C): one line per floor session ---
+			if (floor == 3) {
+				spec.pool = "blocksouls_world:skyrift";
+			}
+			// --- end floor pools ---
 			floorActs.add(spec);
 		}
 		return floorActs;

@@ -23,9 +23,9 @@ import io.github.tmldude.blocksouls.common.floor.PlacedFloor;
 import io.github.tmldude.blocksouls.world.BlockSoulsWorld;
 
 /**
- * {@code /bs floor open <act> [players]} (places a floor without a run), {@code /bs floor tp <act>}, {@code /bs floor info},
- * {@code /bs floor light <act>} (lights its exit portal), {@code /bs floor goto <slot kind>} and {@code /bs floor pop}
- * (pops the nearest node).
+ * {@code /bs floor open <act> [players] [pool]} (places a floor without a run; pool e.g. {@code skyrift}, floor number = act), {@code /bs floor tp <act>}, {@code /bs floor info},
+ * {@code /bs floor light <act>} (lights its exit portal), {@code /bs floor goto <slot kind>}, {@code /bs floor pop}
+ * (pops the nearest node) and {@code /bs floor hazard <trigger>} (fires a floor hazard at you, see {@link FloorHazards}).
  */
 public final class FloorCommands {
 	private FloorCommands() {
@@ -36,19 +36,30 @@ public final class FloorCommands {
 				.then(Commands.literal("open").then(Commands.argument("act", IntegerArgumentType.integer(1, 64))
 						.executes(c -> open(c, 1))
 						.then(Commands.argument("players", IntegerArgumentType.integer(1, 8))
-								.executes(c -> open(c, IntegerArgumentType.getInteger(c, "players"))))))
+								.executes(c -> open(c, IntegerArgumentType.getInteger(c, "players")))
+								.then(Commands.argument("pool", com.mojang.brigadier.arguments.StringArgumentType.word())
+										.executes(c -> open(c, IntegerArgumentType.getInteger(c, "players")))))))
 				.then(Commands.literal("tp").then(Commands.argument("act", IntegerArgumentType.integer(1, 64)).executes(FloorCommands::tp)))
 				.then(Commands.literal("light").then(Commands.argument("act", IntegerArgumentType.integer(1, 64)).executes(FloorCommands::light)))
 				.then(Commands.literal("info").executes(FloorCommands::info))
 				.then(Commands.literal("goto").then(Commands.argument("kind", com.mojang.brigadier.arguments.StringArgumentType.word())
 						.executes(FloorCommands::gotoSlot)))
-				.then(Commands.literal("pop").executes(FloorCommands::pop))));
+				.then(Commands.literal("pop").executes(FloorCommands::pop))
+				.then(Commands.literal("hazard").then(Commands.argument("trigger", com.mojang.brigadier.arguments.StringArgumentType.word())
+						.suggests((c, b) -> net.minecraft.commands.SharedSuggestionProvider.suggest(FloorHazards.names(), b))
+						.executes(FloorCommands::hazard)))));
 	}
 
 	private static int open(CommandContext<CommandSourceStack> c, int players) {
 		MinecraftServer server = c.getSource().getServer();
 		int act = IntegerArgumentType.getInteger(c, "act");
-		Optional<PlacedFloor> floor = Floors.open(server, new FloorRequest(act, BlockSoulsWorld.id("surface"), act, 0, players));
+		String pool = "surface";
+		try {
+			pool = com.mojang.brigadier.arguments.StringArgumentType.getString(c, "pool");
+		} catch (IllegalArgumentException ignored) {
+			// no pool given: Surface
+		}
+		Optional<PlacedFloor> floor = Floors.open(server, new FloorRequest(act, BlockSoulsWorld.id(pool), act, 0, players));
 		if (floor.isEmpty()) {
 			c.getSource().sendFailure(Component.literal("No floor placed (is the floor dimension loaded and a template in the pool?)"));
 			return 0;
@@ -131,6 +142,26 @@ public final class FloorCommands {
 		}
 		c.getSource().sendFailure(Component.literal("No node within 8 blocks"));
 		return 0;
+	}
+
+	private static int hazard(CommandContext<CommandSourceStack> c) {
+		String name = com.mojang.brigadier.arguments.StringArgumentType.getString(c, "trigger");
+		FloorHazards.Trigger trigger = FloorHazards.get(name);
+		if (trigger == null) {
+			c.getSource().sendFailure(Component.literal("Unknown hazard " + name + "; try " + FloorHazards.names()));
+			return 0;
+		}
+		if (!(c.getSource().getEntity() instanceof ServerPlayer player)) {
+			return 0;
+		}
+		Optional<PlacedFloor> floor = Floors.at(c.getSource().getServer(), c.getSource().getLevel().dimension().identifier(), player.blockPosition());
+		if (floor.isEmpty()) {
+			c.getSource().sendFailure(Component.literal("Not on a floor"));
+			return 0;
+		}
+		String result = trigger.fire(player, floor.get());
+		c.getSource().sendSuccess(() -> Component.literal(result), false);
+		return 1;
 	}
 
 	private static String describe(PlacedFloor floor) {

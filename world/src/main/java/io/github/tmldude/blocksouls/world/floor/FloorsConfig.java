@@ -40,6 +40,17 @@ public class FloorsConfig {
 	/** Secret kinds a template's empty secret slot picks from. */
 	public List<String> secrets = new ArrayList<>(List.of("cracked_wall", "hidden_drop"));
 
+	// ---- Skyrift (floor 3)
+	/** Outward push (blocks/tick added every other tick) at the open edge, times the template's {@code rimWind}. */
+	public double rimWindStrength = 0.03;
+	/** The wind blows within this many blocks of the edge and at most this high above the island's ground. */
+	public int rimWindBand = 6;
+	public int rimWindHeight = 5;
+	/** Share of the wind a sneaking player still feels (brace against it). */
+	public double rimWindSneakFactor = 0.25;
+	/** {@code /bs floor hazard gust}: the debug gust is this many times the full rim wind, applied once. */
+	public double gustFactor = 12.0;
+
 	/** Hits a resource node takes before it pops. */
 	public int nodeHits = 3;
 	/** Rolls of the node's loot table when it pops (the burst). */
