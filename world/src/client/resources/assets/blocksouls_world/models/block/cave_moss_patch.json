@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "blocksouls_world:block/cave_moss_patch"
+  }
+}

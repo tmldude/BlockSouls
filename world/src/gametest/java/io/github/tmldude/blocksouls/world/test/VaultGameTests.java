@@ -1,5 +1,6 @@
 package io.github.tmldude.blocksouls.world.test;
 
+import java.util.List;
 import java.util.Optional;
 
 import net.minecraft.core.BlockPos;
@@ -21,13 +22,16 @@ import io.github.tmldude.blocksouls.common.floor.FloorSlotKind;
 import io.github.tmldude.blocksouls.common.floor.Floors;
 import io.github.tmldude.blocksouls.common.floor.PlacedFloor;
 import io.github.tmldude.blocksouls.world.BlockSoulsWorld;
+import io.github.tmldude.blocksouls.world.content.WorldItems;
 import io.github.tmldude.blocksouls.world.floor.NodeBlock;
+import io.github.tmldude.blocksouls.world.floor.VaultBlocks;
 import io.github.tmldude.blocksouls.world.floor.VaultWallBlock;
 import io.github.tmldude.blocksouls.world.floor.WorldFloors;
 
 /**
- * Walks floor 4, The Vault: opens a vault floor in the test level and checks the camp is roofed in, a node pops, plain
- * walls hold, the hollow wall bursts open on its secret and a mob closet releases its swarm.
+ * Walks floor 4, The Vault: opens a vault floor in the test level and checks the camp is roofed in, a node, a deep iron
+ * wall node and a cave moss patch pop, plain walls hold, the hollow wall bursts open on its secret and a mob closet
+ * releases its swarm.
  */
 public class VaultGameTests {
 	private static final String FLOOR = "blocksouls_world_test:floor16";
@@ -63,7 +67,8 @@ public class VaultGameTests {
 		}
 
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-		FloorSlot node = floor.slots(FloorSlotKind.NODE).getFirst();
+		FloorSlot node = floor.slots(FloorSlotKind.NODE).stream().filter(slot -> !slot.tag().equals("blocksouls_world:deep_iron_node")
+				&& !slot.tag().equals("blocksouls_world:cave_moss_patch")).findFirst().orElseThrow();
 		BlockState nodeState = level.getBlockState(node.pos());
 		helper.assertTrue(nodeState.getBlock() instanceof NodeBlock, "node slot holds a node, found " + nodeState);
 		NodeBlock block = (NodeBlock) nodeState.getBlock();
@@ -72,6 +77,24 @@ public class VaultGameTests {
 		}
 		helper.assertTrue(level.getBlockState(node.pos()).isAir(), "a popped node is gone");
 		helper.assertTrue(!level.getEntitiesOfClass(ItemEntity.class, new AABB(node.pos()).inflate(3)).isEmpty(), "the node burst its loot");
+
+		FloorSlot deepIron = floor.slots(FloorSlotKind.NODE).stream().filter(slot -> slot.tag().equals("blocksouls_world:deep_iron_node")).findFirst()
+				.orElse(null);
+		helper.assertTrue(deepIron != null && level.getBlockState(deepIron.pos()).is(VaultBlocks.DEEP_IRON_NODE), "deep iron is set into a wall");
+		for (int i = 0; i < 8 && !VaultBlocks.DEEP_IRON_NODE.hit(level, deepIron.pos(), player); i++) {
+			// hit until it pops
+		}
+		helper.assertTrue(level.getBlockState(deepIron.pos()).isAir(), "the deep iron node popped");
+		helper.assertTrue(!level.getEntitiesOfClass(ItemEntity.class, new AABB(deepIron.pos()).inflate(3), e -> e.getItem().is(WorldItems.DEEP_IRON)
+				|| e.getItem().is(WorldItems.SCRAP)).isEmpty(), "the deep iron node burst its loot");
+
+		List<FloorSlot> herbs = floor.slots(FloorSlotKind.NODE).stream().filter(slot -> slot.tag().equals("blocksouls_world:cave_moss_patch")).toList();
+		helper.assertTrue(herbs.size() >= 2 && herbs.size() <= 3, "2–3 cave moss patches, saw " + herbs.size());
+		FloorSlot herb = herbs.getFirst();
+		helper.assertTrue(level.getBlockState(herb.pos()).is(VaultBlocks.CAVE_MOSS_PATCH), "a cave moss patch grows at " + herb.pos().toShortString());
+		helper.assertTrue(VaultBlocks.CAVE_MOSS_PATCH.hit(level, herb.pos(), player), "cave moss pops in one hit");
+		helper.assertTrue(!level.getEntitiesOfClass(ItemEntity.class, new AABB(herb.pos()).inflate(3), e -> e.getItem().is(WorldItems.CAVE_MOSS)).isEmpty(),
+				"the cave moss dropped");
 
 		BlockPos plain = find(level, floor, VaultWallBlock.Content.NONE);
 		helper.assertTrue(plain != null, "the vault has plain walls");

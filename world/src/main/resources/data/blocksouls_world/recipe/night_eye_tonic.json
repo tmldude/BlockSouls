@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "blocksouls_world:cave_moss",
+    "blocksouls_world:cave_moss",
+    "minecraft:glass_bottle"
+  ],
+  "result": {
+    "id": "blocksouls_world:night_eye_tonic"
+  }
+}

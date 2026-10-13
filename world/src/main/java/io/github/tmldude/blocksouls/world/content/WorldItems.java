@@ -16,6 +16,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.level.block.Block;
+// floor 4 (The Vault) drinks
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
+import net.minecraft.world.item.consume_effects.RemoveStatusEffectsConsumeEffect;
 
 import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTab;
 
@@ -50,6 +59,18 @@ public final class WorldItems {
 	public static final Item BLIGHT_FORGED_LEGGINGS = armor("blight_forged_leggings", WorldArmor.BLIGHT_FORGED, ArmorType.LEGGINGS, true);
 	public static final Item BLIGHT_FORGED_BOOTS = armor("blight_forged_boots", WorldArmor.BLIGHT_FORGED, ArmorType.BOOTS, true);
 
+	// --- floor 4, The Vault (Stage 6C) ---
+	public static final Item DEEP_IRON = item("deep_iron", Item::new, new Item.Properties().rarity(Rarity.UNCOMMON));
+	public static final Item CAVE_MOSS = item("cave_moss", Item::new, new Item.Properties());
+	/** Night vision: see the dark vault. */
+	public static final Item NIGHT_EYE_TONIC = item("night_eye_tonic", Item::new, drink(Consumables.defaultDrink()
+			.onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 3600, 0)))));
+	/** Clears poison and wither, then a short regeneration. */
+	public static final Item MOSS_ANTIDOTE = item("moss_antidote", Item::new, drink(Consumables.defaultDrink()
+			.onConsume(new RemoveStatusEffectsConsumeEffect(HolderSet.direct(MobEffects.POISON, MobEffects.WITHER)))
+			.onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(MobEffects.REGENERATION, 100, 0)))));
+	// --- end floor 4 ---
+
 	public static final ResourceKey<CreativeModeTab> TAB = ResourceKey.create(Registries.CREATIVE_MODE_TAB, BlockSoulsWorld.id("world"));
 
 	private WorldItems() {
@@ -78,6 +99,12 @@ public final class WorldItems {
 		Item.BY_BLOCK.put(block, item);
 		TAB_ORDER.add(item);
 		return item;
+	}
+
+	/** A floor drink (floor 4): stacks to 16 and leaves the bottle. */
+	private static Item.Properties drink(net.minecraft.world.item.component.Consumable.Builder consumable) {
+		return new Item.Properties().stacksTo(16).craftRemainder(Items.GLASS_BOTTLE).usingConvertsTo(Items.GLASS_BOTTLE)
+				.component(DataComponents.CONSUMABLE, consumable.build());
 	}
 
 	private static Item armor(String name, net.minecraft.world.item.equipment.ArmorMaterial material, ArmorType type, boolean fireResistant) {

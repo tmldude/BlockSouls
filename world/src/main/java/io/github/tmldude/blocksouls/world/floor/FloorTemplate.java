@@ -96,6 +96,13 @@ public final class FloorTemplate {
 		/** Wall variant shares (the rest are plain vault bricks). */
 		public double mossyShare = 0.2;
 		public double crackedShare = 0.08;
+		/** The rare node set into the walls (a block id): wall-face nodes are always this one. Empty = from {@code nodeMix}. */
+		public String wallNode = "";
+		/** The floor's herb (a {@code HerbBlock} id): {@code herbs} × {@code PartyScaling.floorNodes}, clamped to min..max, in rooms. */
+		public String herb = "";
+		public int herbs = 0;
+		public int herbsMin = 2;
+		public int herbsMax = 3;
 	}
 	// ---- end Vault block
 
@@ -173,6 +180,9 @@ public final class FloorTemplate {
 		}
 		if (isBox() && (box == null || height < 12)) {
 			throw new IllegalArgumentException("a box needs a box block and a height of at least 12");
+		}
+		if (isBox() && (box.herbsMin < 0 || box.herbsMax < box.herbsMin)) {
+			throw new IllegalArgumentException("box herbs: min must not exceed max");
 		}
 		int camps = 0;
 		int portals = 0;

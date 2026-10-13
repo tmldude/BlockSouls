@@ -73,3 +73,29 @@ Spec: the "Floor 4 — The Vault" block of `docs/design/floors.md`. Code: `world
   "every slot kind" test now only runs on `blocksouls_world:surface` templates (the vault has no cave or wreck).
   `VaultGameTests` opens a vault, pops a node, checks a plain wall holds, bursts the hollow wall and a closet.
 - **The secret's hidden stair goes up** (the box has headroom under the lid, none under the floor); PR 3.
+
+## PR 2: deep iron node, cave moss herb, loot and board entries
+
+- **Deep iron node** (`blocksouls_world:deep_iron_node`, hit-counted like `scrap_node`, loot `nodes/deep_iron_node`:
+  1–2 deep iron, or 1–3 scrap). It is **the wall node**: template knob `box.wallNode` makes every node set into a
+  corridor's wall face deep iron ("walls hide them"); room nodes keep the template's `nodeMix` (gunmetal, scrap). So
+  the rare metal is always found by looking at the walls, never lying in a room. Deepslate-dark, no glow.
+- **Cave moss** (block `cave_moss_patch`, item `cave_moss`): a glowing (light 7) cross plant that pops in one hit
+  (`HerbBlock`, copied verbatim from the Skyrift session so the two branches merge cleanly), loot `nodes/cave_moss_patch`
+  (1–2 cave moss). `box.herb` + `box.herbs` (2) × `PartyScaling.floorNodes`, clamped to `herbsMin`..`herbsMax` (2–3),
+  placed after the nodes on their own random (the node and crate layout is unchanged by adding herbs). Filler rooms
+  first, then the slot rooms except the camp and the secret ("often guarded": the event and mini-boss rooms) when a
+  big party's nodes crowd the filler rooms out (vault_cistern at 8 players).
+- **Recipes** (plain vanilla JSON, on the boards via entry files, `minFloor` 4, `floorTags: ["vault"]`):
+  - forge: `gun_receiver_from_deep_iron` (deep iron, gunmetal ingot, deep iron → 2 gun receivers; guns-loaded
+    condition). Skyrift's metal makes barrels, so the Vault makes receivers.
+  - brew: `night_eye_tonic` (2 cave moss + bottle → night vision 3 min: the vault is dark) and `moss_antidote`
+    (cave moss + deep iron + bottle → clears poison and wither, then 5 s regeneration). Both stack to 16 and leave
+    the bottle.
+  - Deep iron and cave moss are each in 2 recipes (R1); the recipe advancements are generated (R3).
+- **"Where to get it":** `blocksouls_board/source/deep_iron.json` and `cave_moss.json`.
+- **Forge enchant service for floor 4** (`blocksouls_board/enchant/vault.json`): 3 deep iron + 10 souls → protection,
+  blast protection (the volatile affix is common here), unbreaking or sharpness.
+- No upgrade chain: the Vault's armor is the gear set piece in the vault room (PR 3), not a forged piece.
+- **Shared-code note:** the drink helper is `WorldItems.drink(Consumable.Builder)` in its own marked block; Skyrift's
+  `tonic(MobEffectInstance...)` does the same for plain effect drinks. Merge them when both are on main.

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "blocksouls_world:cave_moss",
+    "blocksouls_world:deep_iron",
+    "minecraft:glass_bottle"
+  ],
+  "result": {
+    "id": "blocksouls_world:moss_antidote"
+  }
+}
