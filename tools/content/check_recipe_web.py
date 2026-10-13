@@ -6,6 +6,8 @@
       ingredient in another recipe (no recipes that only turn vanilla items into a dead end);
   R3  every recipe has a recipe-unlock advancement (written by gen_recipe_advancements.py), so it appears in the
       recipe book as soon as a player holds an ingredient.
+  R4  every shopkeeper board data file (data/<ns>/blocksouls_board/{entry,source,enchant,upgrade}, the format in
+      docs/decisions/v2-boards.md) is well formed, and every entry names a recipe that exists.
 
 Gear, trophies and other end items that are meant to be dead ends are listed with a reason in
 tools/content/recipe_web_exempt.json. Run from anywhere:  python3 tools/content/check_recipe_web.py [--report]
@@ -116,6 +118,63 @@ def drops():
     return found
 
 
+def recipe_ids():
+    ids = set()
+    for path in glob.glob(f"{ROOT}/*/src/main/resources/data/*/recipe/**/*.json", recursive=True):
+        ns, rest = os.path.relpath(path, ROOT).split("/data/", 1)[1].split("/recipe/", 1)
+        ids.add(f"{ns}:{rest[:-len('.json')]}")
+    return ids
+
+
+def board_problems():
+    """R4: the shopkeeper's board data files."""
+    problems = []
+    known = recipe_ids()
+
+    def ids_ok(values):
+        return isinstance(values, list) and all(isinstance(v, str) and ID.match(v) and not v.startswith("#") for v in values)
+
+    def floors_ok(d):
+        lo, hi = d.get("minFloor", 1), d.get("maxFloor", 99)
+        tags = d.get("floorTags", [])
+        return isinstance(lo, int) and isinstance(hi, int) and 1 <= lo <= hi and isinstance(tags, list)
+
+    for path in sorted(glob.glob(f"{ROOT}/*/src/main/resources/data/*/blocksouls_board/*/**/*.json", recursive=True)):
+        rel = os.path.relpath(path, ROOT)
+        kind = rel.split("/blocksouls_board/", 1)[1].split("/", 1)[0]
+        try:
+            d = load(path)
+        except ValueError as e:
+            problems.append(f"{rel} isn't valid JSON: {e}")
+            continue
+        if not isinstance(d, dict):
+            problems.append(f"{rel} must be a JSON object")
+            continue
+        if kind == "entry":
+            recipe = d.get("recipe")
+            if not isinstance(recipe, str) or recipe not in known:
+                problems.append(f"{rel} names recipe {recipe!r}, which isn't a recipe in the repo")
+            if d.get("board", "forge") not in ("forge", "brew"):
+                problems.append(f"{rel} board must be \"forge\" or \"brew\"")
+            if not floors_ok(d):
+                problems.append(f"{rel} needs 1 <= minFloor <= maxFloor and a floorTags list")
+        elif kind == "source":
+            if not ids_ok([d.get("item")]) or ("icon" in d and not ids_ok([d["icon"]])):
+                problems.append(f"{rel} needs an item id (and an icon id if set)")
+        elif kind == "enchant":
+            if not ids_ok([d.get("metal")]) or not ids_ok(d.get("enchantments")) or not d.get("enchantments"):
+                problems.append(f"{rel} needs a metal id and a non-empty enchantments id list")
+            if not floors_ok(d) or not all(isinstance(d.get(k, 0), int) and d.get(k, 0) >= 0 for k in ("metalCount", "souls")):
+                problems.append(f"{rel} needs valid minFloor/maxFloor/floorTags and metalCount/souls >= 0")
+        elif kind == "upgrade":
+            chain = d.get("chain")
+            if not ids_ok(chain) or len(chain) < 2:
+                problems.append(f"{rel} needs a chain of 2+ item ids")
+        else:
+            problems.append(f"{rel}: unknown board folder {kind!r} (entry, source, enchant, upgrade)")
+    return problems
+
+
 def main():
     report = "--report" in sys.argv
     items = mod_items()
@@ -156,6 +215,7 @@ def main():
         problems.append(f"exempt list names {k}, which isn't a BlockSouls item any more")
     from gen_recipe_advancements import problems as unlock_problems
     problems += [f"R3 {p}" for p in unlock_problems()]
+    problems += [f"R4 {p}" for p in board_problems()]
     if report:
         print(f"{len(items)} items, {len(rs)} recipes")
     for p in problems:

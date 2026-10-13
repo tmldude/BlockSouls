@@ -1,0 +1,18 @@
+{
+	"minFloor": 1,
+	"maxFloor": 99,
+	"metal": "blocksouls_world:gunmetal_ingot",
+	"metalCount": 2,
+	"souls": 6,
+	"enchantments": [
+		"minecraft:protection",
+		"minecraft:projectile_protection",
+		"minecraft:blast_protection",
+		"minecraft:feather_falling",
+		"minecraft:unbreaking",
+		"minecraft:sharpness",
+		"minecraft:smite",
+		"minecraft:knockback",
+		"minecraft:efficiency"
+	]
+}

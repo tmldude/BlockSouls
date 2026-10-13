@@ -99,3 +99,31 @@ An item that has a next tier in several chains uses the first chain loaded (name
 re-link existing pieces: add your floor's armor as a chain that **starts** with it and joins the existing ladder,
 e.g. `["blocksouls_world:cinder_plate_chestplate", "blocksouls_world:blight_forged_chestplate"]`. `game` ships the
 default ladders: leather → chainmail → scrap plate → blight-forged, per piece.
+
+## The shopkeeper's board (PR 2)
+
+- **One 9×6 board, three tabs** switched on the bottom row: trade (the existing offers, unchanged), forge, brew.
+  Bottom row: 45 purge (trade) / perk reroll (forge), 46 enchant (forge), 47 perk reroll (trade) / upgrade
+  (forge), 48 previous page, 49 trade tab, 50 forge tab, 51 brew tab, 52 next page, 53 the remark.
+- **Forge / brew entries:** two per row on the top five rows (10 per page), in recipe id order. Each is the result
+  (column 0 or 5; its lore lists every ingredient) and up to three ingredient kinds as "where to get it" icons
+  (the merged sources). Click the result to craft: the ingredients must be in the main inventory (hotbar + 27, not
+  armor or offhand); a tag ingredient takes any matching item, and the match backtracks so a tag never uses up
+  the only item a narrower ingredient needed. Missing ingredients are named in chat with where to get them.
+  Smithing results keep the base item's components (vanilla `smithing_transform` behaviour).
+- **Crafting tables off:** in a floors run, right-clicking a crafting table shows "No crafting in the floors…" in
+  the action bar and opens nothing (`ShopGate`, recomputed every server tick). Classic and expedition runs are
+  unchanged. Config `DirectorConfig.Shop.craftingOffInFloors` (default true) turns the whole gate off.
+- **Prices (config `DirectorConfig.Shop`):** perk reroll 6 souls (unchanged); upgrade `upgradeSouls` 12 +
+  `upgradeMetalCount` 2 of the floor's enchant metal (no metal when the floor has no enchant spec); the enchant
+  price is per floor in its spec. `game`'s floor-1 spec: 2 gunmetal ingots + 6 souls, protection / projectile
+  protection / blast protection / feather falling / unbreaking / sharpness / smite / knockback / efficiency.
+- **No PartyScaling:** each player crafts from their own inventory and pays their own price, so nothing on the
+  boards depends on party size.
+- **Debug:** `/bs shop open <trade|forge|brew>`, `/bs shop give-ingredients <recipe>` (the first option of each
+  ingredient).
+- **Lane exception:** `game` adds a mixin on vanilla `RecipeManager.getRecipeFor` (the 3-argument lookup and the
+  hinted one) for the floors gate. It only filters the `crafting` and `smithing` types, and only while the gate
+  is closed.
+- **R4 in `check_recipe_web.py`:** board data files must parse with the fields above, and an entry's `recipe` must
+  be a recipe in the repo.
