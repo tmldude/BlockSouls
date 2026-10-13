@@ -29,7 +29,7 @@ import io.github.tmldude.blocksouls.world.floor.NodeBlock;
 import io.github.tmldude.blocksouls.world.floor.WorldFloors;
 
 /**
- * Walks a placed floor (PLAN2 §1): opens a Surface floor in the floors dimension and checks every slot was built
+ * Walks a placed floor (PLAN2 §1): opens a Surface floor (in the test level, see below) and checks every slot was built
  * (camp, unlit portal, nodes, chests, the cave), that a node pops after its hits and the portal lights. Uses a
  * high act ordinal so it never collides with a real run's floors.
  */
@@ -47,11 +47,21 @@ public class FloorGameTests {
 		EVENTS.clear();
 		MinecraftServer server = helper.getLevel().getServer();
 		int act = 900;
+		// The game-test server bakes no datapack dimensions, so the floor is built in the test's own level.
+		ServerLevel level = helper.getLevel();
+		WorldFloors.useLevelForTests(level.dimension());
+		try {
+			walkFloor(helper, server, level, act);
+		} finally {
+			WorldFloors.useLevelForTests(null);
+		}
+		helper.succeed();
+	}
+
+	private static void walkFloor(GameTestHelper helper, MinecraftServer server, ServerLevel level, int act) {
 		Optional<PlacedFloor> opened = Floors.open(server, new FloorRequest(act, BlockSoulsWorld.id("surface"), 1, 1234L, 1));
 		helper.assertTrue(opened.isPresent(), "a Surface floor opened");
 		PlacedFloor floor = opened.get();
-		ServerLevel level = server.getLevel(WorldFloors.DIMENSION);
-		helper.assertTrue(level != null, "the floors dimension is loaded");
 		helper.assertTrue(Floors.open(server, new FloorRequest(act, BlockSoulsWorld.id("surface"), 1, 1234L, 1)).get().equals(floor),
 				"opening the same act again returns the placed floor");
 
@@ -88,6 +98,5 @@ public class FloorGameTests {
 		WorldFloors.lightPortal(server, floor);
 		helper.assertTrue(level.getBlockState(portal.pos()).getValue(FloorPortalBlock.LIT), "the charged portal is lit");
 		helper.assertTrue(EVENTS.contains("lit:" + act), "EXIT_PORTAL_LIT fired, saw " + EVENTS);
-		helper.succeed();
 	}
 }

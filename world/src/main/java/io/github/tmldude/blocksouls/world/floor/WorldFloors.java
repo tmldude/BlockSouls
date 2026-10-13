@@ -62,12 +62,29 @@ public final class WorldFloors {
 
 	private static FloorsConfig config = new FloorsConfig();
 	private static final Map<UUID, Long> portalCooldown = new HashMap<>();
+	private static @Nullable ResourceKey<Level> testLevel;
 
 	private WorldFloors() {
 	}
 
 	public static FloorsConfig config() {
 		return config;
+	}
+
+	/**
+	 * Builds floors in another level instead of the floors dimension (null restores it). Only for game tests: the
+	 * game-test server bakes no datapack dimensions, so the floors dimension doesn't exist there.
+	 */
+	public static void useLevelForTests(@Nullable ResourceKey<Level> level) {
+		testLevel = level;
+	}
+
+	private static ResourceKey<Level> levelKey() {
+		return testLevel != null ? testLevel : DIMENSION;
+	}
+
+	private static @Nullable ServerLevel level(MinecraftServer server) {
+		return server.getLevel(levelKey());
 	}
 
 	public static void init() {
@@ -93,7 +110,7 @@ public final class WorldFloors {
 			}
 		});
 		ServerPlayerEvents.JOIN.register(player -> {
-			if (!player.level().dimension().equals(DIMENSION)) {
+			if (!player.level().dimension().equals(levelKey())) {
 				sendToCurrentFloor(player);
 			}
 		});
@@ -121,7 +138,7 @@ public final class WorldFloors {
 				return Optional.of(floor);
 			}
 		}
-		ServerLevel level = server.getLevel(DIMENSION);
+		ServerLevel level = level(server);
 		if (level == null) {
 			BlockSoulsWorld.LOGGER.warn("The floor dimension {} isn't loaded", CommonIds.FLOORS_DIMENSION);
 			return Optional.empty();
@@ -143,7 +160,7 @@ public final class WorldFloors {
 		BlockPos camp = slots.stream().filter(slot -> slot.kind() == FloorSlotKind.CAMP).findFirst().map(FloorSlot::pos).orElse(centre.above());
 		Identifier templateId = Identifier.tryParse(template.id);
 		PlacedFloor floor = new PlacedFloor(request.actOrdinal(), request.floorNumber(), request.pool(),
-				templateId != null ? templateId : BlockSoulsWorld.id("unknown"), CommonIds.FLOORS_DIMENSION, camp, plan.radius(), plan.groundY(),
+				templateId != null ? templateId : BlockSoulsWorld.id("unknown"), level.dimension().identifier(), camp, plan.radius(), plan.groundY(),
 				floorSeed, plan.tags(), slots);
 		data.floors.add(floor);
 		data.setDirty();
@@ -158,7 +175,7 @@ public final class WorldFloors {
 	}
 
 	public static void sendToCamp(ServerPlayer player, PlacedFloor floor) {
-		ServerLevel level = player.level().getServer().getLevel(DIMENSION);
+		ServerLevel level = level(player.level().getServer());
 		if (level == null) {
 			return;
 		}
@@ -178,7 +195,7 @@ public final class WorldFloors {
 	// ---------------------------------------------------------------- the death plane
 
 	private static void deathPlane(MinecraftServer server) {
-		ServerLevel level = server.getLevel(DIMENSION);
+		ServerLevel level = level(server);
 		if (level == null || level.players().isEmpty()) {
 			return;
 		}
@@ -239,7 +256,7 @@ public final class WorldFloors {
 		Optional<PlacedFloor> next = floor.flatMap(f -> Floors.forAct(level.getServer(), f.actOrdinal() + 1));
 		if (next.isPresent()) {
 			sendToCamp(player, next.get());
-			level.getServer().getLevel(DIMENSION).playSound(null, next.get().camp(), SoundEvents.PORTAL_TRAVEL, SoundSource.PLAYERS, 0.4F, 1.2F);
+			level(level.getServer()).playSound(null, next.get().camp(), SoundEvents.PORTAL_TRAVEL, SoundSource.PLAYERS, 0.4F, 1.2F);
 		} else {
 			player.sendOverlayMessage(Component.translatable("message.blocksouls_world.floor.portal_end"));
 		}
@@ -247,7 +264,7 @@ public final class WorldFloors {
 
 	/** Lights a floor's exit portal (its charge completed) and fires {@code EXIT_PORTAL_LIT}. */
 	public static void lightPortal(MinecraftServer server, PlacedFloor floor) {
-		ServerLevel level = server.getLevel(DIMENSION);
+		ServerLevel level = level(server);
 		if (level == null || !FloorData.get(server).litPortals.add(floor.actOrdinal())) {
 			return;
 		}
@@ -285,7 +302,7 @@ public final class WorldFloors {
 
 	/** A player used a block: if it is one of a floor's crates, opened for the first time, fire {@code CRATE_OPENED}. */
 	static void openedCrate(ServerLevel level, BlockPos pos, ServerPlayer player) {
-		if (!level.dimension().equals(DIMENSION)) {
+		if (!level.dimension().equals(levelKey())) {
 			return;
 		}
 		FloorData data = FloorData.get(level.getServer());

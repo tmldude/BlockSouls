@@ -87,3 +87,7 @@ as `DECISIONS.md`: where this conflicts with a plan file, this logs what was act
 - **Look:** the floors dimension type sets fog, sky and cloud colours plus cloud height through environment
   attributes, and uses the overworld timelines and clock. Per-floor looks (biome-level attributes per template
   pool) wait for step 2.
+- **Floor gametest builds in the test level.** The game-test server bakes no datapack dimensions, so
+  `blocksouls_world:floors` doesn't exist there. `WorldFloors.useLevelForTests` points floor building at the test's level
+  for the duration of `FloorGameTests`; a placed floor records the dimension it was actually built in. The real
+  dimension is covered by the client screenshot run (a normally created world loads it).
