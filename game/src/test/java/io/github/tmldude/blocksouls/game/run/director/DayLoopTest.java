@@ -137,4 +137,17 @@ class DayLoopTest {
 		assertEquals(true, old.events.pool.stream().anyMatch(spec -> "blood_altar".equals(spec.id) && spec.floorTags.equals(List.of("blight"))));
 		assertEquals(1, old.events.pool.stream().filter(spec -> "blood_altar".equals(spec.id) && spec.floorTags.isEmpty()).count());
 	}
+
+	// v2-floor2-infernal: a file already at revision 3 (Blight's) still gets the Infernal's events, once.
+	@Test
+	void migrationAddsTheInfernalEventsToARevision3Pool() {
+		DirectorConfig old = new DirectorConfig();
+		old.defaultsVersion = 3;
+		old.events.pool = new java.util.ArrayList<>(List.of(new DirectorConfig.EventSpec("blood_altar", 3, 1),
+				new DirectorConfig.EventSpec("blood_altar", 3, 1, List.of("blight"), false)));
+		assertEquals(true, DirectorConfig.migrate(old));
+		assertEquals(true, old.events.pool.stream().anyMatch(spec -> "blocksouls_world:stranded_trader".equals(spec.id)));
+		assertEquals(1, old.events.pool.stream().filter(spec -> "blood_altar".equals(spec.id) && spec.floorTags.equals(List.of("blight"))).count());
+		assertEquals(false, DirectorConfig.migrate(old));
+	}
 }

@@ -109,7 +109,7 @@ Defaults picked while building floor 2, Infernal (Stage 6C wave A; brief `docs/s
   generic migration: every default exotic table a file lacks is added (hand-set chances are kept), so later floor
   sessions only add their defaults line inside the marked block.
 - **Director events** (world `InfernalEvents`, placed through `DirectorEvents.PLACE_EVENT`; the game lines are in
-  `DirectorConfig`'s pool after Skyrift's, tagged `infernal`, lane exception):
+  `DirectorConfig`'s pool after Blight's, tagged `infernal`, lane exception):
   - `soulfire_altar` (weight 4): the game's blood altar on a 5×5 soul-soil pad with soul fire at the corners.
   - `lava_chest` (weight 4): the game's cursed chest on a 3×3 islet in a 3-wide lava moat with one crimson-plank bridge
     that burns into lava after `infernal.lavaChestBridgeSeconds` (60). The timer is not saved, like Skyrift's falling
@@ -117,8 +117,8 @@ Defaults picked while building floor 2, Infernal (Stage 6C wave A; brief `docs/s
   - `stranded_trader` (weight 3): a wandering trader on a basalt pillar in the same moat, no bridge (build one or
     drink a tonic). Permanent fire resistance, leaves after `strandedTraderMinutes` (6). On top of his vanilla offers
     he sells an Ashcap Tonic for `traderTonicCinder` (2) cinder and a Scorch Draught for `traderDraughtCinder` (3).
-  - Existing director.json files get these through Skyrift's revision-2 migration only if they haven't migrated yet;
-    a file already at 2 (e.g. migrated by a Skyrift build) doesn't. Delete the pool from the file to take the defaults.
+  - Existing director.json files get these through the migration: `CURRENT_DEFAULTS` goes to 4, which reruns Blight's
+    revision-3 rule (add every default floor-tagged event a file lacks, by id and tags), so a file already at 3 gets them.
 - **No wall-buy:** the spec's "fire-gun wall-buy" has no wall-buy system anywhere in the code to hang it on; skipped.
 - **Mini-bosses:** `miniBossesByFloorTag.infernal` = Ashwyrm, Furnace Knight. There is no Hound-pack archetype in
   bosses or mobs, so the pool is those two.

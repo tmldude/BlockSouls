@@ -14,7 +14,7 @@ import java.util.Map;
 public class DirectorConfig {
 	public static final String FILE = "director";
 	/** Defaults revision {@link #migrate} brings older files up to. */
-	public static final int CURRENT_DEFAULTS = 3;
+	public static final int CURRENT_DEFAULTS = 4;
 
 	/** Which defaults revision this file was written against (0 = before the field existed). */
 	public int defaultsVersion;
@@ -58,7 +58,8 @@ public class DirectorConfig {
 			}
 		}
 		// 3 (v2-floor5-blight): floor events that share a generic event's id (the blight altar and pylon) join too.
-		if (config.defaultsVersion < 3 && config.events != null && config.events.pool != null) {
+		// 4 (v2-floor2-infernal): the same rule again, so files already at 3 get the Infernal's events.
+		if (config.defaultsVersion < 4 && config.events != null && config.events.pool != null) {
 			for (EventSpec spec : new Events().pool) {
 				if (!spec.floorTags.isEmpty() && config.events.pool.stream()
 						.noneMatch(old -> spec.id.equals(old.id) && spec.floorTags.equals(old.floorTags))) {
