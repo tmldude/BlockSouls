@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:book",
+    "blocksouls_world:cinder",
+    "blocksouls_world:cinder",
+    "blocksouls_world:cinder",
+    "blocksouls_world:gunmetal_ingot"
+  ],
+  "result": {
+    "id": "minecraft:enchanted_book",
+    "components": {
+      "minecraft:stored_enchantments": {
+        "blocksouls_world:combustion": 1
+      }
+    }
+  }
+}

@@ -31,7 +31,7 @@ class ReadabilityTest {
 		List<String> failures = new ArrayList<>();
 		int checked = 0;
 		for (Object config : List.of(new FurnaceKnightConfig(), new StormplateConfig(), new PaleRiderConfig(), new AshwyrmConfig(),
-				new FinalRaidConfig(), new RiftwardenConfig())) {
+				new FinalRaidConfig(), new RiftwardenConfig(), new io.github.tmldude.blocksouls.bosses.blight.BlightheartConfig())) {
 			double phaseMult = maxPhaseDamage(config);
 			List<Named> stats = new ArrayList<>();
 			collect(config, config.getClass().getSimpleName(), stats, 0);

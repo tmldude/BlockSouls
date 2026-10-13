@@ -59,5 +59,6 @@ public class BlockSoulsBosses implements ModInitializer {
 		io.github.tmldude.blocksouls.bosses.ashwyrm.Ashwyrms.register();
 		StormplateKnights.register();
 		io.github.tmldude.blocksouls.bosses.riftwarden.Riftwardens.register();
+		io.github.tmldude.blocksouls.bosses.blight.Blighthearts.register(); // v2-floor5-blight
 	}
 }

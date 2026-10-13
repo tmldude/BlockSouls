@@ -1,0 +1,27 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "blocksouls_guns"
+      ]
+    }
+  ],
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_guns:stray_verdict",
+          "weight": 1,
+          "modifier": {
+            "type": "blocksouls_guns:roll_perks",
+            "tier": "exotic"
+          }
+        }
+      ]
+    }
+  ]
+}

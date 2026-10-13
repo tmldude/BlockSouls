@@ -1,0 +1,42 @@
+{
+	"criteria": {
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipes": "blocksouls_world:combustion_book_from_cinder"
+			}
+		},
+		"has_cinder": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:cinder"
+					}
+				]
+			}
+		},
+		"has_gunmetal_ingot": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:gunmetal_ingot"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_cinder",
+			"has_gunmetal_ingot"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"blocksouls_world:combustion_book_from_cinder"
+		]
+	}
+}

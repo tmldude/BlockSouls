@@ -129,6 +129,31 @@ class InfernalPlannerTest {
 		}
 	}
 
+	/** Slice 2: two or three visible ashcaps per floor (2 solo, 3 at 8 players), clear of the lava, plus cinder ore nodes. */
+	@Test
+	void herbsAndCinderOre() throws Exception {
+		for (String name : INFERNAL) {
+			FloorTemplate template = load(name);
+			assertEquals(java.util.Map.of("blocksouls_world:ashcap", 2), template.herbs, name);
+			assertTrue(template.nodeMix.containsKey("blocksouls_world:cinder_ore"), name);
+			for (int players : new int[] {1, 8}) {
+				int cinder = 0;
+				for (long seed = 0; seed < 40; seed++) {
+					FloorPlanner.FloorPlan plan = FloorPlanner.plan(template, config, 2, players, seed);
+					LavaChannels.Plan channels = FloorPlanner.channels(template, plan.radius(), seed);
+					List<FloorPlanner.PlannedSlot> herbs = plan.slots(FloorSlotKind.NODE).stream()
+							.filter(slot -> slot.tag().equals("blocksouls_world:ashcap")).toList();
+					assertEquals(players == 1 ? 2 : 3, herbs.size(), name + " herbs at " + players + " players, seed " + seed);
+					for (FloorPlanner.PlannedSlot herb : herbs) {
+						assertTrue(channels.distance(herb.x(), herb.z()) > config.slotClearance, name + " herb in the lava, seed " + seed);
+					}
+					cinder += (int) plan.slots(FloorSlotKind.NODE).stream().filter(slot -> slot.tag().equals("blocksouls_world:cinder_ore")).count();
+				}
+				assertTrue(cinder >= 40, name + " averages at least one cinder ore per floor at " + players + " players: " + cinder);
+			}
+		}
+	}
+
 	@Test
 	void surfaceTemplatesHaveNoChannels() throws Exception {
 		for (String name : List.of("surface_crossroads", "surface_ridge", "surface_scrapfield")) {

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_world:ashcap"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "blocksouls_world:nodes/ashcap"
+}

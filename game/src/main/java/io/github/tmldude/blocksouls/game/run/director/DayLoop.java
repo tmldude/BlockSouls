@@ -356,7 +356,10 @@ public final class DayLoop {
 		RandomSource random = level.getRandom();
 		Optional<PlacedFloor> floor = Floors.forAct(server, act);
 		Set<String> floorTags = floor.map(PlacedFloor::tags).orElse(Set.of());
-		String id = forced != null ? forced : DirectorRules.pickEvent(config().events.pool, act, floorTags, random.nextDouble());
+		// v2-floor5-blight: a floor in ownEventsOnlyFloorTags rolls only its own events
+		List<String> ownOnly = config().events.ownEventsOnlyFloorTags;
+		boolean own = ownOnly != null && ownOnly.stream().anyMatch(floorTags::contains);
+		String id = forced != null ? forced : DirectorRules.pickEvent(config().events.pool, act, floorTags, own, random.nextDouble());
 		if (id == null) {
 			return null;
 		}
@@ -442,6 +445,7 @@ public final class DayLoop {
 		DirectorData data = DirectorData.get(server);
 		Set<String> floorTags = Floors.forAct(server, act).map(PlacedFloor::tags).orElse(Set.of());
 		List<String> roster = DirectorRules.miniBossRoster(config().events.miniBosses, config().events.miniBossesByFloorTag, floorTags);
+		roster = DirectorRules.withEarlier(roster, config().events.miniBosses, act, config().events.miniBossFromAct, data.seed); // v2-floor5-blight
 		Identifier boss = miniBossFor(roster, act, config().events.miniBossFromAct, data.seed);
 		if (boss == null) {
 			Director.log(server, DirectorLog.Kind.EVENT, "No mini-boss for act " + act + " (none installed)");

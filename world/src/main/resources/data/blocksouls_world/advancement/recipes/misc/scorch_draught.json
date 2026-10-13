@@ -1,0 +1,42 @@
+{
+	"criteria": {
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipes": "blocksouls_world:scorch_draught"
+			}
+		},
+		"has_ashcap": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:ashcap"
+					}
+				]
+			}
+		},
+		"has_cinder": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:cinder"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_ashcap",
+			"has_cinder"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"blocksouls_world:scorch_draught"
+		]
+	}
+}

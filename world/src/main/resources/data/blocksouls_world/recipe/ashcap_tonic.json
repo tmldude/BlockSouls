@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:glass_bottle",
+    "blocksouls_world:ashcap",
+    "blocksouls_world:ashcap"
+  ],
+  "result": {
+    "id": "blocksouls_world:ashcap_tonic"
+  }
+}

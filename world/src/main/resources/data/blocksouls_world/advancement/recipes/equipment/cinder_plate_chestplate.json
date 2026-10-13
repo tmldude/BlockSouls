@@ -1,0 +1,42 @@
+{
+	"criteria": {
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipes": "blocksouls_world:cinder_plate_chestplate"
+			}
+		},
+		"has_scrap_plate_chestplate": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:scrap_plate_chestplate"
+					}
+				]
+			}
+		},
+		"has_cinder": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:cinder"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_scrap_plate_chestplate",
+			"has_cinder"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"blocksouls_world:cinder_plate_chestplate"
+		]
+	}
+}

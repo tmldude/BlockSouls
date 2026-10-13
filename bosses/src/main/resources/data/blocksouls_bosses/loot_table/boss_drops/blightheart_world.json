@@ -1,0 +1,28 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "blocksouls_world"
+      ]
+    }
+  ],
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "blocksouls_world:blight_crystal",
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": 4,
+            "add": false
+          }
+        }
+      ]
+    }
+  ]
+}

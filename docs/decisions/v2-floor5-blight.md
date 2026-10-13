@@ -156,3 +156,92 @@ data.
   No `DirectorConfig` edit, so slice 2 has no game lane exception.
 - **Art:** `tools/assets/gen.py` placeholders (blight / pale / bone palettes). The crown is worn with the
   blight-forged armor texture.
+
+## Slice 3: nest, grave, events, double siege, mini-bosses, Blightheart
+
+### Structure: the nest
+
+- The structure slot is tagged `nest` on all three templates. `FloorBuilder` builds the checkpoint ruin (the floor 1
+  outpost) with chest loot `chests/blight_nest`:
+  - 3–4 rolls of blight crystal, gunmetal ingot, ghostcap or golden apple;
+  - plus `chests/blight_nest_legendary`, a guns-conditioned table: one of hand cannon, auto rifle, shotgun or sniper
+    rifle with `roll_perks` tier `legendary`. Without guns, the nest is just the base roll.
+- A **cursed chest** (`WorldEconomy.CURSED_CHEST`, the Director's existing event block) sits on the first open spot
+  beside the nest's first chest. It works like the event's cursed chest.
+- Blight spreads over the nest: 55 % of bare ground within the slot radius (at least 4) becomes blighted netherrack,
+  with blight growth on 30 % of that.
+
+### Secret: the grave
+
+- The secret slot is tagged `grave`. It's a mossy-cobblestone-wall headstone and a dead bush over a 1×2 patch of soul
+  soil, two deep, with one more soul soil block over a chest buried 3 below the slot.
+- Soul soil is the "soft dirt": it digs fast with a shovel, and stands out from the coarse dirt and podzol around it
+  only up close. Nothing else marks it; the fog does the hiding.
+- The chest rolls `chests/blight_grave`: 2–3 blight crystals, 2–5 bones, and `chests/blight_grave_exotic`, a
+  guns-conditioned table giving a gun with `roll_perks` tier `exotic` (which turns it into a random exotic). That's the
+  run's exotic. It goes through loot tables, so there's no guns lane exception.
+
+### Events
+
+- Built on main's floor-event API (Vault, #79): `EventSpec.floorTags`, where a tagged spec only rolls on a floor
+  carrying one of its tags. The default pool adds blight-tagged `blood_altar` (3) and `challenge_pylon` (3), which the
+  existing game code places.
+- Main's tagged events *join* the generic pool. The spec's floor-5 list is exclusive, so it adds
+  `Events.ownEventsOnlyFloorTags` (default `["blight"]`): a floor carrying one of those tags rolls only its own tagged
+  events, as long as one is eligible. `DirectorRules.pickEvent` gained an `ownOnly` overload, and the 4-arg form is
+  unchanged. Every other floor, the Vault included, behaves exactly as on main.
+- **The soul wager** is the third blight event in the spec. It already runs at every siege (sneak-use the shopkeeper),
+  so it needs no event entry. With two sieges, one wager spans both: it opens with the first siege and settles when the
+  portal finally lights.
+- `defaultsVersion` 3: main's step 2 adds floor events by id only, so it would skip the blight copies of
+  `blood_altar` / `challenge_pylon`. Step 3 adds floor-tagged defaults that are missing by id *and* tags.
+- Game lane exception: `DirectorConfig` (the pool entries, the `ownEventsOnlyFloorTags` field, the `blight` roster and
+  migration step 3), `DirectorRules` (the `ownOnly` overload, `EARLIER`, `withEarlier`) and three `DayLoop` lines.
+
+### Mini-boss pool
+
+- Main's `Events.miniBossesByFloorTag` gains `blight` → Blightheart, Pale Rider and `@earlier`.
+- `@earlier` (`DirectorRules.EARLIER`) stands for the boss the base roster gave a seed-picked earlier act. That's the
+  spec's "one Director-picked from any earlier floor". `DirectorRules.withEarlier` resolves it after main's
+  `miniBossRoster`, deduplicated against the list. It's dropped on act 2, which has no earlier floor.
+- The pick within the list is the usual seed rotation (`miniBossFor`), and bosses that aren't installed are skipped.
+- `mean_mini_boss` (the floor-5 tag) still applies as before.
+
+### Siege twist: two sieges
+
+- `RunConfig.ActSpec.sieges` (default 1); act 5's is 2 (the marked floor-5 block). `RunConfig.siegeLullSeconds` = 40.
+- When the first siege's charge time runs out, the wave ends, chat says "The siege breaks, but the portal stays dark",
+  and a 40 s lull starts. "Full dark" then starts the second siege (raid horn, a full `portalChargeSeconds`, a new
+  wave). Surviving that one lights the portal.
+- The act stays "charging" through the lull, so the Director stays paused, a second horn is rejected, and the HUD
+  shows the lull countdown. `PORTAL_CHARGE_STARTED` fires once and `PORTAL_CHARGE_COMPLETED` only after the last
+  siege, so the Director, the wager and the boons see one long siege.
+- State (`siegesDone`, `siegeLull`) is saved in `RunData`, so a restart mid-lull resumes.
+- Wave size goes through the wave scheduler's `PartyScaling` as every siege does. Nothing new scales by party.
+- Messages are literal like the rest of `ActMachine`'s broadcasts.
+
+### Roster
+
+- The spec says "every roster, all affixes on elites". Floor 5's roster is already every entry with `minFloor` ≤ 5 and
+  the floor's tags, and the `elite_affixes` tag makes affixes certain on elites. No mobs change.
+
+### Blightheart
+
+- A new boss in bosses (`blocksouls_bosses:blightheart`, config `boss-blightheart.json`), built only from the shared
+  archetypes:
+  - phase 1: rot wave (2 rings), blight pools, spores (3 slow homing orbs) and a leap;
+  - phase 2 (below 50 %): ×1.25 damage, faster, and a heartburst (radial burst with a safe lane) joins.
+- 360 health (party scaling through `PartyScaling.bossHealth` as for every boss), 8 armor, weak point a heart part
+  (×1.6). Not fire immune.
+- **Art and sound:** it reuses the Furnace Knight's rig, model layer and animations, with a violet recolour of its
+  texture, a green glow layer and a recoloured egg. Sounds are the warden's (heartbeat, hurt, roar, death) plus the
+  Furnace Knight's windup, slam and step.
+- Drops: 2 echo shards, 2 eyes of ender, and through `extraLoot` 4 blight crystals (world-conditioned) and the shared
+  legendary gun table (guns-conditioned).
+- **No field spawn rule.** It walks only where the floor-5 hazard (roaming boss) or the mini-boss pick puts it.
+- It's added to `ReadabilityTest` and the `blocksouls:bosses` entity tag.
+- It ships in the same PR as the rest of slice 3. The hazard and mini-boss pool already name it, and without it the
+  floor's signature boss is missing.
+- **Guns-only chest rolls** (`blight_nest_legendary`, `blight_grave_exotic`): `WorldLoot` nests them into the nest /
+  grave tables only when `blocksouls_guns` is loaded. The chest JSON doesn't reference them, because a reference to a
+  table that a load condition dropped leaves an unbound registry value, and that breaks loading without guns.
