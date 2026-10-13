@@ -42,10 +42,15 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import io.github.tmldude.blocksouls.common.CommonIds;
 import io.github.tmldude.blocksouls.common.CommonTags;
 import io.github.tmldude.blocksouls.common.Networking;
+import io.github.tmldude.blocksouls.common.event.CombatEvents;
+import io.github.tmldude.blocksouls.common.event.PlayerMoveEvents;
 import io.github.tmldude.blocksouls.common.player.PlayerStatus;
 import io.github.tmldude.blocksouls.common.player.PlayerTraits;
+import io.github.tmldude.blocksouls.common.player.WeaponHooks;
 import io.github.tmldude.blocksouls.guns.BlockSoulsGuns;
 import io.github.tmldude.blocksouls.guns.GunsConfig;
+import io.github.tmldude.blocksouls.guns.exotic.ExoticBehavior;
+import io.github.tmldude.blocksouls.guns.exotic.Exotics;
 import io.github.tmldude.blocksouls.guns.item.GunItem;
 import io.github.tmldude.blocksouls.guns.item.GunRolls;
 import io.github.tmldude.blocksouls.guns.item.GunsItems;
@@ -81,6 +86,7 @@ public final class GunServer {
 	/** Per-player shooting state. Not saved: a relog just resets fire rate, reloads and perk timers. */
 	public static final class Shooter {
 		final FireGate gate = new FireGate();
+		long reloadStart = -1;
 		long reloadEnd = -1;
 		int reloadSlot;
 		@Nullable ItemStack reloadStack;
@@ -112,6 +118,10 @@ public final class GunServer {
 		ServerTickEvents.END_SERVER_TICK.register(GunServer::tick);
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> sendStats(handler.player));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> SHOOTERS.remove(handler.player.getUUID()));
+		// Reload-cancel: a dodge roll finishes a reload that is far enough along (binds movement to gunplay).
+		PlayerMoveEvents.ROLLED.register(GunServer::onRoll);
+		// Other modules (builds' "precision kills reload an ally") refill a held gun through common.
+		WeaponHooks.setProvider(GunServer::instantReload);
 	}
 
 	/** Sends the server's weapon stats, which the client uses for its own fire timing and spread. */
@@ -132,7 +142,7 @@ public final class GunServer {
 	}
 
 	private static boolean canAct(ServerPlayer player) {
-		return player.isAlive() && !player.isSpectator() && !PlayerStatus.isDowned(player);
+		return player.isAlive() && !player.isSpectator() && PlayerStatus.canShoot(player);
 	}
 
 	// ---- Firing ----------------------------------------------------------------------------------------------
@@ -153,6 +163,10 @@ public final class GunServer {
 		GunStats stats = gun.stats();
 		long now = now(player);
 		int mag = gun.mag(stack);
+		ExoticBehavior exotic = Exotics.of(gun.weaponId());
+		if (exotic != null && !exotic.canFire(player, stack, now)) {
+			return false;
+		}
 		if (mag <= 0) {
 			// Auto-reload on an empty trigger pull, at most once per fire interval so a held trigger doesn't spam clicks.
 			if (shooter.gate.tryFire(now, ShotMath.fireIntervalTicks(stats.rpm()), 0)) {
@@ -161,16 +175,21 @@ public final class GunServer {
 			}
 			return false;
 		}
-		if (!shooter.gate.tryFire(now, ShotMath.fireIntervalTicks(stats.rpm()), config().shooting.fireRateTolerance)) {
+		double interval = ShotMath.fireIntervalTicks(stats.rpm());
+		if (exotic != null) {
+			interval = exotic.fireInterval(player, stack, now, interval);
+		}
+		if (!shooter.gate.tryFire(now, interval, config().shooting.fireRateTolerance)) {
 			return false;
 		}
 
 		gun.setMag(stack, mag - 1);
-		shoot(player, stack, gun, stats, shooter, now);
+		shoot(player, stack, gun, stats, shooter, now, exotic);
 		return true;
 	}
 
-	private static void shoot(ServerPlayer player, ItemStack stack, GunItem gun, GunStats stats, Shooter shooter, long now) {
+	private static void shoot(ServerPlayer player, ItemStack stack, GunItem gun, GunStats stats, Shooter shooter, long now,
+			@Nullable ExoticBehavior exotic) {
 		ServerLevel level = player.level();
 		RandomSource random = player.getRandom();
 		double spread = isAiming(player) ? stats.adsSpread() : stats.hipSpread();
@@ -179,6 +198,7 @@ public final class GunServer {
 		int maxBounces = bouncyLevel(level, stack);
 
 		List<List<Vec3>> tracers = new ArrayList<>();
+		List<Hitscan.Trace> traces = new ArrayList<>();
 		int marker = -1;
 		boolean ricochet = false;
 		for (int pellet = 0; pellet < stats.pellets(); pellet++) {
@@ -186,10 +206,14 @@ public final class GunServer {
 			Vec3 dir = new Vec3(d[0], d[1], d[2]);
 			Hitscan.Trace trace = Hitscan.trace(level, player, eye, dir, stats.range(), maxBounces, config().shooting.hitboxMargin);
 			tracers.add(trace.path());
+			traces.add(trace);
 			ricochet |= trace.path().size() > 2;
 			if (trace.hit() != null) {
-				marker = Math.max(marker, hit(player, stack, stats, shooter, now, trace, dir));
+				marker = Math.max(marker, hit(player, stack, stats, shooter, now, trace, dir, exotic));
 			}
+		}
+		if (exotic != null) {
+			exotic.onShot(player, stack, traces, gun.mag(stack), now);
 		}
 
 		playSound(player, GunSounds.fire(gun.weaponId()), 1.0F, 0.95F + random.nextFloat() * 0.1F);
@@ -210,7 +234,8 @@ public final class GunServer {
 	}
 
 	/** Applies one bullet's hit. Returns the hit-marker kind, or -1 if the target took no damage. */
-	private static int hit(ServerPlayer player, ItemStack stack, GunStats stats, Shooter shooter, long now, Hitscan.Trace trace, Vec3 dir) {
+	private static int hit(ServerPlayer player, ItemStack stack, GunStats stats, Shooter shooter, long now, Hitscan.Trace trace, Vec3 dir,
+			@Nullable ExoticBehavior exotic) {
 		ServerLevel level = player.level();
 		EntityHitResult result = trace.hit();
 		Entity target = result.getEntity();
@@ -228,6 +253,9 @@ public final class GunServer {
 				shooter.vorpalSoundTick = now;
 				playToShooter(player, GunSounds.PERK_VORPAL, 0.6F, 1.0F);
 			}
+		}
+		if (target instanceof LivingEntity living) {
+			perkMult *= Exotics.markedMultiplier(living, now);
 		}
 		double damage = ShotMath.damage(stats.damage(), GunRolls.damageMult(GunRolls.rarity(stack)), precision, stats.precisionMult(),
 				perkMult, ShotMath.falloff(trace.distance(), stats.falloffStart(), stats.range(), stats.falloffMinMult()),
@@ -248,6 +276,13 @@ public final class GunServer {
 		}
 
 		boolean killed = wasAlive && !target.isAlive();
+		if (target instanceof LivingEntity living) {
+			CombatEvents.HIT.invoker().onHit(player, living, (float) damage, precision, killed);
+			if (exotic != null) {
+				GunItem gun = GunItem.of(stack);
+				exotic.onHit(player, stack, living, damage, precision, killed, gun == null ? 0 : gun.mag(stack), now);
+			}
+		}
 		if (killed) {
 			if (precision && GunRolls.hasPerk(stack, Perk.OUTLAW)) {
 				shooter.outlawUntil = now + perks.outlawDurationTicks;
@@ -273,6 +308,16 @@ public final class GunServer {
 		}
 		level.sendParticles(ParticleTypes.EXPLOSION, point.x, point.y, point.z, 1, 0, 0, 0, 0);
 		level.playSound(null, point.x, point.y, point.z, GunSounds.EXPLOSIVE_ROUND, SoundSource.PLAYERS, 0.8F, 1.3F);
+	}
+
+	/** Sends a tracer path (start, bends, end) to everyone near the shooter; exotics draw their extra bullets with it. */
+	public static void sendTracer(ServerLevel level, ServerPlayer shooter, List<Vec3> path) {
+		ShotFxPayload fx = new ShotFxPayload(shooter.getId(), List.of(path));
+		for (ServerPlayer viewer : level.players()) {
+			if (viewer.distanceToSqr(shooter) < FX_RANGE * FX_RANGE) {
+				Networking.sendToPlayer(viewer, fx);
+			}
+		}
 	}
 
 	/** Bullet damage: the player is the attacker and (as the direct entity) supplies the gun as the weapon item. */
@@ -319,6 +364,7 @@ public final class GunServer {
 		long now = now(player);
 		int ticks = ShotMath.reloadTicks(stats.reloadSeconds(), PlayerTraits.level(player, PlayerTraits.RELOAD_SPEED),
 				config().shooting.reloadSpeedPerLevel, shooter.outlawActive(now), config().perks.outlawReloadSpeed);
+		shooter.reloadStart = now;
 		shooter.reloadEnd = now + ticks;
 		shooter.reloadSlot = player.getInventory().getSelectedSlot();
 		shooter.reloadStack = stack;
@@ -342,14 +388,82 @@ public final class GunServer {
 				continue;
 			}
 			if (now(player) >= shooter.reloadEnd) {
-				GunStats stats = gun.stats();
-				int needed = stats.magSize() - gun.mag(stack);
-				int loaded = freeAmmo(player, stats) ? needed : takeAmmo(player, GunsItems.ammoFor(stats.ammo()), needed);
-				gun.setMag(stack, gun.mag(stack) + loaded);
-				playSound(player, GunSounds.RELOAD_END, 0.8F, 1.0F);
-				endReload(player, shooter);
+				completeReload(player, shooter, gun, stack);
 			}
 		}
+		for (ServerLevel level : server.getAllLevels()) {
+			Exotics.tick(level);
+		}
+	}
+
+	/** Fills the magazine from the player's ammo and ends the reload. */
+	private static void completeReload(ServerPlayer player, Shooter shooter, GunItem gun, ItemStack stack) {
+		int loaded = fill(player, gun, stack);
+		playSound(player, GunSounds.RELOAD_END, 0.8F, 1.0F);
+		endReload(player, shooter);
+		CombatEvents.RELOADED.invoker().onReloaded(player, loaded);
+	}
+
+	private static int fill(ServerPlayer player, GunItem gun, ItemStack stack) {
+		GunStats stats = gun.stats();
+		int needed = stats.magSize() - gun.mag(stack);
+		int loaded = freeAmmo(player, stats) ? needed : takeAmmo(player, GunsItems.ammoFor(stats.ammo()), needed);
+		gun.setMag(stack, gun.mag(stack) + loaded);
+		return loaded;
+	}
+
+	/** 0..1: how far the running reload is; 0 when not reloading. */
+	public static double reloadProgress(ServerPlayer player) {
+		Shooter shooter = SHOOTERS.get(player.getUUID());
+		if (shooter == null || !shooter.reloading()) {
+			return 0;
+		}
+		long now = now(player);
+		long total = shooter.reloadEnd - shooter.reloadStart;
+		return total <= 0 ? 1 : Math.clamp((now - shooter.reloadStart) / (double) total, 0.0, 1.0);
+	}
+
+	/** A dodge roll finishes a reload that is at least {@code reloadCancelThreshold} along. Returns whether it did. */
+	public static boolean onRoll(ServerPlayer player) {
+		Shooter shooter = SHOOTERS.get(player.getUUID());
+		if (shooter == null || !shooter.reloading() || !canAct(player)) {
+			return false;
+		}
+		double threshold = config().shooting.reloadCancelThreshold;
+		if (threshold >= 1.0 || reloadProgress(player) < threshold) {
+			return false;
+		}
+		ItemStack stack = shooter.reloadStack;
+		if (player.getMainHandItem() != stack || !(stack.getItem() instanceof GunItem gun)) {
+			endReload(player, shooter);
+			return false;
+		}
+		completeReload(player, shooter, gun, stack);
+		return true;
+	}
+
+	/** {@code WeaponHooks.reload}: instantly fills the main-hand gun (cancelling a running reload). */
+	public static boolean instantReload(ServerPlayer player) {
+		ItemStack stack = player.getMainHandItem();
+		GunItem gun = GunItem.of(stack);
+		if (gun == null || !player.isAlive()) {
+			return false;
+		}
+		GunStats stats = gun.stats();
+		if (gun.mag(stack) >= stats.magSize()) {
+			return false;
+		}
+		if (!freeAmmo(player, stats) && countAmmo(player, GunsItems.ammoFor(stats.ammo())) <= 0) {
+			return false;
+		}
+		Shooter shooter = shooter(player);
+		int loaded = fill(player, gun, stack);
+		if (shooter.reloading()) {
+			endReload(player, shooter);
+		}
+		playSound(player, GunSounds.RELOAD_END, 0.8F, 1.2F);
+		CombatEvents.RELOADED.invoker().onReloaded(player, loaded);
+		return true;
 	}
 
 	private static void endReload(ServerPlayer player, Shooter shooter) {

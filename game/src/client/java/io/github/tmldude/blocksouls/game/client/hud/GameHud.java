@@ -22,6 +22,8 @@ public final class GameHud {
 		// Not attached to the crosshair: its render condition would hide these in third person.
 		HudElementRegistry.addLast(id("teammate_markers"), TeammateMarkers::extract);
 		HudElementRegistry.addLast(id("revive_bar"), DownedHud::extractReviveBar);
+		HudElementRegistry.addLast(id("last_stand"), LastStandHud::extract);
+		HudElementRegistry.addLast(id("pings"), PingHud::extract);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, id("boons"), BoonRowHud::extract);
 		HudElementRegistry.attachElementBefore(VanillaHudElements.BOSS_BAR, id("run_info"), RunInfoHud::extract);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, id("trinkets"), TrinketRowHud::extract);

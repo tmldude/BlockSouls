@@ -131,6 +131,7 @@ public class GunItem extends Item {
 			case COMMON -> ChatFormatting.WHITE;
 			case RARE -> ChatFormatting.AQUA;
 			case LEGENDARY -> ChatFormatting.LIGHT_PURPLE;
+			case EXOTIC -> ChatFormatting.GOLD;
 		}));
 		List<Perk> perks = GunRolls.perks(stack);
 		for (Perk perk : perks) {

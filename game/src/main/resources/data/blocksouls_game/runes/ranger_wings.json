@@ -1,0 +1,10 @@
+{
+  "class": "blocksouls_game:ranger",
+  "cost": 40,
+  "requires": [
+    "blocksouls_game:ranger_fleet"
+  ],
+  "capabilities": [
+    "glide"
+  ]
+}

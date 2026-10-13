@@ -1,0 +1,14 @@
+{
+  "class": "blocksouls_game:striker",
+  "cost": 40,
+  "requires": [
+    "blocksouls_game:striker_blood_rush"
+  ],
+  "effects": [
+    {
+      "type": "trait",
+      "trait": "blocksouls:roll_iframes",
+      "level": 1
+    }
+  ]
+}

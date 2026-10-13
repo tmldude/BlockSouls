@@ -1,0 +1,11 @@
+{
+  "class": "blocksouls_game:striker",
+  "cost": 60,
+  "requires": [
+    "blocksouls_game:striker_long_roll",
+    "blocksouls_game:striker_swift_hands"
+  ],
+  "ability_mods": [
+    "blocksouls_abilities:striker_dash_mastery"
+  ]
+}

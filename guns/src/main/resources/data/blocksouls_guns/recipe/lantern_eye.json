@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:smithing_transform",
+  "template": "blocksouls_guns:exotic_catalyst",
+  "base": "blocksouls_guns:sniper_rifle",
+  "addition": "minecraft:spyglass",
+  "result": {
+    "id": "blocksouls_guns:lantern_eye",
+    "components": {
+      "blocksouls_guns:rarity": "exotic",
+      "minecraft:rarity": "epic"
+    }
+  }
+}

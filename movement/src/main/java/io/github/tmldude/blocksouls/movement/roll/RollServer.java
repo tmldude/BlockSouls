@@ -14,6 +14,7 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
 import io.github.tmldude.blocksouls.common.Networking;
+import io.github.tmldude.blocksouls.common.event.PlayerMoveEvents;
 import io.github.tmldude.blocksouls.common.player.PlayerStatus;
 import io.github.tmldude.blocksouls.movement.BlockSoulsMovement;
 import io.github.tmldude.blocksouls.movement.MovementConfig;
@@ -60,6 +61,7 @@ public final class RollServer {
 			StaminaAttachment.set(player, stamina.spend(config.roll.staminaCost, config.stamina));
 		}
 		target.setAttached(rollTick, 0);
+		PlayerMoveEvents.ROLLED.invoker().onPlayer(player);
 		return true;
 	}
 
@@ -71,7 +73,7 @@ public final class RollServer {
 	private static void tick(MinecraftServer server) {
 		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
 			StaminaState stamina = StaminaAttachment.get(player);
-			StaminaState next = stamina.tick(config.stamina, MovementTraits.staminaRegenMultiplier(player));
+			StaminaState next = stamina.tick(config.stamina, MovementTraits.staminaRegenMultiplier(player), MovementTraits.staminaMax(player));
 			if (next != stamina) {
 				StaminaAttachment.set(player, next);
 			}

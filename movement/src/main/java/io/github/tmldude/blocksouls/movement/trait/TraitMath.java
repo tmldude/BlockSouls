@@ -14,6 +14,17 @@ public final class TraitMath {
 		return Math.max(0, level) * config.airJumpsPerLevel;
 	}
 
+	/** Air jumps are a multi-jump verb: without the {@code MULTI_JUMP} capability there are none, whatever the trait. */
+	public static int airJumps(int level, MovementConfig.Traits config, boolean multiJump) {
+		return multiJump ? airJumps(level, config) : 0;
+	}
+
+	/** A player's max stamina: the config max minus the {@code STAMINA_MAX_PENALTY} trait, floored. */
+	public static double staminaMax(int penaltyLevel, MovementConfig.Stamina stamina, MovementConfig.Traits config) {
+		double max = stamina.max - Math.max(0, penaltyLevel) * config.staminaMaxPenaltyPerLevel;
+		return Math.max(Math.min(stamina.max, config.staminaMaxFloor), max);
+	}
+
 	/** Last i-frame tick of a roll: the base window's end, pushed later per level. */
 	public static int rollIframeEnd(int level, MovementConfig.Roll roll, MovementConfig.Traits config) {
 		return roll.iframeEnd + Math.max(0, level) * config.rollIframeTicksPerLevel;

@@ -13,6 +13,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 
 import io.github.tmldude.blocksouls.guns.BlockSoulsGuns;
+import io.github.tmldude.blocksouls.guns.exotic.KindlingState;
 import io.github.tmldude.blocksouls.guns.logic.GunRarity;
 
 /** Item data components on guns. Changing them (e.g. firing) doesn't replay the re-equip animation. */
@@ -25,6 +26,8 @@ public final class GunComponents {
 			Identifier.STREAM_CODEC.apply(ByteBufCodecs.list()));
 	/** Rounds in the magazine. Absent = full. */
 	public static final DataComponentType<Integer> MAG = register("mag", Codec.INT, ByteBufCodecs.VAR_INT);
+	/** Kindling Engine's heat (exotic). Absent = cold. */
+	public static final DataComponentType<KindlingState> KINDLING = register("kindling", KindlingState.CODEC, KindlingState.STREAM_CODEC);
 
 	private GunComponents() {
 	}

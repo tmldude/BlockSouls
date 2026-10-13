@@ -8,6 +8,7 @@ import net.fabricmc.api.ModInitializer;
 import io.github.tmldude.blocksouls.common.Config;
 import io.github.tmldude.blocksouls.movement.climb.ClimbServer;
 import io.github.tmldude.blocksouls.movement.flight.FlightServer;
+import io.github.tmldude.blocksouls.movement.glide.GlideServer;
 import io.github.tmldude.blocksouls.movement.jump.AirJumpServer;
 import io.github.tmldude.blocksouls.movement.roll.RollServer;
 import io.github.tmldude.blocksouls.movement.stamina.StaminaAttachment;
@@ -25,10 +26,12 @@ public class BlockSoulsMovement implements ModInitializer {
 	public void onInitialize() {
 		CONFIG.copyFrom(Config.load(ConfigSync.FILE, MovementConfig.class, MovementConfig::new));
 		StaminaAttachment.register(CONFIG.stamina);
+		StaminaAttachment.installProvider();
 		RollServer.register(CONFIG);
 		ClimbServer.register(CONFIG);
 		WebServer.register(CONFIG);
 		FlightServer.register(CONFIG);
+		GlideServer.register(CONFIG);
 		AirJumpServer.register();
 		ConfigSync.register();
 		MovementCommands.register();

@@ -1,0 +1,42 @@
+{
+	"criteria": {
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipes": "blocksouls_guns:kindling_engine"
+			}
+		},
+		"has_exotic_catalyst": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_guns:exotic_catalyst"
+					}
+				]
+			}
+		},
+		"has_auto_rifle": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_guns:auto_rifle"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_exotic_catalyst",
+			"has_auto_rifle"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"blocksouls_guns:kindling_engine"
+		]
+	}
+}

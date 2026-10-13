@@ -54,6 +54,7 @@ public final class JumpHandler {
 		wasJumpDown = jumpDown;
 		boolean eligible = isEligible(player);
 
+		controller.setMultiJump(MovementTraits.canMultiJump(player));
 		Vec3 velocity = player.getDeltaMovement();
 		JumpController.Result result = controller.tick(new JumpController.Input(
 				player.onGround(),

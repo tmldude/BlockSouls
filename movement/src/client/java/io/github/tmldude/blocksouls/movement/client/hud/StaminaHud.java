@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import io.github.tmldude.blocksouls.movement.BlockSoulsMovement;
 import io.github.tmldude.blocksouls.movement.MovementConfig;
 import io.github.tmldude.blocksouls.movement.stamina.StaminaAttachment;
+import io.github.tmldude.blocksouls.movement.trait.MovementTraits;
 
 /** Thin stamina bar just above the hunger row; hidden while stamina is full. */
 public final class StaminaHud {
@@ -38,7 +39,7 @@ public final class StaminaHud {
 			return;
 		}
 
-		float fraction = StaminaAttachment.get(player).fraction(config);
+		float fraction = StaminaAttachment.get(player).fraction(MovementTraits.staminaMax(player));
 		if (fraction >= 1.0F) {
 			return;
 		}

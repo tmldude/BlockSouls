@@ -54,4 +54,16 @@ class StaminaStateTest {
 		}
 		assertEquals(10 + config.regenPerSecond * 1.4, state.value(), 1e-3);
 	}
+
+	@Test
+	void aPerPlayerMaxCapsRegenAndClampsExcess() {
+		StaminaState state = new StaminaState(70, 0);
+		for (int t = 0; t < 200; t++) {
+			state = state.tick(config, 1.0, 75);
+		}
+		assertEquals(75, state.value(), 1e-4, "regen stops at the player's max");
+		assertEquals(75, StaminaState.full(config).tick(config, 1.0, 75).value(), 1e-4, "stamina above the max is clamped");
+		assertEquals(1.0F, new StaminaState(80, 0).fraction(75), "the bar never overflows");
+		assertEquals(0.5F, new StaminaState(50, 0).fraction(config), "the v1 fraction is unchanged");
+	}
 }

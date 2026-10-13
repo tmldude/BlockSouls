@@ -91,7 +91,7 @@ public final class WebHandler {
 
 	private static boolean canSwing(LocalPlayer player) {
 		return config.web.enabled && player.isAlive() && !player.isSpectator() && !player.isPassenger() && !player.isFallFlying()
-				&& !player.getAbilities().flying && !player.isInLiquid() && !PlayerStatus.isDowned(player);
+				&& !player.getAbilities().flying && !player.isInLiquid() && !PlayerStatus.isDowned(player) && MovementTraits.canSwing(player);
 	}
 
 	private static void tryShoot(Minecraft client, LocalPlayer player) {

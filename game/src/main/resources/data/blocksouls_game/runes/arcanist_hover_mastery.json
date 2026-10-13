@@ -1,0 +1,11 @@
+{
+  "class": "blocksouls_game:arcanist",
+  "cost": 60,
+  "requires": [
+    "blocksouls_game:arcanist_hollow_bones",
+    "blocksouls_game:arcanist_third_eye"
+  ],
+  "ability_mods": [
+    "blocksouls_abilities:arcanist_hover_mastery"
+  ]
+}

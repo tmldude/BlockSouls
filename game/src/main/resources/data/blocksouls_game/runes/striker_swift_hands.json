@@ -1,0 +1,14 @@
+{
+  "class": "blocksouls_game:striker",
+  "cost": 40,
+  "requires": [
+    "blocksouls_game:striker_keen_edge"
+  ],
+  "effects": [
+    {
+      "type": "trait",
+      "trait": "blocksouls:reload_speed",
+      "level": 1
+    }
+  ]
+}
