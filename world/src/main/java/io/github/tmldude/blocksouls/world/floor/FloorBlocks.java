@@ -15,7 +15,7 @@ import net.minecraft.world.level.material.PushReaction;
 
 import io.github.tmldude.blocksouls.common.CommonIds;
 
-/** The floors' blocks: resource nodes and the exit portal. None has an item; the floor builder places them. */
+/** The floors' blocks: resource nodes, herbs and the exit portal. None has an item; the floor builder places them. */
 public final class FloorBlocks {
 	public static final Block SCRAP_NODE = register(CommonIds.SCRAP_NODE, NodeBlock::new, node(MapColor.COLOR_BROWN, SoundType.CHAIN));
 	public static final Block GUNMETAL_NODE = register(CommonIds.GUNMETAL_NODE, NodeBlock::new, node(MapColor.METAL, SoundType.METAL));
@@ -24,6 +24,14 @@ public final class FloorBlocks {
 			node(MapColor.COLOR_PURPLE, SoundType.AMETHYST).lightLevel(state -> 6).noOcclusion());
 	public static final Block GHOSTCAP = register(CommonIds.GHOSTCAP, props -> new HerbBlock(props, 1),
 			node(MapColor.TERRACOTTA_WHITE, SoundType.FUNGUS).lightLevel(state -> 9).noCollision().noOcclusion());
+	// --- floor 3, Skyrift (Stage 6C) ---
+	public static final Block SKYSTEEL_NODE = register(CommonIds.SKYSTEEL_NODE, NodeBlock::new,
+			node(MapColor.ICE, SoundType.AMETHYST).lightLevel(state -> 6));
+	public static final Block CLOUDBLOOM_PLANT = register(CommonIds.CLOUDBLOOM_PLANT, HerbBlock::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.SNOW).strength(-1.0F, 3600000.0F).noLootTable().noCollision()
+					.sound(SoundType.AZALEA).offsetType(BlockBehaviour.OffsetType.XZ).pushReaction(PushReaction.IMMOVEABLE)
+					.lightLevel(state -> 9));
+	// --- end floor 3 ---
 	public static final Block FLOOR_PORTAL = register(CommonIds.FLOOR_PORTAL, FloorPortalBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(-1.0F, 3600000.0F).noLootTable().noOcclusion()
 					.pushReaction(PushReaction.IMMOVEABLE).sound(SoundType.GLASS)

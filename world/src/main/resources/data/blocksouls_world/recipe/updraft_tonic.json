@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "blocksouls_world:cloudbloom",
+    "blocksouls_world:skysteel",
+    "minecraft:feather",
+    "minecraft:glass_bottle"
+  ],
+  "result": {
+    "id": "blocksouls_world:updraft_tonic"
+  }
+}

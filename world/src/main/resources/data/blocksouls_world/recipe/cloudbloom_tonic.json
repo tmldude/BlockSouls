@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "blocksouls_world:cloudbloom",
+    "blocksouls_world:cloudbloom",
+    "minecraft:glass_bottle"
+  ],
+  "result": {
+    "id": "blocksouls_world:cloudbloom_tonic"
+  }
+}

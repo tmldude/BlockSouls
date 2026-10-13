@@ -6,14 +6,20 @@ import java.util.function.Function;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.level.block.Block;
 // floor 4 (The Vault) drinks
@@ -46,6 +52,18 @@ public final class WorldItems {
 	public static final Item GHOSTCAP_DRAUGHT = item("ghostcap_draught", Item::new, WorldConsumables.draught());
 	public static final Item GHOSTCAP_BROTH = item("ghostcap_broth", Item::new, WorldConsumables.broth());
 	public static final Item HOLLOW_CROWN = item("hollow_crown", Item::new, WorldConsumables.hollowCrown());
+	// --- floor 3, Skyrift (Stage 6C) ---
+	public static final Item SKYSTEEL = item("skysteel", Item::new, new Item.Properties().rarity(Rarity.UNCOMMON));
+	public static final Item CLOUDBLOOM = item("cloudbloom", Item::new, new Item.Properties());
+	/** Slow falling: the edge is less final. */
+	public static final Item CLOUDBLOOM_TONIC = item("cloudbloom_tonic", Item::new, tonic(
+			new MobEffectInstance(MobEffects.SLOW_FALLING, 1200, 0)));
+	/** Jump boost and a short slow fall: reach the shards on foot. */
+	public static final Item UPDRAFT_TONIC = item("updraft_tonic", Item::new, tonic(
+			new MobEffectInstance(MobEffects.JUMP_BOOST, 900, 1), new MobEffectInstance(MobEffects.SLOW_FALLING, 300, 0)));
+	public static final Item SKYSTEEL_FEATHERBOOTS = item("skysteel_featherboots", Item::new, new Item.Properties()
+			.humanoidArmor(WorldArmor.SKYSTEEL, ArmorType.BOOTS).attributes(WorldArmor.featherboots()).rarity(Rarity.UNCOMMON));
+	// --- end floor 3 ---
 
 	public static final Item GUNMETAL_ORE = block(WorldBlocks.GUNMETAL_ORE);
 	public static final Item DEEPSLATE_GUNMETAL_ORE = block(WorldBlocks.DEEPSLATE_GUNMETAL_ORE);
@@ -99,6 +117,11 @@ public final class WorldItems {
 		Item item = Registry.register(BuiltInRegistries.ITEM, key, factory.apply(properties.setId(key)));
 		TAB_ORDER.add(item);
 		return item;
+	}
+
+	private static Item.Properties tonic(MobEffectInstance... effects) {
+		return new Item.Properties().stacksTo(16).craftRemainder(Items.GLASS_BOTTLE).usingConvertsTo(Items.GLASS_BOTTLE)
+				.component(DataComponents.CONSUMABLE, Consumables.defaultDrink().onConsume(new ApplyStatusEffectsConsumeEffect(List.of(effects))).build());
 	}
 
 	private static Item block(Block block) {

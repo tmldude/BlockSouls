@@ -104,6 +104,16 @@ public final class CommonIds {
 	public static final Identifier BLIGHT_CRYSTAL_NODE = id(WORLD, "blight_crystal_node");
 	public static final Identifier BLIGHT_CRYSTAL = id(WORLD, "blight_crystal");
 	public static final Identifier GHOSTCAP = id(WORLD, "ghostcap");
+	// --- floor 3, Skyrift (Stage 6C) ---
+	/** Skyrift's rare node block (world), mostly on the floating shards; pops into skysteel. */
+	public static final Identifier SKYSTEEL_NODE = id(WORLD, "skysteel_node");
+	/** Skyrift's rare metal (world), from skysteel nodes: feather armor, gun barrels, the updraft tonic. */
+	public static final Identifier SKYSTEEL = id(WORLD, "skysteel");
+	/** Skyrift's herb block (world): pops in one hit into cloudbloom. */
+	public static final Identifier CLOUDBLOOM_PLANT = id(WORLD, "cloudbloom_plant");
+	/** Skyrift's herb (world): brewed into slow-fall and updraft tonics. */
+	public static final Identifier CLOUDBLOOM = id(WORLD, "cloudbloom");
+	// --- end floor 3 ---
 	/** The camp's exit portal block (world); using it starts the act's portal charge, lit it leads on. */
 	public static final Identifier FLOOR_PORTAL = id(WORLD, "floor_portal");
 	// --- floor 4, The Vault (Stage 6C) ---

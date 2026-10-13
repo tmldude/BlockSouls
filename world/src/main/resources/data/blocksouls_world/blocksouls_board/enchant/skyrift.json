@@ -1,0 +1,16 @@
+{
+  "minFloor": 3,
+  "maxFloor": 3,
+  "floorTags": [
+    "skyrift"
+  ],
+  "metal": "blocksouls_world:skysteel",
+  "metalCount": 3,
+  "souls": 8,
+  "enchantments": [
+    "minecraft:feather_falling",
+    "minecraft:projectile_protection",
+    "minecraft:power",
+    "minecraft:punch"
+  ]
+}

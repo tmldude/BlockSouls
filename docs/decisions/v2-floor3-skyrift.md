@@ -41,3 +41,37 @@ what was actually built.
   until the skysteel node lands (slice 2).
 - **Lane exception (game):** `RunConfig.defaultFloorActs` sets floor 3's pool to `blocksouls_world:skyrift`,
   inside a marked "floor pools (Stage 6C)" block so the other floor sessions add one line each.
+
+## PR 2: skysteel, cloudbloom and the sky kit
+
+- **Skysteel only grows on shards.** Each template's `shards.node` places `shards.nodes` skysteel nodes (2, or 3 on
+  the archipelago) on shards that carry no raised siege point, scaled by `PartyScaling.floorNodes` and capped
+  by the free shards. Skysteel left the ground `nodeMix`: going out on the shards is how you get the rare.
+- **Herbs are NODE slots.** The shared `FloorTemplate.herbs` map (from Blight, #76) scatters herb blocks as `NODE` slots
+  tagged with the block id, so no common change (FloorSlotKind stays as it is) and `NODE_POPPED` fires for them
+  like any node. `HerbBlock` is a one-hit `NodeBlock` (`hitsToPop()` = 1) with a plant shape, no collision and an
+  XZ offset; cloudbloom uses the shared `HerbBlock` as-is. Cloudbloom: `{"blocksouls_world:cloudbloom_plant": 2}`, × `floorSize`
+  (1 player: 2, 8 players: 3).
+- **Shard nodes find their floor.** A shard past the rim isn't inside `Floors.at`, so `popNode` falls back to the
+  nearest floor in the same dimension whose camp is within 1.5 × radius + 24 blocks (`WorldFloors.floorNear`).
+- **Recipes.**
+  - Skysteel featherboots: 4 skysteel and a cloudbloom, as boots.
+  - Cloudbloom tonic: 2 cloudbloom and a bottle → slow falling for 60 s.
+  - Updraft tonic: cloudbloom, skysteel, a feather and a bottle → Jump Boost II for 45 s plus slow falling
+    for 15 s.
+  - Gun barrels from skysteel: 2 skysteel and a gunmetal → 2 `blocksouls_guns:gun_barrel` (only with guns
+    loaded).
+  - Skysteel and cloudbloom are each in 2+ recipes.
+- **Featherboots.**
+  - Skysteel armor material: durability 22, boots defense 2, toughness 0.5, enchantability 15, repaired with
+    skysteel.
+  - Plus +4 safe fall distance and −33% fall damage, so a missed shard jump hurts less (not a full cancel: the
+    rim fall still costs its penalty).
+- **Boards (docs/decisions/v2-boards.md).**
+  - Entry files: featherboots and gun barrels on forge, the two tonics on brew. Each with `minFloor` 3 and
+    `floorTags` `["skyrift"]`.
+  - Source files: skysteel and cloudbloom. These replace the DirectorConfig edit the draft had, so there is no
+    game lane exception.
+  - Enchant spec: Skyrift's enchant service takes 3 skysteel and 8 souls for one of feather falling,
+    projectile protection, power or punch.
+  - Upgrade chain: featherboots → blight-forged boots.

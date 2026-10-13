@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "blocksouls_world:skysteel"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "blocksouls_world:skysteel"
+      }
+    ]
+  }
+}
