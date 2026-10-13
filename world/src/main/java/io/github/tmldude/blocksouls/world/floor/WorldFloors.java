@@ -292,11 +292,16 @@ public final class WorldFloors {
 
 	/** Pops a node: removes it, bursts its loot table ({@code <ns>:nodes/<node>}) and fires {@code NODE_POPPED}. */
 	static void popNode(ServerLevel level, BlockPos pos, BlockState state, ServerPlayer player) {
+		popNode(level, pos, state, player, config.nodeBurstRolls);
+	}
+
+	/** Pops a node or herb, rolling its {@code nodes/<id>} loot table {@code rolls} times (herbs roll once). */
+	static void popNode(ServerLevel level, BlockPos pos, BlockState state, ServerPlayer player, int rolls) {
 		Identifier node = BuiltInRegistries.BLOCK.getKey(state.getBlock());
 		level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
 		ResourceKey<LootTable> key = ResourceKey.create(Registries.LOOT_TABLE, node.withPrefix("nodes/"));
 		LootTable table = level.getServer().reloadableRegistries().getLootTable(key);
-		for (int roll = 0; roll < Math.max(1, config.nodeBurstRolls); roll++) {
+		for (int roll = 0; roll < Math.max(1, rolls); roll++) {
 			LootParams params = new LootParams.Builder(level).withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos))
 					.withLuck(player.getLuck()).create(LootContextParamSets.CHEST);
 			for (ItemStack stack : table.getRandomItems(params)) {

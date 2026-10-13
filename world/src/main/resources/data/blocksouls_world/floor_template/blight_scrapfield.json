@@ -46,19 +46,83 @@
     "blocksouls_world:scrap_node": 4,
     "blocksouls_world:gunmetal_node": 1
   },
+  "rareNodes": {
+    "blocksouls_world:blight_crystal_node": 2
+  },
+  "herbs": {
+    "blocksouls_world:ghostcap": 2
+  },
   "crates": 3,
   "slots": [
-    { "kind": "camp", "x": 0, "z": 0, "radius": 6 },
-    { "kind": "exit_portal", "x": -6, "z": 7, "radius": 2 },
-    { "kind": "structure", "tag": "outpost", "x": 28, "z": 20, "radius": 7 },
-    { "kind": "mini_boss", "x": -30, "z": -24, "radius": 9 },
-    { "kind": "secret", "x": 36, "z": -26, "radius": 4 },
-    { "kind": "event", "x": -36, "z": 20, "radius": 5 },
-    { "kind": "cave", "x": 10, "z": -20, "radius": 4 },
-    { "kind": "wreck", "x": 40, "z": -2, "radius": 7 },
-    { "kind": "wreck", "x": -12, "z": 40, "radius": 6 },
-    { "kind": "node", "x": -44, "z": -2 },
-    { "kind": "node", "x": 18, "z": 42 },
-    { "kind": "node", "x": -10, "z": -44 }
+    {
+      "kind": "camp",
+      "x": 0,
+      "z": 0,
+      "radius": 6
+    },
+    {
+      "kind": "exit_portal",
+      "x": -6,
+      "z": 7,
+      "radius": 2
+    },
+    {
+      "kind": "structure",
+      "tag": "outpost",
+      "x": 28,
+      "z": 20,
+      "radius": 7
+    },
+    {
+      "kind": "mini_boss",
+      "x": -30,
+      "z": -24,
+      "radius": 9
+    },
+    {
+      "kind": "secret",
+      "x": 36,
+      "z": -26,
+      "radius": 4
+    },
+    {
+      "kind": "event",
+      "x": -36,
+      "z": 20,
+      "radius": 5
+    },
+    {
+      "kind": "cave",
+      "x": 10,
+      "z": -20,
+      "radius": 4
+    },
+    {
+      "kind": "wreck",
+      "x": 40,
+      "z": -2,
+      "radius": 7
+    },
+    {
+      "kind": "wreck",
+      "x": -12,
+      "z": 40,
+      "radius": 6
+    },
+    {
+      "kind": "node",
+      "x": -44,
+      "z": -2
+    },
+    {
+      "kind": "node",
+      "x": 18,
+      "z": 42
+    },
+    {
+      "kind": "node",
+      "x": -10,
+      "z": -44
+    }
   ]
 }

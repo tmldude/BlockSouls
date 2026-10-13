@@ -1,0 +1,31 @@
+{
+	"criteria": {
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipes": "blocksouls_world:ghostcap_draught"
+			}
+		},
+		"has_ghostcap": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:ghostcap"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_ghostcap"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"blocksouls_world:ghostcap_draught"
+		]
+	}
+}

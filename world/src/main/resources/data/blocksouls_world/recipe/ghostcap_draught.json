@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "blocksouls_world:ghostcap",
+    "minecraft:glistering_melon_slice",
+    "minecraft:glass_bottle"
+  ],
+  "result": {
+    "id": "blocksouls_world:ghostcap_draught",
+    "count": 1
+  }
+}

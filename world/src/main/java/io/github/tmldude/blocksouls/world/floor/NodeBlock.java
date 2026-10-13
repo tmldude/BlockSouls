@@ -44,6 +44,11 @@ public class NodeBlock extends Block {
 		return Math.max(1, Math.min(8, WorldFloors.config().nodeHits));
 	}
 
+	/** Times its loot table is rolled when it pops: {@code nodeBurstRolls} from the config. */
+	protected int burstRolls() {
+		return WorldFloors.config().nodeBurstRolls;
+	}
+
 	/** One hit; pops the node on the last. Returns true when it popped. */
 	public boolean hit(ServerLevel level, BlockPos pos, ServerPlayer player) {
 		BlockState state = level.getBlockState(pos);
@@ -54,7 +59,7 @@ public class NodeBlock extends Block {
 		level.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), pos.getX() + 0.5, pos.getY() + 0.6, pos.getZ() + 0.5, 8,
 				0.3, 0.3, 0.3, 0.05);
 		if (hits >= hitsToPop()) {
-			WorldFloors.popNode(level, pos, state, player);
+			WorldFloors.popNode(level, pos, state, player, burstRolls());
 			return true;
 		}
 		level.setBlock(pos, state.setValue(HITS, hits), Block.UPDATE_CLIENTS);

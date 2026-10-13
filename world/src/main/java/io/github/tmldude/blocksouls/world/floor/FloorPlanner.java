@@ -127,6 +127,10 @@ public final class FloorPlanner {
 		}
 		scatter(nodes, nodeCount, FloorSlotKind.NODE, slots, radius, config, random, () -> weighted(template.nodeMix, random));
 		slots.addAll(nodes);
+		// v2-floor5-blight: the floor's rare nodes and herbs, scattered after the common nodes (no draws when empty).
+		slots.addAll(extras(template.rareNodes, PartyScaling.floorNodes(Math.max(1, players)) * config.nodeFactor(floorNumber),
+				slots, radius, config, random));
+		slots.addAll(extras(template.herbs, PartyScaling.floorSize(Math.max(1, players)), slots, radius, config, random));
 
 		int crateCount = (int) Math.round(template.crates * PartyScaling.floorCrates(Math.max(1, players)));
 		List<PlannedSlot> crates = new ArrayList<>();
@@ -256,6 +260,20 @@ public final class FloorPlanner {
 			case 3 -> new int[] {sz, -sx};
 			default -> new int[] {sx, sz};
 		};
+	}
+
+	/** Scatters {@code round(solo × factor)} (at least 1) node slots per block id in {@code counts}. */
+	private static List<PlannedSlot> extras(Map<String, Integer> counts, double factor, List<PlannedSlot> placed, int radius,
+			FloorsConfig config, Random random) {
+		List<PlannedSlot> out = new ArrayList<>();
+		for (Map.Entry<String, Integer> entry : counts.entrySet()) {
+			if (entry.getValue() == null || entry.getValue() <= 0) {
+				continue;
+			}
+			int count = out.size() + Math.max(1, (int) Math.round(entry.getValue() * factor));
+			scatter(out, count, FloorSlotKind.NODE, placed, radius, config, random, entry::getKey);
+		}
+		return out;
 	}
 
 	/** Adds random points inside 85% of the radius until {@code out} holds {@code count}, keeping clear of other slots. */

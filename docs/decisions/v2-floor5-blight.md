@@ -113,3 +113,46 @@ data.
     nodes under one literal would clash.
 - `/bs floor open <act> [players] [pool]` takes an optional pool name, e.g. `blight`.
 - `/bs floor goto <kind>` (already there) now suggests slot kinds.
+
+## Slice 2: rare node and herb
+
+- **Blight crystal node** (`blocksouls_world:blight_crystal_node`): a `NodeBlock`, so it takes `nodeHits` hits like
+  the others.
+  - Purple amethyst sound; it glows (light 6) so it reads through the fog.
+  - Loot `nodes/blight_crystal_node`, rolled 3 times: blight crystal (6), gunmetal nuggets 2–3 (3), scrap 1–2 (1).
+    That's about 2 crystals per node.
+- **Count:** a template field `rareNodes` (block → solo count) is scattered after the common nodes, at
+  × `floorNodes` × the floor's node factor.
+  - Blight templates use 2. That's 2 solo and 4 at 8 players with floor 5's 0.8 factor.
+  - It's separate from `nodeMix` so the rare is guaranteed but stays few (`stingy_nodes`).
+- **Ghostcap** (`blocksouls_world:ghostcap`): a `HerbBlock`, a small glowing (light 9) non-solid plant.
+  - It's the shared `HerbBlock` (Skyrift / Vault: a `NodeBlock` popping in one hit). Herbs normally roll their table
+    `nodeBurstRolls` (3) times. `HerbBlock` gained an optional fixed roll count (through `NodeBlock.burstRolls()`), and
+    the ghostcap uses 1, so each one gives exactly one full heal. Cave moss is unchanged.
+  - It pops in **one hit** and rolls `nodes/ghostcap` once, for 1 ghostcap.
+  - It has no block item and no block drop, so it can't be replanted or farmed.
+  - It fires `NODE_POPPED` like a node, so the Director's loot cadence counts it.
+  - Count: template field `herbs`, × `floorSize`. 2 solo and 3 at 8 players, matching the brief's "2–3 per floor".
+    `floorNodes` would give 5 at 8 players, too many for the run's only full heal.
+  - The block and the item share the id `blocksouls_world:ghostcap`. The item is a plain item, not a block item.
+- **What they make:** vanilla recipes plus a board entry each (`blocksouls_board/entry/`, per `v2-boards.md`):
+  `minFloor` 5 and `floorTags: ["blight"]`, so they show only on the blight floor's boards. Classic runs craft them
+  at a table as usual.
+  - **Forge:**
+    - `hollow_crown`, the cursed armor piece: 4 crystals + a gunmetal ingot. It's a helmet on the blight-forged
+      material with 5 armor, 3 toughness and +2 attack damage, but **−4 max health** while worn.
+    - `exotic_catalyst_from_blight_crystal`, the gun side: the guns module's exotic catalyst with 2 crystals in place
+      of 2 souls. It's load-gated on guns. The brief's "top-tier gun perk" means guns' perk system, which isn't in my
+      lane, so the crystal feeds its exotic path instead.
+  - **Brew:**
+    - `ghostcap_draught`, the **only full heal**: ghostcap + glistering melon slice + glass bottle. It gives Instant
+      Health VI (128 HP) and clears poison, wither and weakness.
+    - `ghostcap_broth`: ghostcap + both mushrooms + bowl. 6 food, Regeneration II for 10 s and Night Vision for 60 s
+      (a siege-night stew).
+  - Floor 6 owns the revive tonic. It can take ghostcap as an ingredient.
+- **Recipe web:** blight crystal and ghostcap are each in 2 recipes, and every result uses one of them. No
+  exemptions needed.
+- **"Where to get it":** two `blocksouls_board/source/` files (blight crystal → its node, ghostcap → the herb).
+  No `DirectorConfig` edit, so slice 2 has no game lane exception.
+- **Art:** `tools/assets/gen.py` placeholders (blight / pale / bone palettes). The crown is worn with the
+  blight-forged armor texture.

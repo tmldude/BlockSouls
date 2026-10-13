@@ -87,6 +87,10 @@ public final class CommonIds {
 	public static final Identifier RESIN_NODE = id(WORLD, "resin_node");
 	/** The Surface floor's rare material (world), from resin nodes. */
 	public static final Identifier AMBER_RESIN = id(WORLD, "amber_resin");
+	// v2-floor5-blight: the Blighted Surface's rare node, its crystal, and the ghostcap herb (block and item share the id).
+	public static final Identifier BLIGHT_CRYSTAL_NODE = id(WORLD, "blight_crystal_node");
+	public static final Identifier BLIGHT_CRYSTAL = id(WORLD, "blight_crystal");
+	public static final Identifier GHOSTCAP = id(WORLD, "ghostcap");
 	/** The camp's exit portal block (world); using it starts the act's portal charge, lit it leads on. */
 	public static final Identifier FLOOR_PORTAL = id(WORLD, "floor_portal");
 	// --- floor 4, The Vault (Stage 6C) ---
