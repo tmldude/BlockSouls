@@ -345,7 +345,7 @@ public final class DayLoop {
 	/** Picks (or uses {@code forced}) the act's random event and places it. Returns the event id, or null. */
 	public static @Nullable String placeEvent(MinecraftServer server, ServerLevel level, int act, @Nullable String forced) {
 		RandomSource random = level.getRandom();
-		String id = forced != null ? forced : pickEvent(config().events.pool, act, random.nextDouble());
+		String id = forced != null ? forced : DirectorRules.pickEvent(config().events.pool, act, random.nextDouble());
 		if (id == null) {
 			return null;
 		}
@@ -374,29 +374,6 @@ public final class DayLoop {
 		};
 		Director.log(server, DirectorLog.Kind.EVENT, "Event " + id + (placed ? " at " + pos.toShortString() : " couldn't be placed"));
 		return placed ? id : null;
-	}
-
-	/** Weighted pick among events unlocked at {@code act}; {@code roll} in [0, 1). Null when none qualify. */
-	static @Nullable String pickEvent(List<DirectorConfig.EventSpec> pool, int act, double roll) {
-		int total = 0;
-		for (DirectorConfig.EventSpec spec : pool) {
-			if (spec.id != null && spec.weight > 0 && act >= spec.minAct) {
-				total += spec.weight;
-			}
-		}
-		if (total <= 0) {
-			return null;
-		}
-		double target = roll * total;
-		for (DirectorConfig.EventSpec spec : pool) {
-			if (spec.id != null && spec.weight > 0 && act >= spec.minAct) {
-				target -= spec.weight;
-				if (target < 0) {
-					return spec.id;
-				}
-			}
-		}
-		return null;
 	}
 
 	private static @Nullable BlockPos eventSpot(MinecraftServer server, ServerLevel level, int act, FloorSlotKind kind, int distance,

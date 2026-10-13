@@ -1,8 +1,6 @@
 package io.github.tmldude.blocksouls.game.run.director;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import org.jspecify.annotations.Nullable;
 
@@ -55,38 +53,10 @@ public final class Shop {
 		return Director.config().shop;
 	}
 
-	/**
-	 * The board for {@code act}: up to {@code slots} valid offers for the act, picked by weight without
-	 * replacement from a random seeded by the run and the act (the same board all floor long).
-	 */
-	static List<DirectorConfig.Offer> stock(List<DirectorConfig.Offer> pool, int act, long seed, int slots) {
-		List<DirectorConfig.Offer> candidates = new ArrayList<>();
-		for (DirectorConfig.Offer offer : pool) {
-			if (offer.valid() && offer.weight > 0 && act >= offer.minAct && act <= offer.maxAct) {
-				candidates.add(offer);
-			}
-		}
-		Random random = new Random(seed * 31 + act);
-		List<DirectorConfig.Offer> board = new ArrayList<>();
-		while (board.size() < Math.min(Math.min(slots, 9), candidates.size())) {
-			int total = candidates.stream().mapToInt(o -> o.weight).sum();
-			int roll = random.nextInt(total);
-			for (DirectorConfig.Offer offer : candidates) {
-				roll -= offer.weight;
-				if (roll < 0) {
-					board.add(offer);
-					candidates.remove(offer);
-					break;
-				}
-			}
-		}
-		return board;
-	}
-
 	/** Opens the board for {@code player}. Null on success. */
 	static @Nullable String open(ServerPlayer player) {
 		MinecraftServer server = player.level().getServer();
-		List<DirectorConfig.Offer> board = stock(config().pool, Math.max(1, DirectorHooks.actOrdinal(server)), DirectorData.get(server).seed, config().slots);
+		List<DirectorConfig.Offer> board = DirectorRules.stock(config().pool, Math.max(1, DirectorHooks.actOrdinal(server)), DirectorData.get(server).seed, config().slots);
 		player.openMenu(new SimpleMenuProvider((id, inventory, p) -> new Board(id, inventory, board, remark(server)),
 				Component.translatable("container.blocksouls_game.shop")));
 		return null;

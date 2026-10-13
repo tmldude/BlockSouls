@@ -982,6 +982,146 @@ def blocks():
     base, glow = blight_heart()
     emit(f"{WORLD}/block/blight_heart.png", base)
     emit(f"{WORLD}/block/blight_heart_glow.png", glow)
+    economy_blocks()
+
+
+# ============================================================================== blocks: run economy (camp objects)
+
+
+def _frame(img, ramp_, light=4, dark=1):
+    """Bevelled 1 px border: light top/left, dark bottom/right."""
+    for i in range(16):
+        A.put(img, i, 0, ramp_[light])
+        A.put(img, 0, i, ramp_[light])
+        A.put(img, i, 15, ramp_[dark])
+        A.put(img, 15, i, ramp_[dark])
+
+
+def blood_altar():
+    """Carved bone plinth; the top is a basin of blood with a bright rune ring."""
+    side = A.noise_tile(16, 16, A.BONE, "altar_side", base=3, p=0.5)
+    for x in range(16):  # blood runs down from the lip
+        run = (x * 5 + 3) % 7
+        for y in range(0, 2 + run):
+            A.put(side, x, y, A.BLIGHT[3] if y < 2 else A.BLIGHT[2])
+    for y in (6, 12):
+        for x in range(16):
+            if (x + y) % 3:
+                A.put(side, x, y, A.BONE[1])
+    _frame(side, A.BONE)
+    top = A.noise_tile(16, 16, A.BONE, "altar_top", base=3, p=0.5)
+    for y in range(16):
+        for x in range(16):
+            d = math.hypot(x - 7.5, y - 7.5)
+            if d < 5.2:
+                top.putpixel((x, y), A.BLIGHT[2] if d > 4 else A.BLIGHT[3 + (x * 3 + y) % 2])
+            elif d < 6.4:
+                top.putpixel((x, y), A.BLIGHT_GLOW[0] if int(math.atan2(y - 7.5, x - 7.5) * 4) % 2 else A.BONE[1])
+    A.put(top, 6, 6, A.BLIGHT[6])
+    _frame(top, A.BONE)
+    bottom = A.noise_tile(16, 16, A.BONE, "altar_bottom", base=2, p=0.5)
+    return side, top, bottom
+
+
+def cursed_chest():
+    """Dark wood chest bound in tarnished gold, a violet sigil lock on the side."""
+    side = Image.new("RGBA", (16, 16))
+    for y in range(16):
+        for x in range(16):
+            plank = A.WOOD[1 + ((y // 4) + (x * 7 + y) % 5 // 4) % 2]
+            side.putpixel((x, y), A.darken(plank, 0.7))
+    for x in range(16):  # lid seam + gold bands
+        A.put(side, x, 5, A.GOLD[1])
+        A.put(side, x, 6, A.WOOD[0])
+    for y in range(16):
+        for x in (1, 14):
+            A.put(side, x, y, A.GOLD[2 if y % 3 else 3])
+    for x, y in ((7, 6), (8, 6), (6, 7), (7, 7), (8, 7), (9, 7), (7, 8), (8, 8), (7, 9), (8, 9)):
+        A.put(side, x, y, A.VOID[4 if (x + y) % 2 else 5])
+    A.put(side, 7, 7, A.VOID[6])
+    _frame(side, A.GOLD, light=3, dark=0)
+    top = Image.new("RGBA", (16, 16))
+    for y in range(16):
+        for x in range(16):
+            top.putpixel((x, y), A.darken(A.WOOD[1 + (x // 4) % 2], 0.7))
+    for y in range(16):
+        for x in (1, 14):
+            A.put(top, x, y, A.GOLD[2])
+    for y in range(5, 11):  # a sigil burnt into the lid
+        A.put(top, 7, y, A.VOID[3])
+        A.put(top, 8, y, A.VOID[4])
+    for x in range(5, 11):
+        A.put(top, x, 7, A.VOID[3])
+    _frame(top, A.GOLD, light=3, dark=0)
+    bottom = A.noise_tile(16, 16, A.WOOD, "cchest_bottom", base=1, p=0.5)
+    return side, top, bottom
+
+
+def challenge_pylon():
+    """Basalt obelisk with a glowing ember channel up each face; the top is a lit brazier."""
+    side = A.noise_tile(16, 16, A.DEEPSLATE, "pylon_side", base=3, p=0.55)
+    for y in range(16):
+        for x in (7, 8):
+            A.put(side, x, y, A.EMBER[3 if (y // 2) % 2 else 4])
+        A.put(side, 6, y, A.EMBER[1])
+        A.put(side, 9, y, A.EMBER[1])
+    for x in range(16):
+        for y in (3, 12):
+            if x not in (6, 7, 8, 9):
+                A.put(side, x, y, A.DEEPSLATE[5])
+    _frame(side, A.DEEPSLATE, light=5, dark=0)
+    top = A.noise_tile(16, 16, A.DEEPSLATE, "pylon_top", base=3, p=0.55)
+    for y in range(16):
+        for x in range(16):
+            d = math.hypot(x - 7.5, y - 7.5)
+            if d < 4.5:
+                top.putpixel((x, y), A.EMBER[5 if d < 1.6 else (4 if d < 3 else 3)])
+            elif d < 5.5:
+                top.putpixel((x, y), A.EMBER[1])
+    _frame(top, A.DEEPSLATE, light=5, dark=0)
+    bottom = A.noise_tile(16, 16, A.DEEPSLATE, "pylon_bottom", base=2, p=0.5)
+    return side, top, bottom
+
+
+def camp_horn():
+    """A wooden horn stand: a curled brass-banded bone horn painted on the side, a mouthpiece on top."""
+    side = A.noise_tile(16, 16, A.WOOD, "horn_side", base=3, p=0.5)
+    for y in range(16):
+        for x in range(16):
+            if (x + y * 3) % 8 == 0:
+                A.put(side, x, y, A.WOOD[2])
+    curve = [(3, 11), (4, 10), (5, 9), (6, 8), (7, 7), (8, 6), (9, 6), (10, 6), (11, 7), (12, 8)]
+    for i, (x, y) in enumerate(curve):
+        width = 1 + i // 3
+        for dy in range(-width, width + 1):
+            A.put(side, x, y + dy, A.BONE[4 if dy < 0 else 3])
+        A.put(side, x, y + width + 1, A.BONE[1])
+    for x, y in ((5, 9), (9, 6)):  # brass bands
+        for dy in range(-2, 3):
+            A.put(side, x, y + dy, A.BRASS[4])
+    for dy in range(-4, 5):  # the bell
+        A.put(side, 13, 8 + dy, A.BONE[2] if abs(dy) == 4 else A.BONE[0])
+    _frame(side, A.WOOD)
+    top = A.noise_tile(16, 16, A.WOOD, "horn_top", base=3, p=0.5)
+    for y in range(16):
+        for x in range(16):
+            d = math.hypot(x - 7.5, y - 7.5)
+            if d < 2.5:
+                top.putpixel((x, y), A.BRASS[2] if d < 1.2 else A.BRASS[4])
+            elif d < 3.5:
+                top.putpixel((x, y), A.BRASS[1])
+    _frame(top, A.WOOD)
+    bottom = A.noise_tile(16, 16, A.WOOD, "horn_bottom", base=2, p=0.5)
+    return side, top, bottom
+
+
+def economy_blocks():
+    for name, painter in (("blood_altar", blood_altar), ("cursed_chest", cursed_chest),
+                          ("challenge_pylon", challenge_pylon), ("camp_horn", camp_horn)):
+        side, top, bottom = painter()
+        emit(f"{WORLD}/block/{name}_side.png", side)
+        emit(f"{WORLD}/block/{name}_top.png", top)
+        emit(f"{WORLD}/block/{name}_bottom.png", bottom)
 
 
 # ================================================================================================ armor layers

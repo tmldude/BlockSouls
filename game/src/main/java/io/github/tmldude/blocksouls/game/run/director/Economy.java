@@ -207,12 +207,6 @@ public final class Economy {
 		return null;
 	}
 
-	/** The circle's radius {@code elapsed} seconds in: shrinks linearly from start to end over the challenge. */
-	static double pylonRadius(long elapsed, DirectorConfig.Pylon config) {
-		double t = Math.min(1, Math.max(0, elapsed / (double) Math.max(1, config.seconds)));
-		return config.startRadius + (config.endRadius - config.startRadius) * t;
-	}
-
 	private static void tickPylon(MinecraftServer server, long now) {
 		Pylon p = pylon;
 		if (p == null) {
@@ -220,7 +214,7 @@ public final class Economy {
 		}
 		DirectorConfig.Pylon config = config().pylon;
 		long elapsed = now - p.startedAt();
-		double radius = pylonRadius(elapsed, config);
+		double radius = DirectorRules.pylonRadius(elapsed, config);
 		Vec3 centre = Vec3.atBottomCenterOf(p.pos());
 		List<ServerPlayer> inside = DirectorHooks.activePlayers(server).stream()
 				.filter(player -> player.level() == p.level() && Places.distanceSq(p.pos(), player.getX(), player.getZ()) <= radius * radius)

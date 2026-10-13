@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "blocksouls_world:block/camp_horn_top",
+    "bottom": "blocksouls_world:block/camp_horn_bottom",
+    "side": "blocksouls_world:block/camp_horn_side"
+  }
+}

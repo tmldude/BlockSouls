@@ -12,6 +12,7 @@ import io.github.tmldude.blocksouls.world.armor.SetBonuses;
 import io.github.tmldude.blocksouls.world.command.WorldCommands;
 import io.github.tmldude.blocksouls.world.content.WorldBlocks;
 import io.github.tmldude.blocksouls.world.content.WorldItems;
+import io.github.tmldude.blocksouls.world.economy.WorldEconomy;
 import io.github.tmldude.blocksouls.world.enchant.WackyEnchantments;
 import io.github.tmldude.blocksouls.world.gen.WorldGen;
 import io.github.tmldude.blocksouls.world.loot.WorldLoot;
@@ -33,6 +34,7 @@ public class BlockSoulsWorld implements ModInitializer {
 		}
 		WorldBlocks.init();
 		WorldItems.init();
+		WorldEconomy.init();
 		WorldGen.init();
 		WorldLoot.init();
 		WackyEnchantments.init();
