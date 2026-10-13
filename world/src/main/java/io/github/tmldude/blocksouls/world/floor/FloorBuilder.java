@@ -53,6 +53,8 @@ final class FloorBuilder {
 	private final double phaseB;
 	private final double phaseC;
 	private final List<FloorSlot> filled = new ArrayList<>();
+	/** Infernal lava channels (null on floors without them). */
+	final LavaChannels.Plan channels;
 
 	FloorBuilder(ServerLevel level, FloorTemplate template, FloorPlanner.FloorPlan plan, FloorsConfig config, BlockPos centre, long seed) {
 		this.level = level;
@@ -67,9 +69,10 @@ final class FloorBuilder {
 		this.phaseA = random.nextDouble() * 100;
 		this.phaseB = random.nextDouble() * 100;
 		this.phaseC = random.nextDouble() * 100;
+		this.channels = FloorPlanner.channels(template, plan.radius(), seed);
 	}
 
-	private static BlockState block(String id, Block fallback) {
+	static BlockState block(String id, Block fallback) {
 		Identifier parsed = Identifier.tryParse(id);
 		return (parsed == null ? fallback : BuiltInRegistries.BLOCK.getOptional(parsed).orElse(fallback)).defaultBlockState();
 	}
@@ -77,6 +80,8 @@ final class FloorBuilder {
 	/** Builds everything and returns the filled slots (camp first). */
 	List<FloorSlot> build() {
 		terrain();
+		InfernalFeatures infernal = new InfernalFeatures(this, level, template, plan, centre, random);
+		infernal.channelsAndBridges();
 		for (FloorPlanner.PlannedSlot slot : plan.slots()) {
 			BlockPos pos = surface(slot.x(), slot.z());
 			switch (slot.kind()) {
@@ -98,6 +103,8 @@ final class FloorBuilder {
 			}
 		}
 		trees();
+		infernal.decorate();
+		infernal.paintBiome();
 		// Camp first, then everything else in plan order (crates the contents added come after their slot).
 		filled.sort((a, b) -> Integer.compare(a.kind() == FloorSlotKind.CAMP ? 0 : 1, b.kind() == FloorSlotKind.CAMP ? 0 : 1));
 		return filled;
@@ -117,6 +124,11 @@ final class FloorBuilder {
 			double d = Math.sqrt((double) (x - slot.x()) * (x - slot.x()) + (double) (z - slot.z()) * (z - slot.z()));
 			flat = Math.max(flat, d <= reach ? 1.0 : Math.max(0, 1 - (d - reach) / 4.0));
 		}
+		if (channels != null) {
+			// Channel banks sit at ground level so the lava stays in its trench (and the rise floods only the channel).
+			double d = channels.distance(x, z);
+			flat = Math.max(flat, d <= 3 ? 1.0 : Math.max(0, 1 - (d - 3) / 4.0));
+		}
 		return plan.groundY() + (int) Math.round(noise * template.hills * (1 - flat));
 	}
 
@@ -124,7 +136,7 @@ final class FloorBuilder {
 		return kind != FloorSlotKind.NODE && kind != FloorSlotKind.CRATE && kind != FloorSlotKind.SIEGE_RING;
 	}
 
-	private BlockPos surface(int x, int z) {
+	BlockPos surface(int x, int z) {
 		return centre.offset(x, height(x, z) + 1 - centre.getY(), z);
 	}
 
@@ -142,8 +154,9 @@ final class FloorBuilder {
 				double edge = d / radius;
 				int bottom = h - Math.max(2, (int) Math.round(depth * (1 - edge * edge)) + (int) ((x * 31 + z * 17 & 3) / 2));
 				BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+				BlockState surfaceBlock = accent(x, z);
 				for (int y = bottom; y <= h; y++) {
-					BlockState state = y == h ? top : y >= h - 3 ? fill : base;
+					BlockState state = y == h ? surfaceBlock : y >= h - 3 ? fill : base;
 					level.setBlock(pos.set(centre.getX() + x, y, centre.getZ() + z), state, FLAGS);
 				}
 				if (d > radius - 1) {
@@ -153,6 +166,21 @@ final class FloorBuilder {
 				}
 			}
 		}
+	}
+
+	/** The top block of a column: the template's top, or one of its accents (seeded per column). */
+	private BlockState accent(int x, int z) {
+		if (template.terrain.accents.isEmpty()) {
+			return top;
+		}
+		int roll = Math.floorMod((x * 73856093) ^ (z * 19349663) ^ (int) (phaseA * 1000), 100);
+		for (var entry : template.terrain.accents.entrySet()) {
+			roll -= Math.max(0, entry.getValue());
+			if (roll < 0) {
+				return block(entry.getKey(), top.getBlock());
+			}
+		}
+		return top;
 	}
 
 	private void trees() {
@@ -177,7 +205,7 @@ final class FloorBuilder {
 		}
 	}
 
-	private boolean nearSlot(int x, int z, int clearance) {
+	boolean nearSlot(int x, int z, int clearance) {
 		for (FloorPlanner.PlannedSlot slot : plan.slots()) {
 			if (slot.kind() == FloorSlotKind.SIEGE_RING) {
 				continue;
@@ -199,12 +227,12 @@ final class FloorBuilder {
 		for (int x = -r; x <= r; x++) {
 			for (int z = -r; z <= r; z++) {
 				if (x * x + z * z <= r * r && random.nextInt(3) != 0) {
-					level.setBlock(pos.offset(x, -1, z), Blocks.COARSE_DIRT.defaultBlockState(), FLAGS);
+					level.setBlock(pos.offset(x, -1, z), block(template.terrain.camp, Blocks.COARSE_DIRT), FLAGS);
 				}
 			}
 		}
 		level.setBlock(pos.offset(0, -1, 3), Blocks.COBBLESTONE.defaultBlockState(), FLAGS);
-		level.setBlock(pos.offset(0, 0, 3), Blocks.CAMPFIRE.defaultBlockState(), FLAGS);
+		level.setBlock(pos.offset(0, 0, 3), block(template.terrain.campfire, Blocks.CAMPFIRE), FLAGS);
 	}
 
 	/** A 3×5 frame (polished blackstone bricks) around a 1×3 column of unlit portal blocks. */

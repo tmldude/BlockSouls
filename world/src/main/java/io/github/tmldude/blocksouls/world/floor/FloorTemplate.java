@@ -49,10 +49,25 @@ public final class FloorTemplate {
 	public int crates = 2;
 	public List<Slot> slots = new ArrayList<>();
 
+	// ---- Infernal (v2-floor2-infernal): all optional, absent on the Surface templates so they build as before.
+	/** Biome painted over the island (sky, fog, particles, ambience); empty keeps the dimension's look. */
+	public String biome = "";
+	/** Lava channels cutting the island into lobes, with bridges; null for none. */
+	public LavaChannels.Spec channels;
+	/** Basalt spires scattered outside the slots and channels. */
+	public int spires = 0;
+	/** Eternal fires lit on netherrack outside the slots. */
+	public int fires = 0;
+
 	public static class Terrain {
 		public String top = "minecraft:grass_block";
 		public String fill = "minecraft:dirt";
 		public String base = "minecraft:stone";
+		/** Top-block swaps: block id → percent of top blocks replaced with it (Infernal: magma, basalt). */
+		public Map<String, Integer> accents = new LinkedHashMap<>();
+		/** The camp's ground and fire. */
+		public String camp = "minecraft:coarse_dirt";
+		public String campfire = "minecraft:campfire";
 	}
 
 	/** One hand-placed slot. {@code kind} is a {@link FloorSlotKind} name (any case). */
@@ -121,6 +136,15 @@ public final class FloorTemplate {
 		}
 		if (nodeMix == null || nodeMix.isEmpty()) {
 			throw new IllegalArgumentException("nodeMix is empty");
+		}
+		if (biome == null) {
+			biome = "";
+		}
+		if (terrain.accents == null) {
+			terrain.accents = new LinkedHashMap<>();
+		}
+		if (channels != null) {
+			channels.validate();
 		}
 	}
 

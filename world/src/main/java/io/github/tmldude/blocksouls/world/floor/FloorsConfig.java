@@ -45,6 +45,21 @@ public class FloorsConfig {
 	/** Rolls of the node's loot table when it pops (the burst). */
 	public int nodeBurstRolls = 3;
 
+	// ---- Infernal (v2-floor2-infernal)
+	public Infernal infernal = new Infernal();
+
+	/** Floor 2's hazard: lava is the death plane, and it rises during the portal-charge siege. */
+	public static class Infernal {
+		/** Seconds after the portal charge starts (the siege) that the lava rises. */
+		public int riseSeconds = 90;
+		/** Blocks the lava rises (the low ring bridges sit one block over the lava, so 1 sinks them). */
+		public int riseBlocks = 1;
+		/** Seconds of warning (rumble, lava bursting from the channels) before the rise. */
+		public int warnSeconds = 5;
+		/** Lava sends a player without fire resistance back to the camp, like falling off. */
+		public boolean lavaSendsBack = true;
+	}
+
 	private static Map<String, List<String>> defaultEscalation() {
 		Map<String, List<String>> tags = new LinkedHashMap<>();
 		tags.put("2", new ArrayList<>(List.of("more_elites")));

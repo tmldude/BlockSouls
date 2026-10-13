@@ -1,0 +1,118 @@
+{
+  "pool": "blocksouls_world:infernal",
+  "tags": [
+    "infernal"
+  ],
+  "minFloor": 2,
+  "maxFloor": 2,
+  "weight": 2,
+  "radius": 62,
+  "groundY": 84,
+  "depth": 20,
+  "hills": 3.5,
+  "terrain": {
+    "top": "minecraft:blackstone",
+    "fill": "minecraft:basalt",
+    "base": "minecraft:blackstone",
+    "accents": {
+      "minecraft:magma_block": 6,
+      "minecraft:basalt": 10,
+      "minecraft:netherrack": 8,
+      "minecraft:soul_soil": 3
+    },
+    "camp": "minecraft:soul_soil",
+    "campfire": "minecraft:soul_campfire"
+  },
+  "biome": "blocksouls_world:infernal",
+  "channels": {
+    "ringFraction": 0.34,
+    "width": 3,
+    "lavaDepth": 2,
+    "radials": [
+      0,
+      180
+    ],
+    "ringBridges": [
+      90,
+      270
+    ],
+    "highBridge": 0
+  },
+  "spires": 14,
+  "fires": 10,
+  "trees": 0,
+  "nodes": 12,
+  "nodeMix": {
+    "blocksouls_world:scrap_node": 3,
+    "blocksouls_world:gunmetal_node": 2
+  },
+  "crates": 2,
+  "slots": [
+    {
+      "kind": "camp",
+      "x": 0,
+      "z": 0,
+      "radius": 6
+    },
+    {
+      "kind": "exit_portal",
+      "x": 0,
+      "z": 9,
+      "radius": 2
+    },
+    {
+      "kind": "structure",
+      "tag": "fortress",
+      "x": -21,
+      "z": 36,
+      "radius": 8
+    },
+    {
+      "kind": "mini_boss",
+      "x": 8,
+      "z": -43,
+      "radius": 10
+    },
+    {
+      "kind": "secret",
+      "tag": "soulfire_door",
+      "x": 23,
+      "z": 40,
+      "radius": 4
+    },
+    {
+      "kind": "event",
+      "x": -17,
+      "z": -25,
+      "radius": 5
+    },
+    {
+      "kind": "cave",
+      "x": 32,
+      "z": -27,
+      "radius": 4
+    },
+    {
+      "kind": "wreck",
+      "x": 0,
+      "z": 50,
+      "radius": 7
+    },
+    {
+      "kind": "node",
+      "tag": "blocksouls_world:gunmetal_node",
+      "x": 45,
+      "z": 10
+    },
+    {
+      "kind": "node",
+      "x": -45,
+      "z": -12
+    },
+    {
+      "kind": "node",
+      "x": -35,
+      "z": 15
+    }
+  ]
+}

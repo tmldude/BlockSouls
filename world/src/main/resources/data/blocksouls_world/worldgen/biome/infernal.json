@@ -1,0 +1,23 @@
+{
+  "has_precipitation": false,
+  "temperature": 2.0,
+  "downfall": 0.0,
+  "attributes": {
+    "minecraft:visual/fog_color": "#5a1e12",
+    "minecraft:visual/sky_color": "#8c2a14",
+    "minecraft:visual/ambient_particles": [
+      { "particle": { "type": "minecraft:white_ash" }, "probability": 0.08 },
+      { "particle": { "type": "minecraft:ash" }, "probability": 0.04 }
+    ],
+    "minecraft:audio/ambient_sounds": {
+      "loop": "minecraft:ambient.basalt_deltas.loop",
+      "mood": { "sound": "minecraft:ambient.basalt_deltas.mood", "tick_delay": 6000, "block_search_extent": 8, "offset": 2.0 },
+      "additions": { "sound": "minecraft:ambient.basalt_deltas.additions", "tick_chance": 0.0111 }
+    }
+  },
+  "effects": {
+    "water_color": "#3f76e4"
+  },
+  "carvers": [],
+  "features": []
+}

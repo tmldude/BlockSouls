@@ -91,6 +91,7 @@ public final class WorldFloors {
 		config = Config.load(FloorsConfig.FILE, FloorsConfig.class, FloorsConfig::new);
 		FloorBlocks.init();
 		FloorTemplateCatalog.register();
+		InfernalHazard.init(); // v2-floor2-infernal
 		Floors.setProvider(new Floors.Provider() {
 			@Override
 			public Optional<PlacedFloor> open(MinecraftServer server, FloorRequest request) {

@@ -43,6 +43,7 @@ public final class FloorCommands {
 				.then(Commands.literal("goto").then(Commands.argument("kind", com.mojang.brigadier.arguments.StringArgumentType.word())
 						.executes(FloorCommands::gotoSlot)))
 				.then(Commands.literal("pop").executes(FloorCommands::pop))));
+		InfernalCommands.init(); // v2-floor2-infernal: /bs floor hazard, /bs floor open <act> <players> <pool>
 	}
 
 	private static int open(CommandContext<CommandSourceStack> c, int players) {
