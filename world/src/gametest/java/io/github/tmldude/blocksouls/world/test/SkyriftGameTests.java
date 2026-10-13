@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 
 import io.github.tmldude.blocksouls.common.event.FloorEvents;
@@ -113,7 +114,9 @@ public class SkyriftGameTests {
 		helper.assertTrue(carried(player) != null, "taking the seed puts it in the inventory");
 		helper.assertTrue(!level.getBlockState(pedestal).getValue(SkyriftBlock.ACTIVE), "the pedestal goes dark");
 
-		player.hurtServer(level, level.damageSources().genericKill(), 1.0F);
+		// A mock player ignores damage until its client has loaded (ServerPlayer.isInvulnerableTo), so fire the
+		// after-damage hook a landed hit would fire.
+		ServerLivingEntityEvents.AFTER_DAMAGE.invoker().afterDamage(player, level.damageSources().generic(), 1.0F, 1.0F, false);
 		helper.assertTrue(carried(player) == null, "a hit takes the seed");
 		helper.assertTrue(level.getBlockState(pedestal).getValue(SkyriftBlock.ACTIVE), "and it dims back to its pedestal");
 
