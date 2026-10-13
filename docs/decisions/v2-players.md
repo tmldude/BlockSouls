@@ -60,7 +60,7 @@ Defaults picked while building origins, movement classes, solo Last Stand, downe
 - **Six runes per class, 24 total** (`data/blocksouls_game/runes/*.json`): a small tree per class with `requires`
   edges, costs 20 / 40 / 60 rune souls (`runes.costMultiplier` scales them all). Runes apply only while playing their
   class and stack on top of the class and boons. Glide is the Ranger's *Wings* rune.
-- **Profiles on disk per player** (`<world>/blocksouls/runes/<uuid>.json`): permanent across runs and worlds' runs;
+- **Profiles on disk per player** (`<server dir>/blocksouls/runes/<uuid>.json`, outside the world so a world reset keeps them): permanent across runs;
   a missing or broken file is an empty profile, never a crash.
 - **Payout at run end** (`runes` in `game-players.json`): 10 souls per siege survived × (1 + 0.05 × threat), plus 25%
   of unspent in-run souls (soul items are taken), never below 5 once a siege was survived. Per player, so not party-
