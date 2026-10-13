@@ -17,7 +17,9 @@
 			"io.github.tmldude.blocksouls.game.test.LastStandGameTests",
 			"io.github.tmldude.blocksouls.game.test.RuneGameTests",
 			"io.github.tmldude.blocksouls.game.test.BuildGameTests",
-			"io.github.tmldude.blocksouls.game.test.SummaryGameTests"
+			"io.github.tmldude.blocksouls.game.test.SummaryGameTests",
+			"io.github.tmldude.blocksouls.game.test.DirectorGameTests",
+			"io.github.tmldude.blocksouls.game.test.EconomyGameTests"
 		]
 	},
 	"depends": {

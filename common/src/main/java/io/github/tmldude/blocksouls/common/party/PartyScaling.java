@@ -92,6 +92,21 @@ public final class PartyScaling {
 		return curve(players, config.floorCrates);
 	}
 
+	/** v2 Director: multiplier on mobs per spawn burst. */
+	public static double directorBurst(int players) {
+		return curve(players, config.directorBurst);
+	}
+
+	/** v2 Director: multiplier on the damage pool that reads as full stress. */
+	public static double directorStressPool(int players) {
+		return curve(players, config.directorStressPool);
+	}
+
+	/** v2 Director: share of a burst that rolls elite (solo is "fewer, scarier"), 0 to 1. */
+	public static double directorEliteShare(int players) {
+		return Math.max(0, Math.min(1, config.directorSoloEliteShare / curve(players, config.directorEliteFade)));
+	}
+
 	public static int raidPlates(int players) {
 		int perPlate = Math.max(1, config.playersPerRaidPlate);
 		int plates = (partySize(players) + perPlate - 1) / perPlate;

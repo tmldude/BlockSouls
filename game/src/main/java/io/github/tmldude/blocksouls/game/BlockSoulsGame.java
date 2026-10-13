@@ -7,6 +7,7 @@ import net.fabricmc.api.ModInitializer;
 
 import io.github.tmldude.blocksouls.game.player.PlayerSystem;
 import io.github.tmldude.blocksouls.game.run.RunSystem;
+import io.github.tmldude.blocksouls.game.run.director.Director;
 
 public class BlockSoulsGame implements ModInitializer {
 	public static final String MOD_ID = "blocksouls_game";
@@ -16,5 +17,6 @@ public class BlockSoulsGame implements ModInitializer {
 	public void onInitialize() {
 		RunSystem.init();
 		PlayerSystem.init();
+		Director.init();
 	}
 }

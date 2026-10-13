@@ -36,5 +36,11 @@
   "enchantment.blocksouls_world.moonwalk.desc": "Lower gravity; no fall damage under 8 blocks.",
   "tooltip.blocksouls_world.set_bonus": "Full set:",
   "tooltip.blocksouls_world.scrap_plate_bonus": "-30% explosion damage, +1 knockback resistance",
-  "tooltip.blocksouls_world.blight_forged_bonus": "Fire immunity; attackers take 2 damage"
+  "tooltip.blocksouls_world.blight_forged_bonus": "Fire immunity; attackers take 2 damage",
+  "block.blocksouls_world.blood_altar": "Blood Altar",
+  "block.blocksouls_world.cursed_chest": "Cursed Chest",
+  "block.blocksouls_world.challenge_pylon": "Challenge Pylon",
+  "block.blocksouls_world.camp_horn": "Camp Horn",
+  "entity.blocksouls_world.shopkeeper": "Shopkeeper",
+  "message.blocksouls_world.economy.nothing": "Nothing happens."
 }

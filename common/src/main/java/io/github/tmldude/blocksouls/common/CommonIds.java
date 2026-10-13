@@ -87,6 +87,24 @@ public final class CommonIds {
 	/** The camp's exit portal block (world); using it starts the act's portal charge, lit it leads on. */
 	public static final Identifier FLOOR_PORTAL = id(WORLD, "floor_portal");
 
+	/** Ammo items (guns). The Director reads a party's ammo from them; the shopkeeper sells them. */
+	public static final Identifier PRIMARY_AMMO = id(GUNS, "primary_ammo");
+	public static final Identifier SPECIAL_AMMO = id(GUNS, "special_ammo");
+
+	/** Economy objects (world): blocks whose use the game handles via {@code EconomyEvents.CAMP_OBJECT_USED}. */
+	public static final Identifier BLOOD_ALTAR = id(WORLD, "blood_altar");
+	public static final Identifier CURSED_CHEST = id(WORLD, "cursed_chest");
+	public static final Identifier CHALLENGE_PYLON = id(WORLD, "challenge_pylon");
+	public static final Identifier CAMP_HORN = id(WORLD, "camp_horn");
+	/** Entity type (world): the camp shopkeeper. */
+	public static final Identifier SHOPKEEPER = id(WORLD, "shopkeeper");
+	/**
+	 * Loot tables (game) the economy objects roll: the cursed chest's haul and the blood altar's legendary
+	 * roll. Guns etc. add entries with {@code LootTableEvents.MODIFY}.
+	 */
+	public static final ResourceKey<LootTable> CURSED_CHEST_LOOT = lootTable(GAME, "economy/cursed_chest");
+	public static final ResourceKey<LootTable> BLOOD_ALTAR_LOOT = lootTable(GAME, "economy/blood_altar");
+
 	/**
 	 * Loot tables (owned by game) rolled for wave kills, by tier. Guns, world etc. add their entries with
 	 * {@code LootTableEvents.MODIFY}; the game picks the tier from the wave number.

@@ -28,7 +28,24 @@ public final class ClientRun {
 		public static final View EMPTY = new View(RunState.NOT_STARTED, -1, -1, Set.of(), 1, "", 1, 1, -1);
 	}
 
+	/**
+	 * The v2 Director's state (expedition only; {@link DirectorView#EMPTY} otherwise).
+	 *
+	 * @param daySecondsLeft seconds left on the act's day timer, or -1 when no day is running
+	 * @param daySeconds     the running day's full length (0 when none)
+	 * @param stress         the party's smoothed stress, 0–1
+	 * @param mood           the pacer's mood: {@code build}, {@code lull} or {@code spike}
+	 * @param objective      the running siege objective's id ({@code supply_drop}, {@code volatile_core},
+	 *                       {@code fleeing_zombie}, {@code generator}), or empty; its name is the lang key
+	 *                       {@code objective.blocksouls_game.<id>}
+	 * @param progress       the objective's progress, 0–1
+	 */
+	public record DirectorView(int daySecondsLeft, int daySeconds, float stress, String mood, String objective, float progress) {
+		public static final DirectorView EMPTY = new DirectorView(-1, 0, 0, "build", "", 0);
+	}
+
 	private static View view = View.EMPTY;
+	private static DirectorView director = DirectorView.EMPTY;
 
 	private ClientRun() {
 	}
@@ -39,6 +56,14 @@ public final class ClientRun {
 
 	public static void set(View newView) {
 		view = newView;
+	}
+
+	public static DirectorView director() {
+		return director;
+	}
+
+	public static void setDirector(DirectorView newDirector) {
+		director = newDirector;
 	}
 
 	/**
