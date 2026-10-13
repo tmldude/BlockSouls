@@ -94,8 +94,11 @@ what was actually built.
   - The altar stays lit once planted, so the secret pays once per floor.
 - **Director events go through a common hook.** `DirectorEvents.PLACE_EVENT` (common) is fired by the Director
   when it places an event id it doesn't own, so the world builds Skyrift's three events without game importing
-  world. The events are floor-tagged `EventSpec`s (`floorTags: ["skyrift"]`) in `DirectorConfig`
-  (`defaultsVersion` 2). A spec with floor tags only rolls on a floor carrying one of those tags.
+  world. The events are floor-tagged `EventSpec`s (`floorTags: ["skyrift"]`) in `DirectorConfig`. A spec with
+  floor tags only rolls on a floor carrying one of those tags. The hook and the floor-tag mechanics landed on main
+  with the Vault's #79, so this slice only adds Skyrift's entries plus a `defaultsVersion` bump (Director 3,
+  mobs 2) that tops up a file already migrated to the Vault's defaults (missing floor events, rosters and affix
+  mixes join; tags tuned by hand are kept).
   - **Wind altar:** offer a held common or rare relic. Win (`windAltarWinChance` 0.5): you get the next-tier
     relic plus `windAltarTonics` (2) cloudbloom tonics. Lose: you get slow fall and a push. One offer per altar.
     The brief's "rune" prize is the tier-up relic, because there is no rune item.
@@ -124,9 +127,8 @@ what was actually built.
   - flyers: the gliders and the Roc
   - leapers: the crawlers
   - snipers: the spitters
-- **Lane exceptions:**
-  - common `DirectorEvents` (the place-event hook)
-  - game `DirectorConfig` / `DirectorRules` / `DayLoop` (floor-tagged events, mini-boss roster by floor tag)
-  - mobs `MobsConfig` / `AffixRoll` / `MobAffixes` (affix weights by floor tag)
+- **Lane exceptions** (defaults only, each in a marked Skyrift block; the mechanics came with #79):
+  - game `DirectorConfig`: three Skyrift events, the `skyrift` mini-boss roster, migration 3
+  - mobs `MobsConfig`: the `skyrift` affix mix (frosted), migration 2
 - **Exemptions:** the featherboots are gear and the cloudbloom tonic is a consumable. Both now drop from the
   temple chest, so they are listed in `recipe_web_exempt.json`.

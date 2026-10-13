@@ -14,7 +14,7 @@ import java.util.Map;
 public class DirectorConfig {
 	public static final String FILE = "director";
 	/** Defaults revision {@link #migrate} brings older files up to. */
-	public static final int CURRENT_DEFAULTS = 3;
+	public static final int CURRENT_DEFAULTS = 4; // 4: floor 3, Skyrift (Stage 6C)
 
 	/** Which defaults revision this file was written against (0 = before the field existed). */
 	public int defaultsVersion;
@@ -66,6 +66,21 @@ public class DirectorConfig {
 				}
 			}
 		}
+		// --- floor 3, Skyrift (Stage 6C) ---
+		// 4: floors whose events and rosters landed after 3 (Skyrift) join a file already at 3; ids and tags kept by hand win.
+		if (config.defaultsVersion < 4 && config.events != null) {
+			if (config.events.pool != null) {
+				for (EventSpec spec : new Events().pool) {
+					if (!spec.floorTags.isEmpty() && config.events.pool.stream().noneMatch(old -> spec.id.equals(old.id))) {
+						config.events.pool.add(spec);
+					}
+				}
+			}
+			if (config.events.miniBossesByFloorTag != null) {
+				defaultFloorMiniBosses().forEach(config.events.miniBossesByFloorTag::putIfAbsent);
+			}
+		}
+		// --- end Skyrift block
 		config.defaultsVersion = CURRENT_DEFAULTS;
 		return true;
 	}

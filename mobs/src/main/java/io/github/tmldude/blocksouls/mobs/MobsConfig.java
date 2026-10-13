@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class MobsConfig {
 	/** Defaults revision {@link #migrate} brings older files up to. */
-	public static final int CURRENT_DEFAULTS = 1;
+	public static final int CURRENT_DEFAULTS = 2;
 
 	/** Which defaults revision this file was written against (0 = before the field existed). */
 	public int defaultsVersion;
@@ -49,6 +49,12 @@ public class MobsConfig {
 		if (config.defaultsVersion < 1 && config.mutantBrute != null && config.mutantBrute.minWave == 7) {
 			config.mutantBrute.minWave = 6;
 		}
+		// --- floor 3, Skyrift (Stage 6C) ---
+		// 2: floor sessions' affix mixes join an existing file (a tag already there is kept as tuned).
+		if (config.defaultsVersion < 2 && config.affixes != null && config.affixes.weightsByFloorTag != null) {
+			defaultFloorWeights().forEach(config.affixes.weightsByFloorTag::putIfAbsent);
+		}
+		// --- end Skyrift block
 		config.defaultsVersion = CURRENT_DEFAULTS;
 		return true;
 	}

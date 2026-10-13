@@ -116,4 +116,18 @@ class DayLoopTest {
 		assertEquals(true, old.events.pool.stream().anyMatch(spec -> "blood_altar".equals(spec.id) && spec.floorTags.equals(List.of("blight"))));
 		assertEquals(1, old.events.pool.stream().filter(spec -> "blood_altar".equals(spec.id) && spec.floorTags.isEmpty()).count());
 	}
+
+	// --- floor 3, Skyrift (Stage 6C) ---
+	@Test
+	void skyriftEventsAndRosterJoinAFileAlreadyAtThree() {
+		DirectorConfig old = new DirectorConfig();
+		old.defaultsVersion = 3;
+		old.events.pool = new java.util.ArrayList<>(List.of(new DirectorConfig.EventSpec("blood_altar", 3, 1)));
+		old.events.miniBossesByFloorTag = new java.util.LinkedHashMap<>(java.util.Map.of("vault", new java.util.ArrayList<>(List.of("x:y"))));
+		assertEquals(true, DirectorConfig.migrate(old));
+		assertEquals(true, old.events.pool.stream().anyMatch(spec -> "blocksouls_world:wind_altar".equals(spec.id)));
+		assertEquals(List.of("x:y"), old.events.miniBossesByFloorTag.get("vault"), "a tuned roster is kept");
+		assertEquals(true, old.events.miniBossesByFloorTag.containsKey("skyrift"));
+		assertEquals(false, DirectorConfig.migrate(old), "second run is a no-op");
+	}
 }
