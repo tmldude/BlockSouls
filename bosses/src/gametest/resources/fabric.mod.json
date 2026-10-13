@@ -11,7 +11,8 @@
 			"io.github.tmldude.blocksouls.bosses.test.PaleRiderGameTests",
 			"io.github.tmldude.blocksouls.bosses.test.AshwyrmGameTests",
 			"io.github.tmldude.blocksouls.bosses.test.StormplateGameTests",
-			"io.github.tmldude.blocksouls.bosses.test.ArenaSealGameTests"
+			"io.github.tmldude.blocksouls.bosses.test.ArenaSealGameTests",
+			"io.github.tmldude.blocksouls.bosses.test.BossV2GameTests"
 		]
 	},
 	"depends": {

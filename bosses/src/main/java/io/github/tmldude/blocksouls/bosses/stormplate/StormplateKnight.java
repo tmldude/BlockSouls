@@ -102,6 +102,12 @@ public class StormplateKnight extends BossEntity {
 		return definition;
 	}
 
+	/** Sidesteps a held aim (v2 reactions). */
+	@Override
+	protected boolean sidesteps() {
+		return true;
+	}
+
 	StormPuddles puddles() {
 		return puddles;
 	}

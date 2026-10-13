@@ -25,15 +25,21 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import io.github.tmldude.blocksouls.bosses.api.Attack;
+import io.github.tmldude.blocksouls.bosses.api.BossAffixes;
+import io.github.tmldude.blocksouls.bosses.api.BossDefinition;
 import io.github.tmldude.blocksouls.bosses.api.BossEntity;
 import io.github.tmldude.blocksouls.bosses.api.Bosses;
 import io.github.tmldude.blocksouls.bosses.field.FieldBossData;
 import io.github.tmldude.blocksouls.bosses.field.FieldBosses;
 import io.github.tmldude.blocksouls.common.debug.DebugCommands;
+import io.github.tmldude.blocksouls.common.mob.Affix;
+import io.github.tmldude.blocksouls.common.mob.Affixes;
 
 /**
  * {@code /bs boss spawn <id>}, {@code phase <n>}, {@code health <percent>}, {@code reset}, {@code field roll [id]},
- * {@code list}. Commands that act on "the boss" pick the nearest one within 64 blocks.
+ * {@code list}, and the v2 debug hooks {@code posture [add <n>|break]}, {@code break <part>}, {@code affix <name|none>},
+ * {@code attack <name>}. Commands that act on "the boss" pick the nearest one within 64 blocks.
  */
 public final class BossCommands {
 	private static final double NEAR = 64;
@@ -72,7 +78,99 @@ public final class BossCommands {
 						.then(Commands.argument("id", StringArgumentType.word())
 								.suggests((ctx, builder) -> SharedSuggestionProvider.suggest(FieldBosses.rules().keySet().stream().map(Identifier::getPath), builder))
 								.executes(ctx -> roll(ctx, StringArgumentType.getString(ctx, "id"))))))
-				.then(Commands.literal("list").executes(BossCommands::list))));
+				.then(Commands.literal("list").executes(BossCommands::list))
+				.then(Commands.literal("posture")
+						.executes(ctx -> posture(ctx, 0, false))
+						.then(Commands.literal("add").then(Commands.argument("n", DoubleArgumentType.doubleArg(0, 10000))
+								.executes(ctx -> posture(ctx, DoubleArgumentType.getDouble(ctx, "n"), false))))
+						.then(Commands.literal("break").executes(ctx -> posture(ctx, 0, true))))
+				.then(Commands.literal("break").then(Commands.argument("part", StringArgumentType.word())
+						.suggests((ctx, builder) -> SharedSuggestionProvider.suggest(breakableParts(ctx), builder))
+						.executes(BossCommands::breakPart)))
+				.then(Commands.literal("affix").then(Commands.argument("name", StringArgumentType.word())
+						.suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+								java.util.stream.Stream.concat(java.util.Arrays.stream(Affix.values()).map(Affix::getSerializedName),
+										java.util.stream.Stream.of("none")), builder))
+						.executes(BossCommands::affix)))
+				.then(Commands.literal("attack").then(Commands.argument("name", StringArgumentType.word())
+						.suggests((ctx, builder) -> {
+							try {
+								return SharedSuggestionProvider.suggest(nearest(ctx).definition().attacks().stream().map(Attack::name), builder);
+							} catch (CommandSyntaxException e) {
+								return builder.buildFuture();
+							}
+						})
+						.executes(BossCommands::attack)))));
+	}
+
+	private static int posture(CommandContext<CommandSourceStack> ctx, double add, boolean breakNow) throws CommandSyntaxException {
+		BossEntity boss = nearest(ctx);
+		if (breakNow) {
+			boss.breakPosture(ctx.getSource().getLevel());
+		} else if (add > 0) {
+			boss.addPoise(add);
+		}
+		ctx.getSource().sendSuccess(() -> Component.literal(String.format("%s posture %.0f%% (max poise %.0f, broken %d×%s)", name(boss),
+				boss.posture() * 100, boss.maxPoise(), boss.posturesBroken(), boss.isPostureBroken() ? ", open now" : "")), true);
+		return 1;
+	}
+
+	private static List<String> breakableParts(CommandContext<CommandSourceStack> ctx) {
+		try {
+			return nearest(ctx).definition().breaks().stream().map(BossDefinition.PartBreak::part).toList();
+		} catch (CommandSyntaxException e) {
+			return List.of();
+		}
+	}
+
+	private static int breakPart(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+		BossEntity boss = nearest(ctx);
+		String part = StringArgumentType.getString(ctx, "part");
+		int index = boss.definition().breakIndex(part);
+		if (index < 0) {
+			ctx.getSource().sendFailure(Component.literal(name(boss) + " has no breakable '" + part + "'. Breakable: "
+					+ boss.definition().breaks().stream().map(BossDefinition.PartBreak::part).toList()));
+			return 0;
+		}
+		if (boss.isPartBroken(part)) {
+			ctx.getSource().sendFailure(Component.literal(part + " is already broken"));
+			return 0;
+		}
+		boss.breakPart(ctx.getSource().getLevel(), index);
+		ctx.getSource().sendSuccess(() -> Component.literal(name(boss) + ": " + part + " broken"), true);
+		return 1;
+	}
+
+	private static int affix(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+		BossEntity boss = nearest(ctx);
+		String name = StringArgumentType.getString(ctx, "name");
+		if (name.equals("none")) {
+			Affixes.attach(boss, null);
+			ctx.getSource().sendSuccess(() -> Component.literal(name(boss) + ": affix cleared"), true);
+			return 1;
+		}
+		Affix affix = Affix.byName(name);
+		if (affix == null) {
+			ctx.getSource().sendFailure(Component.literal("Unknown affix '" + name + "'"));
+			return 0;
+		}
+		BossAffixes.give(boss, affix);
+		ctx.getSource().sendSuccess(() -> Component.literal("Gave " + name(boss) + " the " + affix.getSerializedName() + " affix"), true);
+		return 1;
+	}
+
+	private static int attack(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+		BossEntity boss = nearest(ctx);
+		String name = StringArgumentType.getString(ctx, "name");
+		Optional<Attack> attack = boss.definition().attacks().stream().filter(a -> a.name().equals(name)).findFirst();
+		if (attack.isEmpty()) {
+			ctx.getSource().sendFailure(Component.literal(name(boss) + " has no attack '" + name + "'"));
+			return 0;
+		}
+		boss.cancelAttack();
+		boss.startAttack(ctx.getSource().getLevel(), attack.get(), ctx.getSource().getPlayer());
+		ctx.getSource().sendSuccess(() -> Component.literal(name(boss) + " → " + name), true);
+		return 1;
 	}
 
 	private static Optional<Identifier> resolve(String name) {
