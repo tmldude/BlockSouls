@@ -118,7 +118,7 @@ public final class FloorCommands {
 			return 0;
 		}
 		ServerLevel level = c.getSource().getLevel();
-		for (BlockPos pos : BlockPos.withinManhattan(player.blockPosition(), 8, 4, 8)) {
+		for (BlockPos pos : BlockPos.withinManhattan(player.blockPosition(), 8)) {
 			BlockState state = level.getBlockState(pos);
 			if (state.getBlock() instanceof NodeBlock node) {
 				BlockPos at = pos.immutable();

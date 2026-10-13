@@ -134,18 +134,25 @@ class FloorPlannerTest {
 	}
 
 	@Test
-	void shippedSurfaceTemplateFillsEverySlotKind() throws Exception {
+	void shippedSurfaceTemplatesFillEverySlotKind() throws Exception {
 		// Gradle runs tests from the module directory; the offline runner from the repo root.
-		Path path = Path.of("src/main/resources/data/blocksouls_world/floor_template/surface_crossroads.json");
-		if (!Files.exists(path)) {
-			path = Path.of("world").resolve(path);
+		Path dir = Path.of("src/main/resources/data/blocksouls_world/floor_template");
+		if (!Files.isDirectory(dir)) {
+			dir = Path.of("world").resolve(dir);
 		}
-		try (var in = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
-			FloorTemplate template = FloorTemplate.parse("blocksouls_world:surface_crossroads", JsonParser.parseReader(in));
-			for (int players : new int[] {1, 8}) {
-				FloorPlanner.FloorPlan plan = FloorPlanner.plan(template, config, 1, players, 11);
-				for (FloorSlotKind kind : FloorSlotKind.values()) {
-					assertFalse(plan.slots(kind).isEmpty(), kind + " at " + players + " players");
+		List<Path> files;
+		try (var list = Files.list(dir)) {
+			files = list.filter(path -> path.toString().endsWith(".json")).sorted().toList();
+		}
+		assertTrue(files.size() >= 3, "the Surface pool needs 3+ templates");
+		for (Path path : files) {
+			try (var in = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+				FloorTemplate template = FloorTemplate.parse("blocksouls_world:" + path.getFileName(), JsonParser.parseReader(in));
+				for (int players : new int[] {1, 8}) {
+					FloorPlanner.FloorPlan plan = FloorPlanner.plan(template, config, template.minFloor, players, 11);
+					for (FloorSlotKind kind : FloorSlotKind.values()) {
+						assertFalse(plan.slots(kind).isEmpty(), path.getFileName() + ": " + kind + " at " + players + " players");
+					}
 				}
 			}
 		}

@@ -21,7 +21,7 @@ public final class FloorBlocks {
 	public static final Block GUNMETAL_NODE = register(CommonIds.GUNMETAL_NODE, NodeBlock::new, node(MapColor.METAL, SoundType.METAL));
 	public static final Block FLOOR_PORTAL = register(CommonIds.FLOOR_PORTAL, FloorPortalBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(-1.0F, 3600000.0F).noLootTable().noOcclusion()
-					.pushReaction(PushReaction.BLOCK).sound(SoundType.GLASS)
+					.pushReaction(PushReaction.IMMOVEABLE).sound(SoundType.GLASS)
 					.lightLevel(state -> state.getValue(FloorPortalBlock.LIT) ? 11 : 3));
 
 	private FloorBlocks() {
@@ -29,7 +29,7 @@ public final class FloorBlocks {
 
 	private static BlockBehaviour.Properties node(MapColor color, SoundType sound) {
 		return BlockBehaviour.Properties.of().mapColor(color).strength(-1.0F, 3600000.0F).noLootTable().sound(sound)
-				.pushReaction(PushReaction.BLOCK);
+				.pushReaction(PushReaction.IMMOVEABLE);
 	}
 
 	private static Block register(Identifier id, Function<BlockBehaviour.Properties, Block> factory, BlockBehaviour.Properties properties) {
