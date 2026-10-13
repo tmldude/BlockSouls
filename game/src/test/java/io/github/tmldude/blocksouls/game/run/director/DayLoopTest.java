@@ -66,6 +66,7 @@ class DayLoopTest {
 		old.events.pool = new java.util.ArrayList<>(List.of(new DirectorConfig.EventSpec("blood_altar", 3, 1)));
 		assertEquals(true, DirectorConfig.migrate(old));
 		assertEquals(true, old.events.pool.stream().anyMatch(spec -> "blocksouls_world:vault_prison".equals(spec.id)));
+		assertEquals(true, old.events.pool.stream().anyMatch(spec -> "blocksouls_world:wind_altar".equals(spec.id)));
 		assertEquals(false, old.events.pool.stream().anyMatch(spec -> "cursed_chest".equals(spec.id)), "only floor events are added");
 	}
 

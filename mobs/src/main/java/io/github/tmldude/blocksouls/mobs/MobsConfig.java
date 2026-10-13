@@ -270,6 +270,8 @@ public class MobsConfig {
 		Map<String, Map<String, Integer>> byTag = new LinkedHashMap<>();
 		// --- floor 4, The Vault (Stage 6C): volatile is the common affix in the tight corridors ---
 		byTag.put("vault", new LinkedHashMap<>(Map.of("volatile", 5)));
+		// --- floor 3, Skyrift (Stage 6C): frosted is the common affix up in the cold air ---
+		byTag.put("skyrift", new LinkedHashMap<>(Map.of("frosted", 5)));
 		return byTag;
 	}
 
