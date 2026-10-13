@@ -1,0 +1,13 @@
+{
+  "class": "blocksouls_game:warden",
+  "cost": 20,
+  "requires": [],
+  "effects": [
+    {
+      "type": "attribute",
+      "attribute": "minecraft:armor",
+      "amount": 3,
+      "operation": "add_value"
+    }
+  ]
+}

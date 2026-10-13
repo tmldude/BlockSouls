@@ -86,7 +86,8 @@ public final class Downed {
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> blocked(player));
 		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) -> blocked(player));
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> blocked(player));
-		UseItemCallback.EVENT.register((player, level, hand) -> blocked(player));
+		UseItemCallback.EVENT.register((player, level, hand) ->
+				PlayerStatus.isDowned(player) && DownedPlay.mayUseWhileDowned(player.getItemInHand(hand)) ? InteractionResult.PASS : blocked(player));
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> blocked(player));
 		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> !PlayerStatus.isDowned(player));
 
@@ -150,7 +151,7 @@ public final class Downed {
 				Component.translatable("message.blocksouls_game.downed", player.getDisplayName()).withStyle(ChatFormatting.RED), false);
 		PlayerRunEvents.DOWNED.invoker().onPlayer(player);
 
-		checkWipe(player.level().getServer());
+		checkWipe(player.level().getServer(), player);
 	}
 
 	/** Gets the player back up. {@code reviver} is null for admin revives. */
@@ -202,19 +203,34 @@ public final class Downed {
 
 		if (++wipeCheckTimer >= Math.max(1, config.wipeCheckIntervalTicks)) {
 			wipeCheckTimer = 0;
-			checkWipe(server);
+			checkWipe(server, null);
 		}
 	}
 
-	/** Ends the run if everyone who counts is down. Players forced in by gametests never end a real run. */
-	private static void checkWipe(MinecraftServer server) {
+	/**
+	 * Ends the run if everyone who counts is down, unless a solo player's Last Stand takes over ({@code justDowned}
+	 * is the player who went down this call, null on the periodic check). Players forced in by gametests never end
+	 * a real run.
+	 */
+	private static void checkWipe(MinecraftServer server, @Nullable ServerPlayer justDowned) {
 		if (!Runs.get(server).isActive()) {
 			return;
 		}
-		if (isTeamWiped(realPlayers(server))) {
-			BlockSoulsGame.LOGGER.info("Everyone is down: ending the run");
-			RunSystem.endRun(server);
+		Collection<ServerPlayer> players = realPlayers(server);
+		if (!isTeamWiped(players)) {
+			return;
 		}
+		if (LastStand.isActive()) {
+			return;
+		}
+		int counting = (int) players.stream().filter(Downed::canGoDown).count();
+		ServerPlayer soloist = justDowned != null && !FORCED.contains(justDowned.getUUID()) ? justDowned
+				: players.stream().filter(Downed::canGoDown).findFirst().orElse(null);
+		if (soloist != null && LastStand.tryStart(soloist, counting)) {
+			return;
+		}
+		BlockSoulsGame.LOGGER.info("Everyone is down: ending the run");
+		RunSystem.endRun(server);
 	}
 
 	/** Online players, minus mocks that gametests forced into the run (they never touch a real run). */

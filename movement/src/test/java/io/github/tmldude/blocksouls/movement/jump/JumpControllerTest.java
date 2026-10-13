@@ -211,4 +211,21 @@ class JumpControllerTest {
 		assertEquals(-1.0, result.velocityY());
 		assertFalse(result.jump());
 	}
+
+	@Test
+	void multiJumpOffDisablesTheChainButNotTheJump() {
+		JumpController gated = new JumpController(config);
+		gated.setMultiJump(false);
+		JumpController free = new JumpController(config);
+		for (JumpController c : new JumpController[] {gated, free}) {
+			c.tick(new JumpController.Input(true, false, 0, GRAVITY, true));
+			c.onJump();
+			c.tick(new JumpController.Input(false, true, 0.4, GRAVITY, true));
+			c.tick(new JumpController.Input(true, false, 0, GRAVITY, true));
+		}
+		assertEquals(config.tapJumpMult, gated.onJump(), 1e-9, "no chain bonus without MULTI_JUMP");
+		assertEquals(config.tapJumpMult * (1 + config.secondJumpBonus), free.onJump(), 1e-9, "the all-granted player chains as in v1");
+		assertEquals(0, gated.chainStep());
+		assertEquals(1, free.chainStep());
+	}
 }

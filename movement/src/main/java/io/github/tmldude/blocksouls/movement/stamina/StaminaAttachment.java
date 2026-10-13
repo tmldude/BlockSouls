@@ -12,7 +12,9 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentTarget;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 
+import io.github.tmldude.blocksouls.common.player.Stamina;
 import io.github.tmldude.blocksouls.movement.BlockSoulsMovement;
+import io.github.tmldude.blocksouls.movement.trait.MovementTraits;
 import io.github.tmldude.blocksouls.movement.MovementConfig;
 
 /** Server-authoritative stamina on each player, synced to that player only. Not saved: full on login. */
@@ -43,5 +45,22 @@ public final class StaminaAttachment {
 
 	public static void set(Player player, StaminaState state) {
 		((AttachmentTarget) player).setAttached(type, state);
+	}
+
+	/**
+	 * Installs {@code common}'s {@link Stamina} provider: other modules add or drain stamina through it (a headshot
+	 * refund, an ability cost), clamped to [0, the player's max]; a drain restarts the regen delay like any spend.
+	 */
+	public static void installProvider() {
+		Stamina.setProvider((player, amount) -> {
+			StaminaState current = get(player);
+			double max = MovementTraits.staminaMax(player);
+			float next = (float) Math.clamp(current.value() + amount, 0.0, max);
+			if (next == current.value()) {
+				return false;
+			}
+			set(player, amount < 0 ? new StaminaState(next, config.regenDelayTicks) : new StaminaState(next, current.regenDelay()));
+			return true;
+		});
 	}
 }

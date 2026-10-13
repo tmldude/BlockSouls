@@ -1,0 +1,13 @@
+{
+  "class": "blocksouls_game:arcanist",
+  "cost": 20,
+  "requires": [],
+  "effects": [
+    {
+      "type": "attribute",
+      "attribute": "minecraft:luck",
+      "amount": 1,
+      "operation": "add_value"
+    }
+  ]
+}
