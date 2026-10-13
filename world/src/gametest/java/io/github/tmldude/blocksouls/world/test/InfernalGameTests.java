@@ -93,14 +93,16 @@ public class InfernalGameTests {
 		helper.assertTrue(level.getBlockState(low).is(Blocks.CRIMSON_PLANKS), "a low bridge deck at " + low.toShortString());
 		helper.assertTrue(level.getBlockState(high).is(Blocks.POLISHED_BLACKSTONE_BRICKS), "the stone arch at " + high.toShortString());
 
-		// Lava sends you back to the camp; fire resistance lets you wade.
+		// Lava sends you back to the camp; fire resistance lets you wade. The mock player is creative (exempt in play), so
+		// this calls the check without the game-mode exemption.
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		player.teleportTo(lavaCell.getX() + 0.5, lavaCell.getY(), lavaCell.getZ() + 0.5);
-		helper.assertTrue(InfernalHazard.checkLava(player), "lava sends the player back");
+		helper.assertTrue(!InfernalHazard.checkLava(player), "creative players are exempt");
+		helper.assertTrue(InfernalHazard.burn(player), "lava sends the player back");
 		helper.assertTrue(player.blockPosition().distManhattan(camp) <= 4, "back at the camp, at " + player.blockPosition().toShortString());
 		player.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 200));
 		player.teleportTo(lavaCell.getX() + 0.5, lavaCell.getY(), lavaCell.getZ() + 0.5);
-		helper.assertTrue(!InfernalHazard.checkLava(player), "fire resistance wades the lava");
+		helper.assertTrue(!InfernalHazard.burn(player), "fire resistance wades the lava");
 
 		// The rise: low decks sink, the arch stands, the lava is a block higher.
 		helper.assertTrue(InfernalHazard.schedule(server, floor), "the siege clock starts on an Infernal floor");

@@ -95,7 +95,15 @@ public final class InfernalHazard {
 	 * applies). Returns whether they were sent back.
 	 */
 	public static boolean checkLava(ServerPlayer player) {
-		if (player.isSpectator() || player.isCreative() || player.hasEffect(MobEffects.FIRE_RESISTANCE)) {
+		return !player.isSpectator() && !player.isCreative() && burn(player);
+	}
+
+	/**
+	 * {@link #checkLava} without the game-mode exemption (gametests' mock players are always creative): sends the player
+	 * back if they stand in an Infernal floor's lava without fire resistance.
+	 */
+	public static boolean burn(ServerPlayer player) {
+		if (player.hasEffect(MobEffects.FIRE_RESISTANCE)) {
 			return false;
 		}
 		boolean inLava = player.isInLava() || player.level().getFluidState(player.blockPosition()).is(FluidTags.LAVA);
