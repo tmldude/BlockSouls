@@ -114,6 +114,20 @@ public class GunsConfig {
 		public int waveSpecialMax = 6;
 		/** Wave-clear reward chest (per reward roll): one gun (rare tier) at this chance, plus ammo. */
 		public double waveClearGunChance = 0.5;
+		public int waveClearPrimaryMin = 24;
+		public int waveClearPrimaryMax = 48;
+		public int waveClearSpecialMin = 6;
+		public int waveClearSpecialMax = 12;
+		/** Elite kills (game's {@code wave_drops/elite} table, per roll): a gun at this chance and tier, plus ammo. */
+		public double eliteGunChance = 0.35;
+		public String eliteGunTier = "rare";
+		public int elitePrimaryMin = 16;
+		public int elitePrimaryMax = 32;
+		/** The night-2 pity gun's {@code roll_perks} tier. */
+		public String pityGunTier = "rare";
+		/** Max stack sizes (applied at startup). Vanilla allows up to 99. */
+		public int primaryAmmoStack = 99;
+		public int specialAmmoStack = 64;
 
 		/** Weights of each exotic when a {@code roll_perks} entry with {@code "tier": "exotic"} picks one. */
 		public Map<String, Integer> exoticWeights = defaultExoticWeights();
