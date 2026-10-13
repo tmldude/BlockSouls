@@ -56,7 +56,7 @@ import io.github.tmldude.blocksouls.guns.logic.Perk;
  */
 public class FullPackGameTests {
 	private static final List<String> MODS = List.of("blocksouls_common", "blocksouls_movement", "blocksouls_guns",
-			"blocksouls_game", "blocksouls_mobs", "blocksouls_world", "blocksouls_vehicles", "blocksouls_bosses");
+			"blocksouls_game", "blocksouls_mobs", "blocksouls_world", "blocksouls_vehicles", "blocksouls_bosses", "blocksouls_abilities");
 
 	private static final List<Identifier> MOBS = List.of(CommonIds.SHAMBLER, CommonIds.CRAWLER, CommonIds.SCREAMER,
 			CommonIds.BLOATER, CommonIds.BRUTE, CommonIds.MUTANT_BRUTE, CommonIds.INFECTED_PIGLIN, CommonIds.ASH_HOUND);

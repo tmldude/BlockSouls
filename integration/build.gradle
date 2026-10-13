@@ -1,6 +1,6 @@
 // Test-only project: puts every BlockSouls mod on one classpath so the game tests see the full pack
 // (cross-module ids, mixins, recipes, waves spawning real mobs). Its jar is never shipped.
-def features = ['movement', 'guns', 'game', 'mobs', 'world', 'vehicles', 'bosses']
+def features = ['movement', 'guns', 'game', 'mobs', 'world', 'vehicles', 'bosses', 'abilities']
 
 loom {
 	mods {

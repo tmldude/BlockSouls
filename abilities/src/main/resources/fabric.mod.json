@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "blocksouls_abilities",
+	"version": "${version}",
+	"name": "BlockSouls Abilities",
+	"description": "Tactical, signature and ultimate abilities on cooldowns and kill charge.",
+	"authors": [
+		"tmldude"
+	],
+	"license": "MIT",
+	"contact": {
+		"sources": "https://github.com/tmldude/blocksouls"
+	},
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"io.github.tmldude.blocksouls.abilities.BlockSoulsAbilities"
+		],
+		"client": [
+			"io.github.tmldude.blocksouls.abilities.client.BlockSoulsAbilitiesClient"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=${loader_version}",
+		"minecraft": "~${minecraft_version}",
+		"java": ">=25",
+		"fabric-api": "*",
+		"blocksouls_common": "*"
+	}
+}

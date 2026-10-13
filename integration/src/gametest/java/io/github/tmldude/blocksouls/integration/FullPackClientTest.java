@@ -58,6 +58,12 @@ public class FullPackClientTest implements FabricClientGameTest {
 			context.waitTicks(10);
 			context.takeScreenshot("04b-boon-row");
 
+			// The abilities HUD bottom-left: three slot icons, one mid-cooldown, and a full ultimate bar.
+			server.runCommand("execute as @a run bs ability ready @s");
+			server.runCommand("execute as @a run bs ability cast @s tactical");
+			context.waitTicks(15);
+			context.takeScreenshot("04c-abilities");
+
 			// v2 builds: a keystone (gold key mark), a curse (red frame) in the row, two trinkets right of the hotbar and the
 			// build line top-left ("Kinetic · Fire").
 			server.runCommand("bs boon give @p blocksouls_game:powder_burn");
