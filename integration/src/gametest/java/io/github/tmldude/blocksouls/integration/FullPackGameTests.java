@@ -13,6 +13,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.protocol.game.ServerboundPlayerLoadedPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -34,6 +35,7 @@ import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.loader.api.FabricLoader;
 
 import io.github.tmldude.blocksouls.common.CommonIds;
+import io.github.tmldude.blocksouls.common.economy.CampObject;
 import io.github.tmldude.blocksouls.common.CommonTags;
 import io.github.tmldude.blocksouls.common.mob.WaveContext;
 import io.github.tmldude.blocksouls.common.mob.WaveMobs;
@@ -81,6 +83,14 @@ public class FullPackGameTests {
 			helper.assertTrue(BuiltInRegistries.ITEM.containsKey(item), "item " + item);
 		}
 		helper.assertTrue(BuiltInRegistries.ENTITY_TYPE.containsKey(CommonIds.KART_WRECK), "kart wreck entity");
+		// The Director's economy objects: the world module's blocks and shopkeeper, the game module's loot.
+		for (CampObject object : CampObject.values()) {
+			helper.assertTrue(object == CampObject.SHOPKEEPER ? BuiltInRegistries.ENTITY_TYPE.containsKey(object.id())
+					: BuiltInRegistries.BLOCK.containsKey(object.id()), "economy object " + object.id());
+		}
+		for (var table : List.of(CommonIds.BLOOD_ALTAR_LOOT, CommonIds.CURSED_CHEST_LOOT)) {
+			helper.assertTrue(helper.getLevel().getServer().reloadableRegistries().getLootTable(table) != LootTable.EMPTY, "loot table " + table);
+		}
 		for (Identifier mob : MOBS) {
 			helper.assertTrue(BuiltInRegistries.ENTITY_TYPE.containsKey(mob), "mob " + mob);
 		}

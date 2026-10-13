@@ -90,6 +90,12 @@ public final class Objectives {
 		return running == null ? null : running.id;
 	}
 
+	/** Where the running objective was placed (gametests, {@code /bs director status}); null when none runs. */
+	public static @Nullable BlockPos position() {
+		Running r = running;
+		return r == null ? null : r.pos;
+	}
+
 	/** Progress 0–1 for the HUD (time held, delivery, generator health). */
 	public static float progress() {
 		Running r = running;
