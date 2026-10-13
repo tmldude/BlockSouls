@@ -1,0 +1,9 @@
+{
+  "recipe": "blocksouls_world:night_eye_tonic",
+  "board": "brew",
+  "minFloor": 4,
+  "maxFloor": 99,
+  "floorTags": [
+    "vault"
+  ]
+}

@@ -51,5 +51,11 @@
   "message.blocksouls_world.floor.portal_end": "The way on isn't open yet.",
   "block.blocksouls_world.vault_bricks": "Vault Bricks",
   "block.blocksouls_world.mossy_vault_bricks": "Mossy Vault Bricks",
-  "block.blocksouls_world.cracked_vault_bricks": "Cracked Vault Bricks"
+  "block.blocksouls_world.cracked_vault_bricks": "Cracked Vault Bricks",
+  "item.blocksouls_world.deep_iron": "Deep Iron",
+  "item.blocksouls_world.cave_moss": "Cave Moss",
+  "item.blocksouls_world.night_eye_tonic": "Night-Eye Tonic",
+  "item.blocksouls_world.moss_antidote": "Moss Antidote",
+  "block.blocksouls_world.deep_iron_node": "Deep Iron Node",
+  "block.blocksouls_world.cave_moss_patch": "Cave Moss"
 }

@@ -1,0 +1,9 @@
+{
+  "recipe": "blocksouls_world:gun_receiver_from_deep_iron",
+  "board": "forge",
+  "minFloor": 4,
+  "maxFloor": 99,
+  "floorTags": [
+    "vault"
+  ]
+}

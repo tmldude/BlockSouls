@@ -1,0 +1,31 @@
+{
+	"criteria": {
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipes": "blocksouls_world:night_eye_tonic"
+			}
+		},
+		"has_cave_moss": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:cave_moss"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_cave_moss"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"blocksouls_world:night_eye_tonic"
+		]
+	}
+}

@@ -89,6 +89,16 @@ public final class CommonIds {
 	public static final Identifier AMBER_RESIN = id(WORLD, "amber_resin");
 	/** The camp's exit portal block (world); using it starts the act's portal charge, lit it leads on. */
 	public static final Identifier FLOOR_PORTAL = id(WORLD, "floor_portal");
+	// --- floor 4, The Vault (Stage 6C) ---
+	/** The Vault's rare node block (world), set into the corridor walls; pops into deep iron. */
+	public static final Identifier DEEP_IRON_NODE = id(WORLD, "deep_iron_node");
+	/** The Vault's rare metal (world), from deep iron nodes: gun receivers, the antidote. */
+	public static final Identifier DEEP_IRON = id(WORLD, "deep_iron");
+	/** The Vault's herb block (world): glowing moss in the rooms, pops in one hit into cave moss. */
+	public static final Identifier CAVE_MOSS_PATCH = id(WORLD, "cave_moss_patch");
+	/** The Vault's herb (world): brewed into the night-eye tonic and the moss antidote. */
+	public static final Identifier CAVE_MOSS = id(WORLD, "cave_moss");
+	// --- end floor 4 ---
 
 	/** Ammo items (guns). The Director reads a party's ammo from them; the shopkeeper sells them. */
 	public static final Identifier PRIMARY_AMMO = id(GUNS, "primary_ammo");

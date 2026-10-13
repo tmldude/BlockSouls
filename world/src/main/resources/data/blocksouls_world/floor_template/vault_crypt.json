@@ -34,7 +34,12 @@
     "roomHeight": 6,
     "hallHeight": 9,
     "mossyShare": 0.2,
-    "crackedShare": 0.08
+    "crackedShare": 0.08,
+    "wallNode": "blocksouls_world:deep_iron_node",
+    "herb": "blocksouls_world:cave_moss_patch",
+    "herbs": 2,
+    "herbsMin": 2,
+    "herbsMax": 3
   },
   "slots": [
     {
