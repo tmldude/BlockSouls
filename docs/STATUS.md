@@ -1,6 +1,6 @@
 # Status (handoff)
 
-Last updated 2026-10-11 (v0.10.0). Read this after `CLAUDE.md` to know where the work stands.
+Last updated 2026-10-13 (v0.11.0). Read this after `CLAUDE.md` to know where the work stands.
 
 ## Done (on `main`, CI green)
 - Build: Gradle multi-project, Minecraft 26.3 / Fabric API 0.162.0+26.3 / Java 25, CI (`build.yml`), release
@@ -40,9 +40,17 @@ Original sounds and music for guns, bosses and the kart (#36), custom boon icons
 fog-wall arenas that hold in 3D (#34), wrecks/checkpoints as `/locate`-able structures (#32), content standards +
 CI crafting check (#35) and every drop in 2+ recipes (#38). Releases set the Modrinth environment (#30).
 
+## Playtest fixes (v0.10.1, v0.11.0): done
+v0.10.1: faster pacing (12-minute days, 2–4 waves a night, 8 s breaks), migrated onto live servers through
+`defaultsVersion` (#42). v0.11.0: `/bs config reload` and a tuning map (#44), recipe book, tutorial advancements
+and recipe viewer (#45), denser resources (#43), wave drops that feel good with a gun pity timer and faster pacing
+(#53).
+
 ## Next
-- v1 track (this orchestrator): trial-run feedback → balance pass → v1.0.0.
-- v2 "Expedition" (`PLAN2.md`, its own orchestrator and PRs): Stage 5 spine in progress; Stage 6 starts after v0.10.0.
+- v1 track (this orchestrator): next playtest → feedback pass (hit markers, ammo cues, wave-clear fanfare, death
+  recap) → v1.0.0.
+- v2 (`PLAN2.md`, the Floor Loop, its own orchestrator and PRs): Stage 6A in progress; classic mode stays the live
+  default until v2 ships.
 
 ## Decisions that changed late (see DECISIONS.md for all)
 - Downed players stay down until revived (no bleed-out); everyone down at once ends the run; going down costs
