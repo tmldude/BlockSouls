@@ -1,0 +1,23 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "blocksouls_guns"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SGS"
+  ],
+  "key": {
+    "S": "blocksouls_world:skysteel",
+    "G": "blocksouls_world:gunmetal_ingot"
+  },
+  "result": {
+    "id": "blocksouls_guns:gun_barrel",
+    "count": 2
+  }
+}

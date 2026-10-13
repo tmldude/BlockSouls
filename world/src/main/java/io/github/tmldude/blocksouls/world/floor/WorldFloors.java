@@ -310,7 +310,32 @@ public final class WorldFloors {
 			}
 		}
 		level.playSound(null, pos, SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.BLOCKS, 1.0F, 0.9F);
-		FloorEvents.NODE_POPPED.invoker().onNodePopped(player, Floors.at(level.getServer(), level.dimension().identifier(), pos).orElse(null), pos, node);
+		FloorEvents.NODE_POPPED.invoker().onNodePopped(player, floorNear(level, pos), pos, node);
+	}
+
+	/**
+	 * The floor a position belongs to: the island it is over or, for a shard past the rim, the nearest floor in the
+	 * level whose shards could reach that far (1.5 radii + 24 blocks from the camp). Null when none.
+	 */
+	static PlacedFloor floorNear(ServerLevel level, BlockPos pos) {
+		Identifier dimension = level.dimension().identifier();
+		Optional<PlacedFloor> over = Floors.at(level.getServer(), dimension, pos);
+		if (over.isPresent()) {
+			return over.get();
+		}
+		PlacedFloor best = null;
+		double bestDistance = Double.MAX_VALUE;
+		for (PlacedFloor floor : Floors.all(level.getServer())) {
+			if (!floor.dimension().equals(dimension)) {
+				continue;
+			}
+			double distance = Math.hypot(pos.getX() - floor.camp().getX(), pos.getZ() - floor.camp().getZ());
+			if (distance <= floor.radius() * 1.5 + 24 && distance < bestDistance) {
+				bestDistance = distance;
+				best = floor;
+			}
+		}
+		return best;
 	}
 
 	/** A player used a block: if it is one of a floor's crates, opened for the first time, fire {@code CRATE_OPENED}. */

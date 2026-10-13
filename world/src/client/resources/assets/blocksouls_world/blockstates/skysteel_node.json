@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "blocksouls_world:block/skysteel_node"
+      }
+    }
+  ]
+}

@@ -76,6 +76,8 @@ public final class FloorTemplate {
 	public int spires = 0;
 	/** Eternal fires lit on netherrack outside the slots. */
 	public int fires = 0;
+	/** The floor's herb: {@code count} (× {@code PartyScaling.floorNodes}, clamped to min..max) one-hit plants. */
+	public Herbs herbs = new Herbs();
 
 	// ---- Vault (floor 4) block: the box shape. Island templates leave these at their defaults.
 	/** {@code "island"} (default: a floating disc) or {@code "box"} (a bounded room-and-corridor dungeon, floor 4). */
@@ -201,6 +203,17 @@ public final class FloorTemplate {
 		public int maxGap = 9;
 		/** Share of shards over the island that hang a climbable vine strand toward the ground. */
 		public double vineChance = 0.5;
+		/** Rare nodes ({@code node}, a block id) on free shards: {@code nodes} × {@code PartyScaling.floorNodes}. */
+		public int nodes = 0;
+		public String node = "";
+	}
+
+	/** A floor herb: a block id ({@code HerbBlock}) scattered on the island. */
+	public static class Herbs {
+		public String block = "";
+		public int count = 0;
+		public int min = 2;
+		public int max = 3;
 	}
 
 	/** One hand-placed slot. {@code kind} is a {@link FloorSlotKind} name (any case). */
@@ -285,6 +298,12 @@ public final class FloorTemplate {
 		}
 		if (shards == null) {
 			shards = new Shards();
+		}
+		if (herbs == null) {
+			herbs = new Herbs();
+		}
+		if (herbs.max < herbs.min) {
+			throw new IllegalArgumentException("herbs: min must not exceed max");
 		}
 		if (shards.minSize < 1 || shards.maxSize < shards.minSize || shards.maxRise < shards.minRise || shards.maxReach < shards.minReach) {
 			throw new IllegalArgumentException("shards: min must not exceed max");

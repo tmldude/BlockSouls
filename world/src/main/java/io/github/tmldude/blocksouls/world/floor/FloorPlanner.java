@@ -158,11 +158,46 @@ public final class FloorPlanner {
 			Random sky = new Random(seed ^ 0x5348415244L);
 			shards = shards(template, slots, radius, players, sky);
 			elevate(slots, shards, radius, template.elevatedSiegePoints);
+			shardNodes(slots, shards, template, players, sky);
+		}
+		// Herbs: likewise their own random, so a template without them plans as before.
+		if (template.herbs.count > 0 && !template.herbs.block.isEmpty()) {
+			List<PlannedSlot> herbs = new ArrayList<>();
+			scatter(herbs, herbCount(template, players), FloorSlotKind.NODE, slots, radius, config, new Random(seed ^ 0x48455242L),
+					() -> template.herbs.block);
+			slots.addAll(herbs);
 		}
 
 		Set<String> tags = new LinkedHashSet<>(template.tags);
 		tags.addAll(escalationTags(config, floorNumber));
 		return new FloorPlan(template.id, radius, template.groundY, rotation, mirrored, tags, List.copyOf(slots), shards);
+	}
+
+	/** Herbs for a party: the template's count × {@code PartyScaling.floorNodes}, clamped to its min..max. */
+	public static int herbCount(FloorTemplate template, int players) {
+		FloorTemplate.Herbs herbs = template.herbs;
+		int scaled = (int) Math.round(herbs.count * PartyScaling.floorNodes(Math.max(1, players)));
+		return Math.max(herbs.min, Math.min(herbs.max, scaled));
+	}
+
+	/** Rare shard nodes for a party: the template's count × {@code PartyScaling.floorNodes} (capped later by free shards). */
+	public static int shardNodeCount(FloorTemplate template, int players) {
+		return Math.max(0, (int) Math.round(template.shards.nodes * PartyScaling.floorNodes(Math.max(1, players))));
+	}
+
+	/** Puts the template's rare node on shards no siege point uses, one per shard, on its top (climb or swing to it). */
+	static void shardNodes(List<PlannedSlot> slots, List<Shard> shards, FloorTemplate template, int players, Random random) {
+		if (template.shards.node.isEmpty()) {
+			return;
+		}
+		List<Shard> free = new ArrayList<>(shards);
+		free.removeIf(shard -> slots.stream().anyMatch(slot -> slot.rise() > 0 && slot.x() == shard.x() && slot.z() == shard.z()));
+		java.util.Collections.shuffle(free, random);
+		int count = Math.min(shardNodeCount(template, players), free.size());
+		for (int i = 0; i < count; i++) {
+			Shard shard = free.get(i);
+			slots.add(new PlannedSlot(FloorSlotKind.NODE, template.shards.node, shard.x(), shard.z(), 0, shard.rise()));
+		}
 	}
 
 	/** The shard count for a party: the template's count scaled like the island's radius, capped at {@code maxCount}. */

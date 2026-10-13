@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "SCS",
+    "S S"
+  ],
+  "key": {
+    "S": "blocksouls_world:skysteel",
+    "C": "blocksouls_world:cloudbloom"
+  },
+  "result": {
+    "id": "blocksouls_world:skysteel_featherboots"
+  }
+}

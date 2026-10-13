@@ -133,8 +133,52 @@ class SkyriftPlannerTest {
 					assertFalse(plan.slots(kind).isEmpty(), template.id + ": " + kind);
 				}
 				for (FloorPlanner.PlannedSlot slot : plan.slots()) {
-					assertTrue(slot.x() * slot.x() + slot.z() * slot.z() <= plan.radius() * plan.radius(), slot.toString());
+					if (slot.rise() == 0) {
+						assertTrue(slot.x() * slot.x() + slot.z() * slot.z() <= plan.radius() * plan.radius(), slot.toString());
+					}
 				}
+			}
+		}
+	}
+
+	@Test
+	void skysteelNodesSitOnFreeShardsAndScaleWithTheParty() throws Exception {
+		for (FloorTemplate template : skyrift()) {
+			assertEquals("blocksouls_world:skysteel_node", template.shards.node);
+			assertTrue(FloorPlanner.shardNodeCount(template, 8) > FloorPlanner.shardNodeCount(template, 1));
+			for (int players : new int[] {1, 8}) {
+				for (long seed = 1; seed <= 20; seed++) {
+					FloorPlanner.FloorPlan plan = FloorPlanner.plan(template, config, 3, players, seed);
+					List<FloorPlanner.PlannedSlot> onShards = plan.slots(FloorSlotKind.NODE).stream().filter(slot -> slot.rise() > 0).toList();
+					assertTrue(onShards.size() >= Math.min(2, plan.shards().size() - template.elevatedSiegePoints),
+							template.id + " " + players + "p seed " + seed + ": " + onShards.size() + " shard nodes");
+					assertTrue(onShards.size() <= FloorPlanner.shardNodeCount(template, players));
+					for (FloorPlanner.PlannedSlot node : onShards) {
+						assertEquals(template.shards.node, node.tag());
+						assertTrue(plan.shards().stream().anyMatch(s -> s.x() == node.x() && s.z() == node.z() && s.rise() == node.rise()),
+								"on a shard: " + node);
+						assertTrue(plan.slots(FloorSlotKind.SIEGE_RING).stream().noneMatch(p -> p.x() == node.x() && p.z() == node.z()),
+								"not on a siege shard: " + node);
+					}
+					long skysteel = plan.slots(FloorSlotKind.NODE).stream().filter(n -> n.tag().equals(template.shards.node)).count();
+					assertTrue(onShards.size() * 2 >= skysteel, "skysteel is mostly on the shards");
+				}
+			}
+		}
+	}
+
+	@Test
+	void twoToThreeCloudbloomsScaledByTheParty() throws Exception {
+		for (FloorTemplate template : skyrift()) {
+			assertEquals("blocksouls_world:cloudbloom_plant", template.herbs.block);
+			assertEquals(2, FloorPlanner.herbCount(template, 1));
+			assertEquals(3, FloorPlanner.herbCount(template, 8));
+			for (int players : new int[] {1, 8}) {
+				FloorPlanner.FloorPlan plan = FloorPlanner.plan(template, config, 3, players, 9);
+				List<FloorPlanner.PlannedSlot> herbs = plan.slots(FloorSlotKind.NODE).stream()
+						.filter(slot -> slot.tag().equals(template.herbs.block)).toList();
+				assertEquals(FloorPlanner.herbCount(template, players), herbs.size(), template.id + " " + players + "p");
+				assertTrue(herbs.stream().allMatch(h -> h.rise() == 0), "herbs grow on the island");
 			}
 		}
 	}

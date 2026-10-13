@@ -28,7 +28,9 @@
     "minReach": 0.4,
     "maxReach": 1.1,
     "maxGap": 9,
-    "vineChance": 0.5
+    "vineChance": 0.5,
+    "nodes": 2,
+    "node": "blocksouls_world:skysteel_node"
   },
   "elevatedSiegePoints": 2,
   "edgeWall": false,
@@ -115,5 +117,11 @@
       "z": 48,
       "radius": 0
     }
-  ]
+  ],
+  "herbs": {
+    "block": "blocksouls_world:cloudbloom_plant",
+    "count": 2,
+    "min": 2,
+    "max": 3
+  }
 }
