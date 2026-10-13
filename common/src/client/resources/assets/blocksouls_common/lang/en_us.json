@@ -26,5 +26,9 @@
 	"advancements.blocksouls.tutorial.field_boss.title": "Fog Gate",
 	"advancements.blocksouls.tutorial.field_boss.description": "Defeat a field boss. They appear in the overworld during the run; each drops 2 Eyes of Ender and its own materials.",
 	"advancements.blocksouls.tutorial.final_raid.title": "Crownbreaker",
-	"advancements.blocksouls.tutorial.final_raid.description": "Open the End with the bosses' Eyes of Ender and defeat the Hollow Sovereign. The world goes endless afterwards."
+	"advancements.blocksouls.tutorial.final_raid.description": "Open the End with the bosses' Eyes of Ender and defeat the Hollow Sovereign. The world goes endless afterwards.",
+	"affix.blocksouls_common.burning": "Burning",
+	"affix.blocksouls_common.frosted": "Frosted",
+	"affix.blocksouls_common.volatile": "Volatile",
+	"affix.blocksouls_common.magnetic": "Magnetic"
 }
