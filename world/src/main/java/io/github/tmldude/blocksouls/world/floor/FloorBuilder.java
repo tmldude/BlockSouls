@@ -77,8 +77,10 @@ final class FloorBuilder {
 	/** Builds everything and returns the filled slots (camp first). */
 	List<FloorSlot> build() {
 		terrain();
+		SkyShards.build(level, plan, template, centre, random, this::height, top, fill, base);
 		for (FloorPlanner.PlannedSlot slot : plan.slots()) {
-			BlockPos pos = surface(slot.x(), slot.z());
+			BlockPos pos = slot.rise() > 0 ? centre.offset(slot.x(), plan.groundY() + slot.rise() + 1 - centre.getY(), slot.z())
+					: surface(slot.x(), slot.z());
 			switch (slot.kind()) {
 				case CAMP -> camp(pos, slot);
 				case EXIT_PORTAL -> portal(pos);
@@ -98,6 +100,7 @@ final class FloorBuilder {
 			}
 		}
 		trees();
+		SkyShards.paintBiome(level, template, plan, centre);
 		// Camp first, then everything else in plan order (crates the contents added come after their slot).
 		filled.sort((a, b) -> Integer.compare(a.kind() == FloorSlotKind.CAMP ? 0 : 1, b.kind() == FloorSlotKind.CAMP ? 0 : 1));
 		return filled;
@@ -146,7 +149,7 @@ final class FloorBuilder {
 					BlockState state = y == h ? top : y >= h - 3 ? fill : base;
 					level.setBlock(pos.set(centre.getX() + x, y, centre.getZ() + z), state, FLAGS);
 				}
-				if (d > radius - 1) {
+				if (template.edgeWall && d > radius - 1) {
 					for (int y = h + 1; y <= h + config.wallHeight; y++) {
 						level.setBlock(pos.set(centre.getX() + x, y, centre.getZ() + z), glass, FLAGS);
 					}

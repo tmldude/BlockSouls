@@ -1,0 +1,113 @@
+{
+  "pool": "blocksouls_world:skyrift",
+  "tags": [
+    "skyrift",
+    "archipelago"
+  ],
+  "minFloor": 3,
+  "maxFloor": 3,
+  "weight": 1,
+  "radius": 48,
+  "groundY": 94,
+  "depth": 14,
+  "hills": 2.0,
+  "trees": 6,
+  "nodes": 10,
+  "nodeMix": {
+    "blocksouls_world:scrap_node": 2,
+    "blocksouls_world:gunmetal_node": 1
+  },
+  "crates": 2,
+  "rimWind": 1.3,
+  "shards": {
+    "count": 7,
+    "maxCount": 8,
+    "minSize": 3,
+    "maxSize": 5,
+    "minRise": 8,
+    "maxRise": 16,
+    "minReach": 0.5,
+    "maxReach": 1.15,
+    "maxGap": 8,
+    "vineChance": 0.7
+  },
+  "elevatedSiegePoints": 4,
+  "edgeWall": false,
+  "biome": "blocksouls_world:skyrift",
+  "terrain": {
+    "top": "minecraft:grass_block",
+    "fill": "minecraft:calcite",
+    "base": "minecraft:diorite"
+  },
+  "slots": [
+    {
+      "kind": "camp",
+      "x": 0,
+      "z": 0,
+      "radius": 6
+    },
+    {
+      "kind": "exit_portal",
+      "x": 0,
+      "z": -9,
+      "radius": 2
+    },
+    {
+      "kind": "structure",
+      "tag": "sky_temple",
+      "x": 28,
+      "z": -24,
+      "radius": 7
+    },
+    {
+      "kind": "mini_boss",
+      "x": -30,
+      "z": -22,
+      "radius": 9
+    },
+    {
+      "kind": "secret",
+      "tag": "sky_seed",
+      "x": 32,
+      "z": 22,
+      "radius": 4
+    },
+    {
+      "kind": "event",
+      "x": -26,
+      "z": 28,
+      "radius": 5
+    },
+    {
+      "kind": "cave",
+      "x": 12,
+      "z": 18,
+      "radius": 4
+    },
+    {
+      "kind": "wreck",
+      "x": -38,
+      "z": 4,
+      "radius": 6
+    },
+    {
+      "kind": "node",
+      "tag": "blocksouls_world:gunmetal_node",
+      "x": -10,
+      "z": -38,
+      "radius": 0
+    },
+    {
+      "kind": "node",
+      "x": 40,
+      "z": 0,
+      "radius": 0
+    },
+    {
+      "kind": "node",
+      "x": -6,
+      "z": 40,
+      "radius": 0
+    }
+  ]
+}

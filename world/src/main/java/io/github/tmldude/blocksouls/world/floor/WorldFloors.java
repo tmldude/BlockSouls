@@ -79,7 +79,7 @@ public final class WorldFloors {
 		testLevel = level;
 	}
 
-	private static ResourceKey<Level> levelKey() {
+	static ResourceKey<Level> levelKey() {
 		return testLevel != null ? testLevel : DIMENSION;
 	}
 
@@ -91,6 +91,7 @@ public final class WorldFloors {
 		config = Config.load(FloorsConfig.FILE, FloorsConfig.class, FloorsConfig::new);
 		FloorBlocks.init();
 		FloorTemplateCatalog.register();
+		SkyriftFloor.init();
 		Floors.setProvider(new Floors.Provider() {
 			@Override
 			public Optional<PlacedFloor> open(MinecraftServer server, FloorRequest request) {
