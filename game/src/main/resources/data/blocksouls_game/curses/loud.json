@@ -1,0 +1,9 @@
+{
+  "icon": "blocksouls_game:boon/loud",
+  "effects": [
+    {
+      "type": "rule",
+      "rule": "loud"
+    }
+  ]
+}

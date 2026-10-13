@@ -27,6 +27,9 @@ class RunConfigMigrateTest {
 		config.waveBreakSeconds = 20;
 		config.dropChance = 0.35;
 		config.starterPistolLastWave = 3;
+		config.duskCueTime = 11500;
+		config.tierOdds = new ArrayList<>(List.of(new RunConfig.TierOdds(1, 1, 0, 0), new RunConfig.TierOdds(4, 0.8, 0.2, 0),
+				new RunConfig.TierOdds(7, 0.65, 0.3, 0.05)));
 		return config;
 	}
 
@@ -40,6 +43,8 @@ class RunConfigMigrateTest {
 		assertEquals(fresh.waveBreakSeconds, config.waveBreakSeconds);
 		assertEquals(fresh.dropChance, config.dropChance);
 		assertEquals(fresh.starterPistolLastWave, config.starterPistolLastWave);
+		assertEquals(fresh.duskCueTime, config.duskCueTime);
+		assertEquals(fresh.tierOdds.get(1).fromWave, config.tierOdds.get(1).fromWave);
 		assertEquals(RunConfig.CURRENT_DEFAULTS, config.defaultsVersion);
 	}
 
@@ -52,6 +57,26 @@ class RunConfigMigrateTest {
 		assertEquals(30, config.waveBreakSeconds);
 		assertEquals(25.0, config.dayLengthMinutes);
 		assertEquals(0.5, config.dropChance);
+	}
+
+	@Test
+	void versionOneFilesOnlyTakeTheVersionTwoDefaults() {
+		RunConfig config = oldFile();
+		config.defaultsVersion = 1;
+		config.waveBreakSeconds = 20;
+		RunConfig.migrate(config);
+		assertEquals(20, config.waveBreakSeconds, "v1 already chose its break length");
+		assertEquals(new RunConfig().duskCueTime, config.duskCueTime);
+		assertEquals(3, config.tierOdds.get(1).fromWave);
+	}
+
+	@Test
+	void handTunedTierOddsAreKept() {
+		RunConfig config = oldFile();
+		config.tierOdds.get(2).legendary = 0.2;
+		RunConfig.migrate(config);
+		assertEquals(4, config.tierOdds.get(1).fromWave);
+		assertEquals(0.2, config.tierOdds.get(2).legendary);
 	}
 
 	@Test

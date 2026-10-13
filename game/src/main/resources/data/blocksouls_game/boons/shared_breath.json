@@ -1,0 +1,14 @@
+{
+  "icon": "blocksouls_game:boon/shared_breath",
+  "tier": "common",
+  "levels": 1,
+  "tags": [
+    "heal"
+  ],
+  "effects": [
+    {
+      "type": "rule",
+      "rule": "revive_iframes"
+    }
+  ]
+}

@@ -18,6 +18,7 @@ import io.github.tmldude.blocksouls.common.event.ConfigEvents;
 import io.github.tmldude.blocksouls.guns.command.GunCommands;
 import io.github.tmldude.blocksouls.guns.item.GunsItems;
 import io.github.tmldude.blocksouls.guns.loot.GunLoot;
+import io.github.tmldude.blocksouls.guns.loot.RarityBeam;
 import io.github.tmldude.blocksouls.guns.shoot.GunServer;
 import io.github.tmldude.blocksouls.guns.sound.GunSounds;
 import io.github.tmldude.blocksouls.guns.weapon.Weapons;
@@ -32,6 +33,9 @@ public class BlockSoulsGuns implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		CONFIG = Config.load("guns", GunsConfig.class, GunsConfig::new);
+		if (GunsConfig.migrate(CONFIG)) {
+			Config.save("guns", CONFIG);
+		}
 		applyWeaponStats();
 		// An integrated server must not keep stats synced from a server the client visited earlier.
 		ServerLifecycleEvents.SERVER_STARTING.register(starting -> applyWeaponStats());
@@ -40,6 +44,10 @@ public class BlockSoulsGuns implements ModInitializer {
 		// /bs config reload guns: weapon stats are a rebuilt table, and clients time shots with the synced copy.
 		ConfigEvents.RELOADED.register((name, config) -> {
 			if (name.equals("guns")) {
+				// A reloaded file from before a defaults revision gets the same migration as at startup.
+				if (GunsConfig.migrate(CONFIG)) {
+					Config.save("guns", CONFIG);
+				}
 				applyWeaponStats();
 				if (server != null) {
 					for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -52,6 +60,7 @@ public class BlockSoulsGuns implements ModInitializer {
 		GunSounds.init();
 		GunsItems.register();
 		GunLoot.register();
+		RarityBeam.register();
 		GunServer.register();
 		GunCommands.register();
 	}

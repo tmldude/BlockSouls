@@ -1,0 +1,15 @@
+{
+  "icon": "blocksouls_game:boon/thick_coat",
+  "tier": "common",
+  "tags": [
+    "kinetic"
+  ],
+  "effects": [
+    {
+      "type": "attribute",
+      "attribute": "minecraft:armor",
+      "amount": 3,
+      "operation": "add_value"
+    }
+  ]
+}

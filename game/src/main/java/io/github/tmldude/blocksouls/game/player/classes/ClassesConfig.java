@@ -22,4 +22,6 @@ public class ClassesConfig {
 	public int rollMistBlindnessTicks = 40;
 	/** Bloodbound's hearts per boss kill stop stacking past this many kills. */
 	public int bossKillHeartsCap = 10;
+	/** The Arcanist hover holds Slow Falling this many ticks past each tick jump is held (keeps it smooth on lag). */
+	public int hoverRefreshTicks = 3;
 }

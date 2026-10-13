@@ -1,0 +1,15 @@
+{
+  "icon": "blocksouls_game:boon/lucky_coin",
+  "tier": "common",
+  "tags": [
+    "pull"
+  ],
+  "effects": [
+    {
+      "type": "attribute",
+      "attribute": "minecraft:luck",
+      "amount": 1,
+      "operation": "add_value"
+    }
+  ]
+}

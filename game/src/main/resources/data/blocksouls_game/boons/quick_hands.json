@@ -1,7 +1,10 @@
 {
   "tier": "common",
   "icon": "blocksouls_game:boon/quick_hands",
-  "stackable": 2,
+  "levels": 3,
+  "tags": [
+    "on_reload"
+  ],
   "effects": [
     {
       "type": "trait",

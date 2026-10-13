@@ -17,4 +17,11 @@ public sealed interface BoonEffect {
 	/** An item handed over once, when the boon is first granted. */
 	record Item(String item, int count) implements BoonEffect {
 	}
+
+	/**
+	 * A rule the game module implements in code (keystones, curses with behavior, trinkets with behavior); the id
+	 * names a {@code BoonRules} entry. The rule sees the owner's level.
+	 */
+	record Rule(String rule) implements BoonEffect {
+	}
 }

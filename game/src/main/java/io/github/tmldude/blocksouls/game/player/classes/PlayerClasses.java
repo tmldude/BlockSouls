@@ -37,6 +37,7 @@ import io.github.tmldude.blocksouls.common.event.PlayerMoveEvents;
 import io.github.tmldude.blocksouls.common.event.PlayerRunEvents;
 import io.github.tmldude.blocksouls.common.event.RunEvents;
 import io.github.tmldude.blocksouls.common.player.Capabilities;
+import io.github.tmldude.blocksouls.common.player.Origins;
 import io.github.tmldude.blocksouls.common.run.Runs;
 import io.github.tmldude.blocksouls.common.synergy.SynergyTags;
 import io.github.tmldude.blocksouls.game.BlockSoulsGame;
@@ -99,6 +100,9 @@ public final class PlayerClasses {
 		BossEvents.KILLED.register((level, bossId, boss, players) -> players.forEach(PlayerClasses::onBossKill));
 		PlayerMoveEvents.ROLLED.register(PlayerClasses::onRoll);
 		SynergyTags.addSource(PlayerClasses::collectTags);
+		// common's Origins contract carries the class id (the abilities module binds the signature ability by it).
+		// The attachment syncs to its own player, so this answers on the local client too.
+		Origins.setProvider(player -> id(player).orElse(null));
 	}
 
 	// ---------------------------------------------------------------- reading

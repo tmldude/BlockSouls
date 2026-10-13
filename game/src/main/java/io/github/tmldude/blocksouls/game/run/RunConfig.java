@@ -12,7 +12,7 @@ import java.util.Map;
 public class RunConfig {
 	public static final String FILE = "game-run";
 	/** Defaults revision {@link #migrate} brings older files up to. */
-	public static final int CURRENT_DEFAULTS = 1;
+	public static final int CURRENT_DEFAULTS = 2;
 
 	/**
 	 * Which defaults revision this file was written against. Missing in files from before the field existed (reads as
@@ -46,7 +46,7 @@ public class RunConfig {
 	/** Real minutes for one full day/night cycle (vanilla: 20). */
 	public double dayLengthMinutes = 12.0;
 	/** Day times (mod 24000). */
-	public int duskCueTime = 11500;
+	public int duskCueTime = 10000;
 	public int duskTime = 13000;
 	public int dawnTime = 23000;
 
@@ -101,8 +101,30 @@ public class RunConfig {
 	/** Tier odds by wave: the last entry whose fromWave ≤ wave applies. Weights, normalized. */
 	public List<TierOdds> tierOdds = new ArrayList<>(List.of(
 			new TierOdds(1, 1, 0, 0),
-			new TierOdds(4, 0.8, 0.2, 0),
-			new TierOdds(7, 0.65, 0.3, 0.05)));
+			new TierOdds(3, 0.8, 0.2, 0),
+			new TierOdds(6, 0.65, 0.3, 0.05)));
+
+	/**
+	 * Wave-clear reward bundle: the reward table is rolled round((rewardRollsBase + rewardRollsPerWave·(wave−1)) · party
+	 * rewards factor) times, at least once and at most rewardRollsMax. Party scaling lives in common's party.json.
+	 */
+	public double rewardRollsBase = 1;
+	public double rewardRollsPerWave = 0.15;
+	public int rewardRollsMax = 8;
+	/** Reward chest goes on a free spot within this many blocks of the wave's last kill. */
+	public int rewardSearchRadius = 4;
+
+	/**
+	 * Pity gun: from this night on, a party carrying nothing but Starter Pistols gets gunPityGuns (× party rewards factor)
+	 * rolled guns in the next wave-clear chest, or at its feet at dawn. 0 turns it off.
+	 */
+	public int gunPityNight = 2;
+	public double gunPityGuns = 1;
+
+	/** Every elite a player kills rolls the elite table this many times on top of its tier drop. */
+	public int eliteDropRolls = 1;
+	/** Elite drops glow (outline through walls) until picked up. */
+	public boolean eliteDropsGlow = true;
 
 	/** Starter Pistols break when this wave ends. Late joiners get one only while wave ≤ this. */
 	public int starterPistolLastWave = 4;
@@ -136,7 +158,30 @@ public class RunConfig {
 				config.starterPistolLastWave = 4;
 			}
 		}
+		// 2: drops-and-pacing (v0.11): earlier dusk cue, rare drops a wave earlier.
+		if (config.defaultsVersion < 2) {
+			if (config.duskCueTime == 11500) {
+				config.duskCueTime = 10000;
+			}
+			if (sameOdds(config.tierOdds, List.of(new TierOdds(1, 1, 0, 0), new TierOdds(4, 0.8, 0.2, 0), new TierOdds(7, 0.65, 0.3, 0.05)))) {
+				config.tierOdds = new RunConfig().tierOdds;
+			}
+		}
 		config.defaultsVersion = CURRENT_DEFAULTS;
+		return true;
+	}
+
+	private static boolean sameOdds(List<TierOdds> a, List<TierOdds> b) {
+		if (a == null || a.size() != b.size()) {
+			return false;
+		}
+		for (int i = 0; i < a.size(); i++) {
+			TierOdds x = a.get(i);
+			TierOdds y = b.get(i);
+			if (x == null || x.fromWave != y.fromWave || x.common != y.common || x.rare != y.rare || x.legendary != y.legendary) {
+				return false;
+			}
+		}
 		return true;
 	}
 

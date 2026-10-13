@@ -17,7 +17,7 @@ import re
 import sys
 
 REPO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
-MODULES = ["mobs", "guns", "bosses", "vehicles"]
+MODULES = ["mobs", "guns", "bosses", "vehicles", "abilities"]
 # event id -> why it may still point at a vanilla sound. Empty: everything is original.
 VANILLA_OK = {}
 # Registration calls in the module's sound classes: register("id"), sound("id"), BossSounds.register("id").

@@ -26,6 +26,8 @@ public final class GameHud {
 		HudElementRegistry.addLast(id("pings"), PingHud::extract);
 		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, id("boons"), BoonRowHud::extract);
 		HudElementRegistry.attachElementBefore(VanillaHudElements.BOSS_BAR, id("run_info"), RunInfoHud::extract);
+		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, id("trinkets"), TrinketRowHud::extract);
+		HudElementRegistry.attachElementAfter(VanillaHudElements.HOTBAR, id("build_line"), BuildLineHud::extract);
 	}
 
 	static PlayersConfig.Hud config() {

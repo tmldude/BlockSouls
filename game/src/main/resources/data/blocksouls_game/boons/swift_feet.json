@@ -1,6 +1,10 @@
 {
   "tier": "common",
   "icon": "blocksouls_game:boon/swift_feet",
+  "levels": 3,
+  "tags": [
+    "kinetic"
+  ],
   "effects": [
     {
       "type": "effect",

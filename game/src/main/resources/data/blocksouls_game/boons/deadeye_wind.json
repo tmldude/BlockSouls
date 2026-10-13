@@ -1,0 +1,15 @@
+{
+  "icon": "blocksouls_game:boon/deadeye_wind",
+  "tier": "rare",
+  "keystone": true,
+  "tags": [
+    "on_precision",
+    "kinetic"
+  ],
+  "effects": [
+    {
+      "type": "rule",
+      "rule": "deadeye_wind"
+    }
+  ]
+}

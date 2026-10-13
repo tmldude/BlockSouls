@@ -1,0 +1,14 @@
+{
+  "icon": "blocksouls_game:boon/iron_lung",
+  "tier": "common",
+  "tags": [
+    "on_roll"
+  ],
+  "effects": [
+    {
+      "type": "trait",
+      "trait": "blocksouls:stamina_regen",
+      "level": 1
+    }
+  ]
+}

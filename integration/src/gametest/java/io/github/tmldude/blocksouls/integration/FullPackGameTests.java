@@ -56,7 +56,7 @@ import io.github.tmldude.blocksouls.guns.logic.Perk;
  */
 public class FullPackGameTests {
 	private static final List<String> MODS = List.of("blocksouls_common", "blocksouls_movement", "blocksouls_guns",
-			"blocksouls_game", "blocksouls_mobs", "blocksouls_world", "blocksouls_vehicles", "blocksouls_bosses");
+			"blocksouls_game", "blocksouls_mobs", "blocksouls_world", "blocksouls_vehicles", "blocksouls_bosses", "blocksouls_abilities");
 
 	private static final List<Identifier> MOBS = List.of(CommonIds.SHAMBLER, CommonIds.CRAWLER, CommonIds.SCREAMER,
 			CommonIds.BLOATER, CommonIds.BRUTE, CommonIds.MUTANT_BRUTE, CommonIds.INFECTED_PIGLIN, CommonIds.ASH_HOUND);
@@ -77,7 +77,7 @@ public class FullPackGameTests {
 	@GameTest
 	public void crossModuleIdsResolve(GameTestHelper helper) {
 		for (Identifier item : List.of(CommonIds.STARTER_PISTOL, CommonIds.SCRAP, CommonIds.GUNMETAL_INGOT, CommonIds.BLIGHT_CORE,
-				CommonIds.id(CommonIds.VEHICLES, "wheel"), CommonIds.id(CommonIds.VEHICLES, "engine"))) {
+				CommonIds.id(CommonIds.VEHICLES, "wheel"), CommonIds.id(CommonIds.VEHICLES, "engine"), CommonIds.SOUL, CommonIds.TRINKET_CASE)) {
 			helper.assertTrue(BuiltInRegistries.ITEM.containsKey(item), "item " + item);
 		}
 		helper.assertTrue(BuiltInRegistries.ENTITY_TYPE.containsKey(CommonIds.KART_WRECK), "kart wreck entity");
@@ -95,7 +95,7 @@ public class FullPackGameTests {
 		// Recipes that use another module's items are guarded by load conditions; with the full pack they must load.
 		var recipes = helper.getLevel().getServer().getRecipeManager();
 		for (Identifier recipe : List.of(CommonIds.id(CommonIds.GUNS, "hand_cannon"), CommonIds.id(CommonIds.GUNS, "sniper_rifle"),
-				CommonIds.id(CommonIds.GUNS, "special_ammo"), CommonIds.id(CommonIds.VEHICLES, "engine"))) {
+				CommonIds.id(CommonIds.GUNS, "special_ammo"), CommonIds.id(CommonIds.VEHICLES, "engine"), CommonIds.id(CommonIds.GAME, "reroll_charm"))) {
 			helper.assertTrue(recipes.byKey(ResourceKey.create(Registries.RECIPE, recipe)).isPresent(), "recipe " + recipe);
 		}
 		helper.succeed();

@@ -39,5 +39,7 @@
   "subtitles.blocksouls_guns.gun.ammo_pickup": "Ammo clinks",
   "subtitles.blocksouls_guns.gun.perk.outlaw": "Cylinder spins",
   "subtitles.blocksouls_guns.gun.perk.rampage": "Rampage builds",
-  "subtitles.blocksouls_guns.gun.perk.vorpal": "Vorpal strikes"
+  "subtitles.blocksouls_guns.gun.perk.vorpal": "Vorpal strikes",
+  "subtitles.blocksouls_guns.gun.drop": "Good gun drops",
+  "tooltip.blocksouls_guns.part_used_in": "Used in: %s"
 }

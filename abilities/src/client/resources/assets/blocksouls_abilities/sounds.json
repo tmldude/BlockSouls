@@ -1,0 +1,121 @@
+{
+  "ability.cast.tactical": {
+    "subtitle": "subtitles.blocksouls_abilities.ability.cast",
+    "sounds": [
+      "blocksouls_abilities:ability/cast/tactical1",
+      "blocksouls_abilities:ability/cast/tactical2"
+    ]
+  },
+  "ability.cast.signature": {
+    "subtitle": "subtitles.blocksouls_abilities.ability.cast",
+    "sounds": [
+      "blocksouls_abilities:ability/cast/signature1",
+      "blocksouls_abilities:ability/cast/signature2"
+    ]
+  },
+  "ability.cast.ultimate": {
+    "subtitle": "subtitles.blocksouls_abilities.ability.cast_ultimate",
+    "sounds": [
+      "blocksouls_abilities:ability/cast/ultimate1"
+    ]
+  },
+  "ability.denied": {
+    "subtitle": "subtitles.blocksouls_abilities.ability.denied",
+    "sounds": [
+      "blocksouls_abilities:ability/denied1"
+    ]
+  },
+  "ability.ready": {
+    "subtitle": "subtitles.blocksouls_abilities.ability.ready",
+    "sounds": [
+      "blocksouls_abilities:ability/ready1"
+    ]
+  },
+  "ability.throw": {
+    "subtitle": "subtitles.blocksouls_abilities.ability.throw",
+    "sounds": [
+      "blocksouls_abilities:ability/throw1",
+      "blocksouls_abilities:ability/throw2"
+    ]
+  },
+  "ability.frag": {
+    "subtitle": "subtitles.blocksouls_abilities.ability.frag",
+    "sounds": [
+      "blocksouls_abilities:ability/frag1",
+      "blocksouls_abilities:ability/frag2"
+    ]
+  },
+  "ability.web": {
+    "subtitle": "subtitles.blocksouls_abilities.ability.web",
+    "sounds": [
+      "blocksouls_abilities:ability/web1",
+      "blocksouls_abilities:ability/web2"
+    ]
+  },
+  "ability.fire": {
+    "subtitle": "subtitles.blocksouls_abilities.ability.fire",
+    "sounds": [
+      "blocksouls_abilities:ability/fire1",
+      "blocksouls_abilities:ability/fire2"
+    ]
+  },
+  "ability.heal": {
+    "subtitle": "subtitles.blocksouls_abilities.ability.heal",
+    "sounds": [
+      "blocksouls_abilities:ability/heal1"
+    ]
+  },
+  "ability.slam": {
+    "subtitle": "subtitles.blocksouls_abilities.ability.slam",
+    "sounds": [
+      "blocksouls_abilities:ability/slam1",
+      "blocksouls_abilities:ability/slam2"
+    ]
+  },
+  "ability.geyser": {
+    "subtitle": "subtitles.blocksouls_abilities.ability.geyser",
+    "sounds": [
+      "blocksouls_abilities:ability/geyser1"
+    ]
+  },
+  "ability.fan": {
+    "subtitle": "subtitles.blocksouls_abilities.ability.fan",
+    "sounds": [
+      "blocksouls_abilities:ability/fan1"
+    ]
+  },
+  "ability.zap": {
+    "subtitle": "subtitles.blocksouls_abilities.ability.zap",
+    "sounds": [
+      "blocksouls_abilities:ability/zap1",
+      "blocksouls_abilities:ability/zap2"
+    ]
+  },
+  "ability.drain": {
+    "subtitle": "subtitles.blocksouls_abilities.ability.drain",
+    "sounds": [
+      "blocksouls_abilities:ability/drain1"
+    ]
+  },
+  "ability.storm": {
+    "subtitle": "subtitles.blocksouls_abilities.ability.storm",
+    "sounds": [
+      "blocksouls_abilities:ability/storm1",
+      "blocksouls_abilities:ability/storm2",
+      "blocksouls_abilities:ability/storm3"
+    ]
+  },
+  "ability.frenzy": {
+    "subtitle": "subtitles.blocksouls_abilities.ability.frenzy",
+    "sounds": [
+      "blocksouls_abilities:ability/frenzy1",
+      "blocksouls_abilities:ability/frenzy2"
+    ]
+  },
+  "ability.shield": {
+    "subtitle": "subtitles.blocksouls_abilities.ability.shield",
+    "sounds": [
+      "blocksouls_abilities:ability/shield1"
+    ]
+  }
+}

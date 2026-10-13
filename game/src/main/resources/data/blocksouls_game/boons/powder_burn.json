@@ -1,0 +1,15 @@
+{
+  "icon": "blocksouls_game:boon/powder_burn",
+  "tier": "legendary",
+  "keystone": true,
+  "tags": [
+    "on_reload",
+    "explosion"
+  ],
+  "effects": [
+    {
+      "type": "rule",
+      "rule": "powder_burn"
+    }
+  ]
+}

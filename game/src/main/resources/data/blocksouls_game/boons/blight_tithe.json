@@ -1,0 +1,16 @@
+{
+  "icon": "blocksouls_game:boon/blight_tithe",
+  "tier": "rare",
+  "keystone": true,
+  "tags": [
+    "on_precision",
+    "blight",
+    "heal"
+  ],
+  "effects": [
+    {
+      "type": "rule",
+      "rule": "blight_tithe"
+    }
+  ]
+}

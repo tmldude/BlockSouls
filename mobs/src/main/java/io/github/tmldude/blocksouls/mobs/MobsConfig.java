@@ -5,6 +5,12 @@ package io.github.tmldude.blocksouls.mobs;
  * movement-speed attribute, times are seconds unless named {@code ...Ticks}, distances are blocks.
  */
 public class MobsConfig {
+	/** Defaults revision {@link #migrate} brings older files up to. */
+	public static final int CURRENT_DEFAULTS = 1;
+
+	/** Which defaults revision this file was written against (0 = before the field existed). */
+	public int defaultsVersion;
+
 	public Shambler shambler = new Shambler();
 	public Crawler crawler = new Crawler();
 	public Screamer screamer = new Screamer();
@@ -15,6 +21,22 @@ public class MobsConfig {
 	public AshHound ashHound = new AshHound();
 	public Breaking breaking = new Breaking();
 	public Dread dread = new Dread();
+
+	/**
+	 * Brings a mobs.json written against older defaults up to date: values still at an old default take the new one,
+	 * anything changed by hand is kept. Returns whether anything changed (so the caller saves the file).
+	 */
+	public static boolean migrate(MobsConfig config) {
+		if (config.defaultsVersion >= CURRENT_DEFAULTS) {
+			return false;
+		}
+		// 1: drops-and-pacing (v0.11): the first elite (Mutant Brute) a wave earlier.
+		if (config.defaultsVersion < 1 && config.mutantBrute != null && config.mutantBrute.minWave == 7) {
+			config.mutantBrute.minWave = 6;
+		}
+		config.defaultsVersion = CURRENT_DEFAULTS;
+		return true;
+	}
 
 	/** Shared by every mob. {@code minWave}/{@code weight} only matter for wave mobs. */
 	public static class Stats {
@@ -111,7 +133,7 @@ public class MobsConfig {
 		public double breakSpeed = 2;
 
 		MutantBrute() {
-			super(150, 12, 0.24, 8, 7, 1);
+			super(150, 12, 0.24, 8, 6, 1);
 		}
 	}
 

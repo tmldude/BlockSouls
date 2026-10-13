@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import net.fabricmc.api.ModInitializer;
 
 import io.github.tmldude.blocksouls.common.Config;
+import io.github.tmldude.blocksouls.common.event.ConfigEvents;
 import io.github.tmldude.blocksouls.mobs.command.MobCommands;
 import io.github.tmldude.blocksouls.mobs.dread.Dread;
 import io.github.tmldude.blocksouls.mobs.nether.NetherSpawns;
@@ -22,6 +23,15 @@ public class BlockSoulsMobs implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		CONFIG = Config.load("mobs", MobsConfig.class, MobsConfig::new);
+		if (MobsConfig.migrate(CONFIG)) {
+			Config.save("mobs", CONFIG);
+		}
+		// /bs config reload mobs: an old file gets the same defaults migration as at startup.
+		ConfigEvents.RELOADED.register((name, config) -> {
+			if (config == CONFIG && MobsConfig.migrate(CONFIG)) {
+				Config.save("mobs", CONFIG);
+			}
+		});
 		MobSounds.init();
 		MobEntities.init();
 		MobWaves.init();
