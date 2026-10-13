@@ -14,7 +14,7 @@ import java.util.Map;
 public class DirectorConfig {
 	public static final String FILE = "director";
 	/** Defaults revision {@link #migrate} brings older files up to. */
-	public static final int CURRENT_DEFAULTS = 2;
+	public static final int CURRENT_DEFAULTS = 3;
 
 	/** Which defaults revision this file was written against (0 = before the field existed). */
 	public int defaultsVersion;
@@ -53,6 +53,15 @@ public class DirectorConfig {
 		if (config.defaultsVersion < 2 && config.events != null && config.events.pool != null) {
 			for (EventSpec spec : new Events().pool) {
 				if (!spec.floorTags.isEmpty() && config.events.pool.stream().noneMatch(old -> spec.id.equals(old.id))) {
+					config.events.pool.add(spec);
+				}
+			}
+		}
+		// 3 (v2-floor5-blight): floor events that share a generic event's id (the blight altar and pylon) join too.
+		if (config.defaultsVersion < 3 && config.events != null && config.events.pool != null) {
+			for (EventSpec spec : new Events().pool) {
+				if (!spec.floorTags.isEmpty() && config.events.pool.stream()
+						.noneMatch(old -> spec.id.equals(old.id) && spec.floorTags.equals(old.floorTags))) {
 					config.events.pool.add(spec);
 				}
 			}
@@ -184,7 +193,15 @@ public class DirectorConfig {
 				new EventSpec("ambush", 2, 2),
 				// --- floor 4, The Vault (Stage 6C): placed by the world module through DirectorEvents.PLACE_EVENT ---
 				new EventSpec("blocksouls_world:vault_prison", 4, 1, List.of("vault"), true),
-				new EventSpec("blocksouls_world:trapped_hall", 4, 1, List.of("vault"), false)));
+				new EventSpec("blocksouls_world:trapped_hall", 4, 1, List.of("vault"), false),
+				// v2-floor5-blight: the Blighted Surface's own events (the soul wager runs at every siege already)
+				new EventSpec("blood_altar", 3, 1, List.of("blight"), false),
+				new EventSpec("challenge_pylon", 3, 1, List.of("blight"), false)));
+		/**
+		 * v2-floor5-blight: a floor carrying one of these tags rolls only its own (floor-tagged) events, not the
+		 * generic pool, as long as one of them is eligible.
+		 */
+		public List<String> ownEventsOnlyFloorTags = new ArrayList<>(List.of("blight"));
 		/** Without a floor's EVENT slot, the event is placed this far from the camp. */
 		public int distanceFromCamp = 28;
 		/** An ambush springs when a player comes this close to its marker. */
@@ -197,6 +214,7 @@ public class DirectorConfig {
 		/**
 		 * A floor's own mini-boss roster, by floor tag: a floor carrying one of these tags rotates through that list
 		 * instead of {@link #miniBosses} (first matching tag wins; unknown ids are skipped the same way).
+		 * {@value DirectorRules#EARLIER} stands for the boss {@link #miniBosses} gave a seed-picked earlier act.
 		 */
 		public Map<String, List<String>> miniBossesByFloorTag = defaultFloorMiniBosses();
 		/** Mini-boss from this act on (the first act is the tutorial floor). */
@@ -209,6 +227,8 @@ public class DirectorConfig {
 		Map<String, List<String>> rosters = new LinkedHashMap<>();
 		// --- floor 4, The Vault (Stage 6C): the blind hunter and the golem (world mini-bosses) ---
 		rosters.put("vault", new ArrayList<>(List.of("blocksouls_world:vault_listener", "blocksouls_world:vault_colossus")));
+		// v2-floor5-blight: Blightheart, the Pale Rider and one boss from an earlier floor ({@link DirectorRules#EARLIER})
+		rosters.put("blight", new ArrayList<>(List.of("blocksouls_bosses:blightheart", "blocksouls_bosses:pale_rider", DirectorRules.EARLIER)));
 		return rosters;
 	}
 

@@ -69,7 +69,7 @@
     },
     {
       "kind": "structure",
-      "tag": "outpost",
+      "tag": "nest",
       "x": -34,
       "z": -30,
       "radius": 7
@@ -84,7 +84,8 @@
       "kind": "secret",
       "x": -44,
       "z": 22,
-      "radius": 4
+      "radius": 4,
+      "tag": "grave"
     },
     {
       "kind": "event",

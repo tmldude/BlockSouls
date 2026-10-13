@@ -49,5 +49,6 @@ public class BlockSoulsBossesClient implements ClientModInitializer {
 		io.github.tmldude.blocksouls.bosses.client.ashwyrm.AshwyrmClient.register();
 		StormplateKnightClient.register();
 		RiftwardenClient.register();
+		io.github.tmldude.blocksouls.bosses.client.blight.BlightheartClient.register(); // v2-floor5-blight
 	}
 }

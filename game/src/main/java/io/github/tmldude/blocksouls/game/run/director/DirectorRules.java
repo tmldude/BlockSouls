@@ -52,9 +52,18 @@ final class DirectorRules {
 	 * needs at least one of them (a floor's own event). Null when none qualify.
 	 */
 	static @Nullable String pickEvent(List<DirectorConfig.EventSpec> pool, int act, Set<String> floorTags, double roll) {
+		return pickEvent(pool, act, floorTags, false, roll);
+	}
+
+	/**
+	 * {@link #pickEvent(List, int, Set, double)}; with {@code ownOnly} (v2-floor5-blight: a floor in
+	 * {@code Events.ownEventsOnlyFloorTags}) only the floor-tagged events qualify, when any of them does.
+	 */
+	static @Nullable String pickEvent(List<DirectorConfig.EventSpec> pool, int act, Set<String> floorTags, boolean ownOnly, double roll) {
+		boolean own = ownOnly && pool.stream().anyMatch(spec -> eligible(spec, act, floorTags) && tagged(spec));
 		int total = 0;
 		for (DirectorConfig.EventSpec spec : pool) {
-			if (eligible(spec, act, floorTags)) {
+			if (eligible(spec, act, floorTags) && (!own || tagged(spec))) {
 				total += spec.weight;
 			}
 		}
@@ -63,7 +72,7 @@ final class DirectorRules {
 		}
 		double target = roll * total;
 		for (DirectorConfig.EventSpec spec : pool) {
-			if (eligible(spec, act, floorTags)) {
+			if (eligible(spec, act, floorTags) && (!own || tagged(spec))) {
 				target -= spec.weight;
 				if (target < 0) {
 					return spec.id;
@@ -76,6 +85,10 @@ final class DirectorRules {
 	private static boolean eligible(DirectorConfig.EventSpec spec, int act, Set<String> floorTags) {
 		return spec.id != null && spec.weight > 0 && act >= spec.minAct
 				&& (spec.floorTags == null || spec.floorTags.isEmpty() || spec.floorTags.stream().anyMatch(floorTags::contains));
+	}
+
+	private static boolean tagged(DirectorConfig.EventSpec spec) {
+		return spec.floorTags != null && !spec.floorTags.isEmpty();
 	}
 
 	/** The spec for an event id (for its {@code ambush} flag), or null. */
@@ -94,6 +107,34 @@ final class DirectorRules {
 		}
 		return roster;
 	}
+
+	// v2-floor5-blight: a floor's roster may name "the boss from an earlier floor".
+	/** Stands, in a {@code miniBossesByFloorTag} list, for the boss the base roster gave an earlier act. */
+	static final String EARLIER = "@earlier";
+
+	/**
+	 * {@code roster} with {@link #EARLIER} swapped for the base roster's pick on a seed-chosen act in
+	 * [{@code fromAct}, {@code act}) (dropped when there's none, or it's already listed).
+	 */
+	static List<String> withEarlier(List<String> roster, List<String> base, int act, int fromAct, long seed) {
+		if (!roster.contains(EARLIER)) {
+			return roster;
+		}
+		List<String> out = new ArrayList<>();
+		for (String id : roster) {
+			if (!EARLIER.equals(id)) {
+				out.add(id);
+			} else if (!base.isEmpty() && act > fromAct) {
+				int earlier = fromAct + Math.floorMod(seed, act - fromAct);
+				String pick = base.get(Math.floorMod(earlier - fromAct + seed, base.size()));
+				if (!out.contains(pick) && !roster.contains(pick)) {
+					out.add(pick);
+				}
+			}
+		}
+		return out;
+	}
+	// end v2-floor5-blight
 
 	/** The circle's radius {@code elapsed} seconds in: shrinks linearly from start to end over the challenge. */
 	static double pylonRadius(long elapsed, DirectorConfig.Pylon config) {

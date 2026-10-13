@@ -21,6 +21,7 @@ import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntPr
 
 import net.fabricmc.fabric.api.loot.v3.FabricLootTableBuilder;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
+import net.fabricmc.loader.api.FabricLoader;
 
 import io.github.tmldude.blocksouls.common.CommonIds;
 import io.github.tmldude.blocksouls.world.BlockSoulsWorld;
@@ -39,6 +40,11 @@ public final class WorldLoot {
 	public static final ResourceKey<LootTable> INJECT_WAVE_LEGENDARY = table("inject/wave_legendary");
 	public static final ResourceKey<LootTable> INJECT_WAVE_CLEAR = table("inject/wave_clear");
 	private static final String ENDERMAN = "minecraft:entities/enderman";
+	// v2-floor5-blight: the nest / grave chests' gun rolls. Those tables only load with guns, so they're nested here
+	// (when guns is installed) instead of referenced from the chest JSON, which would leave an unbound reference.
+	private static final Map<ResourceKey<LootTable>, ResourceKey<LootTable>> GUNS_BONUS = Map.of(
+			table("chests/blight_nest"), table("chests/blight_nest_legendary"),
+			table("chests/blight_grave"), table("chests/blight_grave_exotic"));
 
 	private WorldLoot() {
 	}
@@ -67,6 +73,11 @@ public final class WorldLoot {
 					CommonIds.WAVE_CLEAR_REWARD, INJECT_WAVE_CLEAR);
 			if (wave.containsKey(key)) {
 				nested(table, registries, wave.get(key), waveChance(cfg, key));
+			}
+
+			// v2-floor5-blight
+			if (GUNS_BONUS.containsKey(key) && FabricLoader.getInstance().isModLoaded(CommonIds.GUNS)) {
+				nested(table, registries, GUNS_BONUS.get(key), 1.0F);
 			}
 
 			if (key.equals(StructurePlacer.WRECK_LOOT)) {

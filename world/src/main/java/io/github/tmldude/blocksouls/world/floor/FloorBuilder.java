@@ -28,6 +28,7 @@ import io.github.tmldude.blocksouls.common.floor.FloorSlot;
 import io.github.tmldude.blocksouls.common.floor.FloorSlotKind;
 import io.github.tmldude.blocksouls.world.BlockSoulsWorld;
 import io.github.tmldude.blocksouls.world.content.WorldBlocks;
+import io.github.tmldude.blocksouls.world.economy.WorldEconomy;
 import io.github.tmldude.blocksouls.world.gen.RuinStructure;
 import io.github.tmldude.blocksouls.world.gen.StructurePlacer;
 
@@ -41,6 +42,9 @@ final class FloorBuilder {
 	static final ResourceKey<LootTable> SECRET_LOOT = CommonIds.lootTable(BlockSoulsWorld.MOD_ID, "chests/floor_secret");
 	/** Floor 4 (The Vault): a crate holding one of the vault room's keys. */
 	static final ResourceKey<LootTable> KEY_LOOT = CommonIds.lootTable(BlockSoulsWorld.MOD_ID, "chests/vault_key");
+	// v2-floor5-blight: the nest's chest (a legendary) and the grave (the run's exotic).
+	static final ResourceKey<LootTable> NEST_LOOT = CommonIds.lootTable(BlockSoulsWorld.MOD_ID, "chests/blight_nest");
+	static final ResourceKey<LootTable> GRAVE_LOOT = CommonIds.lootTable(BlockSoulsWorld.MOD_ID, "chests/blight_grave");
 	private static final int FLAGS = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE;
 
 	private final ServerLevel level;
@@ -401,12 +405,16 @@ final class FloorBuilder {
 
 	/**
 	 * The floor's structure: {@code outpost} is the checkpoint ruin, {@code wreck_yard} the wreck ruin,
-	 * {@code final_arena} floor 6's fighting ring ({@link ArenaFloor}).
+	 * {@code final_arena} floor 6's fighting ring ({@link ArenaFloor}), {@code nest} floor 5's hive.
 	 */
 	private void structure(BlockPos pos, FloorPlanner.PlannedSlot slot) {
 		String tag = slot.tag();
 		if (CommonIds.FINAL_ARENA_SLOT.equals(tag)) {
 			ArenaFloor.build(level, pos, slot.radius());
+			return;
+		}
+		if ("nest".equals(tag)) { // v2-floor5-blight
+			nest(pos, Math.max(4, slot.radius()));
 			return;
 		}
 		RuinStructure.Kind kind = "wreck_yard".equals(tag) ? RuinStructure.Kind.WRECK : RuinStructure.Kind.CHECKPOINT;
@@ -484,6 +492,10 @@ final class FloorBuilder {
 	 * {@code hidden_drop}: a trapdoor in the grass over a shaft to a small vault. Both hold a legendary-leaning chest.
 	 */
 	private void secret(BlockPos pos, String tag) {
+		if ("grave".equals(tag)) { // v2-floor5-blight
+			grave(pos);
+			return;
+		}
 		if ("hidden_drop".equals(tag)) {
 			BlockPos vault = pos.below(6);
 			carve(List.of(new BlockPos[] {pos.below(5), pos.below(1)}, new BlockPos[] {vault.offset(-1, 0, -1), vault.offset(1, 1, 1)}));
@@ -506,6 +518,72 @@ final class FloorBuilder {
 		}
 		level.setBlock(pos.offset(-1, 0, -1), Blocks.LANTERN.defaultBlockState(), FLAGS);
 		chest(pos.offset(1, 0, -1), SECRET_LOOT);
+	}
+
+	// ---- v2-floor5-blight: the nest (floor 5's structure) and the grave (its secret)
+
+	/**
+	 * The nest: the broken outpost (checkpoint ruin) overgrown with blight, its chests rolling the nest loot (a
+	 * legendary), and a cursed chest (the economy block the game handles) beside the first chest.
+	 */
+	private void nest(BlockPos pos, int radius) {
+		RuinStructure.Kind kind = RuinStructure.Kind.CHECKPOINT;
+		StructurePlacer.Placed placed = StructurePlacer.place(level, random, pos, kind.layout(random.nextLong()), NEST_LOOT);
+		placed.chests().forEach(chest -> crate(chest, NEST_LOOT));
+		if (!placed.chests().isEmpty()) {
+			BlockPos chest = placed.chests().getFirst();
+			for (Direction side : Direction.Plane.HORIZONTAL) {
+				BlockPos spot = chest.relative(side);
+				if (level.getBlockState(spot).isAir() && level.getBlockState(spot.below()).isSolid()) {
+					level.setBlock(spot, WorldEconomy.CURSED_CHEST.defaultBlockState(), FLAGS);
+					break;
+				}
+			}
+		}
+		BlockState ground = template.decor != null && !template.decor.patchBlock.isEmpty() ? block(template.decor.patchBlock, Blocks.NETHERRACK)
+				: Blocks.NETHERRACK.defaultBlockState();
+		BlockState growth = template.decor != null && !template.decor.patchCover.isEmpty() ? block(template.decor.patchCover, Blocks.AIR)
+				: Blocks.AIR.defaultBlockState();
+		int ox = pos.getX() - centre.getX();
+		int oz = pos.getZ() - centre.getZ();
+		for (int x = -radius; x <= radius; x++) {
+			for (int z = -radius; z <= radius; z++) {
+				if (x * x + z * z > radius * radius || random.nextDouble() > 0.55) {
+					continue;
+				}
+				BlockPos top = surface(ox + x, oz + z).below();
+				if (!level.getBlockState(top).is(topAt(ox + x, oz + z).getBlock())) {
+					continue; // only bare ground: never the ruin's own blocks
+				}
+				level.setBlock(top, ground, FLAGS);
+				if (!growth.isAir() && random.nextDouble() < 0.3 && level.getBlockState(top.above()).isAir() && growth.canSurvive(level, top.above())) {
+					level.setBlock(top.above(), growth, FLAGS);
+				}
+			}
+		}
+	}
+
+	/**
+	 * The grave: a leaning headstone and a 1x2 patch of soft soul soil, two deep, over a buried chest rolling the
+	 * grave loot (the run's exotic). Nothing else marks it; the fog does the hiding. {@link #graveChest} is where the
+	 * chest sits.
+	 */
+	private void grave(BlockPos pos) {
+		BlockState soil = Blocks.SOUL_SOIL.defaultBlockState();
+		for (int z = 0; z <= 1; z++) {
+			for (int y = 1; y <= 2; y++) {
+				level.setBlock(pos.offset(0, -y, z), soil, FLAGS);
+			}
+		}
+		level.setBlock(pos.offset(0, -3, 1), soil, FLAGS);
+		level.setBlock(pos.offset(0, 0, -1), Blocks.MOSSY_COBBLESTONE_WALL.defaultBlockState(), FLAGS);
+		level.setBlock(pos.offset(1, 0, 1), Blocks.DEAD_BUSH.defaultBlockState(), FLAGS);
+		chest(graveChest(pos), GRAVE_LOOT);
+	}
+
+	/** Where the grave's chest is buried, under its soft soil (gametests dig to it). */
+	static BlockPos graveChest(BlockPos slot) {
+		return slot.below(3);
 	}
 
 	/** The mini-boss arena: the flattened slot ringed by four lantern posts. */

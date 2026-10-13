@@ -42,6 +42,8 @@ public class RunConfig {
 
 	/** Seconds the player-triggered portal charge takes while its defense siege runs. */
 	public int portalChargeSeconds = 180;
+	/** v2-floor5-blight: seconds of quiet between an act's sieges when it has more than one ({@code ActSpec.sieges}). */
+	public int siegeLullSeconds = 40;
 
 	/** Start the run with {@link #defaultDifficulty} the first time a player joins a fresh world. */
 	public boolean autoStart = true;
@@ -198,6 +200,9 @@ public class RunConfig {
 		public String name = "";
 		/** Floors shape only: the world's floor template pool this act's floor is drawn from. */
 		public String pool = "";
+		// v2-floor5-blight: sieges per night (owner D4). 2 = the horn (or day end) starts the first; after it a lull of
+		// siegeLullSeconds ("full dark"), then the second; the portal lights only after the last. 0 or 1 = one siege.
+		public int sieges = 1;
 
 		public ActSpec() {
 		}
@@ -261,8 +266,9 @@ public class RunConfig {
 			if (floor == 4) {
 				spec.pool = "blocksouls_world:vault";
 			}
-			if (floor == 5) { // v2-floor5-blight: the Blighted Surface
+			if (floor == 5) { // v2-floor5-blight: the Blighted Surface, two sieges in one night
 				spec.pool = "blocksouls_world:blight";
+				spec.sieges = 2;
 			}
 			if (floor == 2) { // v2-floor2-infernal
 				spec.pool = "blocksouls_world:infernal";

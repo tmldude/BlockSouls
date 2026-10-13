@@ -1,6 +1,8 @@
 package io.github.tmldude.blocksouls.game.run;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Map;
@@ -51,6 +53,28 @@ class ActMathTest {
 		for (int players : new int[] {1, 8}) {
 			assertEquals(2, ActMath.partyAct(Map.of(NETHER, players), List.of(OVERWORLD, NETHER), 1),
 					players + " players move the front");
+		}
+	}
+
+	// ---- v2-floor5-blight: two sieges in one night
+
+	@Test
+	void oneSiegeActsLightAfterTheFirst() {
+		assertFalse(ActMath.anotherSiege(0, 1));
+		assertFalse(ActMath.anotherSiege(0, 0), "0 reads as one siege");
+	}
+
+	@Test
+	void twoSiegeActsOweASecond() {
+		assertTrue(ActMath.anotherSiege(0, 2), "the first siege leaves the portal dark");
+		assertFalse(ActMath.anotherSiege(1, 2), "the second lights it");
+	}
+
+	@Test
+	void floorFiveHasTwoSiegesByDefault() {
+		List<RunConfig.ActSpec> acts = new RunConfig().floorActs;
+		for (int i = 0; i < acts.size(); i++) {
+			assertEquals(i == 4 ? 2 : 1, acts.get(i).sieges, "floor " + (i + 1));
 		}
 	}
 }
