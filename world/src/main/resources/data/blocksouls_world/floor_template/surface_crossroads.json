@@ -1,0 +1,38 @@
+{
+  "pool": "blocksouls_world:surface",
+  "tags": ["surface", "grassland"],
+  "minFloor": 1,
+  "maxFloor": 99,
+  "weight": 3,
+  "radius": 56,
+  "groundY": 80,
+  "depth": 16,
+  "hills": 2.5,
+  "terrain": {
+    "top": "minecraft:grass_block",
+    "fill": "minecraft:dirt",
+    "base": "minecraft:stone"
+  },
+  "trees": 16,
+  "nodes": 12,
+  "nodeMix": {
+    "blocksouls_world:scrap_node": 3,
+    "blocksouls_world:gunmetal_node": 2
+  },
+  "crates": 2,
+  "slots": [
+    { "kind": "camp", "x": 0, "z": 0, "radius": 6 },
+    { "kind": "exit_portal", "x": 0, "z": -9, "radius": 2 },
+    { "kind": "structure", "x": 30, "z": -18, "radius": 7 },
+    { "kind": "mini_boss", "x": -32, "z": 20, "radius": 9 },
+    { "kind": "secret", "x": 38, "z": 28, "radius": 4 },
+    { "kind": "event", "x": -24, "z": -26, "radius": 5 },
+    { "kind": "cave", "x": 14, "z": 18, "radius": 4 },
+    { "kind": "wreck", "x": -40, "z": -4, "radius": 7 },
+    { "kind": "node", "tag": "blocksouls_world:gunmetal_node", "x": 18, "z": -34 },
+    { "kind": "node", "tag": "blocksouls_world:gunmetal_node", "x": -14, "z": 38 },
+    { "kind": "node", "x": 44, "z": 4 },
+    { "kind": "node", "x": -6, "z": -42 },
+    { "kind": "node", "x": 24, "z": 40 }
+  ]
+}

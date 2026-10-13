@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "blocksouls_world:block/gunmetal_node"
+  }
+}

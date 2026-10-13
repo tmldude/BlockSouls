@@ -23,7 +23,8 @@ public class RunConfig {
 	/**
 	 * The run's shape: {@code "classic"} is the v1 open-world 7-night overworld run (the default until v2
 	 * ships), {@code "expedition"} the v2 act run (acts advance by portal charge; sieges follow the party
-	 * through every dimension on one day/night rhythm).
+	 * through every dimension on one day/night rhythm), {@code "floors"} the expedition played on the world's
+	 * generated floor islands ({@link #floorActs}, one floor per act).
 	 */
 	public String runShape = "classic";
 
@@ -32,6 +33,12 @@ public class RunConfig {
 	 * travel to it just isn't possible until the dimension does (Stage 6 registers acts 3–4).
 	 */
 	public List<ActSpec> acts = defaultActs();
+
+	/**
+	 * The acts of the {@code "floors"} run shape: every act is a floor island in the world's floor dimension
+	 * (the world places one per act; acts 2–6 reuse Surface templates with escalation tags until their pools ship).
+	 */
+	public List<ActSpec> floorActs = defaultFloorActs();
 
 	/** Seconds the player-triggered portal charge takes while its defense siege runs. */
 	public int portalChargeSeconds = 180;
@@ -189,6 +196,8 @@ public class RunConfig {
 		public String id = "";
 		public String dimension = "";
 		public String name = "";
+		/** Floors shape only: the world's floor template pool this act's floor is drawn from. */
+		public String pool = "";
 
 		public ActSpec() {
 		}
@@ -238,6 +247,16 @@ public class RunConfig {
 				new ActSpec(RunIds.NAMESPACE + ":infected_nether", "minecraft:the_nether", "Infected Nether"),
 				new ActSpec(RunIds.NAMESPACE + ":blightheart", "blocksouls_world:blightheart", "The Blightheart"),
 				new ActSpec(RunIds.NAMESPACE + ":skyrift", "blocksouls_world:skyrift", "The Skyrift")));
+	}
+
+	private static List<ActSpec> defaultFloorActs() {
+		List<ActSpec> floorActs = new ArrayList<>();
+		for (int floor = 1; floor <= 6; floor++) {
+			ActSpec spec = new ActSpec(RunIds.NAMESPACE + ":floor_" + floor, "blocksouls_world:floors", "Floor " + floor);
+			spec.pool = "blocksouls_world:surface";
+			floorActs.add(spec);
+		}
+		return floorActs;
 	}
 
 	private static Map<String, DifficultyPreset> defaultDifficulties() {

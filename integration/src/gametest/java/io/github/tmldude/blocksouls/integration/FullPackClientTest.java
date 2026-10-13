@@ -128,6 +128,18 @@ public class FullPackClientTest implements FabricClientGameTest {
 			context.takeScreenshot("16-end-final-dragon");
 			server.runCommand("effect clear @a minecraft:slow_falling");
 
+			// A v2 floor: act 1's Surface island in the floors dimension (opening act 1 sends everyone to its camp).
+			server.runCommand("bs floor open 1");
+			context.waitTicks(100);
+			server.runCommand("bs floor light 1");
+			server.runCommand("execute as @a at @s run tp @s ~ ~2 ~ 30 20");
+			context.waitTicks(40);
+			context.takeScreenshot("07-floor-camp");
+			server.runCommand("execute as @a at @s run bs floor goto structure");
+			server.runCommand("execute as @a at @s run tp @s ~-6 ~4 ~-6 -45 25");
+			context.waitTicks(60);
+			context.takeScreenshot("07b-floor-structure");
+
 			// The Nether: blight and ash fog. Teleport first so the chunks load, then clear a pocket around the player
 			// (a fill in unloaded chunks does nothing): a hollow glass box keeps the lava out and the view clear.
 			server.runCommand("effect give @a minecraft:fire_resistance infinite 0 true");

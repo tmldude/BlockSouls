@@ -1,0 +1,43 @@
+package io.github.tmldude.blocksouls.world.floor;
+
+import java.util.function.Function;
+
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
+
+import io.github.tmldude.blocksouls.common.CommonIds;
+
+/** The floors' blocks: resource nodes and the exit portal. None has an item; the floor builder places them. */
+public final class FloorBlocks {
+	public static final Block SCRAP_NODE = register(CommonIds.SCRAP_NODE, NodeBlock::new, node(MapColor.COLOR_BROWN, SoundType.CHAIN));
+	public static final Block GUNMETAL_NODE = register(CommonIds.GUNMETAL_NODE, NodeBlock::new, node(MapColor.METAL, SoundType.METAL));
+	public static final Block FLOOR_PORTAL = register(CommonIds.FLOOR_PORTAL, FloorPortalBlock::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(-1.0F, 3600000.0F).noLootTable().noOcclusion()
+					.pushReaction(PushReaction.IMMOVEABLE).sound(SoundType.GLASS)
+					.lightLevel(state -> state.getValue(FloorPortalBlock.LIT) ? 11 : 3));
+
+	private FloorBlocks() {
+	}
+
+	private static BlockBehaviour.Properties node(MapColor color, SoundType sound) {
+		return BlockBehaviour.Properties.of().mapColor(color).strength(-1.0F, 3600000.0F).noLootTable().sound(sound)
+				.pushReaction(PushReaction.IMMOVEABLE);
+	}
+
+	private static Block register(Identifier id, Function<BlockBehaviour.Properties, Block> factory, BlockBehaviour.Properties properties) {
+		ResourceKey<Block> key = ResourceKey.create(Registries.BLOCK, id);
+		return Registry.register(BuiltInRegistries.BLOCK, key, factory.apply(properties.setId(key)));
+	}
+
+	/** Forces class loading (registration) from the initializer. */
+	public static void init() {
+	}
+}
