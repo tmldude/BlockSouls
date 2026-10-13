@@ -258,6 +258,9 @@ public class RunConfig {
 			if (floor == 3) {
 				spec.pool = "blocksouls_world:skyrift";
 			}
+			if (floor == 4) {
+				spec.pool = "blocksouls_world:vault";
+			}
 			// --- end floor pools ---
 			floorActs.add(spec);
 		}

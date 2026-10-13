@@ -61,6 +61,44 @@ public final class FloorTemplate {
 	/** Siege ring points moved onto shards (waves drop in from above). */
 	public int elevatedSiegePoints = 0;
 
+	// ---- Vault (floor 4) block: the box shape. Island templates leave these at their defaults.
+	/** {@code "island"} (default: a floating disc) or {@code "box"} (a bounded room-and-corridor dungeon, floor 4). */
+	public String shape = SHAPE_ISLAND;
+	/** Box only: ceiling height above {@link #groundY} (the bedrock lid). */
+	public int height = 24;
+	/** Box only: how the rooms and corridors are laid out. */
+	public Box box = new Box();
+
+	public static final String SHAPE_ISLAND = "island";
+	public static final String SHAPE_BOX = "box";
+
+	public boolean isBox() {
+		return SHAPE_BOX.equals(shape);
+	}
+
+	/** The box layout's knobs (see {@link BoxLayout}). {@link #radius} is the box's half-width. */
+	public static class Box {
+		/** Filler rooms on top of the slot rooms (keys, crates, nodes live in them). */
+		public int rooms = 7;
+		/** Extra corridors that close a loop, each sealed by a wall plug (a hidden shortcut). */
+		public int shortcuts = 3;
+		/** Corridor stubs that end in a wall. */
+		public int deadEnds = 4;
+		/** Mob closets: a sealed pocket off a corridor behind a wall that releases a swarm when broken. */
+		public int closets = 5;
+		/** Share of scattered nodes set into a corridor's wall face (rock behind) instead of standing in a room. */
+		public double wallNodeShare = 0.4;
+		public int corridorWidth = 3;
+		public int corridorHeight = 4;
+		public int roomHeight = 6;
+		/** Clear height of the camp hall and the mini-boss rooms. */
+		public int hallHeight = 9;
+		/** Wall variant shares (the rest are plain vault bricks). */
+		public double mossyShare = 0.2;
+		public double crackedShare = 0.08;
+	}
+	// ---- end Vault block
+
 	public static class Terrain {
 		public String top = "minecraft:grass_block";
 		public String fill = "minecraft:dirt";
@@ -127,6 +165,15 @@ public final class FloorTemplate {
 		if (radius < 16) {
 			throw new IllegalArgumentException("radius must be at least 16");
 		}
+		if (shape == null) {
+			shape = SHAPE_ISLAND;
+		}
+		if (!isBox() && !SHAPE_ISLAND.equals(shape)) {
+			throw new IllegalArgumentException("unknown shape " + shape);
+		}
+		if (isBox() && (box == null || height < 12)) {
+			throw new IllegalArgumentException("a box needs a box block and a height of at least 12");
+		}
 		int camps = 0;
 		int portals = 0;
 		for (Slot slot : slots) {
@@ -144,7 +191,8 @@ public final class FloorTemplate {
 			} else if (kind == FloorSlotKind.EXIT_PORTAL) {
 				portals++;
 			}
-			if ((long) slot.x * slot.x + (long) slot.z * slot.z > (long) radius * radius) {
+			if (isBox() ? Math.max(Math.abs(slot.x), Math.abs(slot.z)) > radius - 3
+					: (long) slot.x * slot.x + (long) slot.z * slot.z > (long) radius * radius) {
 				throw new IllegalArgumentException(slot.kind + " slot at " + slot.x + "," + slot.z + " is off the island");
 			}
 		}
