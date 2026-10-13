@@ -33,7 +33,10 @@ BOSSES = {
     }),
     "final_dragon": (2, ("#f4e0ff", "#a24bff"), {}),
     # Floor 6 (v2-floor6-arena): cracks per phase (P2 transformed, P3 rush).
-    "riftwarden": (3, ("#f2fffd", "#4dffe1"), {}),
+    "riftwarden": (3, ("#f2fffd", "#4dffe1"), {
+        # RiftwardenModel core (riftwarden.py "core").
+        "core": [(104, 16, 6, 6, 6)],
+    }),
 }
 
 

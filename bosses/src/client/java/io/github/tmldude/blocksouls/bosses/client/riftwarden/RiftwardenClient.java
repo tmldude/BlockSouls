@@ -23,6 +23,7 @@ public final class RiftwardenClient {
 						.glow("riftwarden_glow", state -> true)
 						.glow("riftwarden_rift_glow", state -> state.phase >= 1)
 						.damageStates()
+						.brokenPart(0, "core")
 						.cracks(3));
 	}
 }
