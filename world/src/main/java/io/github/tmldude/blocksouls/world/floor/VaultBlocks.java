@@ -14,7 +14,8 @@ import io.github.tmldude.blocksouls.common.CommonIds;
 import io.github.tmldude.blocksouls.world.BlockSoulsWorld;
 
 /**
- * Floor 4's (The Vault) blocks: the wall bricks, the deep iron node set into them and the cave moss herb. No items: the
+ * Floor 4's (The Vault) blocks: the wall bricks, the deep iron node set into them, the cave moss herb, the vault room's
+ * lock and the trapped hall's flame grate. No items: the
  * floor builder places them; walls burst to nothing, the node and herb pop their loot tables ({@code nodes/<block>}).
  */
 public final class VaultBlocks {
@@ -29,6 +30,15 @@ public final class VaultBlocks {
 			.mapColor(MapColor.COLOR_GREEN).strength(-1.0F, 3600000.0F).noLootTable().noCollision().sound(SoundType.MOSS)
 			.offsetType(BlockBehaviour.OffsetType.XZ).pushReaction(PushReaction.IMMOVEABLE).lightLevel(state -> 7)
 			.setId(key(CommonIds.CAVE_MOSS_PATCH.getPath()))));
+
+	// ---- PR 3: the vault room's door and the trapped hall's grate
+	public static final VaultLockBlock VAULT_LOCK = register("vault_lock", new VaultLockBlock(BlockBehaviour.Properties.of()
+			.mapColor(MapColor.METAL).strength(-1.0F, 3600000.0F).noLootTable().sound(SoundType.VAULT).pushReaction(PushReaction.IMMOVEABLE)
+			.lightLevel(state -> 3).setId(key("vault_lock"))));
+	public static final VaultFlameTrapBlock VAULT_FLAME_TRAP = register("vault_flame_trap", new VaultFlameTrapBlock(BlockBehaviour.Properties.of()
+			.mapColor(MapColor.DEEPSLATE).strength(-1.0F, 3600000.0F).noLootTable().sound(SoundType.DEEPSLATE).pushReaction(PushReaction.IMMOVEABLE)
+			.isValidSpawn((state, level, pos, type) -> false)
+			.lightLevel(state -> state.getValue(VaultFlameTrapBlock.PHASE) == VaultFlameTrapBlock.FLAME ? 10 : 0).setId(key("vault_flame_trap"))));
 
 	private VaultBlocks() {
 	}

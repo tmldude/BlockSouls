@@ -290,7 +290,7 @@ public final class FloorPlanner {
 				continue;
 			}
 			int count = out.size() + Math.max(1, (int) Math.round(entry.getValue() * factor));
-			scatter(out, count, FloorSlotKind.NODE, placed, radius, config, random, entry::getKey, channels); // clear of Infernal's lava
+			scatter(out, count, FloorSlotKind.NODE, placed, radius, config, random, entry::getKey, channels);
 		}
 		return out;
 	}

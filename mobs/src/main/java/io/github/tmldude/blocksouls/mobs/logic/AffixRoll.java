@@ -1,8 +1,10 @@
 package io.github.tmldude.blocksouls.mobs.logic;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import io.github.tmldude.blocksouls.mobs.MobsConfig;
 
@@ -57,9 +59,29 @@ public final class AffixRoll {
 	/** Both draws: {@code chanceDraw} against {@link #chance}, then {@code pickDraw} through {@link #pick}. */
 	public static Optional<String> roll(double chanceDraw, double pickDraw, int floor, boolean escalated, boolean affixesInClassic,
 			List<String> names, MobsConfig.AffixConfig config) {
+		return roll(chanceDraw, pickDraw, floor, escalated, affixesInClassic, names, config, Set.of());
+	}
+
+	/** {@link #roll} with the floor's affix mix ({@link #weights(MobsConfig.AffixConfig, Set)}). */
+	public static Optional<String> roll(double chanceDraw, double pickDraw, int floor, boolean escalated, boolean affixesInClassic,
+			List<String> names, MobsConfig.AffixConfig config, Set<String> floorTags) {
 		if (chanceDraw >= chance(floor, escalated, affixesInClassic, config)) {
 			return Optional.empty();
 		}
-		return pick(pickDraw, names, config.weights);
+		return pick(pickDraw, names, weights(config, floorTags));
+	}
+
+	/** The affix weights on a floor: {@code weights}, overridden by the first {@code weightsByFloorTag} entry it carries. */
+	public static Map<String, Integer> weights(MobsConfig.AffixConfig config, Set<String> floorTags) {
+		if (config.weightsByFloorTag != null) {
+			for (Map.Entry<String, Map<String, Integer>> entry : config.weightsByFloorTag.entrySet()) {
+				if (floorTags.contains(entry.getKey()) && entry.getValue() != null) {
+					Map<String, Integer> merged = new HashMap<>(config.weights);
+					merged.putAll(entry.getValue());
+					return merged;
+				}
+			}
+		}
+		return config.weights;
 	}
 }

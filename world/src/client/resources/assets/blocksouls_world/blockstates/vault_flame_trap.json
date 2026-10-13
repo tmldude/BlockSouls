@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "phase=0": {
+      "model": "blocksouls_world:block/vault_flame_trap"
+    },
+    "phase=1": {
+      "model": "blocksouls_world:block/vault_flame_trap"
+    },
+    "phase=2": {
+      "model": "blocksouls_world:block/vault_flame_trap_lit"
+    }
+  }
+}

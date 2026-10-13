@@ -55,4 +55,19 @@ class AffixRollTest {
 			assertEquals(NAMES.get(i), AffixRoll.pick(i / 4.0 + 0.01, NAMES, config.weights).orElseThrow());
 		}
 	}
+
+	// --- floor 4, The Vault (Stage 6C) ---
+	@Test
+	void theVaultMakesVolatileTheCommonAffix() {
+		Map<String, Integer> vault = AffixRoll.weights(config, java.util.Set.of("vault"));
+		assertTrue(vault.get("volatile") > vault.get("burning"));
+		assertEquals(config.weights, AffixRoll.weights(config, java.util.Set.of("surface")));
+		int volatileCount = 0;
+		for (int i = 0; i < 100; i++) {
+			if (AffixRoll.roll(0.0, i / 100.0, 4, false, false, NAMES, config, java.util.Set.of("vault")).orElseThrow().equals("volatile")) {
+				volatileCount++;
+			}
+		}
+		assertTrue(volatileCount > 50, "volatile " + volatileCount);
+	}
 }

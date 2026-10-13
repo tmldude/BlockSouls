@@ -69,6 +69,8 @@ public final class WorldItems {
 	// --- floor 4, The Vault (Stage 6C) ---
 	public static final Item DEEP_IRON = item("deep_iron", Item::new, new Item.Properties().rarity(Rarity.UNCOMMON));
 	public static final Item CAVE_MOSS = item("cave_moss", Item::new, new Item.Properties());
+	/** One of the three keys to the vault room's lock (found in crates in three other rooms). */
+	public static final Item VAULT_KEY = item("vault_key", Item::new, new Item.Properties().rarity(Rarity.RARE).stacksTo(3));
 	/** Night vision: see the dark vault. */
 	public static final Item NIGHT_EYE_TONIC = item("night_eye_tonic", Item::new, drink(Consumables.defaultDrink()
 			.onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 3600, 0)))));

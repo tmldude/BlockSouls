@@ -9,6 +9,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -16,6 +17,7 @@ import net.minecraft.world.phys.AABB;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 
+import io.github.tmldude.blocksouls.common.event.DirectorEvents;
 import io.github.tmldude.blocksouls.common.floor.FloorRequest;
 import io.github.tmldude.blocksouls.common.floor.FloorSlot;
 import io.github.tmldude.blocksouls.common.floor.FloorSlotKind;
@@ -25,13 +27,19 @@ import io.github.tmldude.blocksouls.world.BlockSoulsWorld;
 import io.github.tmldude.blocksouls.world.content.WorldItems;
 import io.github.tmldude.blocksouls.world.floor.NodeBlock;
 import io.github.tmldude.blocksouls.world.floor.VaultBlocks;
+import io.github.tmldude.blocksouls.world.floor.VaultBoss;
+import io.github.tmldude.blocksouls.world.floor.VaultColossus;
+import io.github.tmldude.blocksouls.world.floor.VaultEvents;
+import io.github.tmldude.blocksouls.world.floor.VaultListener;
+import io.github.tmldude.blocksouls.world.floor.VaultLockBlock;
 import io.github.tmldude.blocksouls.world.floor.VaultWallBlock;
 import io.github.tmldude.blocksouls.world.floor.WorldFloors;
 
 /**
  * Walks floor 4, The Vault: opens a vault floor in the test level and checks the camp is roofed in, a node, a deep iron
- * wall node and a cave moss patch pop, plain walls hold, the hollow wall bursts open on its secret and a mob closet
- * releases its swarm.
+ * wall node and a cave moss patch pop, plain walls hold, the hollow wall bursts open on its secret (waking the
+ * mini-boss in the chamber up the hidden stair), a mob closet releases its swarm, three keys open the vault room, and
+ * the Vault's two Director events build.
  */
 public class VaultGameTests {
 	private static final String FLOOR = "blocksouls_world_test:floor16";
@@ -121,6 +129,54 @@ public class VaultGameTests {
 			// hit until it bursts
 		}
 		helper.assertTrue(level.getEntitiesOfClass(Mob.class, new AABB(closet).inflate(6)).size() > before, "the closet released its swarm");
+
+		// --- PR 3: the secret's mini-boss, the vault room's lock, the Vault's events ---
+		AABB whole = new AABB(floor.camp()).inflate(floor.radius() + 2, 40, floor.radius() + 2);
+		List<Mob> secret = level.getEntitiesOfClass(Mob.class, whole, mob -> mob.entityTags().contains(VaultBoss.SECRET));
+		helper.assertTrue(secret.size() == 1, "the hollow wall woke one mini-boss in the chamber, saw " + secret.size());
+		Mob boss = secret.getFirst();
+		helper.assertTrue(boss instanceof VaultListener || boss instanceof VaultColossus, "the secret's mini-boss is the Listener or the Colossus");
+		helper.assertTrue(boss.getY() > floor.groundY() + 9, "it waits in the chamber over every ceiling, at y " + boss.getY());
+		helper.assertTrue(!level.getBlockState(boss.blockPosition().below()).is(Blocks.REINFORCED_DEEPSLATE), "its seal is gone");
+		boolean stair = false;
+		for (BlockPos at : BlockPos.betweenClosed(boss.blockPosition().offset(-12, -2, -12), boss.blockPosition().offset(12, -1, 12))) {
+			stair |= level.getBlockState(at).isAir() && level.getBlockState(at.below()).isAir() && level.getBlockState(at.below(4)).isAir();
+		}
+		helper.assertTrue(stair, "the hidden stair's shaft opens into the chamber floor");
+		boss.kill(level);
+
+		helper.assertTrue(floor.slots(FloorSlotKind.CRATE).stream().filter(slot -> slot.tag().equals("blocksouls_world:chests/vault_key")).count() == 3,
+				"three crates hold the vault keys");
+		BlockPos room = floor.slots(FloorSlotKind.STRUCTURE).getFirst().pos();
+		BlockPos lock = null;
+		for (BlockPos at : BlockPos.betweenClosed(room.offset(-2, 0, -2), room.offset(2, 0, 2))) {
+			if (level.getBlockState(at).is(VaultBlocks.VAULT_LOCK)) {
+				lock = at.immutable();
+			}
+		}
+		helper.assertTrue(lock != null && level.getBlockState(lock.above()).is(VaultBlocks.VAULT_LOCK), "the vault room's door is a two-high lock");
+		helper.assertTrue(VaultLockBlock.insertKey(level, lock, player) == 1 && VaultLockBlock.insertKey(level, lock.above(), player) == 2,
+				"each key counts for the whole door");
+		helper.assertTrue(level.getBlockState(lock).is(VaultBlocks.VAULT_LOCK), "two keys don't open it");
+		VaultLockBlock.insertKey(level, lock, player);
+		helper.assertTrue(level.getBlockState(lock).isAir() && level.getBlockState(lock.above()).isAir(), "the third key opens the vault");
+		boolean treasure = false;
+		for (BlockPos at : BlockPos.betweenClosed(room.offset(-1, 0, -1), room.offset(1, 0, 1))) {
+			treasure |= level.getBlockState(at).is(Blocks.CHEST);
+		}
+		helper.assertTrue(treasure, "the treasure chest waits inside");
+
+		BlockPos prison = floor.slots(FloorSlotKind.EVENT).getFirst().pos();
+		helper.assertTrue(DirectorEvents.PLACE_EVENT.invoker().place(level, VaultEvents.VAULT_PRISON, prison, floor), "the world places the vault prison");
+		helper.assertTrue(level.getBlockState(prison.offset(2, 1, 0)).is(Blocks.IRON_BARS) && level.getBlockState(prison.above(3)).is(Blocks.IRON_BARS),
+				"the prison is a roofed cage");
+		helper.assertTrue(!level.getEntitiesOfClass(IronGolem.class, new AABB(prison).inflate(2), IronGolem::isPlayerCreated).isEmpty(),
+				"a golem ally waits in the cage");
+		BlockPos hall = floor.slots(FloorSlotKind.MINI_BOSS).getFirst().pos();
+		helper.assertTrue(DirectorEvents.PLACE_EVENT.invoker().place(level, VaultEvents.TRAPPED_HALL, hall, floor), "the world places the trapped hall");
+		helper.assertTrue(level.getBlockState(hall.below()).is(VaultBlocks.VAULT_FLAME_TRAP), "the hall floor is flame grates");
+		helper.assertTrue(level.getBlockState(hall.offset(0, 0, VaultEvents.HALL_ROWS / 2 + 1)).is(Blocks.CHEST), "a chest waits past the grates");
+		// --- end PR 3 ---
 	}
 
 	/** The vault wall of a content kind nearest the camp, at corridor height. */

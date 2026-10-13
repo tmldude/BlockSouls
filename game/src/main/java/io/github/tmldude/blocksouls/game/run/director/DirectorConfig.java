@@ -14,7 +14,7 @@ import java.util.Map;
 public class DirectorConfig {
 	public static final String FILE = "director";
 	/** Defaults revision {@link #migrate} brings older files up to. */
-	public static final int CURRENT_DEFAULTS = 1;
+	public static final int CURRENT_DEFAULTS = 2;
 
 	/** Which defaults revision this file was written against (0 = before the field existed). */
 	public int defaultsVersion;
@@ -49,6 +49,14 @@ public class DirectorConfig {
 			return false;
 		}
 		// 1: the first shipped defaults; nothing to move yet.
+		// 2: floor sessions' own events (floor-tagged) join an existing pool.
+		if (config.defaultsVersion < 2 && config.events != null && config.events.pool != null) {
+			for (EventSpec spec : new Events().pool) {
+				if (!spec.floorTags.isEmpty() && config.events.pool.stream().noneMatch(old -> spec.id.equals(old.id))) {
+					config.events.pool.add(spec);
+				}
+			}
+		}
 		config.defaultsVersion = CURRENT_DEFAULTS;
 		return true;
 	}
@@ -159,6 +167,10 @@ public class DirectorConfig {
 		/** …and pays this many extra relics per player if it holds. */
 		public int overclockRelics = 1;
 		public String overclockRelicTier = "rare";
+		// --- floor 4, The Vault (Stage 6C): the siege twist ---
+		/** On a floor carrying one of these tags the buff stops at one tier: souls and the drop-tier shift, no free relic. */
+		public List<String> oneTierFloorTags = new ArrayList<>(List.of("vault"));
+		// --- end floor 4 ---
 	}
 
 	/** The random event per floor (the StS "?"): data-driven pool. */
@@ -169,7 +181,10 @@ public class DirectorConfig {
 				new EventSpec("challenge_pylon", 2, 1),
 				new EventSpec("wandering_trader", 2, 1),
 				new EventSpec("stranded_ally", 2, 1),
-				new EventSpec("ambush", 2, 2)));
+				new EventSpec("ambush", 2, 2),
+				// --- floor 4, The Vault (Stage 6C): placed by the world module through DirectorEvents.PLACE_EVENT ---
+				new EventSpec("blocksouls_world:vault_prison", 4, 1, List.of("vault"), true),
+				new EventSpec("blocksouls_world:trapped_hall", 4, 1, List.of("vault"), false)));
 		/** Without a floor's EVENT slot, the event is placed this far from the camp. */
 		public int distanceFromCamp = 28;
 		/** An ambush springs when a player comes this close to its marker. */
@@ -179,16 +194,32 @@ public class DirectorConfig {
 		/** Mini-bosses (boss ids), rotated per floor from the run seed. Unknown ids (bosses absent) are skipped. */
 		public List<String> miniBosses = new ArrayList<>(List.of("blocksouls_bosses:furnace_knight", "blocksouls_bosses:pale_rider",
 				"blocksouls_bosses:stormplate_knight"));
+		/**
+		 * A floor's own mini-boss roster, by floor tag: a floor carrying one of these tags rotates through that list
+		 * instead of {@link #miniBosses} (first matching tag wins; unknown ids are skipped the same way).
+		 */
+		public Map<String, List<String>> miniBossesByFloorTag = defaultFloorMiniBosses();
 		/** Mini-boss from this act on (the first act is the tutorial floor). */
 		public int miniBossFromAct = 2;
 		/** Without a floor's MINI_BOSS slot, the mini-boss is placed this far from the camp. */
 		public int miniBossDistance = 64;
 	}
 
+	static Map<String, List<String>> defaultFloorMiniBosses() {
+		Map<String, List<String>> rosters = new LinkedHashMap<>();
+		// --- floor 4, The Vault (Stage 6C): the blind hunter and the golem (world mini-bosses) ---
+		rosters.put("vault", new ArrayList<>(List.of("blocksouls_world:vault_listener", "blocksouls_world:vault_colossus")));
+		return rosters;
+	}
+
 	public static class EventSpec {
 		public String id;
 		public int weight;
 		public int minAct;
+		/** When not empty, only on a floor carrying at least one of these tags (a floor's own event). */
+		public List<String> floorTags = new ArrayList<>();
+		/** After the event is placed, an ambush also arms at its spot (springs like {@code ambush}). */
+		public boolean ambush;
 
 		public EventSpec() {
 		}
@@ -197,6 +228,12 @@ public class DirectorConfig {
 			this.id = id;
 			this.weight = weight;
 			this.minAct = minAct;
+		}
+
+		public EventSpec(String id, int weight, int minAct, List<String> floorTags, boolean ambush) {
+			this(id, weight, minAct);
+			this.floorTags = new ArrayList<>(floorTags);
+			this.ambush = ambush;
 		}
 	}
 

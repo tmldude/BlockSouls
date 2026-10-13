@@ -74,5 +74,13 @@
   "item.blocksouls_world.ghostcap": "Ghostcap",
   "item.blocksouls_world.ghostcap_draught": "Ghostcap Draught",
   "item.blocksouls_world.ghostcap_broth": "Ghostcap Broth",
-  "item.blocksouls_world.hollow_crown": "Hollow Crown"
+  "item.blocksouls_world.hollow_crown": "Hollow Crown",
+  "item.blocksouls_world.vault_key": "Vault Key",
+  "block.blocksouls_world.vault_lock": "Vault Lock",
+  "block.blocksouls_world.vault_flame_trap": "Flame Grate",
+  "entity.blocksouls_world.vault_listener": "The Listener",
+  "entity.blocksouls_world.vault_colossus": "Vault Colossus",
+  "message.blocksouls_world.vault_lock.hint": "The vault is locked: %s of %s keys in. Keys hide in crates in the other rooms.",
+  "message.blocksouls_world.vault_lock.key": "A key turns: %s of %s.",
+  "message.blocksouls_world.vault_lock.open": "The vault door swings open."
 }

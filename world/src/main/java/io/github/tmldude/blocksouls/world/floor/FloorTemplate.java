@@ -119,6 +119,8 @@ public final class FloorTemplate {
 		public int herbs = 0;
 		public int herbsMin = 2;
 		public int herbsMax = 3;
+		/** Vault keys: chests in this many rooms (never the camp, secret or structure room) each hold a key to the vault room. */
+		public int keys = 0;
 	}
 	// ---- end Vault block
 
@@ -252,6 +254,9 @@ public final class FloorTemplate {
 		}
 		if (isBox() && (box.herbsMin < 0 || box.herbsMax < box.herbsMin)) {
 			throw new IllegalArgumentException("box herbs: min must not exceed max");
+		}
+		if (isBox() && box.keys < 0) {
+			throw new IllegalArgumentException("box keys must not be negative");
 		}
 		int camps = 0;
 		int portals = 0;
