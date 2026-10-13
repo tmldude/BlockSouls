@@ -43,6 +43,8 @@ public final class ActMachine {
 	private static List<Act> acts = List.of();
 	/** Floors shape: the template pool per act (index 0 = act 1). */
 	private static List<Identifier> pools = List.of();
+	/** v2-floor5-blight: sieges per night per act (index 0 = act 1). */
+	private static List<Integer> sieges = List.of();
 
 	private static final Identifier DEFAULT_POOL = Identifier.fromNamespaceAndPath("blocksouls_world", "surface");
 
@@ -53,6 +55,7 @@ public final class ActMachine {
 	public static void load(RunConfig config) {
 		List<Act> parsed = new ArrayList<>();
 		List<Identifier> parsedPools = new ArrayList<>();
+		List<Integer> parsedSieges = new ArrayList<>();
 		for (RunConfig.ActSpec spec : "floors".equals(config.runShape) ? config.floorActs : config.acts) {
 			Identifier id = Identifier.tryParse(spec.id);
 			Identifier dimension = Identifier.tryParse(spec.dimension);
@@ -63,9 +66,11 @@ public final class ActMachine {
 			parsed.add(new Act(parsed.size() + 1, id, dimension, spec.name == null || spec.name.isBlank() ? spec.id : spec.name));
 			Identifier pool = spec.pool == null ? null : Identifier.tryParse(spec.pool);
 			parsedPools.add(pool == null || spec.pool.isBlank() ? DEFAULT_POOL : pool);
+			parsedSieges.add(Math.max(1, spec.sieges));
 		}
 		acts = List.copyOf(parsed);
 		pools = List.copyOf(parsedPools);
+		sieges = List.copyOf(parsedSieges);
 	}
 
 	/** Installs the {@code Acts} provider (classic reports the single overworld act) and the floors-shape hooks. */
@@ -247,6 +252,8 @@ public final class ActMachine {
 		Act act = current(server);
 		data.chargingAct = act.ordinal();
 		data.chargeEndsAt = server.overworld().getGameTime() + RunSystem.config().portalChargeSeconds * 20L;
+		data.siegesDone = 0;
+		data.siegeLull = false;
 		data.setDirty();
 		ActEvents.PORTAL_CHARGE_STARTED.invoker().onAct(server, act);
 		broadcast(server, "Portal charge started — defend it! (" + RunSystem.config().portalChargeSeconds + "s)");
@@ -262,7 +269,18 @@ public final class ActMachine {
 	}
 
 	private static void tickCharge(MinecraftServer server, RunData data) {
+		// v2-floor5-blight: acts with several sieges per night (ActSpec.sieges): a lull ("full dark") between them.
+		if (data.siegeLull) {
+			if (server.overworld().getGameTime() >= data.chargeEndsAt) {
+				startNextSiege(server, data);
+			}
+			return;
+		}
 		if (server.overworld().getGameTime() >= data.chargeEndsAt) {
+			if (ActMath.anotherSiege(data.siegesDone, siegesFor(data.chargingAct))) {
+				startLull(server, data);
+				return;
+			}
 			completeCharge(server, data);
 			return;
 		}
@@ -272,12 +290,51 @@ public final class ActMachine {
 		}
 	}
 
+	// ---- v2-floor5-blight: several sieges in one night
+
+	/** Sieges the act's night holds (1 unless its ActSpec says more). */
+	static int siegesFor(int actOrdinal) {
+		return actOrdinal >= 1 && actOrdinal <= sieges.size() ? sieges.get(actOrdinal - 1) : 1;
+	}
+
+	/** A siege held but another is owed: the defense stops, the charge waits out the lull (still "charging"). */
+	private static void startLull(MinecraftServer server, RunData data) {
+		data.siegesDone++;
+		data.siegeLull = true;
+		data.chargeEndsAt = server.overworld().getGameTime() + Math.max(1, RunSystem.config().siegeLullSeconds) * 20L;
+		data.setDirty();
+		if (data.phase == RunPhase.WAVE) {
+			WaveManager.endWave(server, data, false);
+		} else if (data.phase == RunPhase.WAVE_BREAK) {
+			data.phase = RunPhase.NIGHT_QUIET; // no chained wave in the lull
+		}
+		broadcast(server, "The siege breaks, but the portal stays dark. Full dark brings another (" + RunSystem.config().siegeLullSeconds + "s)");
+		RunSync.markDirty();
+	}
+
+	/** Full dark: the next siege of the same charge. */
+	private static void startNextSiege(MinecraftServer server, RunData data) {
+		data.siegeLull = false;
+		data.chargeEndsAt = server.overworld().getGameTime() + RunSystem.config().portalChargeSeconds * 20L;
+		data.setDirty();
+		broadcast(server, "Full dark: the second siege — defend the portal! (" + RunSystem.config().portalChargeSeconds + "s)");
+		for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+			RunSystem.playTo(player, SoundEvents.RAID_HORN, 0.8F, 0.5F);
+		}
+		if (data.phase != RunPhase.WAVE && data.phase != RunPhase.WAVE_BREAK) {
+			WaveManager.startWave(server, data);
+		}
+		RunSync.markDirty();
+	}
+
 	static void cancelCharge(MinecraftServer server, RunData data) {
 		if (data.chargingAct <= 0) {
 			return;
 		}
 		data.chargingAct = 0;
 		data.chargeEndsAt = 0;
+		data.siegesDone = 0;
+		data.siegeLull = false;
 		data.setDirty();
 		broadcast(server, "Portal charge abandoned");
 		RunSync.markDirty();
@@ -287,6 +344,8 @@ public final class ActMachine {
 		Act act = act(data.chargingAct);
 		data.chargingAct = 0;
 		data.chargeEndsAt = 0;
+		data.siegesDone = 0;
+		data.siegeLull = false;
 		data.setDirty();
 		if (data.phase == RunPhase.WAVE) {
 			WaveManager.endWave(server, data, false);

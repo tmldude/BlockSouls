@@ -1,5 +1,7 @@
 {
 	"entity.blocksouls_bosses.furnace_knight": "Furnace Knight",
+	"entity.blocksouls_bosses.blightheart": "Blightheart",
+	"item.blocksouls_bosses.blightheart_spawn_egg": "Blightheart Spawn Egg",
 	"item.blocksouls_bosses.furnace_knight_spawn_egg": "Furnace Knight Spawn Egg",
 	"block.blocksouls_bosses.fog_wall": "Fog Wall",
 	"key.blocksouls.lock_on": "Lock On",

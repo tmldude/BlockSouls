@@ -97,4 +97,39 @@ public class BlightFloorGameTests {
 	private static FloorSlot slot(PlacedFloor floor, String tag) {
 		return floor.slots(FloorSlotKind.NODE).stream().filter(s -> s.tag().equals(tag)).findFirst().orElse(null);
 	}
+
+	/** Slice 3: the nest (outpost + legendary chest + cursed chest beside it) and the grave (soft soil over an exotic chest). */
+	@GameTest(structure = FLOOR, skyAccess = true, maxTicks = 200)
+	public void nestAndGraveAreBuilt(GameTestHelper helper) {
+		MinecraftServer server = helper.getLevel().getServer();
+		ServerLevel level = helper.getLevel();
+		WorldFloors.useLevelForTests(level.dimension());
+		try {
+			PlacedFloor floor = Floors.open(server, new FloorRequest(907, BlockSoulsWorld.id("blight"), 5, 77L, 1)).orElseThrow();
+			FloorSlot nest = floor.slots(FloorSlotKind.STRUCTURE).getFirst();
+			helper.assertTrue(nest.tag().equals("nest"), "the structure is the nest, got " + nest.tag());
+			boolean nestChest = false;
+			boolean cursed = false;
+			for (net.minecraft.core.BlockPos pos : net.minecraft.core.BlockPos.betweenClosed(nest.pos().offset(-12, -4, -12), nest.pos().offset(12, 8, 12))) {
+				if (level.getBlockEntity(pos) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity chest
+						&& chest.getLootTable() != null && chest.getLootTable().identifier().getPath().equals("chests/blight_nest")) {
+					nestChest = true;
+				}
+				cursed |= level.getBlockState(pos).is(io.github.tmldude.blocksouls.world.economy.WorldEconomy.CURSED_CHEST);
+			}
+			helper.assertTrue(nestChest, "the nest holds a blight_nest chest");
+			helper.assertTrue(cursed, "a cursed chest sits beside it");
+
+			FloorSlot grave = floor.slots(FloorSlotKind.SECRET).getFirst();
+			helper.assertTrue(grave.tag().equals("grave"), "the secret is the grave, got " + grave.tag());
+			helper.assertTrue(level.getBlockState(grave.pos().below()).is(net.minecraft.world.level.block.Blocks.SOUL_SOIL), "soft soil over the grave");
+			net.minecraft.core.BlockPos chestPos = grave.pos().below(3); // FloorBuilder.graveChest
+			helper.assertTrue(level.getBlockEntity(chestPos) instanceof net.minecraft.world.level.block.entity.ChestBlockEntity chest
+					&& chest.getLootTable() != null && chest.getLootTable().identifier().getPath().equals("chests/blight_grave"),
+					"the grave chest holds the exotic table, found " + level.getBlockState(chestPos));
+		} finally {
+			WorldFloors.useLevelForTests(null);
+		}
+		helper.succeed();
+	}
 }

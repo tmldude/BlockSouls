@@ -85,6 +85,10 @@ public final class RunData extends SavedData {
 	int chargingAct;
 	/** Game time (overworld) when the running portal charge completes. */
 	long chargeEndsAt;
+	/** v2-floor5-blight: sieges finished in the running charge (acts with ActSpec.sieges > 1). */
+	int siegesDone;
+	/** v2-floor5-blight: true while the charge waits between two sieges (chargeEndsAt is then the lull's end). */
+	boolean siegeLull;
 	/** The run's synthetic day/night cycle for dimensions without a sun. */
 	final SyntheticCycle synthetic = new SyntheticCycle();
 
@@ -128,6 +132,8 @@ public final class RunData extends SavedData {
 		actsEntered.clear();
 		chargingAct = 0;
 		chargeEndsAt = 0;
+		siegesDone = 0;
+		siegeLull = false;
 		synthetic.reset();
 		setDirty();
 	}
@@ -184,6 +190,8 @@ public final class RunData extends SavedData {
 		readStrings(tag.getListOrEmpty("actsEntered"), data.actsEntered);
 		data.chargingAct = tag.getIntOr("chargingAct", 0);
 		data.chargeEndsAt = tag.getLongOr("chargeEndsAt", 0);
+		data.siegesDone = tag.getIntOr("siegesDone", 0);
+		data.siegeLull = tag.getBooleanOr("siegeLull", false);
 		data.synthetic.load(tag.getLongOr("synthTicks", 0), tag.getFloatOr("synthRemainder", 0),
 				tag.getBooleanOr("synthStarted", false));
 		return data;
@@ -232,6 +240,8 @@ public final class RunData extends SavedData {
 		tag.put("actsEntered", writeStrings(actsEntered));
 		tag.putInt("chargingAct", chargingAct);
 		tag.putLong("chargeEndsAt", chargeEndsAt);
+		tag.putInt("siegesDone", siegesDone);
+		tag.putBoolean("siegeLull", siegeLull);
 		tag.putLong("synthTicks", synthetic.saveTotalTicks());
 		tag.putFloat("synthRemainder", synthetic.saveRemainder());
 		tag.putBoolean("synthStarted", synthetic.started());

@@ -21,6 +21,14 @@ public final class ActMath {
 	 * @param currentOrdinal      the current act (1-based)
 	 * @return the 1-based ordinal of the party's act
 	 */
+	/**
+	 * v2-floor5-blight: whether a charge that just finished its {@code siegesDone + 1}-th siege owes another before the
+	 * portal lights ({@code sieges} from the act's config; 0 or 1 = one siege).
+	 */
+	public static boolean anotherSiege(int siegesDone, int sieges) {
+		return siegesDone + 1 < Math.max(1, sieges);
+	}
+
 	public static int partyAct(Map<String, Integer> playersPerDimension, List<String> openActDimensions, int currentOrdinal) {
 		Map<String, Integer> owner = new LinkedHashMap<>();
 		for (int ordinal = 1; ordinal <= openActDimensions.size(); ordinal++) {

@@ -97,8 +97,9 @@ class BlightTemplatesTest {
 				}
 				assertTrue(plan.tags().contains("blight"));
 				assertTrue(plan.tags().contains("floor_5"));
-				// The broken outpost (the nest-to-be) is the floor's structure.
-				assertEquals("outpost", plan.slots(FloorSlotKind.STRUCTURE).getFirst().tag(), template.id);
+				// The broken outpost, now a nest, is the floor's structure; its secret is the grave.
+				assertEquals("nest", plan.slots(FloorSlotKind.STRUCTURE).getFirst().tag(), template.id);
+				assertEquals("grave", plan.slots(FloorSlotKind.SECRET).getFirst().tag(), template.id);
 			}
 			assertTrue(FloorPlanner.plan(template, config, 5, 8, 99).radius() > FloorPlanner.plan(template, config, 5, 1, 99).radius());
 		}

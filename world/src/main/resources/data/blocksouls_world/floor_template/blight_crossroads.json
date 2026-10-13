@@ -72,7 +72,7 @@
       "x": 30,
       "z": -18,
       "radius": 7,
-      "tag": "outpost"
+      "tag": "nest"
     },
     {
       "kind": "mini_boss",
@@ -84,7 +84,8 @@
       "kind": "secret",
       "x": 38,
       "z": 28,
-      "radius": 4
+      "radius": 4,
+      "tag": "grave"
     },
     {
       "kind": "event",
