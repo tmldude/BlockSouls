@@ -75,10 +75,12 @@ public class LastStandGameTests {
 		try {
 			PlayerSystem.CONFIG.downed.lendPistol = true;
 			PlayerSystem.CONFIG.downed.keepShooting = true;
-			Downed.goDown(downed);
-			helper.assertTrue(PlayerStatus.canShoot(downed), "downed shooting is on");
 			var pistol = io.github.tmldude.blocksouls.game.run.StarterKit.pistol();
 			helper.assertTrue(pistol.isPresent(), "the test mod registers a pistol");
+			// A run started by another test in the batch may already have handed this player a starter pistol.
+			int pistolsBefore = count(downed, pistol.get());
+			Downed.goDown(downed);
+			helper.assertTrue(PlayerStatus.canShoot(downed), "downed shooting is on");
 			helper.assertTrue(downed.getInventory().getItem(downed.getInventory().getSelectedSlot()).is(pistol.get()), "a lent pistol in hand");
 
 			// Compare with a standing player's hit for the scaled amount: armor and other damage rules apply to both.
@@ -96,7 +98,7 @@ public class LastStandGameTests {
 			helper.assertTrue(expected > 0 && Math.abs(dealt - expected) < 0.01, "downed 4.0 lands like a standing " + scaled + " (" + expected + "), dealt " + dealt);
 
 			Downed.revive(downed, null);
-			helper.assertTrue(!downed.getInventory().contains(new net.minecraft.world.item.ItemStack(pistol.get())), "the lent pistol is taken back");
+			helper.assertTrue(count(downed, pistol.get()) == pistolsBefore, "the lent pistol is taken back: " + count(downed, pistol.get()) + " vs " + pistolsBefore + " before");
 		} finally {
 			PlayerSystem.CONFIG.downed.lendPistol = lend;
 			PlayerSystem.CONFIG.downed.keepShooting = shoot;
@@ -130,5 +132,15 @@ public class LastStandGameTests {
 			PartyVotes.clearForTests();
 			helper.succeed();
 		});
+	}
+
+	private static int count(ServerPlayer player, net.minecraft.world.item.Item item) {
+		int count = 0;
+		for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+			if (player.getInventory().getItem(i).is(item)) {
+				count += player.getInventory().getItem(i).getCount();
+			}
+		}
+		return count;
 	}
 }
