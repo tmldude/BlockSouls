@@ -107,5 +107,9 @@
 	"subtitles.blocksouls_bosses.entity.stormplate_knight.puddle": "Static crackles",
 	"entity.blocksouls_bosses.riftwarden": "Riftwarden",
 	"item.blocksouls_bosses.riftwarden_spawn_egg": "Riftwarden Spawn Egg",
-	"boss.blocksouls_bosses.riftwarden.rises": "The Riftwarden rises from the plate"
+	"boss.blocksouls_bosses.riftwarden.rises": "The Riftwarden rises from the plate",
+	"boss.blocksouls_bosses.riftwarden.rush": "The rift is open! Deal %2$s%% of its health in %1$s s to end it",
+	"boss.blocksouls_bosses.riftwarden.rush_bar": "Rift open: %1$s s · %2$s%%",
+	"boss.blocksouls_bosses.riftwarden.mended": "The rift mends the Riftwarden",
+	"boss.blocksouls_bosses.riftwarden.unbound": "The Riftwarden is unbound: the rift stays open, and so does it"
 }
