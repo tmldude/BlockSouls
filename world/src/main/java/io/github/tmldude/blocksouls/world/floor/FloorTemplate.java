@@ -39,6 +39,8 @@ public final class FloorTemplate {
 	/** Terrain roughness: blocks up/down from {@link #groundY} away from flattened slots. */
 	public double hills = 2.5;
 	public Terrain terrain = new Terrain();
+	/** Extra ground cover and tree style; null (the default) is plain grassland with oak trees. */
+	public Decor decor;
 	/** Trees scattered outside the slots. */
 	public int trees = 16;
 	/** Resource nodes for a solo party (template node slots first, the rest scattered). */
@@ -103,6 +105,13 @@ public final class FloorTemplate {
 		/** Wall variant shares (the rest are plain vault bricks). */
 		public double mossyShare = 0.2;
 		public double crackedShare = 0.08;
+		/** The rare node set into the walls (a block id): wall-face nodes are always this one. Empty = from {@code nodeMix}. */
+		public String wallNode = "";
+		/** The floor's herb (a {@code HerbBlock} id): {@code herbs} × {@code PartyScaling.floorNodes}, clamped to min..max, in rooms. */
+		public String herb = "";
+		public int herbs = 0;
+		public int herbsMin = 2;
+		public int herbsMax = 3;
 	}
 	// ---- end Vault block
 
@@ -115,6 +124,54 @@ public final class FloorTemplate {
 		/** The camp's ground and fire. */
 		public String camp = "minecraft:coarse_dirt";
 		public String campfire = "minecraft:campfire";
+
+		/**
+		 * Optional weighted top blocks replacing {@link #top}: each column picks one by a hash of its position, so the
+		 * build's random stream (and every other template's output) is unchanged.
+		 */
+		public Map<String, Integer> topMix = new LinkedHashMap<>();
+
+		/** The top block id at a column (relative to the centre): {@link #top}, or a pick from {@link #topMix}. */
+		public String topAt(int x, int z) {
+			if (topMix == null || topMix.isEmpty()) {
+				return top;
+			}
+			int total = 0;
+			for (int weight : topMix.values()) {
+				total += Math.max(0, weight);
+			}
+			if (total == 0) {
+				return top;
+			}
+			// 2×2 clumps read as patches rather than per-block noise.
+			long hash = (x >> 1) * 0x9E3779B97F4A7C15L ^ (z >> 1) * 0xC2B2AE3D27D4EB4FL;
+			hash ^= hash >>> 31;
+			hash *= 0xBF58476D1CE4E5B9L;
+			hash ^= hash >>> 29;
+			int roll = (int) Math.floorMod(hash, (long) total);
+			for (Map.Entry<String, Integer> entry : topMix.entrySet()) {
+				roll -= Math.max(0, entry.getValue());
+				if (roll < 0) {
+					return entry.getKey();
+				}
+			}
+			return top;
+		}
+	}
+
+	/** A themed floor's dressing: tree style, ground patches and scattered plants (all counts for a solo party). */
+	public static class Decor {
+		/** {@code oak} (the oak feature) or {@code dead} (bare trunks of {@link #deadLog} with a stub branch). */
+		public String trees = "oak";
+		public String deadLog = "minecraft:dark_oak_log";
+		/** Round patches of {@link #patchBlock} in the top layer, with {@link #patchCover} growing on some of it. */
+		public int patches;
+		public int patchRadius = 3;
+		public String patchBlock = "";
+		public String patchCover = "";
+		public double coverChance = 0.3;
+		/** Plants (block id → count) set on open ground outside the slots. */
+		public Map<String, Integer> scatter = new LinkedHashMap<>();
 	}
 
 	/**
@@ -185,6 +242,9 @@ public final class FloorTemplate {
 		}
 		if (isBox() && (box == null || height < 12)) {
 			throw new IllegalArgumentException("a box needs a box block and a height of at least 12");
+		}
+		if (isBox() && (box.herbsMin < 0 || box.herbsMax < box.herbsMin)) {
+			throw new IllegalArgumentException("box herbs: min must not exceed max");
 		}
 		int camps = 0;
 		int portals = 0;

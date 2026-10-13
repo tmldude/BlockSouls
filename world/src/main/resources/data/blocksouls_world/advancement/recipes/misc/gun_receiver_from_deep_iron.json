@@ -1,0 +1,50 @@
+{
+	"fabric:load_conditions": [
+		{
+			"condition": "fabric:all_mods_loaded",
+			"values": [
+				"blocksouls_guns"
+			]
+		}
+	],
+	"criteria": {
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipes": "blocksouls_world:gun_receiver_from_deep_iron"
+			}
+		},
+		"has_deep_iron": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:deep_iron"
+					}
+				]
+			}
+		},
+		"has_gunmetal_ingot": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:gunmetal_ingot"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_deep_iron",
+			"has_gunmetal_ingot"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"blocksouls_world:gun_receiver_from_deep_iron"
+		]
+	}
+}

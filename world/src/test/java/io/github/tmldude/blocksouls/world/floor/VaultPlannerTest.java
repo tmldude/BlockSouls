@@ -175,6 +175,36 @@ class VaultPlannerTest {
 	}
 
 	@Test
+	void deepIronSitsInTheWallsAndCaveMossInTheRoomsAtOneAndEightPlayers() throws Exception {
+		for (FloorTemplate template : vaultTemplates()) {
+			assertEquals(2, BoxPlanner.herbCount(template, 1), template.id);
+			assertTrue(BoxPlanner.herbCount(template, 8) >= BoxPlanner.herbCount(template, 1) && BoxPlanner.herbCount(template, 8) <= 3, template.id);
+			for (int players : new int[] {1, 8}) {
+				for (long seed = 0; seed < SEEDS; seed++) {
+					FloorPlanner.FloorPlan plan = FloorPlanner.plan(template, config, 4, players, seed);
+					BoxLayout layout = BoxPlanner.layout(template, plan, seed);
+					String at = template.id + " p" + players + " seed " + seed;
+					int herbs = 0;
+					int deepIron = 0;
+					for (FloorPlanner.PlannedSlot node : plan.slots(FloorSlotKind.NODE)) {
+						if (node.tag().equals(template.box.herb)) {
+							herbs++;
+							assertTrue(layout.open(node.x(), node.z()), at + " herb " + node + " stands in a room");
+						} else if (node.tag().equals(template.box.wallNode)) {
+							deepIron++;
+							assertTrue(!layout.open(node.x(), node.z()) && inWallFace(layout, node.x(), node.z()), at + " deep iron " + node + " is in a wall face");
+						} else {
+							assertTrue(layout.open(node.x(), node.z()), at + " " + node);
+						}
+					}
+					assertEquals(BoxPlanner.herbCount(template, players), herbs, at + " herbs");
+					assertTrue(deepIron > 0, at + " the walls hide deep iron");
+				}
+			}
+		}
+	}
+
+	@Test
 	void theLayoutIsTheSameForTheSamePlanAndSeed() throws Exception {
 		FloorTemplate template = vaultTemplates().getFirst();
 		FloorPlanner.FloorPlan plan = FloorPlanner.plan(template, config, 4, 3, 77);

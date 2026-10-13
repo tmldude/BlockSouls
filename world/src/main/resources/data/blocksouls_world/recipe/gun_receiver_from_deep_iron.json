@@ -1,0 +1,23 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "blocksouls_guns"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "DGD"
+  ],
+  "key": {
+    "D": "blocksouls_world:deep_iron",
+    "G": "blocksouls_world:gunmetal_ingot"
+  },
+  "result": {
+    "id": "blocksouls_guns:gun_receiver",
+    "count": 2
+  }
+}

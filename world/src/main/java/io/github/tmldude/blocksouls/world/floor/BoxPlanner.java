@@ -92,7 +92,8 @@ public final class BoxPlanner {
 				break;
 			}
 			if (spaced(spot, taken, config.nodeSpacing)) {
-				nodes.add(new FloorPlanner.PlannedSlot(FloorSlotKind.NODE, FloorPlanner.weighted(template.nodeMix, random), spot[0], spot[1], 0));
+				String block = template.box.wallNode.isEmpty() ? FloorPlanner.weighted(template.nodeMix, random) : template.box.wallNode;
+				nodes.add(new FloorPlanner.PlannedSlot(FloorSlotKind.NODE, block, spot[0], spot[1], 0));
 				taken.add(BoxLayout.key(spot[0], spot[1]));
 				buried--;
 			}
@@ -108,6 +109,38 @@ public final class BoxPlanner {
 			}
 		}
 		slots.addAll(nodes);
+
+		// Herbs (cave moss): in the filler rooms, then the other rooms but the camp and the secret, after the nodes, on
+		// their own random so the nodes don't move.
+		if (!template.box.herb.isEmpty()) {
+			int herbs = herbCount(template, players);
+			Random herbRandom = new Random(seed ^ 0x48455242L);
+			List<int[]> spots = new ArrayList<>(roomSpots(layout, slots, config.slotClearance, herbRandom));
+			List<int[]> guarded = new ArrayList<>();
+			for (BoxLayout.Room room : layout.rooms()) {
+				if (!room.role().equals("filler") && !room.role().equals("camp") && !room.role().equals("secret")) {
+					for (int x = room.x0() + 1; x <= room.x1() - 1; x++) {
+						for (int z = room.z0() + 1; z <= room.z1() - 1; z++) {
+							if (clearOfSlots(x, z, slots, config.slotClearance)) {
+								guarded.add(new int[] {x, z});
+							}
+						}
+					}
+				}
+			}
+			Collections.shuffle(guarded, herbRandom);
+			spots.addAll(guarded);
+			for (int[] spot : spots) {
+				if (herbs <= 0) {
+					break;
+				}
+				if (spaced(spot, taken, config.nodeSpacing)) {
+					slots.add(new FloorPlanner.PlannedSlot(FloorSlotKind.NODE, template.box.herb, spot[0], spot[1], 0));
+					taken.add(BoxLayout.key(spot[0], spot[1]));
+					herbs--;
+				}
+			}
+		}
 
 		int crateCount = (int) Math.round(template.crates * PartyScaling.floorCrates(Math.max(1, players)));
 		int crates = 0;
@@ -130,6 +163,12 @@ public final class BoxPlanner {
 		Set<String> tags = new LinkedHashSet<>(template.tags);
 		tags.addAll(FloorPlanner.escalationTags(config, floorNumber));
 		return new FloorPlanner.FloorPlan(template.id, radius, template.groundY, rotation, mirrored, tags, List.copyOf(slots));
+	}
+
+	/** Herbs for a party: the template's {@code herbs} × {@code PartyScaling.floorNodes}, clamped to its min..max. */
+	public static int herbCount(FloorTemplate template, int players) {
+		int scaled = (int) Math.round(template.box.herbs * PartyScaling.floorNodes(Math.max(1, players)));
+		return Math.max(template.box.herbsMin, Math.min(template.box.herbsMax, scaled));
 	}
 
 	private static int order(FloorSlotKind kind) {

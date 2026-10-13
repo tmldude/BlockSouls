@@ -1,0 +1,65 @@
+{
+  "pool": "blocksouls_world:blight",
+  "tags": [
+    "blight",
+    "more_elites",
+    "elite_affixes",
+    "mean_mini_boss",
+    "stingy_nodes",
+    "withered_ridge"
+  ],
+  "minFloor": 5,
+  "maxFloor": 5,
+  "weight": 2,
+  "radius": 60,
+  "groundY": 84,
+  "depth": 20,
+  "hills": 4.5,
+  "terrain": {
+    "top": "minecraft:coarse_dirt",
+    "fill": "minecraft:coarse_dirt",
+    "base": "minecraft:andesite",
+    "topMix": {
+      "minecraft:coarse_dirt": 3,
+      "minecraft:grass_block": 2,
+      "minecraft:podzol": 2,
+      "minecraft:gravel": 1
+    }
+  },
+  "biome": "blocksouls_world:blight",
+  "decor": {
+    "trees": "dead",
+    "deadLog": "minecraft:dark_oak_log",
+    "patches": 10,
+    "patchRadius": 3,
+    "patchBlock": "blocksouls_world:blighted_netherrack",
+    "patchCover": "blocksouls_world:blight_growth",
+    "coverChance": 0.35,
+    "scatter": {
+      "minecraft:dead_bush": 24,
+      "minecraft:short_dry_grass": 30,
+      "minecraft:tall_dry_grass": 8
+    }
+  },
+  "trees": 16,
+  "nodes": 14,
+  "nodeMix": {
+    "blocksouls_world:scrap_node": 2,
+    "blocksouls_world:gunmetal_node": 3
+  },
+  "crates": 2,
+  "slots": [
+    { "kind": "camp", "x": 0, "z": 0, "radius": 6 },
+    { "kind": "exit_portal", "x": 9, "z": 0, "radius": 2 },
+    { "kind": "structure", "tag": "outpost", "x": -34, "z": -30, "radius": 7 },
+    { "kind": "mini_boss", "x": 36, "z": -30, "radius": 10 },
+    { "kind": "secret", "x": -44, "z": 22, "radius": 4 },
+    { "kind": "event", "x": 30, "z": 34, "radius": 5 },
+    { "kind": "cave", "x": -16, "z": 14, "radius": 4 },
+    { "kind": "wreck", "x": 4, "z": 46, "radius": 7 },
+    { "kind": "node", "tag": "blocksouls_world:gunmetal_node", "x": -48, "z": -6 },
+    { "kind": "node", "tag": "blocksouls_world:gunmetal_node", "x": 50, "z": 4 },
+    { "kind": "node", "x": 12, "z": -44 },
+    { "kind": "node", "x": -26, "z": 42 }
+  ]
+}

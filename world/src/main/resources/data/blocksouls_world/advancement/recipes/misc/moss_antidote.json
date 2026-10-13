@@ -1,0 +1,42 @@
+{
+	"criteria": {
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipes": "blocksouls_world:moss_antidote"
+			}
+		},
+		"has_cave_moss": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:cave_moss"
+					}
+				]
+			}
+		},
+		"has_deep_iron": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "blocksouls_world:deep_iron"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_cave_moss",
+			"has_deep_iron"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"blocksouls_world:moss_antidote"
+		]
+	}
+}

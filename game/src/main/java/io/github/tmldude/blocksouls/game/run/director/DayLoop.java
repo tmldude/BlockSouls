@@ -203,7 +203,7 @@ public final class DayLoop {
 	}
 
 	private static void dayMobs(MinecraftServer server, List<ServerPlayer> players, long now) {
-		DirectorConfig.DayMobs config = config().dayMobs;
+		DirectorConfig.DayMobs config = FloorHazards.dayMobs(server, config().dayMobs);
 		if (now - lastDayMobs < config.intervalSeconds) {
 			return;
 		}

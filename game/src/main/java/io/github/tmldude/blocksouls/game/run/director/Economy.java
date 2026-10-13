@@ -91,7 +91,7 @@ public final class Economy {
 			case CURSED_CHEST -> useCursedChest(player, level, pos);
 			case CHALLENGE_PYLON -> startPylon(player, level, pos);
 			case CAMP_HORN -> DayLoop.blowHorn(player, sneaking);
-			case SHOPKEEPER -> sneaking && wagerOpen(server) ? wager(player) : Shop.open(player);
+			case SHOPKEEPER -> FloorHazards.shopClosed(server) ? FloorHazards.SHOP_CLOSED : sneaking && wagerOpen(server) ? wager(player) : Shop.open(player);
 		};
 		if (error != null) {
 			player.sendSystemMessage(Component.literal(error));

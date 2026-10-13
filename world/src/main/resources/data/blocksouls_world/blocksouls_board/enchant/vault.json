@@ -1,0 +1,16 @@
+{
+  "minFloor": 4,
+  "maxFloor": 4,
+  "floorTags": [
+    "vault"
+  ],
+  "metal": "blocksouls_world:deep_iron",
+  "metalCount": 3,
+  "souls": 10,
+  "enchantments": [
+    "minecraft:protection",
+    "minecraft:blast_protection",
+    "minecraft:unbreaking",
+    "minecraft:sharpness"
+  ]
+}
