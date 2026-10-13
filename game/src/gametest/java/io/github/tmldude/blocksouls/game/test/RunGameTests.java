@@ -200,7 +200,7 @@ public class RunGameTests {
 	}
 
 	/** v2-floor6-arena: the Riftwarden's kill ends a running run (souls kept, summary), like {@code endRun}. */
-	@GameTest(environment = "blocksouls_game_test:run_over", maxTicks = 40)
+	@GameTest(environment = "blocksouls_game_test:run_riftwarden", maxTicks = 40)
 	public void riftwardenKillEndsTheRun(GameTestHelper helper) {
 		ServerPlayer player = setUp(helper);
 		MinecraftServer server = helper.getLevel().getServer();
