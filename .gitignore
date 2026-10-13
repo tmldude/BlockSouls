@@ -3,7 +3,9 @@
 .gradle/
 build/
 out/
-classes/
+# IDE/compiler output dirs at the root or a module root, not source packages named "classes"
+/classes/
+/*/classes/
 
 # eclipse
 

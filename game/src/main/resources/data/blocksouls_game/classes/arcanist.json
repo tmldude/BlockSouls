@@ -1,0 +1,21 @@
+{
+  "icon": "blocksouls_game:class/arcanist",
+  "signature_capabilities": [],
+  "kit": [
+    {"item": "minecraft:ender_pearl", "count": 4}
+  ],
+  "passives": [
+    {"type": "attribute", "attribute": "minecraft:luck", "amount": 1, "operation": "add_value"},
+    {"type": "effect", "effect": "minecraft:regeneration", "when": "in_rain"}
+  ],
+  "drawbacks": [
+    {"type": "attribute", "attribute": "minecraft:max_health", "amount": -4, "operation": "add_value"}
+  ],
+  "rules": {
+    "relic_cards": 4,
+    "relic_always_wildcard": true,
+    "hover_ticks": 30
+  },
+  "signature_ability": "blocksouls_abilities:ember_wave",
+  "synergy_tags": {"fire": 1, "storm": 1, "blight": 1}
+}

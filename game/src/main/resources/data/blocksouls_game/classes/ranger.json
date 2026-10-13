@@ -1,0 +1,20 @@
+{
+  "icon": "blocksouls_game:class/ranger",
+  "signature_capabilities": [],
+  "kit": [
+    {"loot_table": "blocksouls_game:classes/ranger"}
+  ],
+  "passives": [
+    {"type": "attribute", "attribute": "minecraft:movement_speed", "amount": 0.15, "operation": "add_multiplied_total"},
+    {"type": "attribute", "attribute": "minecraft:fall_damage_multiplier", "amount": -0.5, "operation": "add_multiplied_total"},
+    {"type": "trait", "trait": "blocksouls:reload_speed", "level": 1}
+  ],
+  "drawbacks": [
+    {"type": "trait", "trait": "blocksouls:stamina_max_penalty", "level": 1}
+  ],
+  "rules": {
+    "ammo_drop_multiplier": 1.25
+  },
+  "signature_ability": "blocksouls_abilities:fan_the_hammer",
+  "synergy_tags": {"on_precision": 2, "ricochet": 1}
+}
