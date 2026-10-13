@@ -47,6 +47,9 @@ public final class CommonIds {
 	public static final Identifier MUTANT_BRUTE = id(MOBS, "mutant_brute");
 	public static final Identifier INFECTED_PIGLIN = id(MOBS, "infected_piglin");
 	public static final Identifier ASH_HOUND = id(MOBS, "ash_hound");
+	/** v2 Expedition roster (mobs): a ranged spitter and a shielded mob that must be flanked. */
+	public static final Identifier SPITTER = id(MOBS, "spitter");
+	public static final Identifier BULWARK = id(MOBS, "bulwark");
 
 	/** Wacky enchantments (world). Guns read these to apply them to bullets. */
 	public static final Identifier BOUNCY = id(WORLD, "bouncy");

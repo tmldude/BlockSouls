@@ -19,3 +19,20 @@ Same style as `DECISIONS.md`: where this conflicts with a plan file, this logs w
   floor/escalation; the brief's classic-mode switch (`affixesInClassic`) lives in the provider.
 - **Nameplate prefix is translatable** (`affix.blocksouls_common.<name>`), with the English prefix also on the
   enum for server-side names.
+- **`roll` also takes the floor's tags** (`roll(random, floor, floorTags)`; the two-argument form passes none), so
+  the provider can read the world's `elite_affixes` escalation without the mobs module looking floors up itself.
+
+## Floor rosters (common half)
+
+- **`WaveMobSpec` gains `minFloor` and `tags`** as new record components, with the old five-argument constructor
+  kept (every floor, no tags). `tags` are floor tags the spec needs: it is eligible only on floors carrying all of
+  them, which is how blight/sky mobs slot in later as data (the world adds a pool tag, the spec names it).
+- **`WaveMobs.eligible(wave, floor, floorTags)`** is the floor overload; `eligible(wave)` (classic) is unchanged and
+  ignores both new fields. `more_elites` lets elites skip their `minWave` on that floor (they join from the floor's
+  first wave); `elite_affixes` is read by the affix roll. Both tag names are constants on `WaveMobs`.
+- **Flankers are marked with an entity tag, `WaveMobs.FLANKER_TAG` (`blocksouls_flanker`).** The Director adds it
+  to hunters it spawns under its `FLANKERS` composition; mobs reads it (plus its own config list of always-flanking
+  mob types). A scoreboard tag needs no attachment and is saved with the entity.
+- **The two new mob ids are in `CommonIds`** (`SPITTER`, `BULWARK`) so the Director's mob lists and integration's
+  roster checks can name them without importing `mobs`. "Bulwark" is the shielded, must-be-flanked mob the brief
+  calls "Warden-type"; vanilla already has a Warden, so it gets its own name.
