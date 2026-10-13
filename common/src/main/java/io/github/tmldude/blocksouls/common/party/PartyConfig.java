@@ -51,6 +51,20 @@ public class PartyConfig {
 	/** v2 floors: crates (structure / cave / secret chests) per floor (× the template's solo count). 8 players ×1.9. */
 	public Curve floorCrates = new Curve(0.15, 0.9);
 
+	/** v2 Director: mobs per spawn burst (× the solo burst). 2 players ×1.45, 4 ×2.2, 8 ×3.6. */
+	public Curve directorBurst = new Curve(0.45, 0.9);
+	/**
+	 * v2 Director: damage the party soaks before its stress reads full (× the solo pool). Bigger parties spread
+	 * the hits, so it grows a little slower than the party. 4 players ×2.1, 8 ×3.5.
+	 */
+	public Curve directorStressPool = new Curve(0.4, 0.95);
+	/**
+	 * v2 Director, "fewer, scarier": share of a burst that rolls elite is {@code directorSoloEliteShare} divided by
+	 * {@code directorEliteFade}. Solo 0.25, 4 players 0.14, 8 players 0.09.
+	 */
+	public double directorSoloEliteShare = 0.25;
+	public Curve directorEliteFade = new Curve(0.3, 0.9);
+
 	public static class Curve {
 		public double perExtraPlayer;
 		public double exponent;
