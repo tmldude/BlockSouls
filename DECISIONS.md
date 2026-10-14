@@ -443,3 +443,9 @@ session's decisions file. Slower per session; the orchestrator keeps the paralle
   the forge board. Player crafting grids never match a BlockSouls recipe. The trade board keeps the offer pool.
 - **Build:** Stage 6C. Wave A = boards + floors 2–5 in parallel (Opus workers); wave B = floor 6 after the
   boards merge. Owner playtests floors 1–5 and the final boss before any per-floor tuning.
+
+## v0.12.0 (2026-10-14, orchestrators)
+
+- v0.12.0 is the v2 floors playtest: floors 1–6 with the Riftwarden, the shopkeeper boards and Infernal's three slices
+  (#84 included). Plain version label, no pre-release suffix. `runShape` stays `"classic"` by default; the playtest
+  server opts in with `"runShape": "floors"` in `game-run.json` and a restart.
