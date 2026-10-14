@@ -1,6 +1,6 @@
 # Status (handoff)
 
-Last updated 2026-10-13 (v0.11.0). Read this after `CLAUDE.md` to know where the work stands.
+Last updated 2026-10-14 (v0.12.0). Read this after `CLAUDE.md` to know where the work stands.
 
 ## Done (on `main`, CI green)
 - Build: Gradle multi-project, Minecraft 26.3 / Fabric API 0.162.0+26.3 / Java 25, CI (`build.yml`), release
@@ -48,11 +48,19 @@ and recipe viewer (#45), denser resources (#43), wave drops that feel good with 
 synergy builds (keystones, levels, curses, trinkets, #51), exotic guns and a gun feel pass (#54), and four classes
 with permanent rune trees, glide and Last Stand (#55; players without a class keep the v1 movement kit).
 
+## v0.12.0: v2 floors playtest
+The Floor Loop's six floors, playable with `"runShape": "floors"` in `config/blocksouls/game-run.json` (set it, then
+restart the server before starting a run; classic stays the default): Surface; Infernal (lava terrain, rising lava,
+fortress, soulfire door secret, burning affix, #71/#78/#84); Skyrift (sky temple, glowing-seed secret, shard siege,
+#68/#72/#83); the Vault (vault room, hidden stair, #73/#74/#79/#80); Blighted Surface (nest, grave, blight events,
+double siege, Blightheart, #69/#76/#77); the Final Arena and the Riftwarden (rift core break, damage rush, run end,
+#75/#81/#82). Shopkeeper forge and brew boards replace crafting tables in floors runs (#70). Each floor has its
+mini-bosses and its ore and herb lines. Owner playtests floors 1–5 and the final boss before per-floor tuning.
+
 ## Next
-- v1 track (this orchestrator): next playtest → feedback pass (hit markers, ammo cues, wave-clear fanfare, death
-  recap) → v1.0.0.
-- v2 (`PLAN2.md`, the Floor Loop, its own orchestrator and PRs): Stage 6A in progress; classic mode stays the live
-  default until v2 ships.
+- v1 track (this orchestrator): feedback pass (hit markers, ammo cues, wave-clear fanfare, death recap) → v1.0.0.
+- v2 (`PLAN2.md`, the Floor Loop, its own orchestrator and PRs): per-floor tuning from the v0.12.0 playtest;
+  classic mode stays the live default until v2 ships.
 
 ## Decisions that changed late (see DECISIONS.md for all)
 - Downed players stay down until revived (no bleed-out); everyone down at once ends the run; going down costs
