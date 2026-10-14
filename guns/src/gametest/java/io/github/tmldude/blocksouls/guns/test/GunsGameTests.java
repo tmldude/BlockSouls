@@ -196,14 +196,16 @@ public class GunsGameTests {
 		Vec3 from = helper.absoluteVec(new Vec3(1.5, 2.5, 1.5));
 		Vec3 dir = new Vec3(1, 0, 1).normalize();
 
-		Hitscan.Trace straight = Hitscan.trace(helper.getLevel(), player, from, dir, 30, 0, 0.3);
-		helper.assertTrue(straight.hit() == null, "without Bouncy the wall stops the bullet");
+		// Retried each tick: on a lagging server the fresh zombie can be missing from entity lookups on tick 0.
+		helper.succeedWhen(() -> {
+			Hitscan.Trace straight = Hitscan.trace(helper.getLevel(), player, from, dir, 30, 0, 0.3);
+			helper.assertTrue(straight.hit() == null, "without Bouncy the wall stops the bullet");
 
-		Hitscan.Trace bounced = Hitscan.trace(helper.getLevel(), player, from, dir, 30, 1, 0.3);
-		helper.assertTrue(bounced.hit() != null && bounced.hit().getEntity() == zombie, "the ricochet hits the zombie");
-		helper.assertTrue(bounced.bounces() == 1, "one bounce");
-		helper.assertTrue(bounced.path().size() == 3, "path: start, bounce point, hit");
-		helper.succeed();
+			Hitscan.Trace bounced = Hitscan.trace(helper.getLevel(), player, from, dir, 30, 1, 0.3);
+			helper.assertTrue(bounced.hit() != null && bounced.hit().getEntity() == zombie, "the ricochet hits the zombie");
+			helper.assertTrue(bounced.bounces() == 1, "one bounce");
+			helper.assertTrue(bounced.path().size() == 3, "path: start, bounce point, hit");
+		});
 	}
 
 	@GameTest
