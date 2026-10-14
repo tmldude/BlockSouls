@@ -14,7 +14,7 @@ import java.util.Map;
 public class DirectorConfig {
 	public static final String FILE = "director";
 	/** Defaults revision {@link #migrate} brings older files up to. */
-	public static final int CURRENT_DEFAULTS = 4; // 4: floor 3, Skyrift (Stage 6C)
+	public static final int CURRENT_DEFAULTS = 5; // 4: floor 3, Skyrift (Stage 6C); 5: floor 2, Infernal
 
 	/** Which defaults revision this file was written against (0 = before the field existed). */
 	public int defaultsVersion;
@@ -81,6 +81,20 @@ public class DirectorConfig {
 			}
 		}
 		// --- end Skyrift block
+		// 5 (v2-floor2-infernal): the Infernal's floor events join a pool that lacks them (by id and tags),
+		// and its mini-boss roster a file without one (a file Skyrift's step 4 already brought to 4).
+		if (config.defaultsVersion < 5 && config.events != null && config.events.pool != null) {
+			for (EventSpec spec : new Events().pool) {
+				if (spec.floorTags.contains("infernal") && config.events.pool.stream()
+						.noneMatch(old -> spec.id.equals(old.id) && spec.floorTags.equals(old.floorTags))) {
+					config.events.pool.add(spec);
+				}
+			}
+		}
+		if (config.defaultsVersion < 5 && config.events != null && config.events.miniBossesByFloorTag != null) {
+			config.events.miniBossesByFloorTag.putIfAbsent("infernal", defaultFloorMiniBosses().get("infernal"));
+		}
+		// end v2-floor2-infernal
 		config.defaultsVersion = CURRENT_DEFAULTS;
 		return true;
 	}
@@ -215,7 +229,11 @@ public class DirectorConfig {
 				// --- floor 3, Skyrift (Stage 6C): placed by the world module through DirectorEvents.PLACE_EVENT ---
 				new EventSpec("blocksouls_world:wind_altar", 4, 1, List.of("skyrift"), false),
 				new EventSpec("blocksouls_world:falling_shard_chest", 4, 1, List.of("skyrift"), false),
-				new EventSpec("blocksouls_world:bridge_ambush", 3, 1, List.of("skyrift"), true)));
+				new EventSpec("blocksouls_world:bridge_ambush", 3, 1, List.of("skyrift"), true),
+				// --- floor 2, Infernal (v2-floor2-infernal): placed by the world module through DirectorEvents.PLACE_EVENT ---
+				new EventSpec("blocksouls_world:soulfire_altar", 4, 1, List.of("infernal"), false),
+				new EventSpec("blocksouls_world:lava_chest", 4, 1, List.of("infernal"), false),
+				new EventSpec("blocksouls_world:stranded_trader", 3, 1, List.of("infernal"), false)));
 		/**
 		 * v2-floor5-blight: a floor carrying one of these tags rolls only its own (floor-tagged) events, not the
 		 * generic pool, as long as one of them is eligible.
@@ -251,6 +269,8 @@ public class DirectorConfig {
 		// --- floor 3, Skyrift (Stage 6C) ---
 		rosters.put("skyrift", new ArrayList<>(List.of("blocksouls_bosses:stormplate_knight", "blocksouls_world:storm_roc",
 				"blocksouls_world:glider_matriarch")));
+		// --- floor 2, Infernal (v2-floor2-infernal) ---
+		rosters.put("infernal", new ArrayList<>(List.of("blocksouls_bosses:ashwyrm", "blocksouls_bosses:furnace_knight")));
 		return rosters;
 	}
 

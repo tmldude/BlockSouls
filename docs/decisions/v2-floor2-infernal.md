@@ -54,8 +54,8 @@ Defaults picked while building floor 2, Infernal (Stage 6C wave A; brief `docs/s
     `/bs floor open 2 1 blocksouls_world:infernal` opens an Infernal floor.
   - `/bs floor goto <slot kind>` already works on any floor.
   - `open` registers as its own `/bs floor` contributor (`InfernalCommands`), and Brigadier merges the nodes.
-- **Interim slot tags until slice 3:** the `fortress` structure falls back to the checkpoint ruin and the
-  `soulfire_door` secret to the cracked wall (the builder's defaults for unknown tags).
+- **Interim slot tags until slice 3 (replaced there):** the `fortress` structure fell back to the checkpoint ruin and the
+  `soulfire_door` secret to the cracked wall.
 
 ## Slice 2: cinder ore node and ashcap herb
 
@@ -85,3 +85,46 @@ Defaults picked while building floor 2, Infernal (Stage 6C wave A; brief `docs/s
 - **Gametests use a creative mock player** (vanilla's `makeMockServerPlayerInLevel` is always creative), so the lava
   test calls `InfernalHazard.burn` (the check minus the game-mode exemption), and the tonic's bottle is checked
   through its use-remainder component (creative doesn't use the stack up).
+
+## Slice 3: fortress, soulfire door, events, roster, mini-bosses
+
+- **The fortress stub** (`InfernalFortress`, the `fortress` structure tag) is three rooms in a row along a random
+  horizontal direction, 17 × 7 blocks: a gate (fences), the hall (soul campfire, the **bastion chest**) and the vault.
+  Nether bricks with ~1 in 6 cracked; the gate and hall walls crumble toward the top (it is a ruin), the vault is
+  whole polished-blackstone bricks with a roof. A footing of bricks fills under the corners that reach past the
+  flattened slot. Its blocks are ordinary and breakable, like the Surface huts: digging into the vault is possible but
+  slow, and the door is the intended way in.
+- **Bastion chest** (`chests/infernal_bastion`): one of the Cinder Plate Chestplate (heat armor) or a gun from
+  `#blocksouls_world:loot/guns`, plus 1–2 Scorch Draughts and 2–4 cinder. "Fire gun" is read as a gun plus the
+  draught that makes its hits ignite; there is no fire-element gun to drop. Both drops are exempt in the recipe web as
+  gear and consumable.
+- **Soulfire door secret:** the template's SECRET slot is now `water_pocket`, a 3×3 spring (water sources over clay)
+  on another lobe than the fortress (a planner test checks the straight line between them crosses lava over 40 seeds
+  at 1 and 8 players; `infernal_rift`'s pocket moved to its south lobe for this). The vault door is two
+  `blocksouls_world:soulfire_seal` blocks: unbreakable, light 10, soul-flame particles. A water bucket used on either
+  puts out every seal block touching it (cloud, smoke, extinguish sound) and empties the bucket (not in creative).
+  The fortress records a SECRET slot tagged `soulfire_door` in front of the door so tests and `/bs floor goto` find it.
+- **The exotic:** the vault chest (`chests/soulfire_vault`) holds cinder, gunmetal, a golden apple and ammo; guns adds
+  an exotic at chance 1.0 through `exoticTables` (lane exception, guns). Guns' `CURRENT_DEFAULTS` goes to 2 with a
+  generic migration: every default exotic table a file lacks is added (hand-set chances are kept), so later floor
+  sessions only add their defaults line inside the marked block.
+- **Director events** (world `InfernalEvents`, placed through `DirectorEvents.PLACE_EVENT`; the game lines are in
+  `DirectorConfig`'s pool after Blight's, tagged `infernal`, lane exception):
+  - `soulfire_altar` (weight 4): the game's blood altar on a 5×5 soul-soil pad with soul fire at the corners.
+  - `lava_chest` (weight 4): the game's cursed chest on a 3×3 islet in a 3-wide lava moat with one crimson-plank bridge
+    that burns into lava after `infernal.lavaChestBridgeSeconds` (60). The timer is not saved, like Skyrift's falling
+    shard: a bridge standing at a restart stays.
+  - `stranded_trader` (weight 3): a wandering trader on a basalt pillar in the same moat, no bridge (build one or
+    drink a tonic). Permanent fire resistance, leaves after `strandedTraderMinutes` (6). On top of his vanilla offers
+    he sells an Ashcap Tonic for `traderTonicCinder` (2) cinder and a Scorch Draught for `traderDraughtCinder` (3).
+  - Existing director.json files get these through the migration: `CURRENT_DEFAULTS` goes to 5 (4 is Skyrift's), with
+    an additive step 5 that adds each default `infernal`-tagged event a file lacks (by id and tags) and the `infernal`
+    mini-boss roster if the file has none. Mobs likewise: `MobsConfig.CURRENT_DEFAULTS` 3 (2 is Skyrift's) adds the
+    `infernal` affix mix to a file without one; a tag already in the file is kept as tuned.
+- **No wall-buy:** the spec's "fire-gun wall-buy" has no wall-buy system anywhere in the code to hang it on; skipped.
+- **Mini-bosses:** `miniBossesByFloorTag.infernal` = Ashwyrm, Furnace Knight. There is no Hound-pack archetype in
+  bosses or mobs, so the pool is those two.
+- **Roster and affixes** (lane exception, mobs): the floor-2 roster (shambler, crawler, screamer, spitter, bloater,
+  brute) already matches the spec, and roster tags are all-required (tagging a mob `infernal` would bar it from
+  other floors), so the roster is unchanged. `weightsByFloorTag.infernal` = burning 5 makes burning the common affix.
+- **Siege twist:** slice 1's lava rise already is the floor's siege twist; nothing more in this slice.

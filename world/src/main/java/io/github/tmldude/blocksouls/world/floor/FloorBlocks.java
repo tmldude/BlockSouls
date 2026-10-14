@@ -41,6 +41,10 @@ public final class FloorBlocks {
 	public static final Block SKY_ALTAR = sky("sky_altar", SkyriftBlock.Kind.ALTAR, MapColor.QUARTZ, 14);
 	public static final Block WIND_ALTAR = sky("wind_altar", SkyriftBlock.Kind.WIND_ALTAR, MapColor.ICE, 8);
 	// --- end floor 3 ---
+	/** v2-floor2-infernal: the fortress vault's soulfire door; a water bucket puts it out. */
+	public static final Block SOULFIRE_SEAL = register(CommonIds.SOULFIRE_SEAL, SoulfireSealBlock::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE).strength(-1.0F, 3600000.0F).noLootTable()
+					.sound(SoundType.SOUL_SOIL).pushReaction(PushReaction.IMMOVEABLE).lightLevel(state -> 10).emissiveRendering(state -> true));
 	public static final Block FLOOR_PORTAL = register(CommonIds.FLOOR_PORTAL, FloorPortalBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE).strength(-1.0F, 3600000.0F).noLootTable().noOcclusion()
 					.pushReaction(PushReaction.IMMOVEABLE).sound(SoundType.GLASS)

@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class MobsConfig {
 	/** Defaults revision {@link #migrate} brings older files up to. */
-	public static final int CURRENT_DEFAULTS = 2;
+	public static final int CURRENT_DEFAULTS = 3; // 2: floor 3, Skyrift; 3: floor 2, Infernal
 
 	/** Which defaults revision this file was written against (0 = before the field existed). */
 	public int defaultsVersion;
@@ -55,6 +55,11 @@ public class MobsConfig {
 			defaultFloorWeights().forEach(config.affixes.weightsByFloorTag::putIfAbsent);
 		}
 		// --- end Skyrift block
+		// 3 (v2-floor2-infernal): the Infernal's affix mix joins a file Skyrift's step 2 already brought to 2.
+		if (config.defaultsVersion < 3 && config.affixes != null && config.affixes.weightsByFloorTag != null) {
+			config.affixes.weightsByFloorTag.putIfAbsent("infernal", defaultFloorWeights().get("infernal"));
+		}
+		// end v2-floor2-infernal
 		config.defaultsVersion = CURRENT_DEFAULTS;
 		return true;
 	}
@@ -278,6 +283,8 @@ public class MobsConfig {
 		byTag.put("vault", new LinkedHashMap<>(Map.of("volatile", 5)));
 		// --- floor 3, Skyrift (Stage 6C): frosted is the common affix up in the cold air ---
 		byTag.put("skyrift", new LinkedHashMap<>(Map.of("frosted", 5)));
+		// --- floor 2, Infernal (v2-floor2-infernal): burning is the common affix over the lava ---
+		byTag.put("infernal", new LinkedHashMap<>(Map.of("burning", 5)));
 		return byTag;
 	}
 

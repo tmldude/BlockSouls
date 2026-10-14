@@ -9,7 +9,7 @@ import io.github.tmldude.blocksouls.guns.weapon.Weapons;
 /** {@code config/blocksouls/guns.json}. Times are ticks unless named in seconds; chances are 0..1. */
 public class GunsConfig {
 	/** Defaults revision {@link #migrate} brings older files up to. */
-	public static final int CURRENT_DEFAULTS = 1;
+	public static final int CURRENT_DEFAULTS = 2;
 
 	/** Which defaults revision this file was written against (0 = before the field existed). */
 	public int defaultsVersion;
@@ -41,6 +41,10 @@ public class GunsConfig {
 			loot.waveRareSpecialChance = bump(loot.waveRareSpecialChance, 0.06, 0.12);
 			loot.waveLegendaryPrimaryChance = bump(loot.waveLegendaryPrimaryChance, 0.18, 0.35);
 			loot.waveLegendarySpecialChance = bump(loot.waveLegendarySpecialChance, 0.10, 0.20);
+		}
+		// 2: floor secrets (Stage 6C) join the exotic tables; a table the file already lists keeps its chance.
+		if (config.defaultsVersion < 2 && config.loot != null && config.loot.exoticTables != null) {
+			defaultExoticTables().forEach(config.loot.exoticTables::putIfAbsent);
 		}
 		config.defaultsVersion = CURRENT_DEFAULTS;
 		return true;
@@ -215,6 +219,9 @@ public class GunsConfig {
 		tables.put("blocksouls_bosses:boss_drops/legendary_gun", 0.2);
 		tables.put("blocksouls_bosses:boss_drops/final_dragon_guns", 1.0);
 		tables.put("blocksouls_game:wave_drops/legendary", 0.01);
+		// --- floor secrets (Stage 6C): one line per floor session ---
+		tables.put("blocksouls_world:chests/soulfire_vault", 1.0); // v2-floor2-infernal: behind the soulfire door
+		// --- end floor secrets ---
 		return tables;
 	}
 

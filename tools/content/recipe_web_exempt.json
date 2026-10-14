@@ -29,7 +29,9 @@
 		"blocksouls_world:blight_forged_leggings": "gear (armor set piece; also drops from floor 4's vault room)",
 		"blocksouls_world:blight_forged_boots": "gear (armor set piece; also drops from floor 4's vault room)",
 		"blocksouls_world:skysteel_featherboots": "gear (Skyrift armor; also the sky temple's top-chest prize)",
-		"blocksouls_world:cloudbloom_tonic": "consumable (Skyrift brew)"
+		"blocksouls_world:cloudbloom_tonic": "consumable (Skyrift brew)",
+		"blocksouls_world:cinder_plate_chestplate": "gear (heat armor; also drops from the Infernal bastion chest)",
+		"blocksouls_world:scorch_draught": "consumable (brew; also drops from the Infernal bastion chest)"
 	},
 	"debt": {}
 }

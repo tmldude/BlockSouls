@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -11,10 +12,13 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.animal.pig.Pig;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -22,6 +26,8 @@ import net.minecraft.world.item.component.UseRemainder;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 
@@ -36,6 +42,8 @@ import io.github.tmldude.blocksouls.world.floor.FloorBlocks;
 import io.github.tmldude.blocksouls.world.floor.FloorPlanner;
 import io.github.tmldude.blocksouls.world.floor.FloorTemplate;
 import io.github.tmldude.blocksouls.world.floor.FloorTemplateCatalog;
+import io.github.tmldude.blocksouls.world.floor.InfernalEvents;
+import io.github.tmldude.blocksouls.world.floor.InfernalFortress;
 import io.github.tmldude.blocksouls.world.floor.InfernalHazard;
 import io.github.tmldude.blocksouls.world.floor.LavaChannels;
 import io.github.tmldude.blocksouls.world.floor.NodeBlock;
@@ -45,7 +53,9 @@ import io.github.tmldude.blocksouls.world.floor.WorldFloors;
  * Floor 2, Infernal (v2-floor2-infernal): opens an Infernal floor in the test level and checks the lava channels, both
  * kinds of bridge, the island's biome, the lava rise (low bridges sink, the stone arch stands) and that lava sends a
  * player back to the camp unless they drank the Ashcap Tonic. Slice 2: pops an ashcap and a cinder ore node, and drinks
- * both brews. Act 910 (Infernal owns 910-919) keeps clear of real runs and the other floors' test acts (900-907, 93x).
+ * both brews. Slice 3: douses the fortress's soulfire door with a water bucket and finds the vault chest behind it, and
+ * places the stranded trader event. Act 910 (Infernal owns 910-919) keeps clear of real runs and the other floors' test
+ * acts (900-907, 93x).
  */
 public class InfernalGameTests {
 	private static final String FLOOR = "blocksouls_world_test:floor16";
@@ -134,6 +144,43 @@ public class InfernalGameTests {
 		}
 		helper.assertTrue(((NodeBlock) FloorBlocks.CINDER_ORE).hit(level, ore, player), "the last hit pops the cinder ore");
 		helper.assertTrue(dropped(level, ore, InfernalContent.CINDER), "the cinder ore burst cinder");
+
+		// Slice 3: the fortress's soulfire door goes out under a water bucket and opens the vault; the water pocket is a spring.
+		FloorSlot pocket = floor.slots(FloorSlotKind.SECRET).stream().filter(slot -> slot.tag().equals(InfernalFortress.WATER_POCKET))
+				.findFirst().orElse(null);
+		helper.assertTrue(pocket != null && level.getBlockState(pocket.pos().below()).is(Blocks.WATER), "the water pocket holds water");
+		FloorSlot door = floor.slots(FloorSlotKind.SECRET).stream().filter(slot -> slot.tag().equals(InfernalFortress.SOULFIRE_DOOR))
+				.findFirst().orElse(null);
+		helper.assertTrue(door != null, "the fortress recorded its soulfire door");
+		BlockPos seal = null;
+		for (Direction direction : Direction.Plane.HORIZONTAL) {
+			if (level.getBlockState(door.pos().relative(direction)).is(FloorBlocks.SOULFIRE_SEAL)) {
+				seal = door.pos().relative(direction);
+			}
+		}
+		helper.assertTrue(seal != null, "a seal block beside the door slot at " + door.pos().toShortString());
+		helper.assertTrue(level.getBlockState(seal.above()).is(FloorBlocks.SOULFIRE_SEAL), "the door is two high");
+		helper.assertTrue(floor.slots(FloorSlotKind.CRATE).stream().anyMatch(slot -> slot.tag().equals(InfernalFortress.BASTION_LOOT.identifier().toString())),
+				"the fortress hall has its bastion chest");
+		ItemStack bucket = new ItemStack(Items.WATER_BUCKET);
+		player.setItemInHand(InteractionHand.MAIN_HAND, bucket);
+		InteractionResult doused = level.getBlockState(seal).useItemOn(bucket, level, player, InteractionHand.MAIN_HAND,
+				new BlockHitResult(Vec3.atCenterOf(seal), Direction.UP, seal, false));
+		helper.assertTrue(doused.consumesAction(), "the water bucket works on the seal");
+		helper.assertTrue(level.getBlockState(seal).isAir() && level.getBlockState(seal.above()).isAir(), "the whole door went out");
+		BlockPos vault = seal;
+		helper.assertTrue(floor.slots(FloorSlotKind.CRATE).stream().anyMatch(slot -> slot.tag().equals(InfernalFortress.VAULT_LOOT.identifier().toString())
+				&& slot.pos().distManhattan(vault) <= 6 && level.getBlockState(slot.pos()).is(Blocks.CHEST)), "the vault chest waits behind the door");
+
+		// Slice 3: the stranded trader stands on his pillar in a lava moat, fire-proof, selling brews for cinder.
+		BlockPos spot = floor.slots(FloorSlotKind.EVENT).getFirst().pos();
+		helper.assertTrue(InfernalEvents.place(level, InfernalEvents.STRANDED_TRADER, spot), "the stranded trader event places");
+		helper.assertTrue(level.getBlockState(spot.offset(3, -1, 0)).is(Blocks.LAVA), "a lava moat round the pillar");
+		WanderingTrader trader = level.getEntitiesOfClass(WanderingTrader.class, new AABB(spot).inflate(3)).stream().findFirst().orElse(null);
+		helper.assertTrue(trader != null && trader.hasEffect(MobEffects.FIRE_RESISTANCE), "a fire-proof trader on the pillar");
+		helper.assertTrue(trader.getOffers().stream().anyMatch(offer -> offer.getResult().is(InfernalContent.ASHCAP_TONIC)
+				&& offer.getCostA().is(InfernalContent.CINDER)), "he sells the Ashcap Tonic for cinder");
+		trader.discard();
 
 		// The brews: the Scorch Draught's hits set the target burning.
 		InfernalContent.SCORCH_DRAUGHT.finishUsingItem(new ItemStack(InfernalContent.SCORCH_DRAUGHT), level, player);

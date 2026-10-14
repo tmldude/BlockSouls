@@ -85,4 +85,18 @@ class AffixRollTest {
 		}
 		assertTrue(frosted > 50, "frosted " + frosted);
 	}
+
+	// --- floor 2, Infernal (v2-floor2-infernal) ---
+	@Test
+	void infernalMakesBurningTheCommonAffix() {
+		Map<String, Integer> hot = AffixRoll.weights(config, java.util.Set.of("infernal"));
+		assertTrue(hot.get("burning") > hot.get("frosted"));
+		int burning = 0;
+		for (int i = 0; i < 100; i++) {
+			if (AffixRoll.roll(0.0, i / 100.0, 2, false, false, NAMES, config, java.util.Set.of("infernal")).orElseThrow().equals("burning")) {
+				burning++;
+			}
+		}
+		assertTrue(burning > 50, "burning " + burning);
+	}
 }
